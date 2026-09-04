@@ -1,0 +1,75 @@
+{
+  "registryVersion": "2.1.0",
+  "entries": [
+    {
+      "id": "nasa-solar-system",
+      "title": "NASA Solar System Exploration",
+      "url": "https://science.nasa.gov/solar-system/",
+      "checkedAt": "2026-09-03",
+      "tier": "official"
+    },
+    {
+      "id": "iau-nomenclature",
+      "title": "International Astronomical Union",
+      "url": "https://www.iau.org/public/themes/naming/",
+      "checkedAt": "2026-09-03",
+      "tier": "official"
+    },
+    {
+      "id": "usgs-earthquakes",
+      "title": "USGS Earthquake Hazards",
+      "url": "https://www.usgs.gov/programs/earthquake-hazards/science-earthquakes",
+      "checkedAt": "2026-09-03",
+      "tier": "official"
+    },
+    {
+      "id": "noaa-ocean-service",
+      "title": "NOAA Ocean Service",
+      "url": "https://oceanservice.noaa.gov/",
+      "checkedAt": "2026-09-03",
+      "tier": "official"
+    },
+    {
+      "id": "wmo-weather",
+      "title": "World Meteorological Organization",
+      "url": "https://wmo.int/",
+      "checkedAt": "2026-09-03",
+      "tier": "official"
+    },
+    {
+      "id": "doha-historical-dictionary",
+      "title": "Doha Historical Dictionary",
+      "url": "https://www.dohadictionary.org/",
+      "checkedAt": "2026-09-03",
+      "tier": "official"
+    },
+    {
+      "id": "arabic-academy-cairo",
+      "title": "Arabic Language Academy Cairo",
+      "url": "https://www.arabicacademy.gov.eg/ar",
+      "checkedAt": "2026-09-03",
+      "tier": "official"
+    },
+    {
+      "id": "nccal-kuwait",
+      "title": "Kuwait NCCAL",
+      "url": "https://www.nccal.gov.kw/ar/archaeological-sites-0",
+      "checkedAt": "2026-09-03",
+      "tier": "official"
+    },
+    {
+      "id": "unesco-kuwait-diwaniya",
+      "title": "UNESCO: The Diwaniya",
+      "url": "https://ich.unesco.org/en/RL/the-diwaniya-a-unifying-cultural-practice-in-kuwait-02281",
+      "checkedAt": "2026-09-03",
+      "tier": "official"
+    },
+    {
+      "id": "unesco-kuwait-ich",
+      "title": "UNESCO Kuwait ICH",
+      "url": "https://ich.unesco.org/en/state/kuwait-KW?cp=KW&topic=en-state",
+      "checkedAt": "2026-09-03",
+      "tier": "official"
+    }
+  ]
+}

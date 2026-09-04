@@ -1,0 +1,636 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "manifestSha256": "5c787c9982eba35aaa95211edc571a20ab2ee692de0399b62a508fb3cf759318",
+    "mappingSha256": "e40af8f08f5095fa24c2c66f35d2b329cb285d6b60d02f3298dd6622f8cf213d",
+    "mappingRows": 62
+  },
+  "copiedAssets": [
+    {
+      "legacyIndex": 1,
+      "sourcePath": "images/cropped/من أنا جغرافيا.png",
+      "destinationPath": "content/categories/originals/category-001.png",
+      "sourceSha256": "a454f7c671379ab9bd206810d1982d9e490362903124a1d66cbe4ac2abd54337",
+      "destinationSha256": "a454f7c671379ab9bd206810d1982d9e490362903124a1d66cbe4ac2abd54337",
+      "width": 1250,
+      "height": 1250,
+      "copiedAt": "2026-09-03T19:16:16.380Z"
+    },
+    {
+      "legacyIndex": 2,
+      "sourcePath": "images/cropped/من أنا رياضية.png",
+      "destinationPath": "content/categories/originals/category-002.png",
+      "sourceSha256": "0e8ca28866b5c13848d173e53b4879fce434de63b4b478945cde379539d2b88b",
+      "destinationSha256": "0e8ca28866b5c13848d173e53b4879fce434de63b4b478945cde379539d2b88b",
+      "width": 1250,
+      "height": 1250,
+      "copiedAt": "2026-09-03T19:16:16.382Z"
+    },
+    {
+      "legacyIndex": 3,
+      "sourcePath": "images/cropped/من أنا حيوانات.png",
+      "destinationPath": "content/categories/originals/category-003.png",
+      "sourceSha256": "2350f70254d00b7c745e2b19d020cbf1a2bd78f23a84aa623141f5ccb7422e12",
+      "destinationSha256": "2350f70254d00b7c745e2b19d020cbf1a2bd78f23a84aa623141f5ccb7422e12",
+      "width": 1250,
+      "height": 1250,
+      "copiedAt": "2026-09-03T19:16:16.385Z"
+    },
+    {
+      "legacyIndex": 4,
+      "sourcePath": "images/cropped/من أنا مسلسلات عربية.png",
+      "destinationPath": "content/categories/originals/category-004.png",
+      "sourceSha256": "5a54ef54aa7e69207f4b81dd8754c2f3afef32bda63128f505a01775bbb2bb9f",
+      "destinationSha256": "5a54ef54aa7e69207f4b81dd8754c2f3afef32bda63128f505a01775bbb2bb9f",
+      "width": 1250,
+      "height": 1250,
+      "copiedAt": "2026-09-03T19:16:16.389Z"
+    },
+    {
+      "legacyIndex": 5,
+      "sourcePath": "images/cropped/من أنا ؟.png",
+      "destinationPath": "content/categories/originals/category-005.png",
+      "sourceSha256": "6f38ad5b4a8a804f077e0f8fd5c1646fa97966c7d57593a1d4a1e658d7f75692",
+      "destinationSha256": "6f38ad5b4a8a804f077e0f8fd5c1646fa97966c7d57593a1d4a1e658d7f75692",
+      "width": 1250,
+      "height": 1250,
+      "copiedAt": "2026-09-03T19:16:16.390Z"
+    },
+    {
+      "legacyIndex": 6,
+      "sourcePath": "images/cropped/معلومات عامة.png",
+      "destinationPath": "content/categories/originals/category-006.png",
+      "sourceSha256": "65d35a5beb4222e96f1a053455407ab6d323a314bad9a1bef5a328dc9097b9dd",
+      "destinationSha256": "65d35a5beb4222e96f1a053455407ab6d323a314bad9a1bef5a328dc9097b9dd",
+      "width": 1250,
+      "height": 1250,
+      "copiedAt": "2026-09-03T19:16:16.391Z"
+    },
+    {
+      "legacyIndex": 7,
+      "sourcePath": "images/cropped/عالم الحيوان.png",
+      "destinationPath": "content/categories/originals/category-007.png",
+      "sourceSha256": "16f8ebd9c6407f10161699eb75277d75088bcd12895e2a18de50f8ee32caf15c",
+      "destinationSha256": "16f8ebd9c6407f10161699eb75277d75088bcd12895e2a18de50f8ee32caf15c",
+      "width": 1250,
+      "height": 1250,
+      "copiedAt": "2026-09-03T19:16:16.393Z"
+    },
+    {
+      "legacyIndex": 8,
+      "sourcePath": "images/cropped/تكنولوجيا.png",
+      "destinationPath": "content/categories/originals/category-008.png",
+      "sourceSha256": "e5e64a79314d046fe2883d165cb4dacf2f87f5ccc86cb5d63c5ea369be247f83",
+      "destinationSha256": "e5e64a79314d046fe2883d165cb4dacf2f87f5ccc86cb5d63c5ea369be247f83",
+      "width": 1250,
+      "height": 1250,
+      "copiedAt": "2026-09-03T19:16:16.396Z"
+    },
+    {
+      "legacyIndex": 9,
+      "sourcePath": "images/cropped/تاريخ.png",
+      "destinationPath": "content/categories/originals/category-009.png",
+      "sourceSha256": "ed4e811ec0cb3ee16ccd2bc2f67a9665c14a88dac75d56357a684d30b8df8fdf",
+      "destinationSha256": "ed4e811ec0cb3ee16ccd2bc2f67a9665c14a88dac75d56357a684d30b8df8fdf",
+      "width": 1250,
+      "height": 1250,
+      "copiedAt": "2026-09-03T19:16:16.397Z"
+    },
+    {
+      "legacyIndex": 10,
+      "sourcePath": "images/cropped/منو المشهور.png",
+      "destinationPath": "content/categories/originals/category-010.png",
+      "sourceSha256": "e27a8d260da3efb7fb17bf886711ad87bf40a7f5531b8cb66cda63f8beb31aa4",
+      "destinationSha256": "e27a8d260da3efb7fb17bf886711ad87bf40a7f5531b8cb66cda63f8beb31aa4",
+      "width": 1250,
+      "height": 1250,
+      "copiedAt": "2026-09-03T19:16:16.400Z"
+    },
+    {
+      "legacyIndex": 11,
+      "sourcePath": "images/cropped/فتّح عينك.png",
+      "destinationPath": "content/categories/originals/category-011.png",
+      "sourceSha256": "532eca330b6d75d61f93becde41ccfb194fd78cbe65dad4a0a40c7b864ee4a52",
+      "destinationSha256": "532eca330b6d75d61f93becde41ccfb194fd78cbe65dad4a0a40c7b864ee4a52",
+      "width": 1250,
+      "height": 1250,
+      "copiedAt": "2026-09-03T19:16:16.402Z"
+    },
+    {
+      "legacyIndex": 12,
+      "sourcePath": "images/cropped/زوم.png",
+      "destinationPath": "content/categories/originals/category-012.png",
+      "sourceSha256": "9692b2a87410cfd69f5a16b0486eaf7213317b7ff3cfbe9c79ccf30756a51ad2",
+      "destinationSha256": "9692b2a87410cfd69f5a16b0486eaf7213317b7ff3cfbe9c79ccf30756a51ad2",
+      "width": 1251,
+      "height": 1251,
+      "copiedAt": "2026-09-03T19:16:16.404Z"
+    },
+    {
+      "legacyIndex": 13,
+      "sourcePath": "images/cropped/ألغاز.png",
+      "destinationPath": "content/categories/originals/category-013.png",
+      "sourceSha256": "ea16f8ed819f52ab48d10f6b5f66a98b82267b7da66bce1ef1906e2f5e6c5d0e",
+      "destinationSha256": "ea16f8ed819f52ab48d10f6b5f66a98b82267b7da66bce1ef1906e2f5e6c5d0e",
+      "width": 1250,
+      "height": 1250,
+      "copiedAt": "2026-09-03T19:16:16.406Z"
+    },
+    {
+      "legacyIndex": 14,
+      "sourcePath": "images/cropped/صورة ناقصة.png",
+      "destinationPath": "content/categories/originals/category-014.png",
+      "sourceSha256": "337ea9776eb0944297b2b6b387af417f8693246a0a57422b2d420150dbf1cd3e",
+      "destinationSha256": "337ea9776eb0944297b2b6b387af417f8693246a0a57422b2d420150dbf1cd3e",
+      "width": 1250,
+      "height": 1250,
+      "copiedAt": "2026-09-03T19:16:16.407Z"
+    },
+    {
+      "legacyIndex": 15,
+      "sourcePath": "images/cropped/أمثال شعبية.png",
+      "destinationPath": "content/categories/originals/category-015.png",
+      "sourceSha256": "cc7519452e61013e679a2afd95c29d5b69182e0eedbee0c9be9ad03a330d7f38",
+      "destinationSha256": "cc7519452e61013e679a2afd95c29d5b69182e0eedbee0c9be9ad03a330d7f38",
+      "width": 625,
+      "height": 625,
+      "copiedAt": "2026-09-03T19:16:16.408Z"
+    },
+    {
+      "legacyIndex": 16,
+      "sourcePath": "images/cropped/ولا كلمة حيوانات.png",
+      "destinationPath": "content/categories/originals/category-016.png",
+      "sourceSha256": "dc2d7ef4b63bd757abf26e3a2cd0bd239198d8cb6430380eb57c848adb86de32",
+      "destinationSha256": "dc2d7ef4b63bd757abf26e3a2cd0bd239198d8cb6430380eb57c848adb86de32",
+      "width": 1250,
+      "height": 1250,
+      "copiedAt": "2026-09-03T19:16:16.410Z"
+    },
+    {
+      "legacyIndex": 17,
+      "sourcePath": "images/cropped/ولا كلمة أغاني عربية.png",
+      "destinationPath": "content/categories/originals/category-017.png",
+      "sourceSha256": "6c6e724bc3e90c1745e622ab60e9039a814b5884eb1c050a3f63d1788cef74e8",
+      "destinationSha256": "6c6e724bc3e90c1745e622ab60e9039a814b5884eb1c050a3f63d1788cef74e8",
+      "width": 1250,
+      "height": 1250,
+      "copiedAt": "2026-09-03T19:16:16.413Z"
+    },
+    {
+      "legacyIndex": 18,
+      "sourcePath": "images/cropped/ولا كلمة مشاهير عرب.png",
+      "destinationPath": "content/categories/originals/category-018.png",
+      "sourceSha256": "6848fcdde26a587355f8499e137f08921396a8ae577ee50e26f7aa7f998da493",
+      "destinationSha256": "6848fcdde26a587355f8499e137f08921396a8ae577ee50e26f7aa7f998da493",
+      "width": 1250,
+      "height": 1250,
+      "copiedAt": "2026-09-03T19:16:16.416Z"
+    },
+    {
+      "legacyIndex": 19,
+      "sourcePath": "images/cropped/ولا كلمة كرتون.png",
+      "destinationPath": "content/categories/originals/category-019.png",
+      "sourceSha256": "c2a2aae59ffb0e0d688f6c36a931ada6850db4ef1f1e37b732711114b493ae69",
+      "destinationSha256": "c2a2aae59ffb0e0d688f6c36a931ada6850db4ef1f1e37b732711114b493ae69",
+      "width": 1250,
+      "height": 1250,
+      "copiedAt": "2026-09-03T19:16:16.419Z"
+    },
+    {
+      "legacyIndex": 20,
+      "sourcePath": "images/cropped/ولا كلمة دول.png",
+      "destinationPath": "content/categories/originals/category-020.png",
+      "sourceSha256": "b6c83a1bbc2b901eea45f0febccbff148e148597cba45854499ee352d9726393",
+      "destinationSha256": "b6c83a1bbc2b901eea45f0febccbff148e148597cba45854499ee352d9726393",
+      "width": 1250,
+      "height": 1250,
+      "copiedAt": "2026-09-03T19:16:16.422Z"
+    },
+    {
+      "legacyIndex": 21,
+      "sourcePath": "images/cropped/ريال مدريد.png",
+      "destinationPath": "content/categories/originals/category-021.png",
+      "sourceSha256": "4c2bacc658750e836281ae57106fe472599b7a2e409ae8c2236d8ff8c6306322",
+      "destinationSha256": "4c2bacc658750e836281ae57106fe472599b7a2e409ae8c2236d8ff8c6306322",
+      "width": 1250,
+      "height": 1250,
+      "copiedAt": "2026-09-03T19:16:16.426Z"
+    },
+    {
+      "legacyIndex": 22,
+      "sourcePath": "images/cropped/برشلونة.png",
+      "destinationPath": "content/categories/originals/category-022.png",
+      "sourceSha256": "3c824a5b4907f52cb5e3bddffa562f88200c0e72db3c25a14b9c2827e3713edb",
+      "destinationSha256": "3c824a5b4907f52cb5e3bddffa562f88200c0e72db3c25a14b9c2827e3713edb",
+      "width": 1250,
+      "height": 1250,
+      "copiedAt": "2026-09-03T19:16:16.431Z"
+    },
+    {
+      "legacyIndex": 23,
+      "sourcePath": "images/cropped/كاس العالم.png",
+      "destinationPath": "content/categories/originals/category-023.png",
+      "sourceSha256": "ab5b42ba82d3fa7c1b219590012e3d1dbd319fc63f11efa143122306e93563d7",
+      "destinationSha256": "ab5b42ba82d3fa7c1b219590012e3d1dbd319fc63f11efa143122306e93563d7",
+      "width": 1251,
+      "height": 1251,
+      "copiedAt": "2026-09-03T19:16:16.433Z"
+    },
+    {
+      "legacyIndex": 24,
+      "sourcePath": "images/cropped/ميسي وكرستيانو.png",
+      "destinationPath": "content/categories/originals/category-024.png",
+      "sourceSha256": "85de10cfb42c2f3dc4261a8b88c95fdd6ab5b00fe05cfdedb489d1a018a00289",
+      "destinationSha256": "85de10cfb42c2f3dc4261a8b88c95fdd6ab5b00fe05cfdedb489d1a018a00289",
+      "width": 1250,
+      "height": 1250,
+      "copiedAt": "2026-09-03T19:16:16.436Z"
+    },
+    {
+      "legacyIndex": 25,
+      "sourcePath": "images/cropped/من هو اللاعب.png",
+      "destinationPath": "content/categories/originals/category-025.png",
+      "sourceSha256": "b63aa23da9f1f9c2bece8daef4a6d20cba16a39c9a2b6794178bcc816ab054e8",
+      "destinationSha256": "b63aa23da9f1f9c2bece8daef4a6d20cba16a39c9a2b6794178bcc816ab054e8",
+      "width": 1250,
+      "height": 1250,
+      "copiedAt": "2026-09-03T19:16:16.439Z"
+    },
+    {
+      "legacyIndex": 26,
+      "sourcePath": "images/cropped/طاش ما طاش.png",
+      "destinationPath": "content/categories/originals/category-026.png",
+      "sourceSha256": "91afdedac9c083d6f567bcaba45410218235bdefe2506835f7a0f5061d182284",
+      "destinationSha256": "91afdedac9c083d6f567bcaba45410218235bdefe2506835f7a0f5061d182284",
+      "width": 1250,
+      "height": 1250,
+      "copiedAt": "2026-09-03T19:16:16.441Z"
+    },
+    {
+      "legacyIndex": 27,
+      "sourcePath": "images/cropped/باب الحارة.png",
+      "destinationPath": "content/categories/originals/category-027.png",
+      "sourceSha256": "63c10279e0aade756c8435c1f8cfc44481b2413971bac86e1a91e7dc46ad40c3",
+      "destinationSha256": "63c10279e0aade756c8435c1f8cfc44481b2413971bac86e1a91e7dc46ad40c3",
+      "width": 1250,
+      "height": 1250,
+      "copiedAt": "2026-09-03T19:16:16.442Z"
+    },
+    {
+      "legacyIndex": 28,
+      "sourcePath": "images/cropped/أفلام كلاسيك.png",
+      "destinationPath": "content/categories/originals/category-028.png",
+      "sourceSha256": "a1c256bd215ed5aeef54435f30c67a36aaa6c21d12769bd24f5f88994452f104",
+      "destinationSha256": "a1c256bd215ed5aeef54435f30c67a36aaa6c21d12769bd24f5f88994452f104",
+      "width": 1250,
+      "height": 1250,
+      "copiedAt": "2026-09-03T19:16:16.445Z"
+    },
+    {
+      "legacyIndex": 29,
+      "sourcePath": "images/cropped/أفلام رعب.png",
+      "destinationPath": "content/categories/originals/category-029.png",
+      "sourceSha256": "3030dd494b7d7225acb3a83e9e78ff763d84b3f60e68681b969d0aba2001802f",
+      "destinationSha256": "3030dd494b7d7225acb3a83e9e78ff763d84b3f60e68681b969d0aba2001802f",
+      "width": 1250,
+      "height": 1250,
+      "copiedAt": "2026-09-03T19:16:16.448Z"
+    },
+    {
+      "legacyIndex": 30,
+      "sourcePath": "images/cropped/Game Of Thrones.png",
+      "destinationPath": "content/categories/originals/category-030.png",
+      "sourceSha256": "56081b28257fa1403891ac34a3548a55bf66e1990aeb0e75fb3a4661fb715a40",
+      "destinationSha256": "56081b28257fa1403891ac34a3548a55bf66e1990aeb0e75fb3a4661fb715a40",
+      "width": 1250,
+      "height": 1250,
+      "copiedAt": "2026-09-03T19:16:16.450Z"
+    },
+    {
+      "legacyIndex": 31,
+      "sourcePath": "images/cropped/الزمن الجميل.png",
+      "destinationPath": "content/categories/originals/category-031.png",
+      "sourceSha256": "a3f9b74674d65e8aa4b32493e9389139a5d76598cbcfc1374936f34e6e0a1621",
+      "destinationSha256": "a3f9b74674d65e8aa4b32493e9389139a5d76598cbcfc1374936f34e6e0a1621",
+      "width": 625,
+      "height": 625,
+      "copiedAt": "2026-09-03T19:16:16.451Z"
+    },
+    {
+      "legacyIndex": 32,
+      "sourcePath": "images/cropped/أم كلثوم.png",
+      "destinationPath": "content/categories/originals/category-032.png",
+      "sourceSha256": "9ad64d7897dad304f1b4186fe87b0c0d9e6f533ce6c6744d08f7145845f1c527",
+      "destinationSha256": "9ad64d7897dad304f1b4186fe87b0c0d9e6f533ce6c6744d08f7145845f1c527",
+      "width": 1250,
+      "height": 1250,
+      "copiedAt": "2026-09-03T19:16:16.453Z"
+    },
+    {
+      "legacyIndex": 33,
+      "sourcePath": "images/cropped/نشيد وطني.png",
+      "destinationPath": "content/categories/originals/category-033.png",
+      "sourceSha256": "ed456ce78f4e21d970afb30f179ddeab3ebf541cceffd352af5cff02f803e8df",
+      "destinationSha256": "ed456ce78f4e21d970afb30f179ddeab3ebf541cceffd352af5cff02f803e8df",
+      "width": 1250,
+      "height": 1250,
+      "copiedAt": "2026-09-03T19:16:16.455Z"
+    },
+    {
+      "legacyIndex": 34,
+      "sourcePath": "images/cropped/أغاني أجنبية.png",
+      "destinationPath": "content/categories/originals/category-034.png",
+      "sourceSha256": "18f417ac46f334d3acc83f5d4fb70cbbd082d6e88af2a646c9d91f448781a9a5",
+      "destinationSha256": "18f417ac46f334d3acc83f5d4fb70cbbd082d6e88af2a646c9d91f448781a9a5",
+      "width": 1250,
+      "height": 1250,
+      "copiedAt": "2026-09-03T19:16:16.459Z"
+    },
+    {
+      "legacyIndex": 35,
+      "sourcePath": "images/cropped/عبدالكريم عبدالقادر.png",
+      "destinationPath": "content/categories/originals/category-035.png",
+      "sourceSha256": "1fa806bb5373d057f057eee03803e7c40104b07d0bd5234a1ffce2f3dfe8e4cb",
+      "destinationSha256": "1fa806bb5373d057f057eee03803e7c40104b07d0bd5234a1ffce2f3dfe8e4cb",
+      "width": 1250,
+      "height": 1250,
+      "copiedAt": "2026-09-03T19:16:16.462Z"
+    },
+    {
+      "legacyIndex": 36,
+      "sourcePath": "images/cropped/أنمي ون بيس.png",
+      "destinationPath": "content/categories/originals/category-036.png",
+      "sourceSha256": "c4db5abc18a056e6ef06201693c557119ee61e909e15df916356e81b7bfa2ac3",
+      "destinationSha256": "c4db5abc18a056e6ef06201693c557119ee61e909e15df916356e81b7bfa2ac3",
+      "width": 1250,
+      "height": 1250,
+      "copiedAt": "2026-09-03T19:16:16.463Z"
+    },
+    {
+      "legacyIndex": 37,
+      "sourcePath": "images/cropped/أنمي هجوم العمالقة.png",
+      "destinationPath": "content/categories/originals/category-037.png",
+      "sourceSha256": "593dc0b4169ca1ddb28404098637641eb0539fc8aa22b9e9c43e9513a95c85b6",
+      "destinationSha256": "593dc0b4169ca1ddb28404098637641eb0539fc8aa22b9e9c43e9513a95c85b6",
+      "width": 1250,
+      "height": 1250,
+      "copiedAt": "2026-09-03T19:16:16.464Z"
+    },
+    {
+      "legacyIndex": 38,
+      "sourcePath": "images/cropped/أنمي ناروتو.png",
+      "destinationPath": "content/categories/originals/category-038.png",
+      "sourceSha256": "1d62a58a0dead9b132e34259d137378229050552b9c65c880f7eb4b96a35aaa6",
+      "destinationSha256": "1d62a58a0dead9b132e34259d137378229050552b9c65c880f7eb4b96a35aaa6",
+      "width": 1250,
+      "height": 1250,
+      "copiedAt": "2026-09-03T19:16:16.466Z"
+    },
+    {
+      "legacyIndex": 39,
+      "sourcePath": "images/cropped/المحقق كونان.png",
+      "destinationPath": "content/categories/originals/category-039.png",
+      "sourceSha256": "a6701bdc098a53b1ff6359c85a4b1c74f027a9fbee91ab5591698edd52cd925c",
+      "destinationSha256": "a6701bdc098a53b1ff6359c85a4b1c74f027a9fbee91ab5591698edd52cd925c",
+      "width": 1250,
+      "height": 1250,
+      "copiedAt": "2026-09-03T19:16:16.469Z"
+    },
+    {
+      "legacyIndex": 40,
+      "sourcePath": "images/cropped/لعبة PUBG.png",
+      "destinationPath": "content/categories/originals/category-040.png",
+      "sourceSha256": "18218e34ce2544e52033c45903b10f79da8437ae627fe0298f07272db9d8f965",
+      "destinationSha256": "18218e34ce2544e52033c45903b10f79da8437ae627fe0298f07272db9d8f965",
+      "width": 1250,
+      "height": 1250,
+      "copiedAt": "2026-09-03T19:16:16.472Z"
+    },
+    {
+      "legacyIndex": 41,
+      "sourcePath": "images/cropped/Call Of Duty.png",
+      "destinationPath": "content/categories/originals/category-041.png",
+      "sourceSha256": "94496c5a57a0019a3cceafacda363c91016d06b61dd01d3f5eca50f552ff8c81",
+      "destinationSha256": "94496c5a57a0019a3cceafacda363c91016d06b61dd01d3f5eca50f552ff8c81",
+      "width": 1250,
+      "height": 1250,
+      "copiedAt": "2026-09-03T19:16:16.474Z"
+    },
+    {
+      "legacyIndex": 42,
+      "sourcePath": "images/cropped/Minecraft.png",
+      "destinationPath": "content/categories/originals/category-042.png",
+      "sourceSha256": "17613b1e3cce14f5f0ebad9d22727420ed661f24e96d12159d65e305e1ec6ee2",
+      "destinationSha256": "17613b1e3cce14f5f0ebad9d22727420ed661f24e96d12159d65e305e1ec6ee2",
+      "width": 1250,
+      "height": 1250,
+      "copiedAt": "2026-09-03T19:16:16.475Z"
+    },
+    {
+      "legacyIndex": 43,
+      "sourcePath": "images/cropped/ألعاب الطفولة.png",
+      "destinationPath": "content/categories/originals/category-043.png",
+      "sourceSha256": "b8e9b004109ffa28163a448d06a2e056e76a5b9a3c7d0b65824de619f9a6e3e1",
+      "destinationSha256": "b8e9b004109ffa28163a448d06a2e056e76a5b9a3c7d0b65824de619f9a6e3e1",
+      "width": 1250,
+      "height": 1250,
+      "copiedAt": "2026-09-03T19:16:16.478Z"
+    },
+    {
+      "legacyIndex": 44,
+      "sourcePath": "images/cropped/أعلام.png",
+      "destinationPath": "content/categories/originals/category-044.png",
+      "sourceSha256": "f0ae92ac58f955eaf81347549c305507eb04c59c8511714c4dbaf58924dcd26e",
+      "destinationSha256": "f0ae92ac58f955eaf81347549c305507eb04c59c8511714c4dbaf58924dcd26e",
+      "width": 1250,
+      "height": 1250,
+      "copiedAt": "2026-09-03T19:16:16.480Z"
+    },
+    {
+      "legacyIndex": 45,
+      "sourcePath": "images/cropped/عواصم.png",
+      "destinationPath": "content/categories/originals/category-045.png",
+      "sourceSha256": "08fafea7f444767b625cef7a72e2cc527d9115425fc251431e199501d5a29e7e",
+      "destinationSha256": "08fafea7f444767b625cef7a72e2cc527d9115425fc251431e199501d5a29e7e",
+      "width": 1250,
+      "height": 1250,
+      "copiedAt": "2026-09-03T19:16:16.483Z"
+    },
+    {
+      "legacyIndex": 46,
+      "sourcePath": "images/cropped/دول و عواصم.png",
+      "destinationPath": "content/categories/originals/category-046.png",
+      "sourceSha256": "59ef1da2f4b5d7d701faefd59cdd1e4ef895d64c7ee600848a04512d65ba81b8",
+      "destinationSha256": "59ef1da2f4b5d7d701faefd59cdd1e4ef895d64c7ee600848a04512d65ba81b8",
+      "width": 1250,
+      "height": 1250,
+      "copiedAt": "2026-09-03T19:16:16.486Z"
+    },
+    {
+      "legacyIndex": 47,
+      "sourcePath": "images/cropped/عملات.png",
+      "destinationPath": "content/categories/originals/category-047.png",
+      "sourceSha256": "3b09b52be5060ebdab5ec65567cf13a76fa329f9693702e7f483844f332aa2bc",
+      "destinationSha256": "3b09b52be5060ebdab5ec65567cf13a76fa329f9693702e7f483844f332aa2bc",
+      "width": 1250,
+      "height": 1250,
+      "copiedAt": "2026-09-03T19:16:16.489Z"
+    },
+    {
+      "legacyIndex": 48,
+      "sourcePath": "images/cropped/UFC.png",
+      "destinationPath": "content/categories/originals/category-048.png",
+      "sourceSha256": "0c1df57b75819ed4984ce643d0a64bc975f3614a8abf86c85d66c89cd1442172",
+      "destinationSha256": "0c1df57b75819ed4984ce643d0a64bc975f3614a8abf86c85d66c89cd1442172",
+      "width": 1250,
+      "height": 1250,
+      "copiedAt": "2026-09-03T19:16:16.491Z"
+    },
+    {
+      "legacyIndex": 49,
+      "sourcePath": "images/cropped/تنس.png",
+      "destinationPath": "content/categories/originals/category-049.png",
+      "sourceSha256": "7d039b94d3aacfc0ac3f441af009bb242477d355c0de2db6228e6f5bec2e86b9",
+      "destinationSha256": "7d039b94d3aacfc0ac3f441af009bb242477d355c0de2db6228e6f5bec2e86b9",
+      "width": 1250,
+      "height": 1250,
+      "copiedAt": "2026-09-03T19:16:16.496Z"
+    },
+    {
+      "legacyIndex": 50,
+      "sourcePath": "images/cropped/Formula One.png",
+      "destinationPath": "content/categories/originals/category-050.png",
+      "sourceSha256": "834b0c032abe05dad2a9c0de486c613c095be77891eeeac6f1caa08d7c05f8fb",
+      "destinationSha256": "834b0c032abe05dad2a9c0de486c613c095be77891eeeac6f1caa08d7c05f8fb",
+      "width": 1250,
+      "height": 1250,
+      "copiedAt": "2026-09-03T19:16:16.498Z"
+    },
+    {
+      "legacyIndex": 51,
+      "sourcePath": "images/cropped/سيارات.png",
+      "destinationPath": "content/categories/originals/category-051.png",
+      "sourceSha256": "64a611253ef5aa402df86899bc729c60dce717986a1fc9143e578b31b165effd",
+      "destinationSha256": "64a611253ef5aa402df86899bc729c60dce717986a1fc9143e578b31b165effd",
+      "width": 1250,
+      "height": 1250,
+      "copiedAt": "2026-09-03T19:16:16.499Z"
+    },
+    {
+      "legacyIndex": 52,
+      "sourcePath": "images/cropped/منوعات كرة قدم.png",
+      "destinationPath": "content/categories/originals/category-052.png",
+      "sourceSha256": "91e5f890546273107317534d1e9fa3602f6a1c1012b4eb083628537c1379dc12",
+      "destinationSha256": "91e5f890546273107317534d1e9fa3602f6a1c1012b4eb083628537c1379dc12",
+      "width": 1250,
+      "height": 1250,
+      "copiedAt": "2026-09-03T19:16:16.503Z"
+    },
+    {
+      "legacyIndex": 53,
+      "sourcePath": "images/cropped/منوعات شعرية.png",
+      "destinationPath": "content/categories/originals/category-053.png",
+      "sourceSha256": "1f04b3c5d5d997a6c97b31b0faae6509a84124411bf89b18674be37820972e8b",
+      "destinationSha256": "1f04b3c5d5d997a6c97b31b0faae6509a84124411bf89b18674be37820972e8b",
+      "width": 1250,
+      "height": 1250,
+      "copiedAt": "2026-09-03T19:16:16.506Z"
+    },
+    {
+      "legacyIndex": 54,
+      "sourcePath": "images/cropped/كرة قدم عالمية.png",
+      "destinationPath": "content/categories/originals/category-054.png",
+      "sourceSha256": "8e49882a684786f8f8aa729b70d248acc3b6c846bb2b636a593b85223aa28f5a",
+      "destinationSha256": "8e49882a684786f8f8aa729b70d248acc3b6c846bb2b636a593b85223aa28f5a",
+      "width": 1251,
+      "height": 1251,
+      "copiedAt": "2026-09-03T19:16:16.509Z"
+    },
+    {
+      "legacyIndex": 55,
+      "sourcePath": "images/cropped/الكرة الايطالية.png",
+      "destinationPath": "content/categories/originals/category-055.png",
+      "sourceSha256": "07a561b70730239d2fb8b330c7286c2576c225ad1faaf6ecf8fc30586024a9d2",
+      "destinationSha256": "07a561b70730239d2fb8b330c7286c2576c225ad1faaf6ecf8fc30586024a9d2",
+      "width": 1250,
+      "height": 1250,
+      "copiedAt": "2026-09-03T19:16:16.510Z"
+    },
+    {
+      "legacyIndex": 56,
+      "sourcePath": "images/cropped/قصص الانبياء.png",
+      "destinationPath": "content/categories/originals/category-056.png",
+      "sourceSha256": "572ae94f526eef2c5b694ceed03b2c45f113056a56539c60de6f0b30e6f7b9ef",
+      "destinationSha256": "572ae94f526eef2c5b694ceed03b2c45f113056a56539c60de6f0b30e6f7b9ef",
+      "width": 1250,
+      "height": 1250,
+      "copiedAt": "2026-09-03T19:16:16.512Z"
+    },
+    {
+      "legacyIndex": 57,
+      "sourcePath": "images/cropped/القرآن الكريم.png",
+      "destinationPath": "content/categories/originals/category-057.png",
+      "sourceSha256": "1382bcd0bfccd4b190120b0fa62465e920ec056224344d40eb810d99c34a301f",
+      "destinationSha256": "1382bcd0bfccd4b190120b0fa62465e920ec056224344d40eb810d99c34a301f",
+      "width": 1250,
+      "height": 1250,
+      "copiedAt": "2026-09-03T19:16:16.513Z"
+    },
+    {
+      "legacyIndex": 58,
+      "sourcePath": "images/cropped/مطاعم الكويت.png",
+      "destinationPath": "content/categories/originals/category-058.png",
+      "sourceSha256": "8dc8794fd918f790c09173bbf43d9c35ee1d458449b590613382b0df93ac7028",
+      "destinationSha256": "8dc8794fd918f790c09173bbf43d9c35ee1d458449b590613382b0df93ac7028",
+      "width": 1250,
+      "height": 1250,
+      "copiedAt": "2026-09-03T19:16:16.515Z"
+    },
+    {
+      "legacyIndex": 59,
+      "sourcePath": "images/cropped/من أنا جغرافيا.png",
+      "destinationPath": "content/categories/originals/category-059.png",
+      "sourceSha256": "a454f7c671379ab9bd206810d1982d9e490362903124a1d66cbe4ac2abd54337",
+      "destinationSha256": "a454f7c671379ab9bd206810d1982d9e490362903124a1d66cbe4ac2abd54337",
+      "width": 1250,
+      "height": 1250,
+      "copiedAt": "2026-09-03T19:16:16.516Z"
+    },
+    {
+      "legacyIndex": 60,
+      "sourcePath": "images/cropped/مسيرة لاعب.png",
+      "destinationPath": "content/categories/originals/category-060.png",
+      "sourceSha256": "95e53882ebcd946b10303b5b275ae3d69bb930122c0ee490afb2ff3f60af96dd",
+      "destinationSha256": "95e53882ebcd946b10303b5b275ae3d69bb930122c0ee490afb2ff3f60af96dd",
+      "width": 1250,
+      "height": 1250,
+      "copiedAt": "2026-09-03T19:16:16.518Z"
+    },
+    {
+      "legacyIndex": 61,
+      "sourcePath": "images/cropped/LineUp.png",
+      "destinationPath": "content/categories/originals/category-061.png",
+      "sourceSha256": "c9bae84c1216ab6f0628cbf6eb1bc696cfe5a0d75a071d79d828dbe165f48635",
+      "destinationSha256": "c9bae84c1216ab6f0628cbf6eb1bc696cfe5a0d75a071d79d828dbe165f48635",
+      "width": 1250,
+      "height": 1250,
+      "copiedAt": "2026-09-03T19:16:16.519Z"
+    },
+    {
+      "legacyIndex": 62,
+      "sourcePath": "images/cropped/كأس العالم 2026.png",
+      "destinationPath": "content/categories/originals/category-062.png",
+      "sourceSha256": "eea75433f2f7890b84191f3abd05d18c761bafbbd7f91b24435d65a48a81ea61",
+      "destinationSha256": "eea75433f2f7890b84191f3abd05d18c761bafbbd7f91b24435d65a48a81ea61",
+      "width": 1250,
+      "height": 1250,
+      "copiedAt": "2026-09-03T19:16:16.521Z"
+    }
+  ],
+  "duplicateByteGroups": [
+    [
+      1,
+      59
+    ]
+  ]
+}

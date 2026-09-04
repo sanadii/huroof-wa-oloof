@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.app.json",
+  "compilerOptions": { "types": ["node", "vite/client"] },
+  "include": [
+    "src/features/game/**/*.ts",
+    "src/routes/GameRoutes.tsx",
+    "server/**/*.ts",
+    "tests/game/**/*.test.ts"
+  ]
+}

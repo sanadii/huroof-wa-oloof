@@ -1,0 +1,10 @@
+{
+  "schemaVersion": "2.1.0",
+  "extensionKind": "append_only_authoring_catalog",
+  "categories": [
+    {"id":"huroof-001","slug":"علوم_وفضاء","displayNameAr":"علوم وفضاء","sourceMode":"trivia","sourcePolicy":"official_science_space","classicCompatibility":"text","catalogStatus":"proposed","origin":"v2.1_extension","sortOrder":63,"runtimeVisibility":false,"questionReadiness":"authoring_only","activation":"authoring_only","cover":{"state":"proposed","publishable":false}},
+    {"id":"huroof-002","slug":"جغرافيا_وطبيعة","displayNameAr":"جغرافيا وطبيعة","sourceMode":"trivia","sourcePolicy":"official_geography_nature","classicCompatibility":"text","catalogStatus":"proposed","origin":"v2.1_extension","sortOrder":64,"runtimeVisibility":false,"questionReadiness":"authoring_only","activation":"authoring_only","cover":{"state":"proposed","publishable":false}},
+    {"id":"huroof-003","slug":"ادب_ولغة_عربية","displayNameAr":"أدب ولغة عربية","sourceMode":"trivia","sourcePolicy":"official_arabic_lexicography","classicCompatibility":"text","catalogStatus":"proposed","origin":"v2.1_extension","sortOrder":65,"runtimeVisibility":false,"questionReadiness":"authoring_only","activation":"authoring_only","cover":{"state":"proposed","publishable":false}},
+    {"id":"huroof-004","slug":"الكويت_والخليج_تاريخ_وثقافة","displayNameAr":"الكويت والخليج: تاريخ وثقافة","sourceMode":"trivia","sourcePolicy":"official_kuwait_gulf_heritage","classicCompatibility":"text","catalogStatus":"proposed","origin":"v2.1_extension","sortOrder":66,"runtimeVisibility":false,"questionReadiness":"authoring_only","activation":"authoring_only","cover":{"state":"proposed","publishable":false}}
+  ]
+}

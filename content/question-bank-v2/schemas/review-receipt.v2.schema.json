@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Review Receipt V2",
+  "type": "object",
+  "required": [
+    "receiptId",
+    "itemId",
+    "kind",
+    "reviewer",
+    "reviewedAt",
+    "policyVersion",
+    "verdict",
+    "evidence"
+  ],
+  "properties": {
+    "kind": {
+      "enum": [
+        "fact",
+        "arabic",
+        "relevance",
+        "duplicate",
+        "temporal",
+        "specialist",
+        "rights"
+      ]
+    },
+    "verdict": {
+      "enum": [
+        "pass",
+        "fail"
+      ]
+    },
+    "reviewedAt": {
+      "type": "string",
+      "format": "date"
+    }
+  }
+}

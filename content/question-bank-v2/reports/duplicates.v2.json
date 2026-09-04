@@ -1,0 +1,8 @@
+{
+  "reportVersion": "2.0.0",
+  "asOf": "2026-09-03",
+  "exactClusters": [],
+  "indexedCandidates": [],
+  "unresolvedHighConfidenceClusters": 0,
+  "strategy": "normalized exact hashes plus bounded Arabic shingle candidate index; no all-pairs scan"
+}

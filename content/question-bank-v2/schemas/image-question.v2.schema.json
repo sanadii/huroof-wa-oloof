@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Image Question V2",
+  "type": "object",
+  "required": [
+    "questionType",
+    "media",
+    "status"
+  ],
+  "properties": {
+    "questionType": {
+      "const": "image"
+    },
+    "media": {
+      "$ref": "image-media.v2.schema.json"
+    },
+    "status": {
+      "const": "draft"
+    }
+  }
+}

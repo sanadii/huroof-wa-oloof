@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["schemaVersion", "categories"],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "categories": {"type": "array", "minItems": 62, "maxItems": 62, "items": {"type": "object", "required": ["id", "legacyIndex", "displayNameAr", "slug", "sourceMode", "sourcePolicy", "classicCompatibility", "questionReadiness", "cover", "provenance"], "properties": {"id": {"pattern": "^tahadani-\\d{3}$"}, "legacyIndex": {"type": "integer", "minimum": 1, "maximum": 62}, "displayNameAr": {"type": "string", "minLength": 1}, "slug": {"type": "string", "minLength": 1}, "sourceMode": {"enum": ["trivia", "identity", "puzzle", "image", "charades"]}, "sourcePolicy": {"type": "string"}, "classicCompatibility": {"enum": ["text", "image_pending", "separate_mode"]}, "questionReadiness": {"enum": ["empty", "drafting", "reviewing", "playable_combined_only", "playable_standalone", "blocked"]}, "cover": {"type": "object", "required": ["original", "web320", "web640", "width", "height", "sha256", "altAr", "rightsStatus", "publishable"]}, "provenance": {"type": "object", "required": ["sourceRepository", "manifestVersion", "sourceImageName"]}}}}
+  }
+}

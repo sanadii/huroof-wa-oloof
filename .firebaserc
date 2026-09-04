@@ -1,0 +1,7 @@
+{
+  "projects": {
+    "default": "demo-huroof-wa-oloof",
+    "demo": "demo-huroof-wa-oloof",
+    "production": "huroof-a3ee7"
+  }
+}

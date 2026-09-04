@@ -1,0 +1,1727 @@
+{
+  "registryVersion": "2.1.0",
+  "policies": [
+    {
+      "categoryId": "tahadani-001",
+      "policyVersion": "2.1.0",
+      "modality": "classic",
+      "sourcePolicy": "identity_trios",
+      "sourceRegistryIds": [
+        "legacy-registry-placeholder"
+      ],
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة من أنا / دول"
+      ],
+      "runtimeVisible": true,
+      "activation": "runtime",
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "relevance": true,
+        "duplicate": true,
+        "temporal": true,
+        "minimumSourcePackets": 1
+      }
+    },
+    {
+      "categoryId": "tahadani-002",
+      "policyVersion": "2.1.0",
+      "modality": "classic",
+      "sourcePolicy": "identity_trios",
+      "sourceRegistryIds": [
+        "legacy-registry-placeholder"
+      ],
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة من أنا / لاعبين كرة قدم"
+      ],
+      "runtimeVisible": true,
+      "activation": "runtime",
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "relevance": true,
+        "duplicate": true,
+        "temporal": true,
+        "minimumSourcePackets": 1
+      }
+    },
+    {
+      "categoryId": "tahadani-003",
+      "policyVersion": "2.1.0",
+      "modality": "classic",
+      "sourcePolicy": "identity_trios",
+      "sourceRegistryIds": [
+        "legacy-registry-placeholder"
+      ],
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة من أنا / حيوانات"
+      ],
+      "runtimeVisible": true,
+      "activation": "runtime",
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "relevance": true,
+        "duplicate": true,
+        "temporal": true,
+        "minimumSourcePackets": 1
+      }
+    },
+    {
+      "categoryId": "tahadani-004",
+      "policyVersion": "2.1.0",
+      "modality": "classic",
+      "sourcePolicy": "identity_trios",
+      "sourceRegistryIds": [
+        "legacy-registry-placeholder"
+      ],
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة من أنا / مسلسلات عربيه"
+      ],
+      "runtimeVisible": true,
+      "activation": "runtime",
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "relevance": true,
+        "duplicate": true,
+        "temporal": true,
+        "minimumSourcePackets": 1
+      }
+    },
+    {
+      "categoryId": "tahadani-005",
+      "policyVersion": "2.1.0",
+      "modality": "classic",
+      "sourcePolicy": "identity_trios",
+      "sourceRegistryIds": [
+        "legacy-registry-placeholder"
+      ],
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة من أنا / ممثلين"
+      ],
+      "runtimeVisible": true,
+      "activation": "runtime",
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "relevance": true,
+        "duplicate": true,
+        "temporal": true,
+        "minimumSourcePackets": 1
+      }
+    },
+    {
+      "categoryId": "tahadani-006",
+      "policyVersion": "2.1.0",
+      "modality": "classic",
+      "sourcePolicy": "stable_facts",
+      "sourceRegistryIds": [
+        "legacy-registry-placeholder"
+      ],
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة معلومات عامة"
+      ],
+      "runtimeVisible": true,
+      "activation": "runtime",
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "relevance": true,
+        "duplicate": true,
+        "temporal": true,
+        "minimumSourcePackets": 1
+      }
+    },
+    {
+      "categoryId": "tahadani-007",
+      "policyVersion": "2.1.0",
+      "modality": "classic",
+      "sourcePolicy": "stable_facts",
+      "sourceRegistryIds": [
+        "legacy-registry-placeholder"
+      ],
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة عالم الحيوان"
+      ],
+      "runtimeVisible": true,
+      "activation": "runtime",
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "relevance": true,
+        "duplicate": true,
+        "temporal": true,
+        "minimumSourcePackets": 1
+      }
+    },
+    {
+      "categoryId": "tahadani-008",
+      "policyVersion": "2.1.0",
+      "modality": "classic",
+      "sourcePolicy": "stable_facts",
+      "sourceRegistryIds": [
+        "legacy-registry-placeholder"
+      ],
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة تكنولوجيا"
+      ],
+      "runtimeVisible": true,
+      "activation": "runtime",
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "relevance": true,
+        "duplicate": true,
+        "temporal": true,
+        "minimumSourcePackets": 1
+      }
+    },
+    {
+      "categoryId": "tahadani-009",
+      "policyVersion": "2.1.0",
+      "modality": "classic",
+      "sourcePolicy": "stable_facts",
+      "sourceRegistryIds": [
+        "legacy-registry-placeholder"
+      ],
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة تاريخ"
+      ],
+      "runtimeVisible": true,
+      "activation": "runtime",
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "relevance": true,
+        "duplicate": true,
+        "temporal": true,
+        "minimumSourcePackets": 1
+      }
+    },
+    {
+      "categoryId": "tahadani-010",
+      "policyVersion": "2.1.0",
+      "modality": "classic",
+      "sourcePolicy": "identity_trios",
+      "sourceRegistryIds": [
+        "legacy-registry-placeholder"
+      ],
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة منو المشهور"
+      ],
+      "runtimeVisible": true,
+      "activation": "runtime",
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "relevance": true,
+        "duplicate": true,
+        "temporal": true,
+        "minimumSourcePackets": 1
+      }
+    },
+    {
+      "categoryId": "tahadani-011",
+      "policyVersion": "2.1.0",
+      "modality": "image",
+      "sourcePolicy": "producer_placeholder",
+      "sourceRegistryIds": [
+        "legacy-registry-placeholder"
+      ],
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة خمن الصورة"
+      ],
+      "runtimeVisible": true,
+      "activation": "runtime",
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "relevance": true,
+        "duplicate": true,
+        "temporal": true,
+        "minimumSourcePackets": 1
+      }
+    },
+    {
+      "categoryId": "tahadani-012",
+      "policyVersion": "2.1.0",
+      "modality": "image",
+      "sourcePolicy": "producer_placeholder",
+      "sourceRegistryIds": [
+        "legacy-registry-placeholder"
+      ],
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة شنو هذا؟"
+      ],
+      "runtimeVisible": true,
+      "activation": "runtime",
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "relevance": true,
+        "duplicate": true,
+        "temporal": true,
+        "minimumSourcePackets": 1
+      }
+    },
+    {
+      "categoryId": "tahadani-013",
+      "policyVersion": "2.1.0",
+      "modality": "classic",
+      "sourcePolicy": "single_solution",
+      "sourceRegistryIds": [
+        "legacy-registry-placeholder"
+      ],
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة ألغاز"
+      ],
+      "runtimeVisible": true,
+      "activation": "runtime",
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "relevance": true,
+        "duplicate": true,
+        "temporal": true,
+        "minimumSourcePackets": 1
+      }
+    },
+    {
+      "categoryId": "tahadani-014",
+      "policyVersion": "2.1.0",
+      "modality": "classic",
+      "sourcePolicy": "single_solution",
+      "sourceRegistryIds": [
+        "legacy-registry-placeholder"
+      ],
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة الجزء المفقود"
+      ],
+      "runtimeVisible": true,
+      "activation": "runtime",
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "relevance": true,
+        "duplicate": true,
+        "temporal": true,
+        "minimumSourcePackets": 1
+      }
+    },
+    {
+      "categoryId": "tahadani-015",
+      "policyVersion": "2.1.0",
+      "modality": "classic",
+      "sourcePolicy": "single_solution",
+      "sourceRegistryIds": [
+        "legacy-registry-placeholder"
+      ],
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة أمثال وغطاوي"
+      ],
+      "runtimeVisible": true,
+      "activation": "runtime",
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "relevance": true,
+        "duplicate": true,
+        "temporal": true,
+        "minimumSourcePackets": 1
+      }
+    },
+    {
+      "categoryId": "tahadani-016",
+      "policyVersion": "2.1.0",
+      "modality": "charades",
+      "sourcePolicy": "performable_target",
+      "sourceRegistryIds": [
+        "legacy-registry-placeholder"
+      ],
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة حيوانات / ولا كلمة"
+      ],
+      "runtimeVisible": true,
+      "activation": "runtime",
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "relevance": true,
+        "duplicate": true,
+        "temporal": true,
+        "minimumSourcePackets": 1
+      }
+    },
+    {
+      "categoryId": "tahadani-017",
+      "policyVersion": "2.1.0",
+      "modality": "charades",
+      "sourcePolicy": "performable_target",
+      "sourceRegistryIds": [
+        "legacy-registry-placeholder"
+      ],
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة أغاني عربية / ولا كلمة"
+      ],
+      "runtimeVisible": true,
+      "activation": "runtime",
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "relevance": true,
+        "duplicate": true,
+        "temporal": true,
+        "minimumSourcePackets": 1
+      }
+    },
+    {
+      "categoryId": "tahadani-018",
+      "policyVersion": "2.1.0",
+      "modality": "charades",
+      "sourcePolicy": "performable_target",
+      "sourceRegistryIds": [
+        "legacy-registry-placeholder"
+      ],
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة مشاهير عرب / ولا كلمة"
+      ],
+      "runtimeVisible": true,
+      "activation": "runtime",
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "relevance": true,
+        "duplicate": true,
+        "temporal": true,
+        "minimumSourcePackets": 1
+      }
+    },
+    {
+      "categoryId": "tahadani-019",
+      "policyVersion": "2.1.0",
+      "modality": "charades",
+      "sourcePolicy": "performable_target",
+      "sourceRegistryIds": [
+        "legacy-registry-placeholder"
+      ],
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة كرتون / ولا كلمة"
+      ],
+      "runtimeVisible": true,
+      "activation": "runtime",
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "relevance": true,
+        "duplicate": true,
+        "temporal": true,
+        "minimumSourcePackets": 1
+      }
+    },
+    {
+      "categoryId": "tahadani-020",
+      "policyVersion": "2.1.0",
+      "modality": "charades",
+      "sourcePolicy": "performable_target",
+      "sourceRegistryIds": [
+        "legacy-registry-placeholder"
+      ],
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة دول / ولا كلمة"
+      ],
+      "runtimeVisible": true,
+      "activation": "runtime",
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "relevance": true,
+        "duplicate": true,
+        "temporal": true,
+        "minimumSourcePackets": 1
+      }
+    },
+    {
+      "categoryId": "tahadani-021",
+      "policyVersion": "2.1.0",
+      "modality": "classic",
+      "sourcePolicy": "dated_sports_facts",
+      "sourceRegistryIds": [
+        "legacy-registry-placeholder"
+      ],
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة ريال مدريد"
+      ],
+      "runtimeVisible": true,
+      "activation": "runtime",
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "relevance": true,
+        "duplicate": true,
+        "temporal": true,
+        "minimumSourcePackets": 1
+      }
+    },
+    {
+      "categoryId": "tahadani-022",
+      "policyVersion": "2.1.0",
+      "modality": "classic",
+      "sourcePolicy": "dated_sports_facts",
+      "sourceRegistryIds": [
+        "legacy-registry-placeholder"
+      ],
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة برشلونة"
+      ],
+      "runtimeVisible": true,
+      "activation": "runtime",
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "relevance": true,
+        "duplicate": true,
+        "temporal": true,
+        "minimumSourcePackets": 1
+      }
+    },
+    {
+      "categoryId": "tahadani-023",
+      "policyVersion": "2.1.0",
+      "modality": "classic",
+      "sourcePolicy": "dated_sports_facts",
+      "sourceRegistryIds": [
+        "legacy-registry-placeholder"
+      ],
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة كأس العالم"
+      ],
+      "runtimeVisible": true,
+      "activation": "runtime",
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "relevance": true,
+        "duplicate": true,
+        "temporal": true,
+        "minimumSourcePackets": 1
+      }
+    },
+    {
+      "categoryId": "tahadani-024",
+      "policyVersion": "2.1.0",
+      "modality": "classic",
+      "sourcePolicy": "dated_sports_facts",
+      "sourceRegistryIds": [
+        "legacy-registry-placeholder"
+      ],
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة ميسي وكرستيانو"
+      ],
+      "runtimeVisible": true,
+      "activation": "runtime",
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "relevance": true,
+        "duplicate": true,
+        "temporal": true,
+        "minimumSourcePackets": 1
+      }
+    },
+    {
+      "categoryId": "tahadani-025",
+      "policyVersion": "2.1.0",
+      "modality": "classic",
+      "sourcePolicy": "identity_trios",
+      "sourceRegistryIds": [
+        "legacy-registry-placeholder"
+      ],
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة من هو اللاعب"
+      ],
+      "runtimeVisible": true,
+      "activation": "runtime",
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "relevance": true,
+        "duplicate": true,
+        "temporal": true,
+        "minimumSourcePackets": 1
+      }
+    },
+    {
+      "categoryId": "tahadani-026",
+      "policyVersion": "2.1.0",
+      "modality": "classic",
+      "sourcePolicy": "stable_facts",
+      "sourceRegistryIds": [
+        "legacy-registry-placeholder"
+      ],
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة طاش ماطاش"
+      ],
+      "runtimeVisible": true,
+      "activation": "runtime",
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "relevance": true,
+        "duplicate": true,
+        "temporal": true,
+        "minimumSourcePackets": 1
+      }
+    },
+    {
+      "categoryId": "tahadani-027",
+      "policyVersion": "2.1.0",
+      "modality": "classic",
+      "sourcePolicy": "stable_facts",
+      "sourceRegistryIds": [
+        "legacy-registry-placeholder"
+      ],
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة باب الحارة"
+      ],
+      "runtimeVisible": true,
+      "activation": "runtime",
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "relevance": true,
+        "duplicate": true,
+        "temporal": true,
+        "minimumSourcePackets": 1
+      }
+    },
+    {
+      "categoryId": "tahadani-028",
+      "policyVersion": "2.1.0",
+      "modality": "classic",
+      "sourcePolicy": "stable_facts",
+      "sourceRegistryIds": [
+        "legacy-registry-placeholder"
+      ],
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة أفلام كلاسيك"
+      ],
+      "runtimeVisible": true,
+      "activation": "runtime",
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "relevance": true,
+        "duplicate": true,
+        "temporal": true,
+        "minimumSourcePackets": 1
+      }
+    },
+    {
+      "categoryId": "tahadani-029",
+      "policyVersion": "2.1.0",
+      "modality": "classic",
+      "sourcePolicy": "stable_facts",
+      "sourceRegistryIds": [
+        "legacy-registry-placeholder"
+      ],
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة أفلام رعب"
+      ],
+      "runtimeVisible": true,
+      "activation": "runtime",
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "relevance": true,
+        "duplicate": true,
+        "temporal": true,
+        "minimumSourcePackets": 1
+      }
+    },
+    {
+      "categoryId": "tahadani-030",
+      "policyVersion": "2.1.0",
+      "modality": "classic",
+      "sourcePolicy": "stable_facts",
+      "sourceRegistryIds": [
+        "legacy-registry-placeholder"
+      ],
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة Game Of Thrones"
+      ],
+      "runtimeVisible": true,
+      "activation": "runtime",
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "relevance": true,
+        "duplicate": true,
+        "temporal": true,
+        "minimumSourcePackets": 1
+      }
+    },
+    {
+      "categoryId": "tahadani-031",
+      "policyVersion": "2.1.0",
+      "modality": "classic",
+      "sourcePolicy": "stable_facts",
+      "sourceRegistryIds": [
+        "legacy-registry-placeholder"
+      ],
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة أغاني الزمن الجميل"
+      ],
+      "runtimeVisible": true,
+      "activation": "runtime",
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "relevance": true,
+        "duplicate": true,
+        "temporal": true,
+        "minimumSourcePackets": 1
+      }
+    },
+    {
+      "categoryId": "tahadani-032",
+      "policyVersion": "2.1.0",
+      "modality": "classic",
+      "sourcePolicy": "stable_facts",
+      "sourceRegistryIds": [
+        "legacy-registry-placeholder"
+      ],
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة أم كلثوم"
+      ],
+      "runtimeVisible": true,
+      "activation": "runtime",
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "relevance": true,
+        "duplicate": true,
+        "temporal": true,
+        "minimumSourcePackets": 1
+      }
+    },
+    {
+      "categoryId": "tahadani-033",
+      "policyVersion": "2.1.0",
+      "modality": "classic",
+      "sourcePolicy": "stable_facts",
+      "sourceRegistryIds": [
+        "legacy-registry-placeholder"
+      ],
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة أغاني وطنية"
+      ],
+      "runtimeVisible": true,
+      "activation": "runtime",
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "relevance": true,
+        "duplicate": true,
+        "temporal": true,
+        "minimumSourcePackets": 1
+      }
+    },
+    {
+      "categoryId": "tahadani-034",
+      "policyVersion": "2.1.0",
+      "modality": "classic",
+      "sourcePolicy": "stable_facts",
+      "sourceRegistryIds": [
+        "legacy-registry-placeholder"
+      ],
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة أغاني أجنبية"
+      ],
+      "runtimeVisible": true,
+      "activation": "runtime",
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "relevance": true,
+        "duplicate": true,
+        "temporal": true,
+        "minimumSourcePackets": 1
+      }
+    },
+    {
+      "categoryId": "tahadani-035",
+      "policyVersion": "2.1.0",
+      "modality": "classic",
+      "sourcePolicy": "stable_facts",
+      "sourceRegistryIds": [
+        "legacy-registry-placeholder"
+      ],
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة عبدالكريم عبدالقادر"
+      ],
+      "runtimeVisible": true,
+      "activation": "runtime",
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "relevance": true,
+        "duplicate": true,
+        "temporal": true,
+        "minimumSourcePackets": 1
+      }
+    },
+    {
+      "categoryId": "tahadani-036",
+      "policyVersion": "2.1.0",
+      "modality": "classic",
+      "sourcePolicy": "stable_facts",
+      "sourceRegistryIds": [
+        "legacy-registry-placeholder"
+      ],
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة One Piece"
+      ],
+      "runtimeVisible": true,
+      "activation": "runtime",
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "relevance": true,
+        "duplicate": true,
+        "temporal": true,
+        "minimumSourcePackets": 1
+      }
+    },
+    {
+      "categoryId": "tahadani-037",
+      "policyVersion": "2.1.0",
+      "modality": "classic",
+      "sourcePolicy": "stable_facts",
+      "sourceRegistryIds": [
+        "legacy-registry-placeholder"
+      ],
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة Attack on Titan"
+      ],
+      "runtimeVisible": true,
+      "activation": "runtime",
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "relevance": true,
+        "duplicate": true,
+        "temporal": true,
+        "minimumSourcePackets": 1
+      }
+    },
+    {
+      "categoryId": "tahadani-038",
+      "policyVersion": "2.1.0",
+      "modality": "classic",
+      "sourcePolicy": "stable_facts",
+      "sourceRegistryIds": [
+        "legacy-registry-placeholder"
+      ],
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة Naruto"
+      ],
+      "runtimeVisible": true,
+      "activation": "runtime",
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "relevance": true,
+        "duplicate": true,
+        "temporal": true,
+        "minimumSourcePackets": 1
+      }
+    },
+    {
+      "categoryId": "tahadani-039",
+      "policyVersion": "2.1.0",
+      "modality": "classic",
+      "sourcePolicy": "stable_facts",
+      "sourceRegistryIds": [
+        "legacy-registry-placeholder"
+      ],
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة كونان"
+      ],
+      "runtimeVisible": true,
+      "activation": "runtime",
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "relevance": true,
+        "duplicate": true,
+        "temporal": true,
+        "minimumSourcePackets": 1
+      }
+    },
+    {
+      "categoryId": "tahadani-040",
+      "policyVersion": "2.1.0",
+      "modality": "classic",
+      "sourcePolicy": "stable_facts",
+      "sourceRegistryIds": [
+        "legacy-registry-placeholder"
+      ],
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة لعبة PUBG"
+      ],
+      "runtimeVisible": true,
+      "activation": "runtime",
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "relevance": true,
+        "duplicate": true,
+        "temporal": true,
+        "minimumSourcePackets": 1
+      }
+    },
+    {
+      "categoryId": "tahadani-041",
+      "policyVersion": "2.1.0",
+      "modality": "classic",
+      "sourcePolicy": "stable_facts",
+      "sourceRegistryIds": [
+        "legacy-registry-placeholder"
+      ],
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة Call of Duty"
+      ],
+      "runtimeVisible": true,
+      "activation": "runtime",
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "relevance": true,
+        "duplicate": true,
+        "temporal": true,
+        "minimumSourcePackets": 1
+      }
+    },
+    {
+      "categoryId": "tahadani-042",
+      "policyVersion": "2.1.0",
+      "modality": "classic",
+      "sourcePolicy": "stable_facts",
+      "sourceRegistryIds": [
+        "legacy-registry-placeholder"
+      ],
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة Minecraft"
+      ],
+      "runtimeVisible": true,
+      "activation": "runtime",
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "relevance": true,
+        "duplicate": true,
+        "temporal": true,
+        "minimumSourcePackets": 1
+      }
+    },
+    {
+      "categoryId": "tahadani-043",
+      "policyVersion": "2.1.0",
+      "modality": "classic",
+      "sourcePolicy": "stable_facts",
+      "sourceRegistryIds": [
+        "legacy-registry-placeholder"
+      ],
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة العاب الطفولة"
+      ],
+      "runtimeVisible": true,
+      "activation": "runtime",
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "relevance": true,
+        "duplicate": true,
+        "temporal": true,
+        "minimumSourcePackets": 1
+      }
+    },
+    {
+      "categoryId": "tahadani-044",
+      "policyVersion": "2.1.0",
+      "modality": "image",
+      "sourcePolicy": "producer_placeholder",
+      "sourceRegistryIds": [
+        "legacy-registry-placeholder"
+      ],
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة أعلام"
+      ],
+      "runtimeVisible": true,
+      "activation": "runtime",
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "relevance": true,
+        "duplicate": true,
+        "temporal": true,
+        "minimumSourcePackets": 1
+      }
+    },
+    {
+      "categoryId": "tahadani-045",
+      "policyVersion": "2.1.0",
+      "modality": "classic",
+      "sourcePolicy": "stable_facts",
+      "sourceRegistryIds": [
+        "legacy-registry-placeholder"
+      ],
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة عواصم"
+      ],
+      "runtimeVisible": true,
+      "activation": "runtime",
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "relevance": true,
+        "duplicate": true,
+        "temporal": true,
+        "minimumSourcePackets": 1
+      }
+    },
+    {
+      "categoryId": "tahadani-046",
+      "policyVersion": "2.1.0",
+      "modality": "classic",
+      "sourcePolicy": "stable_facts",
+      "sourceRegistryIds": [
+        "legacy-registry-placeholder"
+      ],
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة دول و عواصم"
+      ],
+      "runtimeVisible": true,
+      "activation": "runtime",
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "relevance": true,
+        "duplicate": true,
+        "temporal": true,
+        "minimumSourcePackets": 1
+      }
+    },
+    {
+      "categoryId": "tahadani-047",
+      "policyVersion": "2.1.0",
+      "modality": "classic",
+      "sourcePolicy": "stable_facts",
+      "sourceRegistryIds": [
+        "legacy-registry-placeholder"
+      ],
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة عملات"
+      ],
+      "runtimeVisible": true,
+      "activation": "runtime",
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "relevance": true,
+        "duplicate": true,
+        "temporal": true,
+        "minimumSourcePackets": 1
+      }
+    },
+    {
+      "categoryId": "tahadani-048",
+      "policyVersion": "2.1.0",
+      "modality": "classic",
+      "sourcePolicy": "stable_facts",
+      "sourceRegistryIds": [
+        "legacy-registry-placeholder"
+      ],
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة الفنون القتالية"
+      ],
+      "runtimeVisible": true,
+      "activation": "runtime",
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "relevance": true,
+        "duplicate": true,
+        "temporal": true,
+        "minimumSourcePackets": 1
+      }
+    },
+    {
+      "categoryId": "tahadani-049",
+      "policyVersion": "2.1.0",
+      "modality": "classic",
+      "sourcePolicy": "stable_facts",
+      "sourceRegistryIds": [
+        "legacy-registry-placeholder"
+      ],
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة تنس"
+      ],
+      "runtimeVisible": true,
+      "activation": "runtime",
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "relevance": true,
+        "duplicate": true,
+        "temporal": true,
+        "minimumSourcePackets": 1
+      }
+    },
+    {
+      "categoryId": "tahadani-050",
+      "policyVersion": "2.1.0",
+      "modality": "classic",
+      "sourcePolicy": "dated_sports_facts",
+      "sourceRegistryIds": [
+        "legacy-registry-placeholder"
+      ],
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة Formula 1"
+      ],
+      "runtimeVisible": true,
+      "activation": "runtime",
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "relevance": true,
+        "duplicate": true,
+        "temporal": true,
+        "minimumSourcePackets": 1
+      }
+    },
+    {
+      "categoryId": "tahadani-051",
+      "policyVersion": "2.1.0",
+      "modality": "classic",
+      "sourcePolicy": "stable_facts",
+      "sourceRegistryIds": [
+        "legacy-registry-placeholder"
+      ],
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة سيارات"
+      ],
+      "runtimeVisible": true,
+      "activation": "runtime",
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "relevance": true,
+        "duplicate": true,
+        "temporal": true,
+        "minimumSourcePackets": 1
+      }
+    },
+    {
+      "categoryId": "tahadani-052",
+      "policyVersion": "2.1.0",
+      "modality": "classic",
+      "sourcePolicy": "dated_sports_facts",
+      "sourceRegistryIds": [
+        "legacy-registry-placeholder"
+      ],
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة منوعات كرة قدم"
+      ],
+      "runtimeVisible": true,
+      "activation": "runtime",
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "relevance": true,
+        "duplicate": true,
+        "temporal": true,
+        "minimumSourcePackets": 1
+      }
+    },
+    {
+      "categoryId": "tahadani-053",
+      "policyVersion": "2.1.0",
+      "modality": "classic",
+      "sourcePolicy": "stable_facts",
+      "sourceRegistryIds": [
+        "legacy-registry-placeholder"
+      ],
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة منوعات شعرية"
+      ],
+      "runtimeVisible": true,
+      "activation": "runtime",
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "relevance": true,
+        "duplicate": true,
+        "temporal": true,
+        "minimumSourcePackets": 1
+      }
+    },
+    {
+      "categoryId": "tahadani-054",
+      "policyVersion": "2.1.0",
+      "modality": "classic",
+      "sourcePolicy": "dated_sports_facts",
+      "sourceRegistryIds": [
+        "legacy-registry-placeholder"
+      ],
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة كرة قدم عالمية"
+      ],
+      "runtimeVisible": true,
+      "activation": "runtime",
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "relevance": true,
+        "duplicate": true,
+        "temporal": true,
+        "minimumSourcePackets": 1
+      }
+    },
+    {
+      "categoryId": "tahadani-055",
+      "policyVersion": "2.1.0",
+      "modality": "classic",
+      "sourcePolicy": "dated_sports_facts",
+      "sourceRegistryIds": [
+        "legacy-registry-placeholder"
+      ],
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة كرة قدم ايطالية"
+      ],
+      "runtimeVisible": true,
+      "activation": "runtime",
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "relevance": true,
+        "duplicate": true,
+        "temporal": true,
+        "minimumSourcePackets": 1
+      }
+    },
+    {
+      "categoryId": "tahadani-056",
+      "policyVersion": "2.1.0",
+      "modality": "classic",
+      "sourcePolicy": "primary_religious_sources",
+      "sourceRegistryIds": [
+        "legacy-registry-placeholder"
+      ],
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة قصص الأنبياء"
+      ],
+      "runtimeVisible": true,
+      "activation": "runtime",
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "relevance": true,
+        "duplicate": true,
+        "temporal": true,
+        "minimumSourcePackets": 1
+      }
+    },
+    {
+      "categoryId": "tahadani-057",
+      "policyVersion": "2.1.0",
+      "modality": "classic",
+      "sourcePolicy": "primary_religious_sources",
+      "sourceRegistryIds": [
+        "legacy-registry-placeholder"
+      ],
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة القرآن الكريم"
+      ],
+      "runtimeVisible": true,
+      "activation": "runtime",
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "relevance": true,
+        "duplicate": true,
+        "temporal": true,
+        "minimumSourcePackets": 1
+      }
+    },
+    {
+      "categoryId": "tahadani-058",
+      "policyVersion": "2.1.0",
+      "modality": "classic",
+      "sourcePolicy": "dated_local_facts",
+      "sourceRegistryIds": [
+        "legacy-registry-placeholder"
+      ],
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة مطاعم الكويت"
+      ],
+      "runtimeVisible": true,
+      "activation": "runtime",
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "relevance": true,
+        "duplicate": true,
+        "temporal": true,
+        "minimumSourcePackets": 1
+      }
+    },
+    {
+      "categoryId": "tahadani-059",
+      "policyVersion": "2.1.0",
+      "modality": "classic",
+      "sourcePolicy": "identity_trios",
+      "sourceRegistryIds": [
+        "legacy-registry-placeholder"
+      ],
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة توقعني (دول)"
+      ],
+      "runtimeVisible": true,
+      "activation": "runtime",
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "relevance": true,
+        "duplicate": true,
+        "temporal": true,
+        "minimumSourcePackets": 1
+      }
+    },
+    {
+      "categoryId": "tahadani-060",
+      "policyVersion": "2.1.0",
+      "modality": "classic",
+      "sourcePolicy": "identity_trios",
+      "sourceRegistryIds": [
+        "legacy-registry-placeholder"
+      ],
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة مسيرة لاعب"
+      ],
+      "runtimeVisible": true,
+      "activation": "runtime",
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "relevance": true,
+        "duplicate": true,
+        "temporal": true,
+        "minimumSourcePackets": 1
+      }
+    },
+    {
+      "categoryId": "tahadani-061",
+      "policyVersion": "2.1.0",
+      "modality": "image",
+      "sourcePolicy": "producer_placeholder",
+      "sourceRegistryIds": [
+        "legacy-registry-placeholder"
+      ],
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة تشكيلات"
+      ],
+      "runtimeVisible": true,
+      "activation": "runtime",
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "relevance": true,
+        "duplicate": true,
+        "temporal": true,
+        "minimumSourcePackets": 1
+      }
+    },
+    {
+      "categoryId": "tahadani-062",
+      "policyVersion": "2.1.0",
+      "modality": "classic",
+      "sourcePolicy": "dated_sports_facts",
+      "sourceRegistryIds": [
+        "legacy-registry-placeholder"
+      ],
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة كأس العالم 2026"
+      ],
+      "runtimeVisible": true,
+      "activation": "runtime",
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "relevance": true,
+        "duplicate": true,
+        "temporal": true,
+        "minimumSourcePackets": 1
+      }
+    },
+    {
+      "categoryId": "huroof-001",
+      "policyVersion": "2.1.0",
+      "modality": "classic",
+      "sourcePolicy": "official_science_space",
+      "sourceRegistryIds": [
+        "nasa-solar-system",
+        "iau-nomenclature"
+      ],
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة علوم وفضاء"
+      ],
+      "runtimeVisible": false,
+      "activation": "authoring_only",
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "relevance": true,
+        "duplicate": true,
+        "temporal": true,
+        "minimumSourcePackets": 1
+      }
+    },
+    {
+      "categoryId": "huroof-002",
+      "policyVersion": "2.1.0",
+      "modality": "classic",
+      "sourcePolicy": "official_geography_nature",
+      "sourceRegistryIds": [
+        "usgs-earthquakes",
+        "noaa-ocean-service",
+        "wmo-weather"
+      ],
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة جغرافيا وطبيعة"
+      ],
+      "runtimeVisible": false,
+      "activation": "authoring_only",
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "relevance": true,
+        "duplicate": true,
+        "temporal": true,
+        "minimumSourcePackets": 1
+      }
+    },
+    {
+      "categoryId": "huroof-003",
+      "policyVersion": "2.1.0",
+      "modality": "classic",
+      "sourcePolicy": "official_arabic_lexicography",
+      "sourceRegistryIds": [
+        "doha-historical-dictionary",
+        "arabic-academy-cairo"
+      ],
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة أدب ولغة عربية"
+      ],
+      "runtimeVisible": false,
+      "activation": "authoring_only",
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "relevance": true,
+        "duplicate": true,
+        "temporal": true,
+        "minimumSourcePackets": 1
+      }
+    },
+    {
+      "categoryId": "huroof-004",
+      "policyVersion": "2.1.0",
+      "modality": "classic",
+      "sourcePolicy": "official_kuwait_gulf_heritage",
+      "sourceRegistryIds": [
+        "unesco-kuwait-diwaniya",
+        "unesco-kuwait-ich",
+        "nccal-kuwait"
+      ],
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة الكويت والخليج: تاريخ وثقافة"
+      ],
+      "runtimeVisible": false,
+      "activation": "authoring_only",
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "relevance": true,
+        "duplicate": true,
+        "temporal": true,
+        "minimumSourcePackets": 1
+      }
+    }
+  ]
+}

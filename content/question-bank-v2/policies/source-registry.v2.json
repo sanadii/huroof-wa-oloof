@@ -1,0 +1,90 @@
+{
+  "registryVersion": "2.0.0",
+  "claimLevelVerification": false,
+  "entries": [
+    {
+      "id": "nasa-science",
+      "title": "NASA Science",
+      "url": "https://science.nasa.gov/solar-system/solar-system-facts/",
+      "tier": "official",
+      "purpose": "source-class discovery only; not claim-level verification"
+    },
+    {
+      "id": "unesco-world-heritage",
+      "title": "UNESCO World Heritage List",
+      "url": "https://whc.unesco.org/en/list",
+      "tier": "official",
+      "purpose": "source-class discovery only; not claim-level verification"
+    },
+    {
+      "id": "un-member-states",
+      "title": "United Nations Member States",
+      "url": "https://www.un.org/about-us/member-states",
+      "tier": "official",
+      "purpose": "source-class discovery only; not claim-level verification"
+    },
+    {
+      "id": "six-iso-4217",
+      "title": "SIX ISO 4217 maintenance",
+      "url": "https://www.six-group.com/en/products-services/financial-information/market-reference-data/data-standards.html",
+      "tier": "official",
+      "purpose": "source-class discovery only; not claim-level verification"
+    },
+    {
+      "id": "fifa-world-cup-2026",
+      "title": "FIFA World Cup 2026",
+      "url": "https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/articles/match-schedule-fixtures-results-teams-stadiums",
+      "tier": "official",
+      "purpose": "source-class discovery only; not claim-level verification"
+    },
+    {
+      "id": "ifab-laws",
+      "title": "IFAB Laws of the Game",
+      "url": "https://www.theifab.com/laws-of-the-game-documents/?language=en",
+      "tier": "official",
+      "purpose": "source-class discovery only; not claim-level verification"
+    },
+    {
+      "id": "real-madrid-history",
+      "title": "Real Madrid History",
+      "url": "https://www.realmadrid.com/en-US/the-club/history",
+      "tier": "official",
+      "purpose": "source-class discovery only; not claim-level verification"
+    },
+    {
+      "id": "minecraft-official",
+      "title": "Minecraft About",
+      "url": "https://www.minecraft.net/en-us/about-minecraft",
+      "tier": "official",
+      "purpose": "source-class discovery only; not claim-level verification"
+    },
+    {
+      "id": "one-piece-official",
+      "title": "One Piece official archive",
+      "url": "https://one-piece.com/anime/index.html?category=&page=1&sort=asc",
+      "tier": "official",
+      "purpose": "source-class discovery only; not claim-level verification"
+    },
+    {
+      "id": "quran-complex",
+      "title": "King Fahd Qur’an Complex",
+      "url": "https://qurancomplex.gov.sa/en/kfgqpc/kfq-structure/",
+      "tier": "primary",
+      "purpose": "source-class discovery only; not claim-level verification"
+    },
+    {
+      "id": "us-copyright-facts-expression",
+      "title": "US Copyright Office facts and expression",
+      "url": "https://www.copyright.gov/help/faq/faq-general.html",
+      "tier": "official",
+      "purpose": "source-class discovery only; not claim-level verification"
+    },
+    {
+      "id": "us-copyright-fair-use",
+      "title": "US Copyright Office fair use",
+      "url": "https://www.copyright.gov/fair-use/more-info.html",
+      "tier": "official",
+      "purpose": "source-class discovery only; not claim-level verification"
+    }
+  ]
+}

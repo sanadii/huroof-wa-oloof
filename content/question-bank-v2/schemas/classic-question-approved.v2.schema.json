@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Classic Question V2 Approved",
+  "type": "object",
+  "required": [
+    "status",
+    "approvedAt",
+    "reviewReceiptIds"
+  ],
+  "properties": {
+    "status": {
+      "const": "approved"
+    },
+    "reviewReceiptIds": {
+      "type": "array",
+      "minItems": 5
+    },
+    "approvedAt": {
+      "type": "string",
+      "format": "date"
+    }
+  }
+}

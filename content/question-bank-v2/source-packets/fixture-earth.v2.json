@@ -1,0 +1,23 @@
+{
+  "packetId": "packet-fixture-earth-001",
+  "sourceRegistryId": "nasa-science",
+  "claimLocators": [
+    "Solar System Facts / Earth"
+  ],
+  "sourceTier": "official",
+  "evidenceKind": "web-page",
+  "checkedAt": "2026-09-03",
+  "digest": null,
+  "archiveUrl": null,
+  "supportedFields": [
+    "promptAr",
+    "canonicalAnswer"
+  ],
+  "policyVersion": "2.0.0",
+  "provenance": {
+    "runId": "fixture-v2",
+    "model": null,
+    "templateVersion": "fixture-1"
+  },
+  "verificationState": "structural_fixture_only"
+}

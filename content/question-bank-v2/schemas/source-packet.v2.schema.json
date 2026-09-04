@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Source Packet V2",
+  "type": "object",
+  "required": [
+    "packetId",
+    "sourceRegistryId",
+    "claimLocators",
+    "sourceTier",
+    "evidenceKind",
+    "checkedAt",
+    "supportedFields",
+    "policyVersion",
+    "provenance"
+  ],
+  "properties": {
+    "packetId": {
+      "type": "string"
+    },
+    "sourceRegistryId": {
+      "type": "string"
+    },
+    "claimLocators": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      }
+    },
+    "sourceTier": {
+      "enum": [
+        "primary",
+        "official",
+        "reference"
+      ]
+    },
+    "evidenceKind": {
+      "enum": [
+        "web-page",
+        "document",
+        "media-license"
+      ]
+    },
+    "checkedAt": {
+      "type": "string",
+      "format": "date"
+    },
+    "digest": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "archiveUrl": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "supportedFields": {
+      "type": "array"
+    },
+    "policyVersion": {
+      "const": "2.0.0"
+    },
+    "provenance": {
+      "type": "object"
+    }
+  }
+}

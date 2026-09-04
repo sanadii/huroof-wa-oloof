@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Immutable Release Manifest V2",
+  "type": "object",
+  "required": [
+    "releaseId",
+    "asOf",
+    "approvedContentHash",
+    "categoryIds",
+    "counts",
+    "policyVersion"
+  ],
+  "properties": {
+    "approvedContentHash": {
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "asOf": {
+      "type": "string",
+      "format": "date"
+    }
+  }
+}

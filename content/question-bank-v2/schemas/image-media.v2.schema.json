@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Image Media V2",
+  "type": "object",
+  "required": [
+    "assetId",
+    "localPath",
+    "sha256",
+    "altAr",
+    "rightsReceiptId",
+    "publishable"
+  ],
+  "properties": {
+    "localPath": {
+      "pattern": "^(?!https?://)"
+    },
+    "sha256": {
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "publishable": {
+      "const": true
+    }
+  }
+}

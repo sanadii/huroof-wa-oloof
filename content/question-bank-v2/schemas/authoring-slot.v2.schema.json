@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Authoring Slot V2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "slotId",
+    "planVersion",
+    "categoryId",
+    "modality",
+    "difficulty",
+    "ordinal",
+    "state"
+  ],
+  "properties": {
+    "slotId": {
+      "type": "string"
+    },
+    "planVersion": {
+      "const": "2.0.0"
+    },
+    "modality": {
+      "enum": [
+        "classic",
+        "image",
+        "charades"
+      ]
+    },
+    "targetLetter": {
+      "type": "string"
+    },
+    "difficulty": {
+      "enum": [
+        "easy",
+        "medium",
+        "hard"
+      ]
+    },
+    "ordinal": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "state": {
+      "enum": [
+        "unfilled",
+        "blocked_source",
+        "blocked_media",
+        "needs_asset"
+      ]
+    },
+    "blocker": {
+      "type": "string"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "modality": {
+            "const": "charades"
+          }
+        }
+      },
+      "then": {
+        "not": {
+          "required": [
+            "targetLetter"
+          ]
+        }
+      },
+      "else": {
+        "required": [
+          "targetLetter"
+        ]
+      }
+    }
+  ]
+}

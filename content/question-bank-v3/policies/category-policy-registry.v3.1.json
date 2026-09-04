@@ -1,0 +1,6 @@
+{
+  "registryVersion": "3.1.0",
+  "authority": "derived-at-generation-time from the immutable 62-category catalog and the four pinned huroof extensions",
+  "approval": "disabled_without_authenticated_review_adapter",
+  "sourceRule": "legacy playable.sources are unverified metadata; only packet IDs with immutable configured source identity and exact excerpts may support evidence readiness"
+}

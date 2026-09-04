@@ -1,0 +1,76 @@
+{
+  "reportVersion": "2.1.0",
+  "asOf": "2026-09-03",
+  "structuralOnly": false,
+  "runtimeCategories": 62,
+  "authoringCategories": 66,
+  "extensionCategories": [
+    "huroof-001",
+    "huroof-002",
+    "huroof-003",
+    "huroof-004"
+  ],
+  "counts": {
+    "total": 22176,
+    "classic": 19152,
+    "image": 1344,
+    "charades": 1680,
+    "plannedSlots": 22176,
+    "structuralFixtures": 0,
+    "targetRealDrafts": 112,
+    "blockedAttempts": 108,
+    "realDrafts": 4,
+    "shortfall": 108,
+    "reviewed": 0,
+    "approved": 0,
+    "playable": 0,
+    "proposedCovers": 4
+  },
+  "perCategory": {
+    "huroof-001": {
+      "plannedSlots": 336,
+      "realDrafts": 1,
+      "blockedAttempts": 27,
+      "reviewed": 0,
+      "approved": 0,
+      "playable": 0,
+      "proposedCover": true
+    },
+    "huroof-002": {
+      "plannedSlots": 336,
+      "realDrafts": 1,
+      "blockedAttempts": 27,
+      "reviewed": 0,
+      "approved": 0,
+      "playable": 0,
+      "proposedCover": true
+    },
+    "huroof-003": {
+      "plannedSlots": 336,
+      "realDrafts": 1,
+      "blockedAttempts": 27,
+      "reviewed": 0,
+      "approved": 0,
+      "playable": 0,
+      "proposedCover": true
+    },
+    "huroof-004": {
+      "plannedSlots": 336,
+      "realDrafts": 1,
+      "blockedAttempts": 27,
+      "reviewed": 0,
+      "approved": 0,
+      "playable": 0,
+      "proposedCover": true
+    }
+  },
+  "slotIssues": [],
+  "draftIssues": [],
+  "baselineIssues": [],
+  "duplicates": {
+    "exact": [],
+    "candidates": [],
+    "bucketCap": 50
+  },
+  "status": "drafts_only"
+}

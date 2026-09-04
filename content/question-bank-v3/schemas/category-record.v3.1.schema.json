@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "question-bank-v3/category-record.v3.1.schema.json",
+  "type": "object", "additionalProperties": false,
+  "required": ["recordVersion", "candidateId", "revision", "schemaVersion", "categoryId", "modality", "headerAr", "canonicalAnswer", "acceptedAnswers", "difficulty", "difficultyRationale", "explanationAr", "temporal", "claimIds", "evidencePacketIds", "media", "provenance", "workflow", "legacySources"],
+  "properties": {
+    "recordVersion": {"const": "3.1.0"}, "candidateId": {"type": "string", "minLength": 1}, "revision": {"const": 1}, "schemaVersion": {"const": "3.1.0"}, "categoryId": {"type": "string", "pattern": "^(tahadani-[0-9]{3}|huroof-00[1-4])$"}, "modality": {"enum": ["classic", "image", "charades"]}, "headerAr": {"type": "string", "minLength": 1}, "promptAr": {"type": "string", "minLength": 1}, "phraseAr": {"type": "string", "minLength": 1}, "canonicalAnswer": {"type": "string", "minLength": 1}, "acceptedAnswers": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}}, "targetLetter": {"type": "string", "minLength": 1}, "difficulty": {"enum": ["easy", "medium", "hard"]},
+    "difficultyRationale": {"type": "object", "additionalProperties": false, "required": ["difficulty", "rationale", "familiarity", "clueDirectness", "domainSpecificity", "retrievalBurden", "score"], "properties": {"difficulty": {"enum": ["easy", "medium", "hard"]}, "rationale": {"type": "string", "minLength": 1}, "familiarity": {"type": "number"}, "clueDirectness": {"type": "number"}, "domainSpecificity": {"type": "number"}, "retrievalBurden": {"type": "number"}, "score": {"type": "number"}}},
+    "explanationAr": {"type": ["string", "null"]}, "temporal": {"type": ["object", "null"], "additionalProperties": false, "properties": {"kind": {"type": "string"}, "verifiedAt": {"type": "string"}, "checkedAt": {"type": "string"}, "validUntil": {"type": ["string", "null"]}}}, "claimIds": {"type": "array", "items": {"type": "string", "minLength": 1}}, "evidencePacketIds": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}}, "media": {"type": ["object", "null"]},
+    "provenance": {"type": "object", "additionalProperties": false, "required": ["importedAt", "sourcePath", "sourceHash"], "properties": {"importedAt": {"type": "string"}, "sourcePath": {"type": "string", "minLength": 1}, "sourceHash": {"type": "string", "pattern": "^[a-f0-9]{64}$"}}},
+    "workflow": {"type": "object", "additionalProperties": false, "required": ["state", "disposition", "dispositionReason"], "properties": {"state": {"enum": ["slot", "draft", "evidence_ready", "ready_for_human", "approved", "rejected", "released"]}, "disposition": {"type": "string", "minLength": 1}, "dispositionReason": {"type": "string", "minLength": 1}}},
+    "legacySources": {"type": "object", "additionalProperties": false, "required": ["authority", "sources"], "properties": {"authority": {"const": "unverified_legacy_metadata"}, "sources": {"type": "array"}}}
+  },
+  "allOf": [
+    {"if": {"properties": {"modality": {"const": "charades"}}}, "then": {"not": {"required": ["targetLetter"]}, "anyOf": [{"required": ["promptAr"]}, {"required": ["phraseAr"]}]}},
+    {"if": {"properties": {"modality": {"enum": ["classic", "image"]}}}, "then": {"required": ["targetLetter", "promptAr"]}}
+  ]
+}

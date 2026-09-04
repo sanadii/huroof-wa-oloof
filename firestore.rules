@@ -1,0 +1,39 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function membership(roomId) {
+      return get(/databases/$(database)/documents/rooms/$(roomId)/members/$(request.auth.uid));
+    }
+
+    function isRoomMember(roomId) {
+      return signedIn()
+        && membership(roomId).data.uid == request.auth.uid
+        && membership(roomId).data.active == true;
+    }
+
+    function isHost(roomId) {
+      return isRoomMember(roomId) && membership(roomId).data.role == 'host';
+    }
+
+    // Projections are deliberately the only browser-readable documents.  The
+    // server writes them as complete role-safe snapshots; clients never list.
+    match /rooms/{roomId}/projections/{projectionId} {
+      allow get: if isRoomMember(roomId) && (
+        projectionId == 'audience' ||
+        (projectionId == 'host' && isHost(roomId)) ||
+        projectionId == 'player_' + request.auth.uid
+      );
+      allow list, create, update, delete: if false;
+    }
+
+    // All catalog, content-release, canonical-room, membership, event, code,
+    // receipt, and runtime configuration documents are Admin-only by default.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "schemaVersion", "locale", "categoryId", "targetLetter", "headerAr", "promptAr", "canonicalAnswer", "acceptedAnswers", "acceptDefiniteArticle", "difficulty", "questionType", "explanationAr", "sources", "temporal", "media", "status", "authoring", "review"],
+  "properties": {
+    "id": {"type": "string", "minLength": 1}, "schemaVersion": {"const": 1}, "locale": {"const": "ar-KW"}, "categoryId": {"pattern": "^tahadani-\\d{3}$"},
+    "targetLetter": {"enum": ["ا","ب","ت","ث","ج","ح","خ","د","ذ","ر","ز","س","ش","ص","ض","ط","ظ","ع","غ","ف","ق","ك","ل","م","ن","ه","و","ي"]},
+    "headerAr": {"type": "string", "minLength": 3, "maxLength": 80}, "promptAr": {"type": "string", "minLength": 10, "maxLength": 220}, "canonicalAnswer": {"type": "string", "minLength": 1, "maxLength": 60}, "acceptedAnswers": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}}, "acceptDefiniteArticle": {"type": "boolean"},
+    "difficulty": {"enum": ["easy", "medium", "hard"]}, "questionType": {"enum": ["text", "identity", "puzzle", "image"]}, "explanationAr": {"type": ["string", "null"], "minLength": 1, "description": "Optional player-facing additive information. It must be concise, source-supported, and must not contain authoring or review workflow notes."},
+    "sources": {"type": "array", "items": {"type": "object", "required": ["title", "publisher", "url", "accessedAt"], "properties": {"title": {"type": "string"}, "publisher": {"type": "string"}, "url": {"type": "string"}, "accessedAt": {"const": "2026-09-03"}}}},
+    "temporal": {"type": "object", "required": ["kind", "verifiedAt", "validUntil"], "properties": {"kind": {"enum": ["stable", "dated"]}, "verifiedAt": {"const": "2026-09-03"}, "validUntil": {"type": ["string", "null"]}}}, "media": {"type": ["object", "null"]}, "status": {"enum": ["draft", "approved", "rejected"]},
+    "authoring": {"type": "object", "required": ["method", "model", "createdAt"], "properties": {"method": {"enum": ["human", "model_assisted"]}, "model": {"type": ["string", "null"]}, "createdAt": {"type": "string"}}}, "review": {"type": "object", "required": ["factReviewer", "languageReviewer", "reviewedAt", "notes"], "properties": {"factReviewer": {"type": ["string", "null"]}, "languageReviewer": {"type": ["string", "null"]}, "reviewedAt": {"type": ["string", "null"]}, "notes": {"type": ["string", "null"]}}}
+  }
+}

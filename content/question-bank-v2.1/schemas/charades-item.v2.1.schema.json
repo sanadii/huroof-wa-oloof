@@ -1,0 +1,32 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "categoryId",
+    "phraseAr",
+    "status"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$"
+    },
+    "categoryId": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$"
+    },
+    "phraseAr": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "const": "draft"
+    }
+  },
+  "not": {
+    "required": [
+      "targetLetter"
+    ]
+  }
+}

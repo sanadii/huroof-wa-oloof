@@ -1,0 +1,21 @@
+{
+  "reportVersion": "2.1.0",
+  "asOf": "2026-09-03",
+  "counts": {
+    "total": 22176,
+    "classic": 19152,
+    "image": 1344,
+    "charades": 1680,
+    "plannedSlots": 22176,
+    "structuralFixtures": 0,
+    "targetRealDrafts": 112,
+    "blockedAttempts": 108,
+    "realDrafts": 4,
+    "shortfall": 108,
+    "reviewed": 0,
+    "approved": 0,
+    "playable": 0,
+    "proposedCovers": 4
+  },
+  "note": "planned slots, real drafts, reviews, approvals and runtime eligibility are separate states."
+}

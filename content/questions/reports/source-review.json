@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "reviewStatus": "human_review_pending",
+  "draftQuestions": 280,
+  "approvedQuestions": 0,
+  "hardDraftsWithTwoSources": 84,
+  "explanations": {
+    "nullCount": 280,
+    "playerFacingAddonCount": 0
+  },
+  "sourceStrategies": {
+    "factualReferenceDrafts": 267,
+    "lexicalOnlyWordPuzzleDrafts": 13,
+    "lexicalOnlyFactualDrafts": 0
+  },
+  "lexicalOnlyWordPuzzleDrafts": [
+    "draft-033",
+    "draft-046",
+    "draft-092",
+    "draft-105",
+    "draft-136",
+    "draft-153",
+    "draft-165",
+    "draft-182",
+    "draft-200",
+    "draft-204",
+    "draft-225",
+    "draft-264",
+    "draft-266"
+  ],
+  "lexicalOnlyFactualDrafts": [],
+  "lexicalOnlyFactualDraftCount": 0,
+  "flagged": []
+}

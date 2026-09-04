@@ -1,0 +1,37 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Build and test output
+dist/
+coverage/
+test-results/
+playwright-report/
+output/
+functions/lib/
+content/question-bank-v3/cache/
+content/question-bank-v3/evidence-bodies/
+*.tsbuildinfo
+
+# Local environment configuration (keep the committed template)
+.env
+.env.*
+!.env.example
+
+# Hosting and local emulator metadata
+.vercel/
+.firebase/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Local agent, browser, and analysis runtime artifacts
+.codex/
+.agent-runtime/
+.evidence-migration-backups/
+.evidence-migration-staging/
+.playwright-cli/
+graphify-out/

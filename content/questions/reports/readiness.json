@@ -1,0 +1,413 @@
+{
+  "schemaVersion": 1,
+  "approvedInventoryCount": 0,
+  "draftsExcludedFromRuntime": 280,
+  "combinedPilot": {
+    "minimumPerLetter": 8,
+    "active": false,
+    "approvedByLetter": {
+      "ا": 0,
+      "ب": 0,
+      "ت": 0,
+      "ث": 0,
+      "ج": 0,
+      "ح": 0,
+      "خ": 0,
+      "د": 0,
+      "ذ": 0,
+      "ر": 0,
+      "ز": 0,
+      "س": 0,
+      "ش": 0,
+      "ص": 0,
+      "ض": 0,
+      "ط": 0,
+      "ظ": 0,
+      "ع": 0,
+      "غ": 0,
+      "ف": 0,
+      "ق": 0,
+      "ك": 0,
+      "ل": 0,
+      "م": 0,
+      "ن": 0,
+      "ه": 0,
+      "و": 0,
+      "ي": 0
+    }
+  },
+  "categories": [
+    {
+      "categoryId": "tahadani-001",
+      "approvedCount": 0,
+      "readiness": "empty",
+      "reason": "No approved questions; drafts are intentionally excluded from runtime."
+    },
+    {
+      "categoryId": "tahadani-002",
+      "approvedCount": 0,
+      "readiness": "empty",
+      "reason": "No approved questions; drafts are intentionally excluded from runtime."
+    },
+    {
+      "categoryId": "tahadani-003",
+      "approvedCount": 0,
+      "readiness": "empty",
+      "reason": "No approved questions; drafts are intentionally excluded from runtime."
+    },
+    {
+      "categoryId": "tahadani-004",
+      "approvedCount": 0,
+      "readiness": "empty",
+      "reason": "No approved questions; drafts are intentionally excluded from runtime."
+    },
+    {
+      "categoryId": "tahadani-005",
+      "approvedCount": 0,
+      "readiness": "empty",
+      "reason": "No approved questions; drafts are intentionally excluded from runtime."
+    },
+    {
+      "categoryId": "tahadani-006",
+      "approvedCount": 0,
+      "readiness": "empty",
+      "reason": "No approved questions; drafts are intentionally excluded from runtime."
+    },
+    {
+      "categoryId": "tahadani-007",
+      "approvedCount": 0,
+      "readiness": "empty",
+      "reason": "No approved questions; drafts are intentionally excluded from runtime."
+    },
+    {
+      "categoryId": "tahadani-008",
+      "approvedCount": 0,
+      "readiness": "empty",
+      "reason": "No approved questions; drafts are intentionally excluded from runtime."
+    },
+    {
+      "categoryId": "tahadani-009",
+      "approvedCount": 0,
+      "readiness": "empty",
+      "reason": "No approved questions; drafts are intentionally excluded from runtime."
+    },
+    {
+      "categoryId": "tahadani-010",
+      "approvedCount": 0,
+      "readiness": "empty",
+      "reason": "No approved questions; drafts are intentionally excluded from runtime."
+    },
+    {
+      "categoryId": "tahadani-011",
+      "approvedCount": 0,
+      "readiness": "empty",
+      "reason": "No approved questions; drafts are intentionally excluded from runtime."
+    },
+    {
+      "categoryId": "tahadani-012",
+      "approvedCount": 0,
+      "readiness": "empty",
+      "reason": "No approved questions; drafts are intentionally excluded from runtime."
+    },
+    {
+      "categoryId": "tahadani-013",
+      "approvedCount": 0,
+      "readiness": "empty",
+      "reason": "No approved questions; drafts are intentionally excluded from runtime."
+    },
+    {
+      "categoryId": "tahadani-014",
+      "approvedCount": 0,
+      "readiness": "empty",
+      "reason": "No approved questions; drafts are intentionally excluded from runtime."
+    },
+    {
+      "categoryId": "tahadani-015",
+      "approvedCount": 0,
+      "readiness": "empty",
+      "reason": "No approved questions; drafts are intentionally excluded from runtime."
+    },
+    {
+      "categoryId": "tahadani-016",
+      "approvedCount": 0,
+      "readiness": "empty",
+      "reason": "No approved questions; drafts are intentionally excluded from runtime."
+    },
+    {
+      "categoryId": "tahadani-017",
+      "approvedCount": 0,
+      "readiness": "empty",
+      "reason": "No approved questions; drafts are intentionally excluded from runtime."
+    },
+    {
+      "categoryId": "tahadani-018",
+      "approvedCount": 0,
+      "readiness": "empty",
+      "reason": "No approved questions; drafts are intentionally excluded from runtime."
+    },
+    {
+      "categoryId": "tahadani-019",
+      "approvedCount": 0,
+      "readiness": "empty",
+      "reason": "No approved questions; drafts are intentionally excluded from runtime."
+    },
+    {
+      "categoryId": "tahadani-020",
+      "approvedCount": 0,
+      "readiness": "empty",
+      "reason": "No approved questions; drafts are intentionally excluded from runtime."
+    },
+    {
+      "categoryId": "tahadani-021",
+      "approvedCount": 0,
+      "readiness": "empty",
+      "reason": "No approved questions; drafts are intentionally excluded from runtime."
+    },
+    {
+      "categoryId": "tahadani-022",
+      "approvedCount": 0,
+      "readiness": "empty",
+      "reason": "No approved questions; drafts are intentionally excluded from runtime."
+    },
+    {
+      "categoryId": "tahadani-023",
+      "approvedCount": 0,
+      "readiness": "empty",
+      "reason": "No approved questions; drafts are intentionally excluded from runtime."
+    },
+    {
+      "categoryId": "tahadani-024",
+      "approvedCount": 0,
+      "readiness": "empty",
+      "reason": "No approved questions; drafts are intentionally excluded from runtime."
+    },
+    {
+      "categoryId": "tahadani-025",
+      "approvedCount": 0,
+      "readiness": "empty",
+      "reason": "No approved questions; drafts are intentionally excluded from runtime."
+    },
+    {
+      "categoryId": "tahadani-026",
+      "approvedCount": 0,
+      "readiness": "empty",
+      "reason": "No approved questions; drafts are intentionally excluded from runtime."
+    },
+    {
+      "categoryId": "tahadani-027",
+      "approvedCount": 0,
+      "readiness": "empty",
+      "reason": "No approved questions; drafts are intentionally excluded from runtime."
+    },
+    {
+      "categoryId": "tahadani-028",
+      "approvedCount": 0,
+      "readiness": "empty",
+      "reason": "No approved questions; drafts are intentionally excluded from runtime."
+    },
+    {
+      "categoryId": "tahadani-029",
+      "approvedCount": 0,
+      "readiness": "empty",
+      "reason": "No approved questions; drafts are intentionally excluded from runtime."
+    },
+    {
+      "categoryId": "tahadani-030",
+      "approvedCount": 0,
+      "readiness": "empty",
+      "reason": "No approved questions; drafts are intentionally excluded from runtime."
+    },
+    {
+      "categoryId": "tahadani-031",
+      "approvedCount": 0,
+      "readiness": "empty",
+      "reason": "No approved questions; drafts are intentionally excluded from runtime."
+    },
+    {
+      "categoryId": "tahadani-032",
+      "approvedCount": 0,
+      "readiness": "empty",
+      "reason": "No approved questions; drafts are intentionally excluded from runtime."
+    },
+    {
+      "categoryId": "tahadani-033",
+      "approvedCount": 0,
+      "readiness": "empty",
+      "reason": "No approved questions; drafts are intentionally excluded from runtime."
+    },
+    {
+      "categoryId": "tahadani-034",
+      "approvedCount": 0,
+      "readiness": "empty",
+      "reason": "No approved questions; drafts are intentionally excluded from runtime."
+    },
+    {
+      "categoryId": "tahadani-035",
+      "approvedCount": 0,
+      "readiness": "empty",
+      "reason": "No approved questions; drafts are intentionally excluded from runtime."
+    },
+    {
+      "categoryId": "tahadani-036",
+      "approvedCount": 0,
+      "readiness": "empty",
+      "reason": "No approved questions; drafts are intentionally excluded from runtime."
+    },
+    {
+      "categoryId": "tahadani-037",
+      "approvedCount": 0,
+      "readiness": "empty",
+      "reason": "No approved questions; drafts are intentionally excluded from runtime."
+    },
+    {
+      "categoryId": "tahadani-038",
+      "approvedCount": 0,
+      "readiness": "empty",
+      "reason": "No approved questions; drafts are intentionally excluded from runtime."
+    },
+    {
+      "categoryId": "tahadani-039",
+      "approvedCount": 0,
+      "readiness": "empty",
+      "reason": "No approved questions; drafts are intentionally excluded from runtime."
+    },
+    {
+      "categoryId": "tahadani-040",
+      "approvedCount": 0,
+      "readiness": "empty",
+      "reason": "No approved questions; drafts are intentionally excluded from runtime."
+    },
+    {
+      "categoryId": "tahadani-041",
+      "approvedCount": 0,
+      "readiness": "empty",
+      "reason": "No approved questions; drafts are intentionally excluded from runtime."
+    },
+    {
+      "categoryId": "tahadani-042",
+      "approvedCount": 0,
+      "readiness": "empty",
+      "reason": "No approved questions; drafts are intentionally excluded from runtime."
+    },
+    {
+      "categoryId": "tahadani-043",
+      "approvedCount": 0,
+      "readiness": "empty",
+      "reason": "No approved questions; drafts are intentionally excluded from runtime."
+    },
+    {
+      "categoryId": "tahadani-044",
+      "approvedCount": 0,
+      "readiness": "empty",
+      "reason": "No approved questions; drafts are intentionally excluded from runtime."
+    },
+    {
+      "categoryId": "tahadani-045",
+      "approvedCount": 0,
+      "readiness": "empty",
+      "reason": "No approved questions; drafts are intentionally excluded from runtime."
+    },
+    {
+      "categoryId": "tahadani-046",
+      "approvedCount": 0,
+      "readiness": "empty",
+      "reason": "No approved questions; drafts are intentionally excluded from runtime."
+    },
+    {
+      "categoryId": "tahadani-047",
+      "approvedCount": 0,
+      "readiness": "empty",
+      "reason": "No approved questions; drafts are intentionally excluded from runtime."
+    },
+    {
+      "categoryId": "tahadani-048",
+      "approvedCount": 0,
+      "readiness": "empty",
+      "reason": "No approved questions; drafts are intentionally excluded from runtime."
+    },
+    {
+      "categoryId": "tahadani-049",
+      "approvedCount": 0,
+      "readiness": "empty",
+      "reason": "No approved questions; drafts are intentionally excluded from runtime."
+    },
+    {
+      "categoryId": "tahadani-050",
+      "approvedCount": 0,
+      "readiness": "empty",
+      "reason": "No approved questions; drafts are intentionally excluded from runtime."
+    },
+    {
+      "categoryId": "tahadani-051",
+      "approvedCount": 0,
+      "readiness": "empty",
+      "reason": "No approved questions; drafts are intentionally excluded from runtime."
+    },
+    {
+      "categoryId": "tahadani-052",
+      "approvedCount": 0,
+      "readiness": "empty",
+      "reason": "No approved questions; drafts are intentionally excluded from runtime."
+    },
+    {
+      "categoryId": "tahadani-053",
+      "approvedCount": 0,
+      "readiness": "empty",
+      "reason": "No approved questions; drafts are intentionally excluded from runtime."
+    },
+    {
+      "categoryId": "tahadani-054",
+      "approvedCount": 0,
+      "readiness": "empty",
+      "reason": "No approved questions; drafts are intentionally excluded from runtime."
+    },
+    {
+      "categoryId": "tahadani-055",
+      "approvedCount": 0,
+      "readiness": "empty",
+      "reason": "No approved questions; drafts are intentionally excluded from runtime."
+    },
+    {
+      "categoryId": "tahadani-056",
+      "approvedCount": 0,
+      "readiness": "empty",
+      "reason": "No approved questions; drafts are intentionally excluded from runtime."
+    },
+    {
+      "categoryId": "tahadani-057",
+      "approvedCount": 0,
+      "readiness": "empty",
+      "reason": "No approved questions; drafts are intentionally excluded from runtime."
+    },
+    {
+      "categoryId": "tahadani-058",
+      "approvedCount": 0,
+      "readiness": "empty",
+      "reason": "No approved questions; drafts are intentionally excluded from runtime."
+    },
+    {
+      "categoryId": "tahadani-059",
+      "approvedCount": 0,
+      "readiness": "empty",
+      "reason": "No approved questions; drafts are intentionally excluded from runtime."
+    },
+    {
+      "categoryId": "tahadani-060",
+      "approvedCount": 0,
+      "readiness": "empty",
+      "reason": "No approved questions; drafts are intentionally excluded from runtime."
+    },
+    {
+      "categoryId": "tahadani-061",
+      "approvedCount": 0,
+      "readiness": "empty",
+      "reason": "No approved questions; drafts are intentionally excluded from runtime."
+    },
+    {
+      "categoryId": "tahadani-062",
+      "approvedCount": 0,
+      "readiness": "empty",
+      "reason": "No approved questions; drafts are intentionally excluded from runtime."
+    }
+  ]
+}

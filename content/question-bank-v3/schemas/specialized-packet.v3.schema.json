@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "question-bank-v3/specialized-packet.v3.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["packetId", "candidateId", "canonicalUrl", "publisher", "title", "locator", "supportAr", "retrievedAt", "httpStatus", "claimToken", "sourceExcerptBase64", "sourceExcerptSha256", "remoteBodySha256", "normalizedEvidenceSha256", "temporal", "sourceTier", "researchVerifiedDirect"],
+  "properties": {
+    "packetId": { "type": "string", "pattern": "^specialized-v3-v3-(v1|v21)-" },
+    "candidateId": { "type": "string", "pattern": "^v3-(v1|v21)-" },
+    "canonicalUrl": { "type": "string", "format": "uri" }, "publisher": { "type": "string", "minLength": 1 }, "title": { "type": "string", "minLength": 1 }, "locator": { "type": "string", "minLength": 1 }, "supportAr": { "type": "string", "minLength": 1 }, "retrievedAt": { "type": "string", "format": "date" }, "httpStatus": { "type": "integer", "minimum": 100, "maximum": 599 }, "claimToken": { "type": "string", "minLength": 2 }, "sourceExcerptBase64": { "type": "string", "minLength": 1 }, "sourceExcerptSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }, "remoteBodySha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }, "normalizedEvidenceSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }, "temporal": { "type": "object", "additionalProperties": false, "required": ["class", "validUntil"], "properties": { "class": { "const": "dated" }, "validUntil": { "type": "string", "format": "date" } } }, "sourceTier": { "enum": ["official", "authoritative"] }, "researchVerifiedDirect": { "const": true }
+  }
+}

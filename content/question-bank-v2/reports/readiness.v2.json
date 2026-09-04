@@ -1,0 +1,399 @@
+{
+  "reportVersion": "2.0.0",
+  "asOf": "2026-09-03",
+  "rule": "approved, non-expired, schema-valid and policy-valid records in the exact selected pack only",
+  "standalone": {
+    "tahadani-001": {
+      "threshold": 224,
+      "approved": 0,
+      "ready": false
+    },
+    "tahadani-002": {
+      "threshold": 224,
+      "approved": 0,
+      "ready": false
+    },
+    "tahadani-003": {
+      "threshold": 224,
+      "approved": 0,
+      "ready": false
+    },
+    "tahadani-004": {
+      "threshold": 224,
+      "approved": 0,
+      "ready": false
+    },
+    "tahadani-005": {
+      "threshold": 224,
+      "approved": 0,
+      "ready": false
+    },
+    "tahadani-006": {
+      "threshold": 224,
+      "approved": 0,
+      "ready": false
+    },
+    "tahadani-007": {
+      "threshold": 224,
+      "approved": 0,
+      "ready": false
+    },
+    "tahadani-008": {
+      "threshold": 224,
+      "approved": 0,
+      "ready": false
+    },
+    "tahadani-009": {
+      "threshold": 224,
+      "approved": 0,
+      "ready": false
+    },
+    "tahadani-010": {
+      "threshold": 224,
+      "approved": 0,
+      "ready": false
+    },
+    "tahadani-011": {
+      "threshold": null,
+      "approved": 0,
+      "ready": false,
+      "behavior": "blocked until question-specific media is local and explicitly publishable"
+    },
+    "tahadani-012": {
+      "threshold": null,
+      "approved": 0,
+      "ready": false,
+      "behavior": "blocked until question-specific media is local and explicitly publishable"
+    },
+    "tahadani-013": {
+      "threshold": 224,
+      "approved": 0,
+      "ready": false
+    },
+    "tahadani-014": {
+      "threshold": 224,
+      "approved": 0,
+      "ready": false
+    },
+    "tahadani-015": {
+      "threshold": 224,
+      "approved": 0,
+      "ready": false
+    },
+    "tahadani-016": {
+      "threshold": null,
+      "approved": 0,
+      "ready": false,
+      "behavior": "separate mode only; never enters classic inventory"
+    },
+    "tahadani-017": {
+      "threshold": null,
+      "approved": 0,
+      "ready": false,
+      "behavior": "separate mode only; never enters classic inventory"
+    },
+    "tahadani-018": {
+      "threshold": null,
+      "approved": 0,
+      "ready": false,
+      "behavior": "separate mode only; never enters classic inventory"
+    },
+    "tahadani-019": {
+      "threshold": null,
+      "approved": 0,
+      "ready": false,
+      "behavior": "separate mode only; never enters classic inventory"
+    },
+    "tahadani-020": {
+      "threshold": null,
+      "approved": 0,
+      "ready": false,
+      "behavior": "separate mode only; never enters classic inventory"
+    },
+    "tahadani-021": {
+      "threshold": 224,
+      "approved": 0,
+      "ready": false
+    },
+    "tahadani-022": {
+      "threshold": 224,
+      "approved": 0,
+      "ready": false
+    },
+    "tahadani-023": {
+      "threshold": 224,
+      "approved": 0,
+      "ready": false
+    },
+    "tahadani-024": {
+      "threshold": 224,
+      "approved": 0,
+      "ready": false
+    },
+    "tahadani-025": {
+      "threshold": 224,
+      "approved": 0,
+      "ready": false
+    },
+    "tahadani-026": {
+      "threshold": 224,
+      "approved": 0,
+      "ready": false
+    },
+    "tahadani-027": {
+      "threshold": 224,
+      "approved": 0,
+      "ready": false
+    },
+    "tahadani-028": {
+      "threshold": 224,
+      "approved": 0,
+      "ready": false
+    },
+    "tahadani-029": {
+      "threshold": 224,
+      "approved": 0,
+      "ready": false
+    },
+    "tahadani-030": {
+      "threshold": 224,
+      "approved": 0,
+      "ready": false
+    },
+    "tahadani-031": {
+      "threshold": 224,
+      "approved": 0,
+      "ready": false
+    },
+    "tahadani-032": {
+      "threshold": 224,
+      "approved": 0,
+      "ready": false
+    },
+    "tahadani-033": {
+      "threshold": 224,
+      "approved": 0,
+      "ready": false
+    },
+    "tahadani-034": {
+      "threshold": 224,
+      "approved": 0,
+      "ready": false
+    },
+    "tahadani-035": {
+      "threshold": 224,
+      "approved": 0,
+      "ready": false
+    },
+    "tahadani-036": {
+      "threshold": 224,
+      "approved": 0,
+      "ready": false
+    },
+    "tahadani-037": {
+      "threshold": 224,
+      "approved": 0,
+      "ready": false
+    },
+    "tahadani-038": {
+      "threshold": 224,
+      "approved": 0,
+      "ready": false
+    },
+    "tahadani-039": {
+      "threshold": 224,
+      "approved": 0,
+      "ready": false
+    },
+    "tahadani-040": {
+      "threshold": 224,
+      "approved": 0,
+      "ready": false
+    },
+    "tahadani-041": {
+      "threshold": 224,
+      "approved": 0,
+      "ready": false
+    },
+    "tahadani-042": {
+      "threshold": 224,
+      "approved": 0,
+      "ready": false
+    },
+    "tahadani-043": {
+      "threshold": 224,
+      "approved": 0,
+      "ready": false
+    },
+    "tahadani-044": {
+      "threshold": null,
+      "approved": 0,
+      "ready": false,
+      "behavior": "blocked until question-specific media is local and explicitly publishable"
+    },
+    "tahadani-045": {
+      "threshold": 224,
+      "approved": 0,
+      "ready": false
+    },
+    "tahadani-046": {
+      "threshold": 224,
+      "approved": 0,
+      "ready": false
+    },
+    "tahadani-047": {
+      "threshold": 224,
+      "approved": 0,
+      "ready": false
+    },
+    "tahadani-048": {
+      "threshold": 224,
+      "approved": 0,
+      "ready": false
+    },
+    "tahadani-049": {
+      "threshold": 224,
+      "approved": 0,
+      "ready": false
+    },
+    "tahadani-050": {
+      "threshold": 224,
+      "approved": 0,
+      "ready": false
+    },
+    "tahadani-051": {
+      "threshold": 224,
+      "approved": 0,
+      "ready": false
+    },
+    "tahadani-052": {
+      "threshold": 224,
+      "approved": 0,
+      "ready": false
+    },
+    "tahadani-053": {
+      "threshold": 224,
+      "approved": 0,
+      "ready": false
+    },
+    "tahadani-054": {
+      "threshold": 224,
+      "approved": 0,
+      "ready": false
+    },
+    "tahadani-055": {
+      "threshold": 224,
+      "approved": 0,
+      "ready": false
+    },
+    "tahadani-056": {
+      "threshold": 224,
+      "approved": 0,
+      "ready": false
+    },
+    "tahadani-057": {
+      "threshold": 224,
+      "approved": 0,
+      "ready": false
+    },
+    "tahadani-058": {
+      "threshold": 224,
+      "approved": 0,
+      "ready": false
+    },
+    "tahadani-059": {
+      "threshold": 224,
+      "approved": 0,
+      "ready": false
+    },
+    "tahadani-060": {
+      "threshold": 224,
+      "approved": 0,
+      "ready": false
+    },
+    "tahadani-061": {
+      "threshold": null,
+      "approved": 0,
+      "ready": false,
+      "behavior": "blocked until question-specific media is local and explicitly publishable"
+    },
+    "tahadani-062": {
+      "threshold": 224,
+      "approved": 0,
+      "ready": false
+    }
+  },
+  "namedCombinedPacks": [
+    {
+      "name": "all-classic-catalog",
+      "categoryIds": [
+        "tahadani-001",
+        "tahadani-002",
+        "tahadani-003",
+        "tahadani-004",
+        "tahadani-005",
+        "tahadani-006",
+        "tahadani-007",
+        "tahadani-008",
+        "tahadani-009",
+        "tahadani-010",
+        "tahadani-013",
+        "tahadani-014",
+        "tahadani-015",
+        "tahadani-021",
+        "tahadani-022",
+        "tahadani-023",
+        "tahadani-024",
+        "tahadani-025",
+        "tahadani-026",
+        "tahadani-027",
+        "tahadani-028",
+        "tahadani-029",
+        "tahadani-030",
+        "tahadani-031",
+        "tahadani-032",
+        "tahadani-033",
+        "tahadani-034",
+        "tahadani-035",
+        "tahadani-036",
+        "tahadani-037",
+        "tahadani-038",
+        "tahadani-039",
+        "tahadani-040",
+        "tahadani-041",
+        "tahadani-042",
+        "tahadani-043",
+        "tahadani-045",
+        "tahadani-046",
+        "tahadani-047",
+        "tahadani-048",
+        "tahadani-049",
+        "tahadani-050",
+        "tahadani-051",
+        "tahadani-052",
+        "tahadani-053",
+        "tahadani-054",
+        "tahadani-055",
+        "tahadani-056",
+        "tahadani-057",
+        "tahadani-058",
+        "tahadani-059",
+        "tahadani-060",
+        "tahadani-062"
+      ],
+      "approved": 0,
+      "ready": false
+    }
+  ],
+  "charades": {
+    "categories": [
+      "tahadani-016",
+      "tahadani-017",
+      "tahadani-018",
+      "tahadani-019",
+      "tahadani-020"
+    ],
+    "classicInventory": 0,
+    "reportedSeparately": true
+  }
+}

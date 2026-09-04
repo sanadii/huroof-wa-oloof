@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "asOf": "2026-09-04",
+  "approvedQuestionCount": 0,
+  "approvedBankSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "coverageSha256": "9434283d13aa7afcbb6321e87a81e80c069fdbe04df7c1219e28c4ca32a69e21",
+  "runtimeOnlyApproved": true
+}

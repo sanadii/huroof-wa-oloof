@@ -1,0 +1,58 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "packetId",
+    "schemaVersion",
+    "categoryId",
+    "sourceRegistryId",
+    "sourceUrl",
+    "claimLocators",
+    "checkedAt",
+    "contentHash",
+    "validUntil"
+  ],
+  "properties": {
+    "packetId": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$"
+    },
+    "schemaVersion": {
+      "const": "2.1.0"
+    },
+    "categoryId": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$"
+    },
+    "sourceRegistryId": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$"
+    },
+    "sourceUrl": {
+      "type": "string",
+      "pattern": "^https://"
+    },
+    "claimLocators": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "checkedAt": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+    },
+    "contentHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "validUntil": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  }
+}

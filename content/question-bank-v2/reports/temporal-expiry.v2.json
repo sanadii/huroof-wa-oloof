@@ -1,0 +1,22 @@
+{
+  "reportVersion": "2.0.0",
+  "asOf": "2026-09-03",
+  "approvedExpired": 0,
+  "draftExpired": 0,
+  "datedPolicyCategories": [
+    "tahadani-021",
+    "tahadani-022",
+    "tahadani-023",
+    "tahadani-024",
+    "tahadani-050",
+    "tahadani-052",
+    "tahadani-054",
+    "tahadani-055",
+    "tahadani-058",
+    "tahadani-062"
+  ],
+  "religiousRecheckOnWordingChange": [
+    "tahadani-056",
+    "tahadani-057"
+  ]
+}

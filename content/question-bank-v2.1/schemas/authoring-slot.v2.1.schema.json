@@ -1,0 +1,86 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "slotId",
+    "planVersion",
+    "categoryId",
+    "modality",
+    "difficulty",
+    "ordinal",
+    "state"
+  ],
+  "properties": {
+    "slotId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "planVersion": {
+      "const": "2.1.0"
+    },
+    "categoryId": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$"
+    },
+    "modality": {
+      "enum": [
+        "classic",
+        "image",
+        "charades"
+      ]
+    },
+    "targetLetter": {
+      "enum": [
+        "ا",
+        "ب",
+        "ت",
+        "ث",
+        "ج",
+        "ح",
+        "خ",
+        "د",
+        "ذ",
+        "ر",
+        "ز",
+        "س",
+        "ش",
+        "ص",
+        "ض",
+        "ط",
+        "ظ",
+        "ع",
+        "غ",
+        "ف",
+        "ق",
+        "ك",
+        "ل",
+        "م",
+        "ن",
+        "ه",
+        "و",
+        "ي"
+      ]
+    },
+    "difficulty": {
+      "enum": [
+        "easy",
+        "medium",
+        "hard"
+      ]
+    },
+    "ordinal": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "state": {
+      "enum": [
+        "unfilled",
+        "blocked_media"
+      ]
+    },
+    "blocker": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

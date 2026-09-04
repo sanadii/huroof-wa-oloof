@@ -1,0 +1,1685 @@
+{
+  "schemaVersion": 1,
+  "seeds": [
+    {
+      "id": "draft-001",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-002",
+      "categoryId": "tahadani-007",
+      "topic": "animal_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-003",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-004",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-005",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-006",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-007",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-008",
+      "categoryId": "tahadani-045",
+      "topic": "capital",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-009",
+      "categoryId": "tahadani-046",
+      "topic": "country_capital",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-010",
+      "categoryId": "tahadani-047",
+      "topic": "currency",
+      "sourceKind": "official"
+    },
+    {
+      "id": "draft-011",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-012",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-013",
+      "categoryId": "tahadani-008",
+      "topic": "technology_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-014",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-015",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-016",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-017",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-018",
+      "categoryId": "tahadani-045",
+      "topic": "capital",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-019",
+      "categoryId": "tahadani-046",
+      "topic": "country_capital",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-020",
+      "categoryId": "tahadani-051",
+      "topic": "car_brand",
+      "sourceKind": "official"
+    },
+    {
+      "id": "draft-021",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-022",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-023",
+      "categoryId": "tahadani-008",
+      "topic": "technology_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-024",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-025",
+      "categoryId": "tahadani-007",
+      "topic": "animal_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-026",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-027",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-028",
+      "categoryId": "tahadani-045",
+      "topic": "capital",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-029",
+      "categoryId": "tahadani-046",
+      "topic": "country_capital",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-030",
+      "categoryId": "tahadani-051",
+      "topic": "car_brand",
+      "sourceKind": "official"
+    },
+    {
+      "id": "draft-031",
+      "categoryId": "tahadani-007",
+      "topic": "animal_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-032",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-033",
+      "categoryId": "tahadani-013",
+      "topic": "word_puzzle",
+      "sourceKind": "lexical"
+    },
+    {
+      "id": "draft-034",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-035",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-036",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-037",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-038",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-039",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-040",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-041",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-042",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-043",
+      "categoryId": "tahadani-007",
+      "topic": "animal_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-044",
+      "categoryId": "tahadani-008",
+      "topic": "technology_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-045",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-046",
+      "categoryId": "tahadani-013",
+      "topic": "word_puzzle",
+      "sourceKind": "lexical"
+    },
+    {
+      "id": "draft-047",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-048",
+      "categoryId": "tahadani-045",
+      "topic": "capital",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-049",
+      "categoryId": "tahadani-047",
+      "topic": "currency",
+      "sourceKind": "official"
+    },
+    {
+      "id": "draft-050",
+      "categoryId": "tahadani-051",
+      "topic": "car_brand",
+      "sourceKind": "official"
+    },
+    {
+      "id": "draft-051",
+      "categoryId": "tahadani-007",
+      "topic": "animal_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-052",
+      "categoryId": "tahadani-007",
+      "topic": "animal_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-053",
+      "categoryId": "tahadani-008",
+      "topic": "technology_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-054",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-055",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-056",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-057",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-058",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-059",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-060",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-061",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-062",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-063",
+      "categoryId": "tahadani-007",
+      "topic": "animal_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-064",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-065",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-066",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-067",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-068",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-069",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-070",
+      "categoryId": "tahadani-008",
+      "topic": "technology_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-071",
+      "categoryId": "tahadani-007",
+      "topic": "animal_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-072",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-073",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-074",
+      "categoryId": "tahadani-007",
+      "topic": "animal_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-075",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-076",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-077",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-078",
+      "categoryId": "tahadani-045",
+      "topic": "capital",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-079",
+      "categoryId": "tahadani-046",
+      "topic": "country_capital",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-080",
+      "categoryId": "tahadani-047",
+      "topic": "currency",
+      "sourceKind": "official"
+    },
+    {
+      "id": "draft-081",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-082",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-083",
+      "categoryId": "tahadani-007",
+      "topic": "animal_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-084",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-085",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-086",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-087",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-088",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-089",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-090",
+      "categoryId": "tahadani-007",
+      "topic": "animal_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-091",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-092",
+      "categoryId": "tahadani-013",
+      "topic": "word_puzzle",
+      "sourceKind": "lexical"
+    },
+    {
+      "id": "draft-093",
+      "categoryId": "tahadani-008",
+      "topic": "technology_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-094",
+      "categoryId": "tahadani-008",
+      "topic": "technology_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-095",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-096",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-097",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-098",
+      "categoryId": "tahadani-045",
+      "topic": "capital",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-099",
+      "categoryId": "tahadani-046",
+      "topic": "country_capital",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-100",
+      "categoryId": "tahadani-047",
+      "topic": "currency",
+      "sourceKind": "official"
+    },
+    {
+      "id": "draft-101",
+      "categoryId": "tahadani-007",
+      "topic": "animal_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-102",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-103",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-104",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-105",
+      "categoryId": "tahadani-013",
+      "topic": "word_puzzle",
+      "sourceKind": "lexical"
+    },
+    {
+      "id": "draft-106",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-107",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-108",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-109",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-110",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-111",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-112",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-113",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-114",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-115",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-116",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-117",
+      "categoryId": "tahadani-007",
+      "topic": "animal_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-118",
+      "categoryId": "tahadani-045",
+      "topic": "capital",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-119",
+      "categoryId": "tahadani-046",
+      "topic": "country_capital",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-120",
+      "categoryId": "tahadani-051",
+      "topic": "car_brand",
+      "sourceKind": "official"
+    },
+    {
+      "id": "draft-121",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-122",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-123",
+      "categoryId": "tahadani-008",
+      "topic": "technology_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-124",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-125",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-126",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-127",
+      "categoryId": "tahadani-008",
+      "topic": "technology_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-128",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-129",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-130",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-131",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-132",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-133",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-134",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-135",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-136",
+      "categoryId": "tahadani-013",
+      "topic": "word_puzzle",
+      "sourceKind": "lexical"
+    },
+    {
+      "id": "draft-137",
+      "categoryId": "tahadani-007",
+      "topic": "animal_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-138",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-139",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-140",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-141",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-142",
+      "categoryId": "tahadani-007",
+      "topic": "animal_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-143",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-144",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-145",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-146",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-147",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-148",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-149",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-150",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-151",
+      "categoryId": "tahadani-007",
+      "topic": "animal_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-152",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-153",
+      "categoryId": "tahadani-013",
+      "topic": "word_puzzle",
+      "sourceKind": "lexical"
+    },
+    {
+      "id": "draft-154",
+      "categoryId": "tahadani-008",
+      "topic": "technology_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-155",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-156",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-157",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-158",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-159",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-160",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-161",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-162",
+      "categoryId": "tahadani-007",
+      "topic": "animal_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-163",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-164",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-165",
+      "categoryId": "tahadani-013",
+      "topic": "word_puzzle",
+      "sourceKind": "lexical"
+    },
+    {
+      "id": "draft-166",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-167",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-168",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-169",
+      "categoryId": "tahadani-007",
+      "topic": "animal_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-170",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-171",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-172",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-173",
+      "categoryId": "tahadani-007",
+      "topic": "animal_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-174",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-175",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-176",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-177",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-178",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-179",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-180",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-181",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-182",
+      "categoryId": "tahadani-013",
+      "topic": "word_puzzle",
+      "sourceKind": "lexical"
+    },
+    {
+      "id": "draft-183",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-184",
+      "categoryId": "tahadani-007",
+      "topic": "animal_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-185",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-186",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-187",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-188",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-189",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-190",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-191",
+      "categoryId": "tahadani-007",
+      "topic": "animal_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-192",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-193",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-194",
+      "categoryId": "tahadani-008",
+      "topic": "technology_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-195",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-196",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-197",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-198",
+      "categoryId": "tahadani-047",
+      "topic": "currency",
+      "sourceKind": "official"
+    },
+    {
+      "id": "draft-199",
+      "categoryId": "tahadani-051",
+      "topic": "car_brand",
+      "sourceKind": "official"
+    },
+    {
+      "id": "draft-200",
+      "categoryId": "tahadani-013",
+      "topic": "word_puzzle",
+      "sourceKind": "lexical"
+    },
+    {
+      "id": "draft-201",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-202",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-203",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-204",
+      "categoryId": "tahadani-013",
+      "topic": "word_puzzle",
+      "sourceKind": "lexical"
+    },
+    {
+      "id": "draft-205",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-206",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-207",
+      "categoryId": "tahadani-007",
+      "topic": "animal_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-208",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-209",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-210",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-211",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-212",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-213",
+      "categoryId": "tahadani-007",
+      "topic": "animal_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-214",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-215",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-216",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-217",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-218",
+      "categoryId": "tahadani-047",
+      "topic": "currency",
+      "sourceKind": "official"
+    },
+    {
+      "id": "draft-219",
+      "categoryId": "tahadani-051",
+      "topic": "car_brand",
+      "sourceKind": "official"
+    },
+    {
+      "id": "draft-220",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-221",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-222",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-223",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-224",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-225",
+      "categoryId": "tahadani-013",
+      "topic": "word_puzzle",
+      "sourceKind": "lexical"
+    },
+    {
+      "id": "draft-226",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-227",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-228",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-229",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-230",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-231",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-232",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-233",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-234",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-235",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-236",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-237",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-238",
+      "categoryId": "tahadani-045",
+      "topic": "capital",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-239",
+      "categoryId": "tahadani-046",
+      "topic": "country_capital",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-240",
+      "categoryId": "tahadani-047",
+      "topic": "currency",
+      "sourceKind": "official"
+    },
+    {
+      "id": "draft-241",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-242",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-243",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-244",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-245",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-246",
+      "categoryId": "tahadani-007",
+      "topic": "animal_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-247",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-248",
+      "categoryId": "tahadani-046",
+      "topic": "country_capital",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-249",
+      "categoryId": "tahadani-051",
+      "topic": "car_brand",
+      "sourceKind": "official"
+    },
+    {
+      "id": "draft-250",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-251",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-252",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-253",
+      "categoryId": "tahadani-008",
+      "topic": "technology_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-254",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-255",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-256",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-257",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-258",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-259",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-260",
+      "categoryId": "tahadani-008",
+      "topic": "technology_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-261",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-262",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-263",
+      "categoryId": "tahadani-007",
+      "topic": "animal_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-264",
+      "categoryId": "tahadani-013",
+      "topic": "word_puzzle",
+      "sourceKind": "lexical"
+    },
+    {
+      "id": "draft-265",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-266",
+      "categoryId": "tahadani-013",
+      "topic": "word_puzzle",
+      "sourceKind": "lexical"
+    },
+    {
+      "id": "draft-267",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-268",
+      "categoryId": "tahadani-045",
+      "topic": "capital",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-269",
+      "categoryId": "tahadani-047",
+      "topic": "currency",
+      "sourceKind": "official"
+    },
+    {
+      "id": "draft-270",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-271",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-272",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-273",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-274",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-275",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-276",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-277",
+      "categoryId": "tahadani-006",
+      "topic": "general_fact",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-278",
+      "categoryId": "tahadani-045",
+      "topic": "capital",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-279",
+      "categoryId": "tahadani-046",
+      "topic": "country_capital",
+      "sourceKind": "reference"
+    },
+    {
+      "id": "draft-280",
+      "categoryId": "tahadani-047",
+      "topic": "currency",
+      "sourceKind": "official"
+    }
+  ]
+}

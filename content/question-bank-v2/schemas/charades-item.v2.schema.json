@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Charades Item V2",
+  "type": "object",
+  "required": [
+    "id",
+    "categoryId",
+    "difficulty",
+    "status",
+    "phraseAr"
+  ],
+  "not": {
+    "required": [
+      "targetLetter"
+    ]
+  },
+  "properties": {
+    "status": {
+      "const": "draft"
+    },
+    "phraseAr": {
+      "type": "string"
+    }
+  }
+}

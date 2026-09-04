@@ -1,0 +1,34 @@
+{
+  "reportVersion": "2.0.0",
+  "asOf": "2026-09-03",
+  "structuralOnly": true,
+  "claimLevelFactVerification": "not performed",
+  "counts": {
+    "total": 20832,
+    "classic": 17808,
+    "image": 1344,
+    "charades": 1680,
+    "realDrafts": 1,
+    "approved": 0,
+    "blockedAttempts": 1
+  },
+  "slotIssues": [],
+  "baselineIssues": [],
+  "duplicate": {
+    "exact": [],
+    "candidates": []
+  },
+  "partitions": {
+    "categoryPolicies": 62,
+    "classicCategories": 53,
+    "imageCategories": 4,
+    "charadesCategories": 5
+  },
+  "yield": {
+    "plannedSlots": 20832,
+    "realDrafts": 1,
+    "blockedSourceAttempts": 1,
+    "approved": 0,
+    "playable": 0
+  }
+}

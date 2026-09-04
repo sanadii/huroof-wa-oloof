@@ -1,0 +1,37 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "assetId",
+    "localPath",
+    "sha256",
+    "altAr",
+    "rightsReceiptId",
+    "publishable"
+  ],
+  "properties": {
+    "assetId": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$"
+    },
+    "localPath": {
+      "type": "string",
+      "pattern": "^(?!https?://)(?!.*category-).*"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "altAr": {
+      "type": "string",
+      "minLength": 1
+    },
+    "rightsReceiptId": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$"
+    },
+    "publishable": {
+      "const": true
+    }
+  }
+}

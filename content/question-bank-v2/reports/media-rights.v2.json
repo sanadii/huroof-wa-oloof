@@ -1,0 +1,13 @@
+{
+  "reportVersion": "2.0.0",
+  "asOf": "2026-09-03",
+  "imageCategories": [
+    "tahadani-011",
+    "tahadani-012",
+    "tahadani-044",
+    "tahadani-061"
+  ],
+  "localPublishableQuestionMedia": 0,
+  "blockedSlots": 1344,
+  "status": "blocked_media"
+}

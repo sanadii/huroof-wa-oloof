@@ -1,0 +1,1679 @@
+{
+  "schemaVersion": 1,
+  "categories": [
+    {
+      "id": "tahadani-001",
+      "legacyIndex": 1,
+      "displayNameAr": "من أنا / دول",
+      "slug": "من_أنا_دول",
+      "sourceMode": "identity",
+      "sourcePolicy": "identity_trios",
+      "classicCompatibility": "text",
+      "catalogStatus": "imported",
+      "questionReadiness": "empty",
+      "cover": {
+        "original": "content/categories/originals/category-001.png",
+        "web320": "assets/categories/320/category-001.webp",
+        "web640": "assets/categories/640/category-001.webp",
+        "width": 1250,
+        "height": 1250,
+        "sha256": "a454f7c671379ab9bd206810d1982d9e490362903124a1d66cbe4ac2abd54337",
+        "altAr": "غلاف فئة من أنا / دول",
+        "rightsStatus": "unverified_legacy_import",
+        "publishable": false
+      },
+      "provenance": {
+        "sourceRepository": "D:/projects/tahadani",
+        "manifestVersion": 2,
+        "sourceImageName": "من أنا جغرافيا.png"
+      }
+    },
+    {
+      "id": "tahadani-002",
+      "legacyIndex": 2,
+      "displayNameAr": "من أنا / لاعبين كرة قدم",
+      "slug": "من_أنا_لاعبين_كرة_قدم",
+      "sourceMode": "identity",
+      "sourcePolicy": "identity_trios",
+      "classicCompatibility": "text",
+      "catalogStatus": "imported",
+      "questionReadiness": "empty",
+      "cover": {
+        "original": "content/categories/originals/category-002.png",
+        "web320": "assets/categories/320/category-002.webp",
+        "web640": "assets/categories/640/category-002.webp",
+        "width": 1250,
+        "height": 1250,
+        "sha256": "0e8ca28866b5c13848d173e53b4879fce434de63b4b478945cde379539d2b88b",
+        "altAr": "غلاف فئة من أنا / لاعبين كرة قدم",
+        "rightsStatus": "unverified_legacy_import",
+        "publishable": false
+      },
+      "provenance": {
+        "sourceRepository": "D:/projects/tahadani",
+        "manifestVersion": 2,
+        "sourceImageName": "من أنا رياضية.png"
+      }
+    },
+    {
+      "id": "tahadani-003",
+      "legacyIndex": 3,
+      "displayNameAr": "من أنا / حيوانات",
+      "slug": "من_أنا_حيوانات",
+      "sourceMode": "identity",
+      "sourcePolicy": "identity_trios",
+      "classicCompatibility": "text",
+      "catalogStatus": "imported",
+      "questionReadiness": "empty",
+      "cover": {
+        "original": "content/categories/originals/category-003.png",
+        "web320": "assets/categories/320/category-003.webp",
+        "web640": "assets/categories/640/category-003.webp",
+        "width": 1250,
+        "height": 1250,
+        "sha256": "2350f70254d00b7c745e2b19d020cbf1a2bd78f23a84aa623141f5ccb7422e12",
+        "altAr": "غلاف فئة من أنا / حيوانات",
+        "rightsStatus": "unverified_legacy_import",
+        "publishable": false
+      },
+      "provenance": {
+        "sourceRepository": "D:/projects/tahadani",
+        "manifestVersion": 2,
+        "sourceImageName": "من أنا حيوانات.png"
+      }
+    },
+    {
+      "id": "tahadani-004",
+      "legacyIndex": 4,
+      "displayNameAr": "من أنا / مسلسلات عربيه",
+      "slug": "من_أنا_مسلسلات_عربيه",
+      "sourceMode": "identity",
+      "sourcePolicy": "identity_trios",
+      "classicCompatibility": "text",
+      "catalogStatus": "imported",
+      "questionReadiness": "empty",
+      "cover": {
+        "original": "content/categories/originals/category-004.png",
+        "web320": "assets/categories/320/category-004.webp",
+        "web640": "assets/categories/640/category-004.webp",
+        "width": 1250,
+        "height": 1250,
+        "sha256": "5a54ef54aa7e69207f4b81dd8754c2f3afef32bda63128f505a01775bbb2bb9f",
+        "altAr": "غلاف فئة من أنا / مسلسلات عربيه",
+        "rightsStatus": "unverified_legacy_import",
+        "publishable": false
+      },
+      "provenance": {
+        "sourceRepository": "D:/projects/tahadani",
+        "manifestVersion": 2,
+        "sourceImageName": "من أنا مسلسلات عربية.png"
+      }
+    },
+    {
+      "id": "tahadani-005",
+      "legacyIndex": 5,
+      "displayNameAr": "من أنا / ممثلين",
+      "slug": "من_أنا_ممثلين",
+      "sourceMode": "identity",
+      "sourcePolicy": "identity_trios",
+      "classicCompatibility": "text",
+      "catalogStatus": "imported",
+      "questionReadiness": "empty",
+      "cover": {
+        "original": "content/categories/originals/category-005.png",
+        "web320": "assets/categories/320/category-005.webp",
+        "web640": "assets/categories/640/category-005.webp",
+        "width": 1250,
+        "height": 1250,
+        "sha256": "6f38ad5b4a8a804f077e0f8fd5c1646fa97966c7d57593a1d4a1e658d7f75692",
+        "altAr": "غلاف فئة من أنا / ممثلين",
+        "rightsStatus": "unverified_legacy_import",
+        "publishable": false
+      },
+      "provenance": {
+        "sourceRepository": "D:/projects/tahadani",
+        "manifestVersion": 2,
+        "sourceImageName": "من أنا ؟.png"
+      }
+    },
+    {
+      "id": "tahadani-006",
+      "legacyIndex": 6,
+      "displayNameAr": "معلومات عامة",
+      "slug": "معلومات_عامة",
+      "sourceMode": "trivia",
+      "sourcePolicy": "stable_facts",
+      "classicCompatibility": "text",
+      "catalogStatus": "imported",
+      "questionReadiness": "drafting",
+      "cover": {
+        "original": "content/categories/originals/category-006.png",
+        "web320": "assets/categories/320/category-006.webp",
+        "web640": "assets/categories/640/category-006.webp",
+        "width": 1250,
+        "height": 1250,
+        "sha256": "65d35a5beb4222e96f1a053455407ab6d323a314bad9a1bef5a328dc9097b9dd",
+        "altAr": "غلاف فئة معلومات عامة",
+        "rightsStatus": "unverified_legacy_import",
+        "publishable": false
+      },
+      "provenance": {
+        "sourceRepository": "D:/projects/tahadani",
+        "manifestVersion": 2,
+        "sourceImageName": "معلومات عامة.png"
+      }
+    },
+    {
+      "id": "tahadani-007",
+      "legacyIndex": 7,
+      "displayNameAr": "عالم الحيوان",
+      "slug": "عالم_الحيوان",
+      "sourceMode": "trivia",
+      "sourcePolicy": "stable_facts",
+      "classicCompatibility": "text",
+      "catalogStatus": "imported",
+      "questionReadiness": "drafting",
+      "cover": {
+        "original": "content/categories/originals/category-007.png",
+        "web320": "assets/categories/320/category-007.webp",
+        "web640": "assets/categories/640/category-007.webp",
+        "width": 1250,
+        "height": 1250,
+        "sha256": "16f8ebd9c6407f10161699eb75277d75088bcd12895e2a18de50f8ee32caf15c",
+        "altAr": "غلاف فئة عالم الحيوان",
+        "rightsStatus": "unverified_legacy_import",
+        "publishable": false
+      },
+      "provenance": {
+        "sourceRepository": "D:/projects/tahadani",
+        "manifestVersion": 2,
+        "sourceImageName": "عالم الحيوان.png"
+      }
+    },
+    {
+      "id": "tahadani-008",
+      "legacyIndex": 8,
+      "displayNameAr": "تكنولوجيا",
+      "slug": "تكنولوجيا",
+      "sourceMode": "trivia",
+      "sourcePolicy": "stable_facts",
+      "classicCompatibility": "text",
+      "catalogStatus": "imported",
+      "questionReadiness": "drafting",
+      "cover": {
+        "original": "content/categories/originals/category-008.png",
+        "web320": "assets/categories/320/category-008.webp",
+        "web640": "assets/categories/640/category-008.webp",
+        "width": 1250,
+        "height": 1250,
+        "sha256": "e5e64a79314d046fe2883d165cb4dacf2f87f5ccc86cb5d63c5ea369be247f83",
+        "altAr": "غلاف فئة تكنولوجيا",
+        "rightsStatus": "unverified_legacy_import",
+        "publishable": false
+      },
+      "provenance": {
+        "sourceRepository": "D:/projects/tahadani",
+        "manifestVersion": 2,
+        "sourceImageName": "تكنولوجيا.png"
+      }
+    },
+    {
+      "id": "tahadani-009",
+      "legacyIndex": 9,
+      "displayNameAr": "تاريخ",
+      "slug": "تاريخ",
+      "sourceMode": "trivia",
+      "sourcePolicy": "stable_facts",
+      "classicCompatibility": "text",
+      "catalogStatus": "imported",
+      "questionReadiness": "empty",
+      "cover": {
+        "original": "content/categories/originals/category-009.png",
+        "web320": "assets/categories/320/category-009.webp",
+        "web640": "assets/categories/640/category-009.webp",
+        "width": 1250,
+        "height": 1250,
+        "sha256": "ed4e811ec0cb3ee16ccd2bc2f67a9665c14a88dac75d56357a684d30b8df8fdf",
+        "altAr": "غلاف فئة تاريخ",
+        "rightsStatus": "unverified_legacy_import",
+        "publishable": false
+      },
+      "provenance": {
+        "sourceRepository": "D:/projects/tahadani",
+        "manifestVersion": 2,
+        "sourceImageName": "تاريخ.png"
+      }
+    },
+    {
+      "id": "tahadani-010",
+      "legacyIndex": 10,
+      "displayNameAr": "منو المشهور",
+      "slug": "منو_المشهور",
+      "sourceMode": "identity",
+      "sourcePolicy": "identity_trios",
+      "classicCompatibility": "text",
+      "catalogStatus": "imported",
+      "questionReadiness": "empty",
+      "cover": {
+        "original": "content/categories/originals/category-010.png",
+        "web320": "assets/categories/320/category-010.webp",
+        "web640": "assets/categories/640/category-010.webp",
+        "width": 1250,
+        "height": 1250,
+        "sha256": "e27a8d260da3efb7fb17bf886711ad87bf40a7f5531b8cb66cda63f8beb31aa4",
+        "altAr": "غلاف فئة منو المشهور",
+        "rightsStatus": "unverified_legacy_import",
+        "publishable": false
+      },
+      "provenance": {
+        "sourceRepository": "D:/projects/tahadani",
+        "manifestVersion": 2,
+        "sourceImageName": "منو المشهور.png"
+      }
+    },
+    {
+      "id": "tahadani-011",
+      "legacyIndex": 11,
+      "displayNameAr": "خمن الصورة",
+      "slug": "خمن_الصورة",
+      "sourceMode": "image",
+      "sourcePolicy": "producer_placeholder",
+      "classicCompatibility": "image_pending",
+      "catalogStatus": "imported",
+      "questionReadiness": "empty",
+      "cover": {
+        "original": "content/categories/originals/category-011.png",
+        "web320": "assets/categories/320/category-011.webp",
+        "web640": "assets/categories/640/category-011.webp",
+        "width": 1250,
+        "height": 1250,
+        "sha256": "532eca330b6d75d61f93becde41ccfb194fd78cbe65dad4a0a40c7b864ee4a52",
+        "altAr": "غلاف فئة خمن الصورة",
+        "rightsStatus": "unverified_legacy_import",
+        "publishable": false
+      },
+      "provenance": {
+        "sourceRepository": "D:/projects/tahadani",
+        "manifestVersion": 2,
+        "sourceImageName": "فتّح عينك.png"
+      }
+    },
+    {
+      "id": "tahadani-012",
+      "legacyIndex": 12,
+      "displayNameAr": "شنو هذا؟",
+      "slug": "شنو_هذا",
+      "sourceMode": "image",
+      "sourcePolicy": "producer_placeholder",
+      "classicCompatibility": "image_pending",
+      "catalogStatus": "imported",
+      "questionReadiness": "empty",
+      "cover": {
+        "original": "content/categories/originals/category-012.png",
+        "web320": "assets/categories/320/category-012.webp",
+        "web640": "assets/categories/640/category-012.webp",
+        "width": 1251,
+        "height": 1251,
+        "sha256": "9692b2a87410cfd69f5a16b0486eaf7213317b7ff3cfbe9c79ccf30756a51ad2",
+        "altAr": "غلاف فئة شنو هذا؟",
+        "rightsStatus": "unverified_legacy_import",
+        "publishable": false
+      },
+      "provenance": {
+        "sourceRepository": "D:/projects/tahadani",
+        "manifestVersion": 2,
+        "sourceImageName": "زوم.png"
+      }
+    },
+    {
+      "id": "tahadani-013",
+      "legacyIndex": 13,
+      "displayNameAr": "ألغاز",
+      "slug": "ألغاز",
+      "sourceMode": "puzzle",
+      "sourcePolicy": "single_solution",
+      "classicCompatibility": "text",
+      "catalogStatus": "imported",
+      "questionReadiness": "drafting",
+      "cover": {
+        "original": "content/categories/originals/category-013.png",
+        "web320": "assets/categories/320/category-013.webp",
+        "web640": "assets/categories/640/category-013.webp",
+        "width": 1250,
+        "height": 1250,
+        "sha256": "ea16f8ed819f52ab48d10f6b5f66a98b82267b7da66bce1ef1906e2f5e6c5d0e",
+        "altAr": "غلاف فئة ألغاز",
+        "rightsStatus": "unverified_legacy_import",
+        "publishable": false
+      },
+      "provenance": {
+        "sourceRepository": "D:/projects/tahadani",
+        "manifestVersion": 2,
+        "sourceImageName": "ألغاز.png"
+      }
+    },
+    {
+      "id": "tahadani-014",
+      "legacyIndex": 14,
+      "displayNameAr": "الجزء المفقود",
+      "slug": "الجزء_المفقود",
+      "sourceMode": "puzzle",
+      "sourcePolicy": "single_solution",
+      "classicCompatibility": "text",
+      "catalogStatus": "imported",
+      "questionReadiness": "empty",
+      "cover": {
+        "original": "content/categories/originals/category-014.png",
+        "web320": "assets/categories/320/category-014.webp",
+        "web640": "assets/categories/640/category-014.webp",
+        "width": 1250,
+        "height": 1250,
+        "sha256": "337ea9776eb0944297b2b6b387af417f8693246a0a57422b2d420150dbf1cd3e",
+        "altAr": "غلاف فئة الجزء المفقود",
+        "rightsStatus": "unverified_legacy_import",
+        "publishable": false
+      },
+      "provenance": {
+        "sourceRepository": "D:/projects/tahadani",
+        "manifestVersion": 2,
+        "sourceImageName": "صورة ناقصة.png"
+      }
+    },
+    {
+      "id": "tahadani-015",
+      "legacyIndex": 15,
+      "displayNameAr": "أمثال وغطاوي",
+      "slug": "أمثال_وغطاوي",
+      "sourceMode": "puzzle",
+      "sourcePolicy": "single_solution",
+      "classicCompatibility": "text",
+      "catalogStatus": "imported",
+      "questionReadiness": "empty",
+      "cover": {
+        "original": "content/categories/originals/category-015.png",
+        "web320": "assets/categories/320/category-015.webp",
+        "web640": "assets/categories/640/category-015.webp",
+        "width": 625,
+        "height": 625,
+        "sha256": "cc7519452e61013e679a2afd95c29d5b69182e0eedbee0c9be9ad03a330d7f38",
+        "altAr": "غلاف فئة أمثال وغطاوي",
+        "rightsStatus": "unverified_legacy_import",
+        "publishable": false
+      },
+      "provenance": {
+        "sourceRepository": "D:/projects/tahadani",
+        "manifestVersion": 2,
+        "sourceImageName": "أمثال شعبية.png"
+      }
+    },
+    {
+      "id": "tahadani-016",
+      "legacyIndex": 16,
+      "displayNameAr": "حيوانات / ولا كلمة",
+      "slug": "حيوانات_ولا_كلمة",
+      "sourceMode": "charades",
+      "sourcePolicy": "performable_target",
+      "classicCompatibility": "separate_mode",
+      "catalogStatus": "imported",
+      "questionReadiness": "empty",
+      "cover": {
+        "original": "content/categories/originals/category-016.png",
+        "web320": "assets/categories/320/category-016.webp",
+        "web640": "assets/categories/640/category-016.webp",
+        "width": 1250,
+        "height": 1250,
+        "sha256": "dc2d7ef4b63bd757abf26e3a2cd0bd239198d8cb6430380eb57c848adb86de32",
+        "altAr": "غلاف فئة حيوانات / ولا كلمة",
+        "rightsStatus": "unverified_legacy_import",
+        "publishable": false
+      },
+      "provenance": {
+        "sourceRepository": "D:/projects/tahadani",
+        "manifestVersion": 2,
+        "sourceImageName": "ولا كلمة حيوانات.png"
+      }
+    },
+    {
+      "id": "tahadani-017",
+      "legacyIndex": 17,
+      "displayNameAr": "أغاني عربية / ولا كلمة",
+      "slug": "أغاني_عربية_ولا_كلمة",
+      "sourceMode": "charades",
+      "sourcePolicy": "performable_target",
+      "classicCompatibility": "separate_mode",
+      "catalogStatus": "imported",
+      "questionReadiness": "empty",
+      "cover": {
+        "original": "content/categories/originals/category-017.png",
+        "web320": "assets/categories/320/category-017.webp",
+        "web640": "assets/categories/640/category-017.webp",
+        "width": 1250,
+        "height": 1250,
+        "sha256": "6c6e724bc3e90c1745e622ab60e9039a814b5884eb1c050a3f63d1788cef74e8",
+        "altAr": "غلاف فئة أغاني عربية / ولا كلمة",
+        "rightsStatus": "unverified_legacy_import",
+        "publishable": false
+      },
+      "provenance": {
+        "sourceRepository": "D:/projects/tahadani",
+        "manifestVersion": 2,
+        "sourceImageName": "ولا كلمة أغاني عربية.png"
+      }
+    },
+    {
+      "id": "tahadani-018",
+      "legacyIndex": 18,
+      "displayNameAr": "مشاهير عرب / ولا كلمة",
+      "slug": "مشاهير_عرب_ولا_كلمة",
+      "sourceMode": "charades",
+      "sourcePolicy": "performable_target",
+      "classicCompatibility": "separate_mode",
+      "catalogStatus": "imported",
+      "questionReadiness": "empty",
+      "cover": {
+        "original": "content/categories/originals/category-018.png",
+        "web320": "assets/categories/320/category-018.webp",
+        "web640": "assets/categories/640/category-018.webp",
+        "width": 1250,
+        "height": 1250,
+        "sha256": "6848fcdde26a587355f8499e137f08921396a8ae577ee50e26f7aa7f998da493",
+        "altAr": "غلاف فئة مشاهير عرب / ولا كلمة",
+        "rightsStatus": "unverified_legacy_import",
+        "publishable": false
+      },
+      "provenance": {
+        "sourceRepository": "D:/projects/tahadani",
+        "manifestVersion": 2,
+        "sourceImageName": "ولا كلمة مشاهير عرب.png"
+      }
+    },
+    {
+      "id": "tahadani-019",
+      "legacyIndex": 19,
+      "displayNameAr": "كرتون / ولا كلمة",
+      "slug": "كرتون_ولا_كلمة",
+      "sourceMode": "charades",
+      "sourcePolicy": "performable_target",
+      "classicCompatibility": "separate_mode",
+      "catalogStatus": "imported",
+      "questionReadiness": "empty",
+      "cover": {
+        "original": "content/categories/originals/category-019.png",
+        "web320": "assets/categories/320/category-019.webp",
+        "web640": "assets/categories/640/category-019.webp",
+        "width": 1250,
+        "height": 1250,
+        "sha256": "c2a2aae59ffb0e0d688f6c36a931ada6850db4ef1f1e37b732711114b493ae69",
+        "altAr": "غلاف فئة كرتون / ولا كلمة",
+        "rightsStatus": "unverified_legacy_import",
+        "publishable": false
+      },
+      "provenance": {
+        "sourceRepository": "D:/projects/tahadani",
+        "manifestVersion": 2,
+        "sourceImageName": "ولا كلمة كرتون.png"
+      }
+    },
+    {
+      "id": "tahadani-020",
+      "legacyIndex": 20,
+      "displayNameAr": "دول / ولا كلمة",
+      "slug": "دول_ولا_كلمة",
+      "sourceMode": "charades",
+      "sourcePolicy": "performable_target",
+      "classicCompatibility": "separate_mode",
+      "catalogStatus": "imported",
+      "questionReadiness": "empty",
+      "cover": {
+        "original": "content/categories/originals/category-020.png",
+        "web320": "assets/categories/320/category-020.webp",
+        "web640": "assets/categories/640/category-020.webp",
+        "width": 1250,
+        "height": 1250,
+        "sha256": "b6c83a1bbc2b901eea45f0febccbff148e148597cba45854499ee352d9726393",
+        "altAr": "غلاف فئة دول / ولا كلمة",
+        "rightsStatus": "unverified_legacy_import",
+        "publishable": false
+      },
+      "provenance": {
+        "sourceRepository": "D:/projects/tahadani",
+        "manifestVersion": 2,
+        "sourceImageName": "ولا كلمة دول.png"
+      }
+    },
+    {
+      "id": "tahadani-021",
+      "legacyIndex": 21,
+      "displayNameAr": "ريال مدريد",
+      "slug": "ريال_مدريد",
+      "sourceMode": "trivia",
+      "sourcePolicy": "dated_sports_facts",
+      "classicCompatibility": "text",
+      "catalogStatus": "imported",
+      "questionReadiness": "empty",
+      "cover": {
+        "original": "content/categories/originals/category-021.png",
+        "web320": "assets/categories/320/category-021.webp",
+        "web640": "assets/categories/640/category-021.webp",
+        "width": 1250,
+        "height": 1250,
+        "sha256": "4c2bacc658750e836281ae57106fe472599b7a2e409ae8c2236d8ff8c6306322",
+        "altAr": "غلاف فئة ريال مدريد",
+        "rightsStatus": "unverified_legacy_import",
+        "publishable": false
+      },
+      "provenance": {
+        "sourceRepository": "D:/projects/tahadani",
+        "manifestVersion": 2,
+        "sourceImageName": "ريال مدريد.png"
+      }
+    },
+    {
+      "id": "tahadani-022",
+      "legacyIndex": 22,
+      "displayNameAr": "برشلونة",
+      "slug": "برشلونة",
+      "sourceMode": "trivia",
+      "sourcePolicy": "dated_sports_facts",
+      "classicCompatibility": "text",
+      "catalogStatus": "imported",
+      "questionReadiness": "empty",
+      "cover": {
+        "original": "content/categories/originals/category-022.png",
+        "web320": "assets/categories/320/category-022.webp",
+        "web640": "assets/categories/640/category-022.webp",
+        "width": 1250,
+        "height": 1250,
+        "sha256": "3c824a5b4907f52cb5e3bddffa562f88200c0e72db3c25a14b9c2827e3713edb",
+        "altAr": "غلاف فئة برشلونة",
+        "rightsStatus": "unverified_legacy_import",
+        "publishable": false
+      },
+      "provenance": {
+        "sourceRepository": "D:/projects/tahadani",
+        "manifestVersion": 2,
+        "sourceImageName": "برشلونة.png"
+      }
+    },
+    {
+      "id": "tahadani-023",
+      "legacyIndex": 23,
+      "displayNameAr": "كأس العالم",
+      "slug": "كأس_العالم",
+      "sourceMode": "trivia",
+      "sourcePolicy": "dated_sports_facts",
+      "classicCompatibility": "text",
+      "catalogStatus": "imported",
+      "questionReadiness": "empty",
+      "cover": {
+        "original": "content/categories/originals/category-023.png",
+        "web320": "assets/categories/320/category-023.webp",
+        "web640": "assets/categories/640/category-023.webp",
+        "width": 1251,
+        "height": 1251,
+        "sha256": "ab5b42ba82d3fa7c1b219590012e3d1dbd319fc63f11efa143122306e93563d7",
+        "altAr": "غلاف فئة كأس العالم",
+        "rightsStatus": "unverified_legacy_import",
+        "publishable": false
+      },
+      "provenance": {
+        "sourceRepository": "D:/projects/tahadani",
+        "manifestVersion": 2,
+        "sourceImageName": "كاس العالم.png"
+      }
+    },
+    {
+      "id": "tahadani-024",
+      "legacyIndex": 24,
+      "displayNameAr": "ميسي وكرستيانو",
+      "slug": "ميسي_وكرستيانو",
+      "sourceMode": "trivia",
+      "sourcePolicy": "dated_sports_facts",
+      "classicCompatibility": "text",
+      "catalogStatus": "imported",
+      "questionReadiness": "empty",
+      "cover": {
+        "original": "content/categories/originals/category-024.png",
+        "web320": "assets/categories/320/category-024.webp",
+        "web640": "assets/categories/640/category-024.webp",
+        "width": 1250,
+        "height": 1250,
+        "sha256": "85de10cfb42c2f3dc4261a8b88c95fdd6ab5b00fe05cfdedb489d1a018a00289",
+        "altAr": "غلاف فئة ميسي وكرستيانو",
+        "rightsStatus": "unverified_legacy_import",
+        "publishable": false
+      },
+      "provenance": {
+        "sourceRepository": "D:/projects/tahadani",
+        "manifestVersion": 2,
+        "sourceImageName": "ميسي وكرستيانو.png"
+      }
+    },
+    {
+      "id": "tahadani-025",
+      "legacyIndex": 25,
+      "displayNameAr": "من هو اللاعب",
+      "slug": "من_هو_اللاعب",
+      "sourceMode": "identity",
+      "sourcePolicy": "identity_trios",
+      "classicCompatibility": "text",
+      "catalogStatus": "imported",
+      "questionReadiness": "empty",
+      "cover": {
+        "original": "content/categories/originals/category-025.png",
+        "web320": "assets/categories/320/category-025.webp",
+        "web640": "assets/categories/640/category-025.webp",
+        "width": 1250,
+        "height": 1250,
+        "sha256": "b63aa23da9f1f9c2bece8daef4a6d20cba16a39c9a2b6794178bcc816ab054e8",
+        "altAr": "غلاف فئة من هو اللاعب",
+        "rightsStatus": "unverified_legacy_import",
+        "publishable": false
+      },
+      "provenance": {
+        "sourceRepository": "D:/projects/tahadani",
+        "manifestVersion": 2,
+        "sourceImageName": "من هو اللاعب.png"
+      }
+    },
+    {
+      "id": "tahadani-026",
+      "legacyIndex": 26,
+      "displayNameAr": "طاش ماطاش",
+      "slug": "طاش_ماطاش",
+      "sourceMode": "trivia",
+      "sourcePolicy": "stable_facts",
+      "classicCompatibility": "text",
+      "catalogStatus": "imported",
+      "questionReadiness": "empty",
+      "cover": {
+        "original": "content/categories/originals/category-026.png",
+        "web320": "assets/categories/320/category-026.webp",
+        "web640": "assets/categories/640/category-026.webp",
+        "width": 1250,
+        "height": 1250,
+        "sha256": "91afdedac9c083d6f567bcaba45410218235bdefe2506835f7a0f5061d182284",
+        "altAr": "غلاف فئة طاش ماطاش",
+        "rightsStatus": "unverified_legacy_import",
+        "publishable": false
+      },
+      "provenance": {
+        "sourceRepository": "D:/projects/tahadani",
+        "manifestVersion": 2,
+        "sourceImageName": "طاش ما طاش.png"
+      }
+    },
+    {
+      "id": "tahadani-027",
+      "legacyIndex": 27,
+      "displayNameAr": "باب الحارة",
+      "slug": "باب_الحارة",
+      "sourceMode": "trivia",
+      "sourcePolicy": "stable_facts",
+      "classicCompatibility": "text",
+      "catalogStatus": "imported",
+      "questionReadiness": "empty",
+      "cover": {
+        "original": "content/categories/originals/category-027.png",
+        "web320": "assets/categories/320/category-027.webp",
+        "web640": "assets/categories/640/category-027.webp",
+        "width": 1250,
+        "height": 1250,
+        "sha256": "63c10279e0aade756c8435c1f8cfc44481b2413971bac86e1a91e7dc46ad40c3",
+        "altAr": "غلاف فئة باب الحارة",
+        "rightsStatus": "unverified_legacy_import",
+        "publishable": false
+      },
+      "provenance": {
+        "sourceRepository": "D:/projects/tahadani",
+        "manifestVersion": 2,
+        "sourceImageName": "باب الحارة.png"
+      }
+    },
+    {
+      "id": "tahadani-028",
+      "legacyIndex": 28,
+      "displayNameAr": "أفلام كلاسيك",
+      "slug": "أفلام_كلاسيك",
+      "sourceMode": "trivia",
+      "sourcePolicy": "stable_facts",
+      "classicCompatibility": "text",
+      "catalogStatus": "imported",
+      "questionReadiness": "empty",
+      "cover": {
+        "original": "content/categories/originals/category-028.png",
+        "web320": "assets/categories/320/category-028.webp",
+        "web640": "assets/categories/640/category-028.webp",
+        "width": 1250,
+        "height": 1250,
+        "sha256": "a1c256bd215ed5aeef54435f30c67a36aaa6c21d12769bd24f5f88994452f104",
+        "altAr": "غلاف فئة أفلام كلاسيك",
+        "rightsStatus": "unverified_legacy_import",
+        "publishable": false
+      },
+      "provenance": {
+        "sourceRepository": "D:/projects/tahadani",
+        "manifestVersion": 2,
+        "sourceImageName": "أفلام كلاسيك.png"
+      }
+    },
+    {
+      "id": "tahadani-029",
+      "legacyIndex": 29,
+      "displayNameAr": "أفلام رعب",
+      "slug": "أفلام_رعب",
+      "sourceMode": "trivia",
+      "sourcePolicy": "stable_facts",
+      "classicCompatibility": "text",
+      "catalogStatus": "imported",
+      "questionReadiness": "empty",
+      "cover": {
+        "original": "content/categories/originals/category-029.png",
+        "web320": "assets/categories/320/category-029.webp",
+        "web640": "assets/categories/640/category-029.webp",
+        "width": 1250,
+        "height": 1250,
+        "sha256": "3030dd494b7d7225acb3a83e9e78ff763d84b3f60e68681b969d0aba2001802f",
+        "altAr": "غلاف فئة أفلام رعب",
+        "rightsStatus": "unverified_legacy_import",
+        "publishable": false
+      },
+      "provenance": {
+        "sourceRepository": "D:/projects/tahadani",
+        "manifestVersion": 2,
+        "sourceImageName": "أفلام رعب.png"
+      }
+    },
+    {
+      "id": "tahadani-030",
+      "legacyIndex": 30,
+      "displayNameAr": "Game Of Thrones",
+      "slug": "Game_Of_Thrones",
+      "sourceMode": "trivia",
+      "sourcePolicy": "stable_facts",
+      "classicCompatibility": "text",
+      "catalogStatus": "imported",
+      "questionReadiness": "empty",
+      "cover": {
+        "original": "content/categories/originals/category-030.png",
+        "web320": "assets/categories/320/category-030.webp",
+        "web640": "assets/categories/640/category-030.webp",
+        "width": 1250,
+        "height": 1250,
+        "sha256": "56081b28257fa1403891ac34a3548a55bf66e1990aeb0e75fb3a4661fb715a40",
+        "altAr": "غلاف فئة Game Of Thrones",
+        "rightsStatus": "unverified_legacy_import",
+        "publishable": false
+      },
+      "provenance": {
+        "sourceRepository": "D:/projects/tahadani",
+        "manifestVersion": 2,
+        "sourceImageName": "Game Of Thrones.png"
+      }
+    },
+    {
+      "id": "tahadani-031",
+      "legacyIndex": 31,
+      "displayNameAr": "أغاني الزمن الجميل",
+      "slug": "أغاني_الزمن_الجميل",
+      "sourceMode": "trivia",
+      "sourcePolicy": "stable_facts",
+      "classicCompatibility": "text",
+      "catalogStatus": "imported",
+      "questionReadiness": "empty",
+      "cover": {
+        "original": "content/categories/originals/category-031.png",
+        "web320": "assets/categories/320/category-031.webp",
+        "web640": "assets/categories/640/category-031.webp",
+        "width": 625,
+        "height": 625,
+        "sha256": "a3f9b74674d65e8aa4b32493e9389139a5d76598cbcfc1374936f34e6e0a1621",
+        "altAr": "غلاف فئة أغاني الزمن الجميل",
+        "rightsStatus": "unverified_legacy_import",
+        "publishable": false
+      },
+      "provenance": {
+        "sourceRepository": "D:/projects/tahadani",
+        "manifestVersion": 2,
+        "sourceImageName": "الزمن الجميل.png"
+      }
+    },
+    {
+      "id": "tahadani-032",
+      "legacyIndex": 32,
+      "displayNameAr": "أم كلثوم",
+      "slug": "أم_كلثوم",
+      "sourceMode": "trivia",
+      "sourcePolicy": "stable_facts",
+      "classicCompatibility": "text",
+      "catalogStatus": "imported",
+      "questionReadiness": "empty",
+      "cover": {
+        "original": "content/categories/originals/category-032.png",
+        "web320": "assets/categories/320/category-032.webp",
+        "web640": "assets/categories/640/category-032.webp",
+        "width": 1250,
+        "height": 1250,
+        "sha256": "9ad64d7897dad304f1b4186fe87b0c0d9e6f533ce6c6744d08f7145845f1c527",
+        "altAr": "غلاف فئة أم كلثوم",
+        "rightsStatus": "unverified_legacy_import",
+        "publishable": false
+      },
+      "provenance": {
+        "sourceRepository": "D:/projects/tahadani",
+        "manifestVersion": 2,
+        "sourceImageName": "أم كلثوم.png"
+      }
+    },
+    {
+      "id": "tahadani-033",
+      "legacyIndex": 33,
+      "displayNameAr": "أغاني وطنية",
+      "slug": "أغاني_وطنية",
+      "sourceMode": "trivia",
+      "sourcePolicy": "stable_facts",
+      "classicCompatibility": "text",
+      "catalogStatus": "imported",
+      "questionReadiness": "empty",
+      "cover": {
+        "original": "content/categories/originals/category-033.png",
+        "web320": "assets/categories/320/category-033.webp",
+        "web640": "assets/categories/640/category-033.webp",
+        "width": 1250,
+        "height": 1250,
+        "sha256": "ed456ce78f4e21d970afb30f179ddeab3ebf541cceffd352af5cff02f803e8df",
+        "altAr": "غلاف فئة أغاني وطنية",
+        "rightsStatus": "unverified_legacy_import",
+        "publishable": false
+      },
+      "provenance": {
+        "sourceRepository": "D:/projects/tahadani",
+        "manifestVersion": 2,
+        "sourceImageName": "نشيد وطني.png"
+      }
+    },
+    {
+      "id": "tahadani-034",
+      "legacyIndex": 34,
+      "displayNameAr": "أغاني أجنبية",
+      "slug": "أغاني_أجنبية",
+      "sourceMode": "trivia",
+      "sourcePolicy": "stable_facts",
+      "classicCompatibility": "text",
+      "catalogStatus": "imported",
+      "questionReadiness": "empty",
+      "cover": {
+        "original": "content/categories/originals/category-034.png",
+        "web320": "assets/categories/320/category-034.webp",
+        "web640": "assets/categories/640/category-034.webp",
+        "width": 1250,
+        "height": 1250,
+        "sha256": "18f417ac46f334d3acc83f5d4fb70cbbd082d6e88af2a646c9d91f448781a9a5",
+        "altAr": "غلاف فئة أغاني أجنبية",
+        "rightsStatus": "unverified_legacy_import",
+        "publishable": false
+      },
+      "provenance": {
+        "sourceRepository": "D:/projects/tahadani",
+        "manifestVersion": 2,
+        "sourceImageName": "أغاني أجنبية.png"
+      }
+    },
+    {
+      "id": "tahadani-035",
+      "legacyIndex": 35,
+      "displayNameAr": "عبدالكريم عبدالقادر",
+      "slug": "عبدالكريم_عبدالقادر",
+      "sourceMode": "trivia",
+      "sourcePolicy": "stable_facts",
+      "classicCompatibility": "text",
+      "catalogStatus": "imported",
+      "questionReadiness": "empty",
+      "cover": {
+        "original": "content/categories/originals/category-035.png",
+        "web320": "assets/categories/320/category-035.webp",
+        "web640": "assets/categories/640/category-035.webp",
+        "width": 1250,
+        "height": 1250,
+        "sha256": "1fa806bb5373d057f057eee03803e7c40104b07d0bd5234a1ffce2f3dfe8e4cb",
+        "altAr": "غلاف فئة عبدالكريم عبدالقادر",
+        "rightsStatus": "unverified_legacy_import",
+        "publishable": false
+      },
+      "provenance": {
+        "sourceRepository": "D:/projects/tahadani",
+        "manifestVersion": 2,
+        "sourceImageName": "عبدالكريم عبدالقادر.png"
+      }
+    },
+    {
+      "id": "tahadani-036",
+      "legacyIndex": 36,
+      "displayNameAr": "One Piece",
+      "slug": "One_Piece",
+      "sourceMode": "trivia",
+      "sourcePolicy": "stable_facts",
+      "classicCompatibility": "text",
+      "catalogStatus": "imported",
+      "questionReadiness": "empty",
+      "cover": {
+        "original": "content/categories/originals/category-036.png",
+        "web320": "assets/categories/320/category-036.webp",
+        "web640": "assets/categories/640/category-036.webp",
+        "width": 1250,
+        "height": 1250,
+        "sha256": "c4db5abc18a056e6ef06201693c557119ee61e909e15df916356e81b7bfa2ac3",
+        "altAr": "غلاف فئة One Piece",
+        "rightsStatus": "unverified_legacy_import",
+        "publishable": false
+      },
+      "provenance": {
+        "sourceRepository": "D:/projects/tahadani",
+        "manifestVersion": 2,
+        "sourceImageName": "أنمي ون بيس.png"
+      }
+    },
+    {
+      "id": "tahadani-037",
+      "legacyIndex": 37,
+      "displayNameAr": "Attack on Titan",
+      "slug": "Attack_on_Titan",
+      "sourceMode": "trivia",
+      "sourcePolicy": "stable_facts",
+      "classicCompatibility": "text",
+      "catalogStatus": "imported",
+      "questionReadiness": "empty",
+      "cover": {
+        "original": "content/categories/originals/category-037.png",
+        "web320": "assets/categories/320/category-037.webp",
+        "web640": "assets/categories/640/category-037.webp",
+        "width": 1250,
+        "height": 1250,
+        "sha256": "593dc0b4169ca1ddb28404098637641eb0539fc8aa22b9e9c43e9513a95c85b6",
+        "altAr": "غلاف فئة Attack on Titan",
+        "rightsStatus": "unverified_legacy_import",
+        "publishable": false
+      },
+      "provenance": {
+        "sourceRepository": "D:/projects/tahadani",
+        "manifestVersion": 2,
+        "sourceImageName": "أنمي هجوم العمالقة.png"
+      }
+    },
+    {
+      "id": "tahadani-038",
+      "legacyIndex": 38,
+      "displayNameAr": "Naruto",
+      "slug": "Naruto",
+      "sourceMode": "trivia",
+      "sourcePolicy": "stable_facts",
+      "classicCompatibility": "text",
+      "catalogStatus": "imported",
+      "questionReadiness": "empty",
+      "cover": {
+        "original": "content/categories/originals/category-038.png",
+        "web320": "assets/categories/320/category-038.webp",
+        "web640": "assets/categories/640/category-038.webp",
+        "width": 1250,
+        "height": 1250,
+        "sha256": "1d62a58a0dead9b132e34259d137378229050552b9c65c880f7eb4b96a35aaa6",
+        "altAr": "غلاف فئة Naruto",
+        "rightsStatus": "unverified_legacy_import",
+        "publishable": false
+      },
+      "provenance": {
+        "sourceRepository": "D:/projects/tahadani",
+        "manifestVersion": 2,
+        "sourceImageName": "أنمي ناروتو.png"
+      }
+    },
+    {
+      "id": "tahadani-039",
+      "legacyIndex": 39,
+      "displayNameAr": "كونان",
+      "slug": "كونان",
+      "sourceMode": "trivia",
+      "sourcePolicy": "stable_facts",
+      "classicCompatibility": "text",
+      "catalogStatus": "imported",
+      "questionReadiness": "empty",
+      "cover": {
+        "original": "content/categories/originals/category-039.png",
+        "web320": "assets/categories/320/category-039.webp",
+        "web640": "assets/categories/640/category-039.webp",
+        "width": 1250,
+        "height": 1250,
+        "sha256": "a6701bdc098a53b1ff6359c85a4b1c74f027a9fbee91ab5591698edd52cd925c",
+        "altAr": "غلاف فئة كونان",
+        "rightsStatus": "unverified_legacy_import",
+        "publishable": false
+      },
+      "provenance": {
+        "sourceRepository": "D:/projects/tahadani",
+        "manifestVersion": 2,
+        "sourceImageName": "المحقق كونان.png"
+      }
+    },
+    {
+      "id": "tahadani-040",
+      "legacyIndex": 40,
+      "displayNameAr": "لعبة PUBG",
+      "slug": "لعبة_PUBG",
+      "sourceMode": "trivia",
+      "sourcePolicy": "stable_facts",
+      "classicCompatibility": "text",
+      "catalogStatus": "imported",
+      "questionReadiness": "empty",
+      "cover": {
+        "original": "content/categories/originals/category-040.png",
+        "web320": "assets/categories/320/category-040.webp",
+        "web640": "assets/categories/640/category-040.webp",
+        "width": 1250,
+        "height": 1250,
+        "sha256": "18218e34ce2544e52033c45903b10f79da8437ae627fe0298f07272db9d8f965",
+        "altAr": "غلاف فئة لعبة PUBG",
+        "rightsStatus": "unverified_legacy_import",
+        "publishable": false
+      },
+      "provenance": {
+        "sourceRepository": "D:/projects/tahadani",
+        "manifestVersion": 2,
+        "sourceImageName": "لعبة PUBG.png"
+      }
+    },
+    {
+      "id": "tahadani-041",
+      "legacyIndex": 41,
+      "displayNameAr": "Call of Duty",
+      "slug": "Call_of_Duty",
+      "sourceMode": "trivia",
+      "sourcePolicy": "stable_facts",
+      "classicCompatibility": "text",
+      "catalogStatus": "imported",
+      "questionReadiness": "empty",
+      "cover": {
+        "original": "content/categories/originals/category-041.png",
+        "web320": "assets/categories/320/category-041.webp",
+        "web640": "assets/categories/640/category-041.webp",
+        "width": 1250,
+        "height": 1250,
+        "sha256": "94496c5a57a0019a3cceafacda363c91016d06b61dd01d3f5eca50f552ff8c81",
+        "altAr": "غلاف فئة Call of Duty",
+        "rightsStatus": "unverified_legacy_import",
+        "publishable": false
+      },
+      "provenance": {
+        "sourceRepository": "D:/projects/tahadani",
+        "manifestVersion": 2,
+        "sourceImageName": "Call Of Duty.png"
+      }
+    },
+    {
+      "id": "tahadani-042",
+      "legacyIndex": 42,
+      "displayNameAr": "Minecraft",
+      "slug": "Minecraft",
+      "sourceMode": "trivia",
+      "sourcePolicy": "stable_facts",
+      "classicCompatibility": "text",
+      "catalogStatus": "imported",
+      "questionReadiness": "empty",
+      "cover": {
+        "original": "content/categories/originals/category-042.png",
+        "web320": "assets/categories/320/category-042.webp",
+        "web640": "assets/categories/640/category-042.webp",
+        "width": 1250,
+        "height": 1250,
+        "sha256": "17613b1e3cce14f5f0ebad9d22727420ed661f24e96d12159d65e305e1ec6ee2",
+        "altAr": "غلاف فئة Minecraft",
+        "rightsStatus": "unverified_legacy_import",
+        "publishable": false
+      },
+      "provenance": {
+        "sourceRepository": "D:/projects/tahadani",
+        "manifestVersion": 2,
+        "sourceImageName": "Minecraft.png"
+      }
+    },
+    {
+      "id": "tahadani-043",
+      "legacyIndex": 43,
+      "displayNameAr": "العاب الطفولة",
+      "slug": "العاب_الطفولة",
+      "sourceMode": "trivia",
+      "sourcePolicy": "stable_facts",
+      "classicCompatibility": "text",
+      "catalogStatus": "imported",
+      "questionReadiness": "empty",
+      "cover": {
+        "original": "content/categories/originals/category-043.png",
+        "web320": "assets/categories/320/category-043.webp",
+        "web640": "assets/categories/640/category-043.webp",
+        "width": 1250,
+        "height": 1250,
+        "sha256": "b8e9b004109ffa28163a448d06a2e056e76a5b9a3c7d0b65824de619f9a6e3e1",
+        "altAr": "غلاف فئة العاب الطفولة",
+        "rightsStatus": "unverified_legacy_import",
+        "publishable": false
+      },
+      "provenance": {
+        "sourceRepository": "D:/projects/tahadani",
+        "manifestVersion": 2,
+        "sourceImageName": "ألعاب الطفولة.png"
+      }
+    },
+    {
+      "id": "tahadani-044",
+      "legacyIndex": 44,
+      "displayNameAr": "أعلام",
+      "slug": "أعلام",
+      "sourceMode": "image",
+      "sourcePolicy": "producer_placeholder",
+      "classicCompatibility": "image_pending",
+      "catalogStatus": "imported",
+      "questionReadiness": "empty",
+      "cover": {
+        "original": "content/categories/originals/category-044.png",
+        "web320": "assets/categories/320/category-044.webp",
+        "web640": "assets/categories/640/category-044.webp",
+        "width": 1250,
+        "height": 1250,
+        "sha256": "f0ae92ac58f955eaf81347549c305507eb04c59c8511714c4dbaf58924dcd26e",
+        "altAr": "غلاف فئة أعلام",
+        "rightsStatus": "unverified_legacy_import",
+        "publishable": false
+      },
+      "provenance": {
+        "sourceRepository": "D:/projects/tahadani",
+        "manifestVersion": 2,
+        "sourceImageName": "أعلام.png"
+      }
+    },
+    {
+      "id": "tahadani-045",
+      "legacyIndex": 45,
+      "displayNameAr": "عواصم",
+      "slug": "عواصم",
+      "sourceMode": "trivia",
+      "sourcePolicy": "stable_facts",
+      "classicCompatibility": "text",
+      "catalogStatus": "imported",
+      "questionReadiness": "drafting",
+      "cover": {
+        "original": "content/categories/originals/category-045.png",
+        "web320": "assets/categories/320/category-045.webp",
+        "web640": "assets/categories/640/category-045.webp",
+        "width": 1250,
+        "height": 1250,
+        "sha256": "08fafea7f444767b625cef7a72e2cc527d9115425fc251431e199501d5a29e7e",
+        "altAr": "غلاف فئة عواصم",
+        "rightsStatus": "unverified_legacy_import",
+        "publishable": false
+      },
+      "provenance": {
+        "sourceRepository": "D:/projects/tahadani",
+        "manifestVersion": 2,
+        "sourceImageName": "عواصم.png"
+      }
+    },
+    {
+      "id": "tahadani-046",
+      "legacyIndex": 46,
+      "displayNameAr": "دول و عواصم",
+      "slug": "دول_و_عواصم",
+      "sourceMode": "trivia",
+      "sourcePolicy": "stable_facts",
+      "classicCompatibility": "text",
+      "catalogStatus": "imported",
+      "questionReadiness": "drafting",
+      "cover": {
+        "original": "content/categories/originals/category-046.png",
+        "web320": "assets/categories/320/category-046.webp",
+        "web640": "assets/categories/640/category-046.webp",
+        "width": 1250,
+        "height": 1250,
+        "sha256": "59ef1da2f4b5d7d701faefd59cdd1e4ef895d64c7ee600848a04512d65ba81b8",
+        "altAr": "غلاف فئة دول و عواصم",
+        "rightsStatus": "unverified_legacy_import",
+        "publishable": false
+      },
+      "provenance": {
+        "sourceRepository": "D:/projects/tahadani",
+        "manifestVersion": 2,
+        "sourceImageName": "دول و عواصم.png"
+      }
+    },
+    {
+      "id": "tahadani-047",
+      "legacyIndex": 47,
+      "displayNameAr": "عملات",
+      "slug": "عملات",
+      "sourceMode": "trivia",
+      "sourcePolicy": "stable_facts",
+      "classicCompatibility": "text",
+      "catalogStatus": "imported",
+      "questionReadiness": "drafting",
+      "cover": {
+        "original": "content/categories/originals/category-047.png",
+        "web320": "assets/categories/320/category-047.webp",
+        "web640": "assets/categories/640/category-047.webp",
+        "width": 1250,
+        "height": 1250,
+        "sha256": "3b09b52be5060ebdab5ec65567cf13a76fa329f9693702e7f483844f332aa2bc",
+        "altAr": "غلاف فئة عملات",
+        "rightsStatus": "unverified_legacy_import",
+        "publishable": false
+      },
+      "provenance": {
+        "sourceRepository": "D:/projects/tahadani",
+        "manifestVersion": 2,
+        "sourceImageName": "عملات.png"
+      }
+    },
+    {
+      "id": "tahadani-048",
+      "legacyIndex": 48,
+      "displayNameAr": "الفنون القتالية",
+      "slug": "الفنون_القتالية",
+      "sourceMode": "trivia",
+      "sourcePolicy": "stable_facts",
+      "classicCompatibility": "text",
+      "catalogStatus": "imported",
+      "questionReadiness": "empty",
+      "cover": {
+        "original": "content/categories/originals/category-048.png",
+        "web320": "assets/categories/320/category-048.webp",
+        "web640": "assets/categories/640/category-048.webp",
+        "width": 1250,
+        "height": 1250,
+        "sha256": "0c1df57b75819ed4984ce643d0a64bc975f3614a8abf86c85d66c89cd1442172",
+        "altAr": "غلاف فئة الفنون القتالية",
+        "rightsStatus": "unverified_legacy_import",
+        "publishable": false
+      },
+      "provenance": {
+        "sourceRepository": "D:/projects/tahadani",
+        "manifestVersion": 2,
+        "sourceImageName": "UFC.png"
+      }
+    },
+    {
+      "id": "tahadani-049",
+      "legacyIndex": 49,
+      "displayNameAr": "تنس",
+      "slug": "تنس",
+      "sourceMode": "trivia",
+      "sourcePolicy": "stable_facts",
+      "classicCompatibility": "text",
+      "catalogStatus": "imported",
+      "questionReadiness": "empty",
+      "cover": {
+        "original": "content/categories/originals/category-049.png",
+        "web320": "assets/categories/320/category-049.webp",
+        "web640": "assets/categories/640/category-049.webp",
+        "width": 1250,
+        "height": 1250,
+        "sha256": "7d039b94d3aacfc0ac3f441af009bb242477d355c0de2db6228e6f5bec2e86b9",
+        "altAr": "غلاف فئة تنس",
+        "rightsStatus": "unverified_legacy_import",
+        "publishable": false
+      },
+      "provenance": {
+        "sourceRepository": "D:/projects/tahadani",
+        "manifestVersion": 2,
+        "sourceImageName": "تنس.png"
+      }
+    },
+    {
+      "id": "tahadani-050",
+      "legacyIndex": 50,
+      "displayNameAr": "Formula 1",
+      "slug": "Formula_1",
+      "sourceMode": "trivia",
+      "sourcePolicy": "dated_sports_facts",
+      "classicCompatibility": "text",
+      "catalogStatus": "imported",
+      "questionReadiness": "empty",
+      "cover": {
+        "original": "content/categories/originals/category-050.png",
+        "web320": "assets/categories/320/category-050.webp",
+        "web640": "assets/categories/640/category-050.webp",
+        "width": 1250,
+        "height": 1250,
+        "sha256": "834b0c032abe05dad2a9c0de486c613c095be77891eeeac6f1caa08d7c05f8fb",
+        "altAr": "غلاف فئة Formula 1",
+        "rightsStatus": "unverified_legacy_import",
+        "publishable": false
+      },
+      "provenance": {
+        "sourceRepository": "D:/projects/tahadani",
+        "manifestVersion": 2,
+        "sourceImageName": "Formula One.png"
+      }
+    },
+    {
+      "id": "tahadani-051",
+      "legacyIndex": 51,
+      "displayNameAr": "سيارات",
+      "slug": "سيارات",
+      "sourceMode": "trivia",
+      "sourcePolicy": "stable_facts",
+      "classicCompatibility": "text",
+      "catalogStatus": "imported",
+      "questionReadiness": "drafting",
+      "cover": {
+        "original": "content/categories/originals/category-051.png",
+        "web320": "assets/categories/320/category-051.webp",
+        "web640": "assets/categories/640/category-051.webp",
+        "width": 1250,
+        "height": 1250,
+        "sha256": "64a611253ef5aa402df86899bc729c60dce717986a1fc9143e578b31b165effd",
+        "altAr": "غلاف فئة سيارات",
+        "rightsStatus": "unverified_legacy_import",
+        "publishable": false
+      },
+      "provenance": {
+        "sourceRepository": "D:/projects/tahadani",
+        "manifestVersion": 2,
+        "sourceImageName": "سيارات.png"
+      }
+    },
+    {
+      "id": "tahadani-052",
+      "legacyIndex": 52,
+      "displayNameAr": "منوعات كرة قدم",
+      "slug": "منوعات_كرة_قدم",
+      "sourceMode": "trivia",
+      "sourcePolicy": "dated_sports_facts",
+      "classicCompatibility": "text",
+      "catalogStatus": "imported",
+      "questionReadiness": "empty",
+      "cover": {
+        "original": "content/categories/originals/category-052.png",
+        "web320": "assets/categories/320/category-052.webp",
+        "web640": "assets/categories/640/category-052.webp",
+        "width": 1250,
+        "height": 1250,
+        "sha256": "91e5f890546273107317534d1e9fa3602f6a1c1012b4eb083628537c1379dc12",
+        "altAr": "غلاف فئة منوعات كرة قدم",
+        "rightsStatus": "unverified_legacy_import",
+        "publishable": false
+      },
+      "provenance": {
+        "sourceRepository": "D:/projects/tahadani",
+        "manifestVersion": 2,
+        "sourceImageName": "منوعات كرة قدم.png"
+      }
+    },
+    {
+      "id": "tahadani-053",
+      "legacyIndex": 53,
+      "displayNameAr": "منوعات شعرية",
+      "slug": "منوعات_شعرية",
+      "sourceMode": "trivia",
+      "sourcePolicy": "stable_facts",
+      "classicCompatibility": "text",
+      "catalogStatus": "imported",
+      "questionReadiness": "empty",
+      "cover": {
+        "original": "content/categories/originals/category-053.png",
+        "web320": "assets/categories/320/category-053.webp",
+        "web640": "assets/categories/640/category-053.webp",
+        "width": 1250,
+        "height": 1250,
+        "sha256": "1f04b3c5d5d997a6c97b31b0faae6509a84124411bf89b18674be37820972e8b",
+        "altAr": "غلاف فئة منوعات شعرية",
+        "rightsStatus": "unverified_legacy_import",
+        "publishable": false
+      },
+      "provenance": {
+        "sourceRepository": "D:/projects/tahadani",
+        "manifestVersion": 2,
+        "sourceImageName": "منوعات شعرية.png"
+      }
+    },
+    {
+      "id": "tahadani-054",
+      "legacyIndex": 54,
+      "displayNameAr": "كرة قدم عالمية",
+      "slug": "كرة_قدم_عالمية",
+      "sourceMode": "trivia",
+      "sourcePolicy": "dated_sports_facts",
+      "classicCompatibility": "text",
+      "catalogStatus": "imported",
+      "questionReadiness": "empty",
+      "cover": {
+        "original": "content/categories/originals/category-054.png",
+        "web320": "assets/categories/320/category-054.webp",
+        "web640": "assets/categories/640/category-054.webp",
+        "width": 1251,
+        "height": 1251,
+        "sha256": "8e49882a684786f8f8aa729b70d248acc3b6c846bb2b636a593b85223aa28f5a",
+        "altAr": "غلاف فئة كرة قدم عالمية",
+        "rightsStatus": "unverified_legacy_import",
+        "publishable": false
+      },
+      "provenance": {
+        "sourceRepository": "D:/projects/tahadani",
+        "manifestVersion": 2,
+        "sourceImageName": "كرة قدم عالمية.png"
+      }
+    },
+    {
+      "id": "tahadani-055",
+      "legacyIndex": 55,
+      "displayNameAr": "كرة قدم ايطالية",
+      "slug": "كرة_قدم_ايطالية",
+      "sourceMode": "trivia",
+      "sourcePolicy": "dated_sports_facts",
+      "classicCompatibility": "text",
+      "catalogStatus": "imported",
+      "questionReadiness": "empty",
+      "cover": {
+        "original": "content/categories/originals/category-055.png",
+        "web320": "assets/categories/320/category-055.webp",
+        "web640": "assets/categories/640/category-055.webp",
+        "width": 1250,
+        "height": 1250,
+        "sha256": "07a561b70730239d2fb8b330c7286c2576c225ad1faaf6ecf8fc30586024a9d2",
+        "altAr": "غلاف فئة كرة قدم ايطالية",
+        "rightsStatus": "unverified_legacy_import",
+        "publishable": false
+      },
+      "provenance": {
+        "sourceRepository": "D:/projects/tahadani",
+        "manifestVersion": 2,
+        "sourceImageName": "الكرة الايطالية.png"
+      }
+    },
+    {
+      "id": "tahadani-056",
+      "legacyIndex": 56,
+      "displayNameAr": "قصص الأنبياء",
+      "slug": "قصص_الأنبياء",
+      "sourceMode": "trivia",
+      "sourcePolicy": "primary_religious_sources",
+      "classicCompatibility": "text",
+      "catalogStatus": "imported",
+      "questionReadiness": "empty",
+      "cover": {
+        "original": "content/categories/originals/category-056.png",
+        "web320": "assets/categories/320/category-056.webp",
+        "web640": "assets/categories/640/category-056.webp",
+        "width": 1250,
+        "height": 1250,
+        "sha256": "572ae94f526eef2c5b694ceed03b2c45f113056a56539c60de6f0b30e6f7b9ef",
+        "altAr": "غلاف فئة قصص الأنبياء",
+        "rightsStatus": "unverified_legacy_import",
+        "publishable": false
+      },
+      "provenance": {
+        "sourceRepository": "D:/projects/tahadani",
+        "manifestVersion": 2,
+        "sourceImageName": "قصص الانبياء.png"
+      }
+    },
+    {
+      "id": "tahadani-057",
+      "legacyIndex": 57,
+      "displayNameAr": "القرآن الكريم",
+      "slug": "القرآن_الكريم",
+      "sourceMode": "trivia",
+      "sourcePolicy": "primary_religious_sources",
+      "classicCompatibility": "text",
+      "catalogStatus": "imported",
+      "questionReadiness": "empty",
+      "cover": {
+        "original": "content/categories/originals/category-057.png",
+        "web320": "assets/categories/320/category-057.webp",
+        "web640": "assets/categories/640/category-057.webp",
+        "width": 1250,
+        "height": 1250,
+        "sha256": "1382bcd0bfccd4b190120b0fa62465e920ec056224344d40eb810d99c34a301f",
+        "altAr": "غلاف فئة القرآن الكريم",
+        "rightsStatus": "unverified_legacy_import",
+        "publishable": false
+      },
+      "provenance": {
+        "sourceRepository": "D:/projects/tahadani",
+        "manifestVersion": 2,
+        "sourceImageName": "القرآن الكريم.png"
+      }
+    },
+    {
+      "id": "tahadani-058",
+      "legacyIndex": 58,
+      "displayNameAr": "مطاعم الكويت",
+      "slug": "مطاعم_الكويت",
+      "sourceMode": "trivia",
+      "sourcePolicy": "dated_local_facts",
+      "classicCompatibility": "text",
+      "catalogStatus": "imported",
+      "questionReadiness": "empty",
+      "cover": {
+        "original": "content/categories/originals/category-058.png",
+        "web320": "assets/categories/320/category-058.webp",
+        "web640": "assets/categories/640/category-058.webp",
+        "width": 1250,
+        "height": 1250,
+        "sha256": "8dc8794fd918f790c09173bbf43d9c35ee1d458449b590613382b0df93ac7028",
+        "altAr": "غلاف فئة مطاعم الكويت",
+        "rightsStatus": "unverified_legacy_import",
+        "publishable": false
+      },
+      "provenance": {
+        "sourceRepository": "D:/projects/tahadani",
+        "manifestVersion": 2,
+        "sourceImageName": "مطاعم الكويت.png"
+      }
+    },
+    {
+      "id": "tahadani-059",
+      "legacyIndex": 59,
+      "displayNameAr": "توقعني (دول)",
+      "slug": "توقعني_دول",
+      "sourceMode": "identity",
+      "sourcePolicy": "identity_trios",
+      "classicCompatibility": "text",
+      "catalogStatus": "imported",
+      "questionReadiness": "empty",
+      "cover": {
+        "original": "content/categories/originals/category-059.png",
+        "web320": "assets/categories/320/category-059.webp",
+        "web640": "assets/categories/640/category-059.webp",
+        "width": 1250,
+        "height": 1250,
+        "sha256": "a454f7c671379ab9bd206810d1982d9e490362903124a1d66cbe4ac2abd54337",
+        "altAr": "غلاف فئة توقعني (دول)",
+        "rightsStatus": "unverified_legacy_import",
+        "publishable": false
+      },
+      "provenance": {
+        "sourceRepository": "D:/projects/tahadani",
+        "manifestVersion": 2,
+        "sourceImageName": "من أنا جغرافيا.png"
+      }
+    },
+    {
+      "id": "tahadani-060",
+      "legacyIndex": 60,
+      "displayNameAr": "مسيرة لاعب",
+      "slug": "مسيرة_لاعب",
+      "sourceMode": "identity",
+      "sourcePolicy": "identity_trios",
+      "classicCompatibility": "text",
+      "catalogStatus": "imported",
+      "questionReadiness": "empty",
+      "cover": {
+        "original": "content/categories/originals/category-060.png",
+        "web320": "assets/categories/320/category-060.webp",
+        "web640": "assets/categories/640/category-060.webp",
+        "width": 1250,
+        "height": 1250,
+        "sha256": "95e53882ebcd946b10303b5b275ae3d69bb930122c0ee490afb2ff3f60af96dd",
+        "altAr": "غلاف فئة مسيرة لاعب",
+        "rightsStatus": "unverified_legacy_import",
+        "publishable": false
+      },
+      "provenance": {
+        "sourceRepository": "D:/projects/tahadani",
+        "manifestVersion": 2,
+        "sourceImageName": "مسيرة لاعب.png"
+      }
+    },
+    {
+      "id": "tahadani-061",
+      "legacyIndex": 61,
+      "displayNameAr": "تشكيلات",
+      "slug": "تشكيلات",
+      "sourceMode": "image",
+      "sourcePolicy": "producer_placeholder",
+      "classicCompatibility": "image_pending",
+      "catalogStatus": "imported",
+      "questionReadiness": "empty",
+      "cover": {
+        "original": "content/categories/originals/category-061.png",
+        "web320": "assets/categories/320/category-061.webp",
+        "web640": "assets/categories/640/category-061.webp",
+        "width": 1250,
+        "height": 1250,
+        "sha256": "c9bae84c1216ab6f0628cbf6eb1bc696cfe5a0d75a071d79d828dbe165f48635",
+        "altAr": "غلاف فئة تشكيلات",
+        "rightsStatus": "unverified_legacy_import",
+        "publishable": false
+      },
+      "provenance": {
+        "sourceRepository": "D:/projects/tahadani",
+        "manifestVersion": 2,
+        "sourceImageName": "LineUp.png"
+      }
+    },
+    {
+      "id": "tahadani-062",
+      "legacyIndex": 62,
+      "displayNameAr": "كأس العالم 2026",
+      "slug": "كأس_العالم_2026",
+      "sourceMode": "trivia",
+      "sourcePolicy": "dated_sports_facts",
+      "classicCompatibility": "text",
+      "catalogStatus": "imported",
+      "questionReadiness": "empty",
+      "cover": {
+        "original": "content/categories/originals/category-062.png",
+        "web320": "assets/categories/320/category-062.webp",
+        "web640": "assets/categories/640/category-062.webp",
+        "width": 1250,
+        "height": 1250,
+        "sha256": "eea75433f2f7890b84191f3abd05d18c761bafbbd7f91b24435d65a48a81ea61",
+        "altAr": "غلاف فئة كأس العالم 2026",
+        "rightsStatus": "unverified_legacy_import",
+        "publishable": false
+      },
+      "provenance": {
+        "sourceRepository": "D:/projects/tahadani",
+        "manifestVersion": 2,
+        "sourceImageName": "كأس العالم 2026.png"
+      }
+    }
+  ]
+}

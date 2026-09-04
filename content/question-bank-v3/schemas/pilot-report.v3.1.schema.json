@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "question-bank-v3/pilot-report.v3.1.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "categoryId", "batchId", "questionCount", "evidenceCount", "states", "issues", "sourceIdentities", "integrityChecked", "semanticEntailment", "approved", "released"],
+  "properties": {
+    "schemaVersion": {"const": "3.1.0"},
+    "categoryId": {"type": "string", "pattern": "^(?:tahadani-[0-9]{3}|huroof-00[1-4])$"},
+    "batchId": {"type": "string", "pattern": "^batch-[a-z0-9]+(?:-[a-z0-9]+)*$"},
+    "questionCount": {"type": "integer", "minimum": 0},
+    "evidenceCount": {"type": "integer", "minimum": 0},
+    "states": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["draft", "evidence_ready", "ready_for_human"],
+      "properties": {
+        "draft": {"type": "integer", "minimum": 0},
+        "evidence_ready": {"type": "integer", "minimum": 0},
+        "ready_for_human": {"type": "integer", "minimum": 0}
+      }
+    },
+    "issues": {"type": "array", "uniqueItems": true, "items": {"type": "string", "pattern": "^(?:evidence|question|duplicate):\\S+$"}},
+    "sourceIdentities": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "sourcePolicyId", "canonicalUrl", "publisher", "title", "responseBodySha256", "sha256"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^pilot-source-[a-f0-9]{64}$"},
+          "sourcePolicyId": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+          "canonicalUrl": {"type": "string", "format": "uri", "maxLength": 1024},
+          "publisher": {"type": "string", "minLength": 1, "maxLength": 180},
+          "title": {"type": "string", "minLength": 1, "maxLength": 280},
+          "responseBodySha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+          "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+        }
+      }
+    },
+    "integrityChecked": {"const": true},
+    "semanticEntailment": {"const": "human_review_required"},
+    "approved": {"const": 0},
+    "released": {"const": 0}
+  }
+}

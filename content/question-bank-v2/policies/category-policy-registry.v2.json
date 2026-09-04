@@ -1,0 +1,2149 @@
+{
+  "registryVersion": "2.0.0",
+  "policies": [
+    {
+      "categoryId": "tahadani-001",
+      "policyVersion": "2.0.0",
+      "modality": "classic",
+      "sourcePolicy": "identity_trios",
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة من أنا / دول"
+      ],
+      "prohibitedFacets": [
+        "صياغة عامة لا تخص الفئة",
+        "ادعاء غير موثق",
+        "سؤال متعدد الإجابات في الوضع الكلاسيكي"
+      ],
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730,
+        "recheckOnWordingChange": false
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "specialist": false,
+        "rights": false,
+        "minimumSourcePackets": 1
+      },
+      "readiness": {
+        "classicEligible": true,
+        "standaloneThreshold": 224,
+        "behavior": "approved non-expired policy-valid items only; combined pack is evaluated independently"
+      },
+      "sourceRegistryIds": [
+        "unesco-world-heritage"
+      ]
+    },
+    {
+      "categoryId": "tahadani-002",
+      "policyVersion": "2.0.0",
+      "modality": "classic",
+      "sourcePolicy": "identity_trios",
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة من أنا / لاعبين كرة قدم"
+      ],
+      "prohibitedFacets": [
+        "صياغة عامة لا تخص الفئة",
+        "ادعاء غير موثق",
+        "سؤال متعدد الإجابات في الوضع الكلاسيكي"
+      ],
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730,
+        "recheckOnWordingChange": false
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "specialist": false,
+        "rights": false,
+        "minimumSourcePackets": 1
+      },
+      "readiness": {
+        "classicEligible": true,
+        "standaloneThreshold": 224,
+        "behavior": "approved non-expired policy-valid items only; combined pack is evaluated independently"
+      },
+      "sourceRegistryIds": [
+        "unesco-world-heritage"
+      ]
+    },
+    {
+      "categoryId": "tahadani-003",
+      "policyVersion": "2.0.0",
+      "modality": "classic",
+      "sourcePolicy": "identity_trios",
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة من أنا / حيوانات"
+      ],
+      "prohibitedFacets": [
+        "صياغة عامة لا تخص الفئة",
+        "ادعاء غير موثق",
+        "سؤال متعدد الإجابات في الوضع الكلاسيكي"
+      ],
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730,
+        "recheckOnWordingChange": false
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "specialist": false,
+        "rights": false,
+        "minimumSourcePackets": 1
+      },
+      "readiness": {
+        "classicEligible": true,
+        "standaloneThreshold": 224,
+        "behavior": "approved non-expired policy-valid items only; combined pack is evaluated independently"
+      },
+      "sourceRegistryIds": [
+        "unesco-world-heritage"
+      ]
+    },
+    {
+      "categoryId": "tahadani-004",
+      "policyVersion": "2.0.0",
+      "modality": "classic",
+      "sourcePolicy": "identity_trios",
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة من أنا / مسلسلات عربيه"
+      ],
+      "prohibitedFacets": [
+        "صياغة عامة لا تخص الفئة",
+        "ادعاء غير موثق",
+        "سؤال متعدد الإجابات في الوضع الكلاسيكي"
+      ],
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730,
+        "recheckOnWordingChange": false
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "specialist": false,
+        "rights": false,
+        "minimumSourcePackets": 1
+      },
+      "readiness": {
+        "classicEligible": true,
+        "standaloneThreshold": 224,
+        "behavior": "approved non-expired policy-valid items only; combined pack is evaluated independently"
+      },
+      "sourceRegistryIds": [
+        "unesco-world-heritage"
+      ]
+    },
+    {
+      "categoryId": "tahadani-005",
+      "policyVersion": "2.0.0",
+      "modality": "classic",
+      "sourcePolicy": "identity_trios",
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة من أنا / ممثلين"
+      ],
+      "prohibitedFacets": [
+        "صياغة عامة لا تخص الفئة",
+        "ادعاء غير موثق",
+        "سؤال متعدد الإجابات في الوضع الكلاسيكي"
+      ],
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730,
+        "recheckOnWordingChange": false
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "specialist": false,
+        "rights": false,
+        "minimumSourcePackets": 1
+      },
+      "readiness": {
+        "classicEligible": true,
+        "standaloneThreshold": 224,
+        "behavior": "approved non-expired policy-valid items only; combined pack is evaluated independently"
+      },
+      "sourceRegistryIds": [
+        "unesco-world-heritage"
+      ]
+    },
+    {
+      "categoryId": "tahadani-006",
+      "policyVersion": "2.0.0",
+      "modality": "classic",
+      "sourcePolicy": "stable_facts",
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة معلومات عامة"
+      ],
+      "prohibitedFacets": [
+        "صياغة عامة لا تخص الفئة",
+        "ادعاء غير موثق",
+        "سؤال متعدد الإجابات في الوضع الكلاسيكي"
+      ],
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730,
+        "recheckOnWordingChange": false
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "specialist": false,
+        "rights": false,
+        "minimumSourcePackets": 1
+      },
+      "readiness": {
+        "classicEligible": true,
+        "standaloneThreshold": 224,
+        "behavior": "approved non-expired policy-valid items only; combined pack is evaluated independently"
+      },
+      "sourceRegistryIds": [
+        "nasa-science"
+      ]
+    },
+    {
+      "categoryId": "tahadani-007",
+      "policyVersion": "2.0.0",
+      "modality": "classic",
+      "sourcePolicy": "stable_facts",
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة عالم الحيوان"
+      ],
+      "prohibitedFacets": [
+        "صياغة عامة لا تخص الفئة",
+        "ادعاء غير موثق",
+        "سؤال متعدد الإجابات في الوضع الكلاسيكي"
+      ],
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730,
+        "recheckOnWordingChange": false
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "specialist": false,
+        "rights": false,
+        "minimumSourcePackets": 1
+      },
+      "readiness": {
+        "classicEligible": true,
+        "standaloneThreshold": 224,
+        "behavior": "approved non-expired policy-valid items only; combined pack is evaluated independently"
+      },
+      "sourceRegistryIds": [
+        "unesco-world-heritage"
+      ]
+    },
+    {
+      "categoryId": "tahadani-008",
+      "policyVersion": "2.0.0",
+      "modality": "classic",
+      "sourcePolicy": "stable_facts",
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة تكنولوجيا"
+      ],
+      "prohibitedFacets": [
+        "صياغة عامة لا تخص الفئة",
+        "ادعاء غير موثق",
+        "سؤال متعدد الإجابات في الوضع الكلاسيكي"
+      ],
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730,
+        "recheckOnWordingChange": false
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "specialist": false,
+        "rights": false,
+        "minimumSourcePackets": 1
+      },
+      "readiness": {
+        "classicEligible": true,
+        "standaloneThreshold": 224,
+        "behavior": "approved non-expired policy-valid items only; combined pack is evaluated independently"
+      },
+      "sourceRegistryIds": [
+        "nasa-science"
+      ]
+    },
+    {
+      "categoryId": "tahadani-009",
+      "policyVersion": "2.0.0",
+      "modality": "classic",
+      "sourcePolicy": "stable_facts",
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة تاريخ"
+      ],
+      "prohibitedFacets": [
+        "صياغة عامة لا تخص الفئة",
+        "ادعاء غير موثق",
+        "سؤال متعدد الإجابات في الوضع الكلاسيكي"
+      ],
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730,
+        "recheckOnWordingChange": false
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "specialist": false,
+        "rights": false,
+        "minimumSourcePackets": 1
+      },
+      "readiness": {
+        "classicEligible": true,
+        "standaloneThreshold": 224,
+        "behavior": "approved non-expired policy-valid items only; combined pack is evaluated independently"
+      },
+      "sourceRegistryIds": [
+        "unesco-world-heritage"
+      ]
+    },
+    {
+      "categoryId": "tahadani-010",
+      "policyVersion": "2.0.0",
+      "modality": "classic",
+      "sourcePolicy": "identity_trios",
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة منو المشهور"
+      ],
+      "prohibitedFacets": [
+        "صياغة عامة لا تخص الفئة",
+        "ادعاء غير موثق",
+        "سؤال متعدد الإجابات في الوضع الكلاسيكي"
+      ],
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730,
+        "recheckOnWordingChange": false
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "specialist": false,
+        "rights": false,
+        "minimumSourcePackets": 1
+      },
+      "readiness": {
+        "classicEligible": true,
+        "standaloneThreshold": 224,
+        "behavior": "approved non-expired policy-valid items only; combined pack is evaluated independently"
+      },
+      "sourceRegistryIds": [
+        "unesco-world-heritage"
+      ]
+    },
+    {
+      "categoryId": "tahadani-011",
+      "policyVersion": "2.0.0",
+      "modality": "image",
+      "sourcePolicy": "producer_placeholder",
+      "allowedFacets": [
+        "سؤال بصري مع أصل إعلام محلي"
+      ],
+      "prohibitedFacets": [
+        "صياغة عامة لا تخص الفئة",
+        "ادعاء غير موثق",
+        "سؤال متعدد الإجابات في الوضع الكلاسيكي",
+        "رابط صورة خارجي",
+        "وسيط بلا حقوق نشر صريحة"
+      ],
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730,
+        "recheckOnWordingChange": false
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "specialist": false,
+        "rights": true,
+        "minimumSourcePackets": 1
+      },
+      "readiness": {
+        "classicEligible": false,
+        "standaloneThreshold": null,
+        "behavior": "blocked until question-specific media is local and explicitly publishable"
+      },
+      "sourceRegistryIds": [
+        "us-copyright-fair-use",
+        "us-copyright-facts-expression"
+      ]
+    },
+    {
+      "categoryId": "tahadani-012",
+      "policyVersion": "2.0.0",
+      "modality": "image",
+      "sourcePolicy": "producer_placeholder",
+      "allowedFacets": [
+        "سؤال بصري مع أصل إعلام محلي"
+      ],
+      "prohibitedFacets": [
+        "صياغة عامة لا تخص الفئة",
+        "ادعاء غير موثق",
+        "سؤال متعدد الإجابات في الوضع الكلاسيكي",
+        "رابط صورة خارجي",
+        "وسيط بلا حقوق نشر صريحة"
+      ],
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730,
+        "recheckOnWordingChange": false
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "specialist": false,
+        "rights": true,
+        "minimumSourcePackets": 1
+      },
+      "readiness": {
+        "classicEligible": false,
+        "standaloneThreshold": null,
+        "behavior": "blocked until question-specific media is local and explicitly publishable"
+      },
+      "sourceRegistryIds": [
+        "us-copyright-fair-use",
+        "us-copyright-facts-expression"
+      ]
+    },
+    {
+      "categoryId": "tahadani-013",
+      "policyVersion": "2.0.0",
+      "modality": "classic",
+      "sourcePolicy": "single_solution",
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة ألغاز"
+      ],
+      "prohibitedFacets": [
+        "صياغة عامة لا تخص الفئة",
+        "ادعاء غير موثق",
+        "سؤال متعدد الإجابات في الوضع الكلاسيكي"
+      ],
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730,
+        "recheckOnWordingChange": false
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "specialist": false,
+        "rights": false,
+        "minimumSourcePackets": 1
+      },
+      "readiness": {
+        "classicEligible": true,
+        "standaloneThreshold": 224,
+        "behavior": "approved non-expired policy-valid items only; combined pack is evaluated independently"
+      },
+      "sourceRegistryIds": [
+        "unesco-world-heritage"
+      ]
+    },
+    {
+      "categoryId": "tahadani-014",
+      "policyVersion": "2.0.0",
+      "modality": "classic",
+      "sourcePolicy": "single_solution",
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة الجزء المفقود"
+      ],
+      "prohibitedFacets": [
+        "صياغة عامة لا تخص الفئة",
+        "ادعاء غير موثق",
+        "سؤال متعدد الإجابات في الوضع الكلاسيكي"
+      ],
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730,
+        "recheckOnWordingChange": false
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "specialist": false,
+        "rights": false,
+        "minimumSourcePackets": 1
+      },
+      "readiness": {
+        "classicEligible": true,
+        "standaloneThreshold": 224,
+        "behavior": "approved non-expired policy-valid items only; combined pack is evaluated independently"
+      },
+      "sourceRegistryIds": [
+        "unesco-world-heritage"
+      ]
+    },
+    {
+      "categoryId": "tahadani-015",
+      "policyVersion": "2.0.0",
+      "modality": "classic",
+      "sourcePolicy": "single_solution",
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة أمثال وغطاوي"
+      ],
+      "prohibitedFacets": [
+        "صياغة عامة لا تخص الفئة",
+        "ادعاء غير موثق",
+        "سؤال متعدد الإجابات في الوضع الكلاسيكي"
+      ],
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730,
+        "recheckOnWordingChange": false
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "specialist": false,
+        "rights": false,
+        "minimumSourcePackets": 1
+      },
+      "readiness": {
+        "classicEligible": true,
+        "standaloneThreshold": 224,
+        "behavior": "approved non-expired policy-valid items only; combined pack is evaluated independently"
+      },
+      "sourceRegistryIds": [
+        "unesco-world-heritage"
+      ]
+    },
+    {
+      "categoryId": "tahadani-016",
+      "policyVersion": "2.0.0",
+      "modality": "charades",
+      "sourcePolicy": "performable_target",
+      "allowedFacets": [
+        "عبارة تمثيلية منفصلة غير كلاسيكية"
+      ],
+      "prohibitedFacets": [
+        "صياغة عامة لا تخص الفئة",
+        "ادعاء غير موثق",
+        "سؤال متعدد الإجابات في الوضع الكلاسيكي",
+        "targetLetter",
+        "المخزون الكلاسيكي"
+      ],
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730,
+        "recheckOnWordingChange": false
+      },
+      "review": {
+        "fact": false,
+        "arabic": true,
+        "specialist": false,
+        "rights": false,
+        "minimumSourcePackets": 0
+      },
+      "readiness": {
+        "classicEligible": false,
+        "standaloneThreshold": null,
+        "behavior": "separate mode only; never enters classic inventory"
+      },
+      "sourceRegistryIds": [
+        "unesco-world-heritage"
+      ]
+    },
+    {
+      "categoryId": "tahadani-017",
+      "policyVersion": "2.0.0",
+      "modality": "charades",
+      "sourcePolicy": "performable_target",
+      "allowedFacets": [
+        "عبارة تمثيلية منفصلة غير كلاسيكية"
+      ],
+      "prohibitedFacets": [
+        "صياغة عامة لا تخص الفئة",
+        "ادعاء غير موثق",
+        "سؤال متعدد الإجابات في الوضع الكلاسيكي",
+        "targetLetter",
+        "المخزون الكلاسيكي"
+      ],
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730,
+        "recheckOnWordingChange": false
+      },
+      "review": {
+        "fact": false,
+        "arabic": true,
+        "specialist": false,
+        "rights": false,
+        "minimumSourcePackets": 0
+      },
+      "readiness": {
+        "classicEligible": false,
+        "standaloneThreshold": null,
+        "behavior": "separate mode only; never enters classic inventory"
+      },
+      "sourceRegistryIds": [
+        "unesco-world-heritage"
+      ]
+    },
+    {
+      "categoryId": "tahadani-018",
+      "policyVersion": "2.0.0",
+      "modality": "charades",
+      "sourcePolicy": "performable_target",
+      "allowedFacets": [
+        "عبارة تمثيلية منفصلة غير كلاسيكية"
+      ],
+      "prohibitedFacets": [
+        "صياغة عامة لا تخص الفئة",
+        "ادعاء غير موثق",
+        "سؤال متعدد الإجابات في الوضع الكلاسيكي",
+        "targetLetter",
+        "المخزون الكلاسيكي"
+      ],
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730,
+        "recheckOnWordingChange": false
+      },
+      "review": {
+        "fact": false,
+        "arabic": true,
+        "specialist": false,
+        "rights": false,
+        "minimumSourcePackets": 0
+      },
+      "readiness": {
+        "classicEligible": false,
+        "standaloneThreshold": null,
+        "behavior": "separate mode only; never enters classic inventory"
+      },
+      "sourceRegistryIds": [
+        "unesco-world-heritage"
+      ]
+    },
+    {
+      "categoryId": "tahadani-019",
+      "policyVersion": "2.0.0",
+      "modality": "charades",
+      "sourcePolicy": "performable_target",
+      "allowedFacets": [
+        "عبارة تمثيلية منفصلة غير كلاسيكية"
+      ],
+      "prohibitedFacets": [
+        "صياغة عامة لا تخص الفئة",
+        "ادعاء غير موثق",
+        "سؤال متعدد الإجابات في الوضع الكلاسيكي",
+        "targetLetter",
+        "المخزون الكلاسيكي"
+      ],
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730,
+        "recheckOnWordingChange": false
+      },
+      "review": {
+        "fact": false,
+        "arabic": true,
+        "specialist": false,
+        "rights": false,
+        "minimumSourcePackets": 0
+      },
+      "readiness": {
+        "classicEligible": false,
+        "standaloneThreshold": null,
+        "behavior": "separate mode only; never enters classic inventory"
+      },
+      "sourceRegistryIds": [
+        "unesco-world-heritage"
+      ]
+    },
+    {
+      "categoryId": "tahadani-020",
+      "policyVersion": "2.0.0",
+      "modality": "charades",
+      "sourcePolicy": "performable_target",
+      "allowedFacets": [
+        "عبارة تمثيلية منفصلة غير كلاسيكية"
+      ],
+      "prohibitedFacets": [
+        "صياغة عامة لا تخص الفئة",
+        "ادعاء غير موثق",
+        "سؤال متعدد الإجابات في الوضع الكلاسيكي",
+        "targetLetter",
+        "المخزون الكلاسيكي"
+      ],
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730,
+        "recheckOnWordingChange": false
+      },
+      "review": {
+        "fact": false,
+        "arabic": true,
+        "specialist": false,
+        "rights": false,
+        "minimumSourcePackets": 0
+      },
+      "readiness": {
+        "classicEligible": false,
+        "standaloneThreshold": null,
+        "behavior": "separate mode only; never enters classic inventory"
+      },
+      "sourceRegistryIds": [
+        "un-member-states"
+      ]
+    },
+    {
+      "categoryId": "tahadani-021",
+      "policyVersion": "2.0.0",
+      "modality": "classic",
+      "sourcePolicy": "dated_sports_facts",
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة ريال مدريد"
+      ],
+      "prohibitedFacets": [
+        "صياغة عامة لا تخص الفئة",
+        "ادعاء غير موثق",
+        "سؤال متعدد الإجابات في الوضع الكلاسيكي"
+      ],
+      "temporal": {
+        "class": "dated",
+        "recheckDays": 30,
+        "recheckOnWordingChange": false
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "specialist": false,
+        "rights": false,
+        "minimumSourcePackets": 2
+      },
+      "readiness": {
+        "classicEligible": true,
+        "standaloneThreshold": 224,
+        "behavior": "approved non-expired policy-valid items only; combined pack is evaluated independently"
+      },
+      "sourceRegistryIds": [
+        "fifa-world-cup-2026",
+        "ifab-laws"
+      ]
+    },
+    {
+      "categoryId": "tahadani-022",
+      "policyVersion": "2.0.0",
+      "modality": "classic",
+      "sourcePolicy": "dated_sports_facts",
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة برشلونة"
+      ],
+      "prohibitedFacets": [
+        "صياغة عامة لا تخص الفئة",
+        "ادعاء غير موثق",
+        "سؤال متعدد الإجابات في الوضع الكلاسيكي"
+      ],
+      "temporal": {
+        "class": "dated",
+        "recheckDays": 30,
+        "recheckOnWordingChange": false
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "specialist": false,
+        "rights": false,
+        "minimumSourcePackets": 2
+      },
+      "readiness": {
+        "classicEligible": true,
+        "standaloneThreshold": 224,
+        "behavior": "approved non-expired policy-valid items only; combined pack is evaluated independently"
+      },
+      "sourceRegistryIds": [
+        "fifa-world-cup-2026",
+        "ifab-laws"
+      ]
+    },
+    {
+      "categoryId": "tahadani-023",
+      "policyVersion": "2.0.0",
+      "modality": "classic",
+      "sourcePolicy": "dated_sports_facts",
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة كأس العالم"
+      ],
+      "prohibitedFacets": [
+        "صياغة عامة لا تخص الفئة",
+        "ادعاء غير موثق",
+        "سؤال متعدد الإجابات في الوضع الكلاسيكي"
+      ],
+      "temporal": {
+        "class": "dated",
+        "recheckDays": 30,
+        "recheckOnWordingChange": false
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "specialist": false,
+        "rights": false,
+        "minimumSourcePackets": 2
+      },
+      "readiness": {
+        "classicEligible": true,
+        "standaloneThreshold": 224,
+        "behavior": "approved non-expired policy-valid items only; combined pack is evaluated independently"
+      },
+      "sourceRegistryIds": [
+        "fifa-world-cup-2026",
+        "ifab-laws"
+      ]
+    },
+    {
+      "categoryId": "tahadani-024",
+      "policyVersion": "2.0.0",
+      "modality": "classic",
+      "sourcePolicy": "dated_sports_facts",
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة ميسي وكرستيانو"
+      ],
+      "prohibitedFacets": [
+        "صياغة عامة لا تخص الفئة",
+        "ادعاء غير موثق",
+        "سؤال متعدد الإجابات في الوضع الكلاسيكي"
+      ],
+      "temporal": {
+        "class": "dated",
+        "recheckDays": 30,
+        "recheckOnWordingChange": false
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "specialist": false,
+        "rights": false,
+        "minimumSourcePackets": 2
+      },
+      "readiness": {
+        "classicEligible": true,
+        "standaloneThreshold": 224,
+        "behavior": "approved non-expired policy-valid items only; combined pack is evaluated independently"
+      },
+      "sourceRegistryIds": [
+        "fifa-world-cup-2026",
+        "ifab-laws"
+      ]
+    },
+    {
+      "categoryId": "tahadani-025",
+      "policyVersion": "2.0.0",
+      "modality": "classic",
+      "sourcePolicy": "identity_trios",
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة من هو اللاعب"
+      ],
+      "prohibitedFacets": [
+        "صياغة عامة لا تخص الفئة",
+        "ادعاء غير موثق",
+        "سؤال متعدد الإجابات في الوضع الكلاسيكي"
+      ],
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730,
+        "recheckOnWordingChange": false
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "specialist": false,
+        "rights": false,
+        "minimumSourcePackets": 1
+      },
+      "readiness": {
+        "classicEligible": true,
+        "standaloneThreshold": 224,
+        "behavior": "approved non-expired policy-valid items only; combined pack is evaluated independently"
+      },
+      "sourceRegistryIds": [
+        "unesco-world-heritage"
+      ]
+    },
+    {
+      "categoryId": "tahadani-026",
+      "policyVersion": "2.0.0",
+      "modality": "classic",
+      "sourcePolicy": "stable_facts",
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة طاش ماطاش"
+      ],
+      "prohibitedFacets": [
+        "صياغة عامة لا تخص الفئة",
+        "ادعاء غير موثق",
+        "سؤال متعدد الإجابات في الوضع الكلاسيكي"
+      ],
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730,
+        "recheckOnWordingChange": false
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "specialist": false,
+        "rights": false,
+        "minimumSourcePackets": 1
+      },
+      "readiness": {
+        "classicEligible": true,
+        "standaloneThreshold": 224,
+        "behavior": "approved non-expired policy-valid items only; combined pack is evaluated independently"
+      },
+      "sourceRegistryIds": [
+        "unesco-world-heritage"
+      ]
+    },
+    {
+      "categoryId": "tahadani-027",
+      "policyVersion": "2.0.0",
+      "modality": "classic",
+      "sourcePolicy": "stable_facts",
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة باب الحارة"
+      ],
+      "prohibitedFacets": [
+        "صياغة عامة لا تخص الفئة",
+        "ادعاء غير موثق",
+        "سؤال متعدد الإجابات في الوضع الكلاسيكي"
+      ],
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730,
+        "recheckOnWordingChange": false
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "specialist": false,
+        "rights": false,
+        "minimumSourcePackets": 1
+      },
+      "readiness": {
+        "classicEligible": true,
+        "standaloneThreshold": 224,
+        "behavior": "approved non-expired policy-valid items only; combined pack is evaluated independently"
+      },
+      "sourceRegistryIds": [
+        "unesco-world-heritage"
+      ]
+    },
+    {
+      "categoryId": "tahadani-028",
+      "policyVersion": "2.0.0",
+      "modality": "classic",
+      "sourcePolicy": "stable_facts",
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة أفلام كلاسيك"
+      ],
+      "prohibitedFacets": [
+        "صياغة عامة لا تخص الفئة",
+        "ادعاء غير موثق",
+        "سؤال متعدد الإجابات في الوضع الكلاسيكي"
+      ],
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730,
+        "recheckOnWordingChange": false
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "specialist": false,
+        "rights": false,
+        "minimumSourcePackets": 1
+      },
+      "readiness": {
+        "classicEligible": true,
+        "standaloneThreshold": 224,
+        "behavior": "approved non-expired policy-valid items only; combined pack is evaluated independently"
+      },
+      "sourceRegistryIds": [
+        "unesco-world-heritage"
+      ]
+    },
+    {
+      "categoryId": "tahadani-029",
+      "policyVersion": "2.0.0",
+      "modality": "classic",
+      "sourcePolicy": "stable_facts",
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة أفلام رعب"
+      ],
+      "prohibitedFacets": [
+        "صياغة عامة لا تخص الفئة",
+        "ادعاء غير موثق",
+        "سؤال متعدد الإجابات في الوضع الكلاسيكي"
+      ],
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730,
+        "recheckOnWordingChange": false
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "specialist": false,
+        "rights": false,
+        "minimumSourcePackets": 1
+      },
+      "readiness": {
+        "classicEligible": true,
+        "standaloneThreshold": 224,
+        "behavior": "approved non-expired policy-valid items only; combined pack is evaluated independently"
+      },
+      "sourceRegistryIds": [
+        "unesco-world-heritage"
+      ]
+    },
+    {
+      "categoryId": "tahadani-030",
+      "policyVersion": "2.0.0",
+      "modality": "classic",
+      "sourcePolicy": "stable_facts",
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة Game Of Thrones"
+      ],
+      "prohibitedFacets": [
+        "صياغة عامة لا تخص الفئة",
+        "ادعاء غير موثق",
+        "سؤال متعدد الإجابات في الوضع الكلاسيكي"
+      ],
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730,
+        "recheckOnWordingChange": false
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "specialist": false,
+        "rights": false,
+        "minimumSourcePackets": 1
+      },
+      "readiness": {
+        "classicEligible": true,
+        "standaloneThreshold": 224,
+        "behavior": "approved non-expired policy-valid items only; combined pack is evaluated independently"
+      },
+      "sourceRegistryIds": [
+        "unesco-world-heritage"
+      ]
+    },
+    {
+      "categoryId": "tahadani-031",
+      "policyVersion": "2.0.0",
+      "modality": "classic",
+      "sourcePolicy": "stable_facts",
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة أغاني الزمن الجميل"
+      ],
+      "prohibitedFacets": [
+        "صياغة عامة لا تخص الفئة",
+        "ادعاء غير موثق",
+        "سؤال متعدد الإجابات في الوضع الكلاسيكي"
+      ],
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730,
+        "recheckOnWordingChange": false
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "specialist": false,
+        "rights": false,
+        "minimumSourcePackets": 1
+      },
+      "readiness": {
+        "classicEligible": true,
+        "standaloneThreshold": 224,
+        "behavior": "approved non-expired policy-valid items only; combined pack is evaluated independently"
+      },
+      "sourceRegistryIds": [
+        "unesco-world-heritage"
+      ]
+    },
+    {
+      "categoryId": "tahadani-032",
+      "policyVersion": "2.0.0",
+      "modality": "classic",
+      "sourcePolicy": "stable_facts",
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة أم كلثوم"
+      ],
+      "prohibitedFacets": [
+        "صياغة عامة لا تخص الفئة",
+        "ادعاء غير موثق",
+        "سؤال متعدد الإجابات في الوضع الكلاسيكي"
+      ],
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730,
+        "recheckOnWordingChange": false
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "specialist": false,
+        "rights": false,
+        "minimumSourcePackets": 1
+      },
+      "readiness": {
+        "classicEligible": true,
+        "standaloneThreshold": 224,
+        "behavior": "approved non-expired policy-valid items only; combined pack is evaluated independently"
+      },
+      "sourceRegistryIds": [
+        "unesco-world-heritage"
+      ]
+    },
+    {
+      "categoryId": "tahadani-033",
+      "policyVersion": "2.0.0",
+      "modality": "classic",
+      "sourcePolicy": "stable_facts",
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة أغاني وطنية"
+      ],
+      "prohibitedFacets": [
+        "صياغة عامة لا تخص الفئة",
+        "ادعاء غير موثق",
+        "سؤال متعدد الإجابات في الوضع الكلاسيكي"
+      ],
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730,
+        "recheckOnWordingChange": false
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "specialist": false,
+        "rights": false,
+        "minimumSourcePackets": 1
+      },
+      "readiness": {
+        "classicEligible": true,
+        "standaloneThreshold": 224,
+        "behavior": "approved non-expired policy-valid items only; combined pack is evaluated independently"
+      },
+      "sourceRegistryIds": [
+        "unesco-world-heritage"
+      ]
+    },
+    {
+      "categoryId": "tahadani-034",
+      "policyVersion": "2.0.0",
+      "modality": "classic",
+      "sourcePolicy": "stable_facts",
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة أغاني أجنبية"
+      ],
+      "prohibitedFacets": [
+        "صياغة عامة لا تخص الفئة",
+        "ادعاء غير موثق",
+        "سؤال متعدد الإجابات في الوضع الكلاسيكي"
+      ],
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730,
+        "recheckOnWordingChange": false
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "specialist": false,
+        "rights": false,
+        "minimumSourcePackets": 1
+      },
+      "readiness": {
+        "classicEligible": true,
+        "standaloneThreshold": 224,
+        "behavior": "approved non-expired policy-valid items only; combined pack is evaluated independently"
+      },
+      "sourceRegistryIds": [
+        "unesco-world-heritage"
+      ]
+    },
+    {
+      "categoryId": "tahadani-035",
+      "policyVersion": "2.0.0",
+      "modality": "classic",
+      "sourcePolicy": "stable_facts",
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة عبدالكريم عبدالقادر"
+      ],
+      "prohibitedFacets": [
+        "صياغة عامة لا تخص الفئة",
+        "ادعاء غير موثق",
+        "سؤال متعدد الإجابات في الوضع الكلاسيكي"
+      ],
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730,
+        "recheckOnWordingChange": false
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "specialist": false,
+        "rights": false,
+        "minimumSourcePackets": 1
+      },
+      "readiness": {
+        "classicEligible": true,
+        "standaloneThreshold": 224,
+        "behavior": "approved non-expired policy-valid items only; combined pack is evaluated independently"
+      },
+      "sourceRegistryIds": [
+        "unesco-world-heritage"
+      ]
+    },
+    {
+      "categoryId": "tahadani-036",
+      "policyVersion": "2.0.0",
+      "modality": "classic",
+      "sourcePolicy": "stable_facts",
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة One Piece"
+      ],
+      "prohibitedFacets": [
+        "صياغة عامة لا تخص الفئة",
+        "ادعاء غير موثق",
+        "سؤال متعدد الإجابات في الوضع الكلاسيكي"
+      ],
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730,
+        "recheckOnWordingChange": false
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "specialist": false,
+        "rights": false,
+        "minimumSourcePackets": 1
+      },
+      "readiness": {
+        "classicEligible": true,
+        "standaloneThreshold": 224,
+        "behavior": "approved non-expired policy-valid items only; combined pack is evaluated independently"
+      },
+      "sourceRegistryIds": [
+        "one-piece-official"
+      ]
+    },
+    {
+      "categoryId": "tahadani-037",
+      "policyVersion": "2.0.0",
+      "modality": "classic",
+      "sourcePolicy": "stable_facts",
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة Attack on Titan"
+      ],
+      "prohibitedFacets": [
+        "صياغة عامة لا تخص الفئة",
+        "ادعاء غير موثق",
+        "سؤال متعدد الإجابات في الوضع الكلاسيكي"
+      ],
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730,
+        "recheckOnWordingChange": false
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "specialist": false,
+        "rights": false,
+        "minimumSourcePackets": 1
+      },
+      "readiness": {
+        "classicEligible": true,
+        "standaloneThreshold": 224,
+        "behavior": "approved non-expired policy-valid items only; combined pack is evaluated independently"
+      },
+      "sourceRegistryIds": [
+        "unesco-world-heritage"
+      ]
+    },
+    {
+      "categoryId": "tahadani-038",
+      "policyVersion": "2.0.0",
+      "modality": "classic",
+      "sourcePolicy": "stable_facts",
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة Naruto"
+      ],
+      "prohibitedFacets": [
+        "صياغة عامة لا تخص الفئة",
+        "ادعاء غير موثق",
+        "سؤال متعدد الإجابات في الوضع الكلاسيكي"
+      ],
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730,
+        "recheckOnWordingChange": false
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "specialist": false,
+        "rights": false,
+        "minimumSourcePackets": 1
+      },
+      "readiness": {
+        "classicEligible": true,
+        "standaloneThreshold": 224,
+        "behavior": "approved non-expired policy-valid items only; combined pack is evaluated independently"
+      },
+      "sourceRegistryIds": [
+        "unesco-world-heritage"
+      ]
+    },
+    {
+      "categoryId": "tahadani-039",
+      "policyVersion": "2.0.0",
+      "modality": "classic",
+      "sourcePolicy": "stable_facts",
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة كونان"
+      ],
+      "prohibitedFacets": [
+        "صياغة عامة لا تخص الفئة",
+        "ادعاء غير موثق",
+        "سؤال متعدد الإجابات في الوضع الكلاسيكي"
+      ],
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730,
+        "recheckOnWordingChange": false
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "specialist": false,
+        "rights": false,
+        "minimumSourcePackets": 1
+      },
+      "readiness": {
+        "classicEligible": true,
+        "standaloneThreshold": 224,
+        "behavior": "approved non-expired policy-valid items only; combined pack is evaluated independently"
+      },
+      "sourceRegistryIds": [
+        "unesco-world-heritage"
+      ]
+    },
+    {
+      "categoryId": "tahadani-040",
+      "policyVersion": "2.0.0",
+      "modality": "classic",
+      "sourcePolicy": "stable_facts",
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة لعبة PUBG"
+      ],
+      "prohibitedFacets": [
+        "صياغة عامة لا تخص الفئة",
+        "ادعاء غير موثق",
+        "سؤال متعدد الإجابات في الوضع الكلاسيكي"
+      ],
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730,
+        "recheckOnWordingChange": false
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "specialist": false,
+        "rights": false,
+        "minimumSourcePackets": 1
+      },
+      "readiness": {
+        "classicEligible": true,
+        "standaloneThreshold": 224,
+        "behavior": "approved non-expired policy-valid items only; combined pack is evaluated independently"
+      },
+      "sourceRegistryIds": [
+        "unesco-world-heritage"
+      ]
+    },
+    {
+      "categoryId": "tahadani-041",
+      "policyVersion": "2.0.0",
+      "modality": "classic",
+      "sourcePolicy": "stable_facts",
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة Call of Duty"
+      ],
+      "prohibitedFacets": [
+        "صياغة عامة لا تخص الفئة",
+        "ادعاء غير موثق",
+        "سؤال متعدد الإجابات في الوضع الكلاسيكي"
+      ],
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730,
+        "recheckOnWordingChange": false
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "specialist": false,
+        "rights": false,
+        "minimumSourcePackets": 1
+      },
+      "readiness": {
+        "classicEligible": true,
+        "standaloneThreshold": 224,
+        "behavior": "approved non-expired policy-valid items only; combined pack is evaluated independently"
+      },
+      "sourceRegistryIds": [
+        "unesco-world-heritage"
+      ]
+    },
+    {
+      "categoryId": "tahadani-042",
+      "policyVersion": "2.0.0",
+      "modality": "classic",
+      "sourcePolicy": "stable_facts",
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة Minecraft"
+      ],
+      "prohibitedFacets": [
+        "صياغة عامة لا تخص الفئة",
+        "ادعاء غير موثق",
+        "سؤال متعدد الإجابات في الوضع الكلاسيكي"
+      ],
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730,
+        "recheckOnWordingChange": false
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "specialist": false,
+        "rights": false,
+        "minimumSourcePackets": 1
+      },
+      "readiness": {
+        "classicEligible": true,
+        "standaloneThreshold": 224,
+        "behavior": "approved non-expired policy-valid items only; combined pack is evaluated independently"
+      },
+      "sourceRegistryIds": [
+        "minecraft-official"
+      ]
+    },
+    {
+      "categoryId": "tahadani-043",
+      "policyVersion": "2.0.0",
+      "modality": "classic",
+      "sourcePolicy": "stable_facts",
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة العاب الطفولة"
+      ],
+      "prohibitedFacets": [
+        "صياغة عامة لا تخص الفئة",
+        "ادعاء غير موثق",
+        "سؤال متعدد الإجابات في الوضع الكلاسيكي"
+      ],
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730,
+        "recheckOnWordingChange": false
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "specialist": false,
+        "rights": false,
+        "minimumSourcePackets": 1
+      },
+      "readiness": {
+        "classicEligible": true,
+        "standaloneThreshold": 224,
+        "behavior": "approved non-expired policy-valid items only; combined pack is evaluated independently"
+      },
+      "sourceRegistryIds": [
+        "unesco-world-heritage"
+      ]
+    },
+    {
+      "categoryId": "tahadani-044",
+      "policyVersion": "2.0.0",
+      "modality": "image",
+      "sourcePolicy": "producer_placeholder",
+      "allowedFacets": [
+        "تعرف علم بصري مرخّص"
+      ],
+      "prohibitedFacets": [
+        "صياغة عامة لا تخص الفئة",
+        "ادعاء غير موثق",
+        "سؤال متعدد الإجابات في الوضع الكلاسيكي",
+        "رابط صورة خارجي",
+        "وسيط بلا حقوق نشر صريحة"
+      ],
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730,
+        "recheckOnWordingChange": false
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "specialist": false,
+        "rights": true,
+        "minimumSourcePackets": 1
+      },
+      "readiness": {
+        "classicEligible": false,
+        "standaloneThreshold": null,
+        "behavior": "blocked until question-specific media is local and explicitly publishable"
+      },
+      "sourceRegistryIds": [
+        "un-member-states",
+        "us-copyright-fair-use"
+      ]
+    },
+    {
+      "categoryId": "tahadani-045",
+      "policyVersion": "2.0.0",
+      "modality": "classic",
+      "sourcePolicy": "stable_facts",
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة عواصم"
+      ],
+      "prohibitedFacets": [
+        "صياغة عامة لا تخص الفئة",
+        "ادعاء غير موثق",
+        "سؤال متعدد الإجابات في الوضع الكلاسيكي"
+      ],
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730,
+        "recheckOnWordingChange": false
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "specialist": false,
+        "rights": false,
+        "minimumSourcePackets": 1
+      },
+      "readiness": {
+        "classicEligible": true,
+        "standaloneThreshold": 224,
+        "behavior": "approved non-expired policy-valid items only; combined pack is evaluated independently"
+      },
+      "sourceRegistryIds": [
+        "un-member-states"
+      ]
+    },
+    {
+      "categoryId": "tahadani-046",
+      "policyVersion": "2.0.0",
+      "modality": "classic",
+      "sourcePolicy": "stable_facts",
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة دول و عواصم"
+      ],
+      "prohibitedFacets": [
+        "صياغة عامة لا تخص الفئة",
+        "ادعاء غير موثق",
+        "سؤال متعدد الإجابات في الوضع الكلاسيكي"
+      ],
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730,
+        "recheckOnWordingChange": false
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "specialist": false,
+        "rights": false,
+        "minimumSourcePackets": 1
+      },
+      "readiness": {
+        "classicEligible": true,
+        "standaloneThreshold": 224,
+        "behavior": "approved non-expired policy-valid items only; combined pack is evaluated independently"
+      },
+      "sourceRegistryIds": [
+        "un-member-states"
+      ]
+    },
+    {
+      "categoryId": "tahadani-047",
+      "policyVersion": "2.0.0",
+      "modality": "classic",
+      "sourcePolicy": "stable_facts",
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة عملات"
+      ],
+      "prohibitedFacets": [
+        "صياغة عامة لا تخص الفئة",
+        "ادعاء غير موثق",
+        "سؤال متعدد الإجابات في الوضع الكلاسيكي"
+      ],
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730,
+        "recheckOnWordingChange": false
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "specialist": false,
+        "rights": false,
+        "minimumSourcePackets": 1
+      },
+      "readiness": {
+        "classicEligible": true,
+        "standaloneThreshold": 224,
+        "behavior": "approved non-expired policy-valid items only; combined pack is evaluated independently"
+      },
+      "sourceRegistryIds": [
+        "six-iso-4217"
+      ]
+    },
+    {
+      "categoryId": "tahadani-048",
+      "policyVersion": "2.0.0",
+      "modality": "classic",
+      "sourcePolicy": "stable_facts",
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة الفنون القتالية"
+      ],
+      "prohibitedFacets": [
+        "صياغة عامة لا تخص الفئة",
+        "ادعاء غير موثق",
+        "سؤال متعدد الإجابات في الوضع الكلاسيكي"
+      ],
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730,
+        "recheckOnWordingChange": false
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "specialist": false,
+        "rights": false,
+        "minimumSourcePackets": 1
+      },
+      "readiness": {
+        "classicEligible": true,
+        "standaloneThreshold": 224,
+        "behavior": "approved non-expired policy-valid items only; combined pack is evaluated independently"
+      },
+      "sourceRegistryIds": [
+        "unesco-world-heritage"
+      ]
+    },
+    {
+      "categoryId": "tahadani-049",
+      "policyVersion": "2.0.0",
+      "modality": "classic",
+      "sourcePolicy": "stable_facts",
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة تنس"
+      ],
+      "prohibitedFacets": [
+        "صياغة عامة لا تخص الفئة",
+        "ادعاء غير موثق",
+        "سؤال متعدد الإجابات في الوضع الكلاسيكي"
+      ],
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730,
+        "recheckOnWordingChange": false
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "specialist": false,
+        "rights": false,
+        "minimumSourcePackets": 1
+      },
+      "readiness": {
+        "classicEligible": true,
+        "standaloneThreshold": 224,
+        "behavior": "approved non-expired policy-valid items only; combined pack is evaluated independently"
+      },
+      "sourceRegistryIds": [
+        "unesco-world-heritage"
+      ]
+    },
+    {
+      "categoryId": "tahadani-050",
+      "policyVersion": "2.0.0",
+      "modality": "classic",
+      "sourcePolicy": "dated_sports_facts",
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة Formula 1"
+      ],
+      "prohibitedFacets": [
+        "صياغة عامة لا تخص الفئة",
+        "ادعاء غير موثق",
+        "سؤال متعدد الإجابات في الوضع الكلاسيكي"
+      ],
+      "temporal": {
+        "class": "dated",
+        "recheckDays": 30,
+        "recheckOnWordingChange": false
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "specialist": false,
+        "rights": false,
+        "minimumSourcePackets": 2
+      },
+      "readiness": {
+        "classicEligible": true,
+        "standaloneThreshold": 224,
+        "behavior": "approved non-expired policy-valid items only; combined pack is evaluated independently"
+      },
+      "sourceRegistryIds": [
+        "fifa-world-cup-2026",
+        "ifab-laws"
+      ]
+    },
+    {
+      "categoryId": "tahadani-051",
+      "policyVersion": "2.0.0",
+      "modality": "classic",
+      "sourcePolicy": "stable_facts",
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة سيارات"
+      ],
+      "prohibitedFacets": [
+        "صياغة عامة لا تخص الفئة",
+        "ادعاء غير موثق",
+        "سؤال متعدد الإجابات في الوضع الكلاسيكي"
+      ],
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730,
+        "recheckOnWordingChange": false
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "specialist": false,
+        "rights": false,
+        "minimumSourcePackets": 1
+      },
+      "readiness": {
+        "classicEligible": true,
+        "standaloneThreshold": 224,
+        "behavior": "approved non-expired policy-valid items only; combined pack is evaluated independently"
+      },
+      "sourceRegistryIds": [
+        "unesco-world-heritage"
+      ]
+    },
+    {
+      "categoryId": "tahadani-052",
+      "policyVersion": "2.0.0",
+      "modality": "classic",
+      "sourcePolicy": "dated_sports_facts",
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة منوعات كرة قدم"
+      ],
+      "prohibitedFacets": [
+        "صياغة عامة لا تخص الفئة",
+        "ادعاء غير موثق",
+        "سؤال متعدد الإجابات في الوضع الكلاسيكي"
+      ],
+      "temporal": {
+        "class": "dated",
+        "recheckDays": 30,
+        "recheckOnWordingChange": false
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "specialist": false,
+        "rights": false,
+        "minimumSourcePackets": 2
+      },
+      "readiness": {
+        "classicEligible": true,
+        "standaloneThreshold": 224,
+        "behavior": "approved non-expired policy-valid items only; combined pack is evaluated independently"
+      },
+      "sourceRegistryIds": [
+        "fifa-world-cup-2026",
+        "ifab-laws"
+      ]
+    },
+    {
+      "categoryId": "tahadani-053",
+      "policyVersion": "2.0.0",
+      "modality": "classic",
+      "sourcePolicy": "stable_facts",
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة منوعات شعرية"
+      ],
+      "prohibitedFacets": [
+        "صياغة عامة لا تخص الفئة",
+        "ادعاء غير موثق",
+        "سؤال متعدد الإجابات في الوضع الكلاسيكي"
+      ],
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730,
+        "recheckOnWordingChange": false
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "specialist": false,
+        "rights": false,
+        "minimumSourcePackets": 1
+      },
+      "readiness": {
+        "classicEligible": true,
+        "standaloneThreshold": 224,
+        "behavior": "approved non-expired policy-valid items only; combined pack is evaluated independently"
+      },
+      "sourceRegistryIds": [
+        "unesco-world-heritage"
+      ]
+    },
+    {
+      "categoryId": "tahadani-054",
+      "policyVersion": "2.0.0",
+      "modality": "classic",
+      "sourcePolicy": "dated_sports_facts",
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة كرة قدم عالمية"
+      ],
+      "prohibitedFacets": [
+        "صياغة عامة لا تخص الفئة",
+        "ادعاء غير موثق",
+        "سؤال متعدد الإجابات في الوضع الكلاسيكي"
+      ],
+      "temporal": {
+        "class": "dated",
+        "recheckDays": 30,
+        "recheckOnWordingChange": false
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "specialist": false,
+        "rights": false,
+        "minimumSourcePackets": 2
+      },
+      "readiness": {
+        "classicEligible": true,
+        "standaloneThreshold": 224,
+        "behavior": "approved non-expired policy-valid items only; combined pack is evaluated independently"
+      },
+      "sourceRegistryIds": [
+        "fifa-world-cup-2026",
+        "ifab-laws"
+      ]
+    },
+    {
+      "categoryId": "tahadani-055",
+      "policyVersion": "2.0.0",
+      "modality": "classic",
+      "sourcePolicy": "dated_sports_facts",
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة كرة قدم ايطالية"
+      ],
+      "prohibitedFacets": [
+        "صياغة عامة لا تخص الفئة",
+        "ادعاء غير موثق",
+        "سؤال متعدد الإجابات في الوضع الكلاسيكي"
+      ],
+      "temporal": {
+        "class": "dated",
+        "recheckDays": 30,
+        "recheckOnWordingChange": false
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "specialist": false,
+        "rights": false,
+        "minimumSourcePackets": 2
+      },
+      "readiness": {
+        "classicEligible": true,
+        "standaloneThreshold": 224,
+        "behavior": "approved non-expired policy-valid items only; combined pack is evaluated independently"
+      },
+      "sourceRegistryIds": [
+        "fifa-world-cup-2026",
+        "ifab-laws"
+      ]
+    },
+    {
+      "categoryId": "tahadani-056",
+      "policyVersion": "2.0.0",
+      "modality": "classic",
+      "sourcePolicy": "primary_religious_sources",
+      "allowedFacets": [
+        "قرآني موثق",
+        "قصص الأنبياء بنص مرجعي"
+      ],
+      "prohibitedFacets": [
+        "صياغة عامة لا تخص الفئة",
+        "ادعاء غير موثق",
+        "سؤال متعدد الإجابات في الوضع الكلاسيكي",
+        "تفسير مولد غير مراجَع",
+        "فتوى أو حكم ديني"
+      ],
+      "temporal": {
+        "class": "religious",
+        "recheckDays": null,
+        "recheckOnWordingChange": true
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "specialist": true,
+        "rights": false,
+        "minimumSourcePackets": 2
+      },
+      "readiness": {
+        "classicEligible": true,
+        "standaloneThreshold": 224,
+        "behavior": "approved non-expired policy-valid items only; combined pack is evaluated independently"
+      },
+      "sourceRegistryIds": [
+        "quran-complex"
+      ]
+    },
+    {
+      "categoryId": "tahadani-057",
+      "policyVersion": "2.0.0",
+      "modality": "classic",
+      "sourcePolicy": "primary_religious_sources",
+      "allowedFacets": [
+        "نص القرآن",
+        "معلومات مصحف موثقة"
+      ],
+      "prohibitedFacets": [
+        "صياغة عامة لا تخص الفئة",
+        "ادعاء غير موثق",
+        "سؤال متعدد الإجابات في الوضع الكلاسيكي",
+        "تفسير مولد غير مراجَع",
+        "فتوى أو حكم ديني"
+      ],
+      "temporal": {
+        "class": "religious",
+        "recheckDays": null,
+        "recheckOnWordingChange": true
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "specialist": true,
+        "rights": false,
+        "minimumSourcePackets": 2
+      },
+      "readiness": {
+        "classicEligible": true,
+        "standaloneThreshold": 224,
+        "behavior": "approved non-expired policy-valid items only; combined pack is evaluated independently"
+      },
+      "sourceRegistryIds": [
+        "quran-complex"
+      ]
+    },
+    {
+      "categoryId": "tahadani-058",
+      "policyVersion": "2.0.0",
+      "modality": "classic",
+      "sourcePolicy": "dated_local_facts",
+      "allowedFacets": [
+        "معلومات محلية مؤرخة ومصدرها رسمي"
+      ],
+      "prohibitedFacets": [
+        "صياغة عامة لا تخص الفئة",
+        "ادعاء غير موثق",
+        "سؤال متعدد الإجابات في الوضع الكلاسيكي"
+      ],
+      "temporal": {
+        "class": "dated",
+        "recheckDays": 30,
+        "recheckOnWordingChange": false
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "specialist": false,
+        "rights": false,
+        "minimumSourcePackets": 2
+      },
+      "readiness": {
+        "classicEligible": true,
+        "standaloneThreshold": 224,
+        "behavior": "approved non-expired policy-valid items only; combined pack is evaluated independently"
+      },
+      "sourceRegistryIds": [
+        "unesco-world-heritage"
+      ]
+    },
+    {
+      "categoryId": "tahadani-059",
+      "policyVersion": "2.0.0",
+      "modality": "classic",
+      "sourcePolicy": "identity_trios",
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة توقعني (دول)"
+      ],
+      "prohibitedFacets": [
+        "صياغة عامة لا تخص الفئة",
+        "ادعاء غير موثق",
+        "سؤال متعدد الإجابات في الوضع الكلاسيكي"
+      ],
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730,
+        "recheckOnWordingChange": false
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "specialist": false,
+        "rights": false,
+        "minimumSourcePackets": 1
+      },
+      "readiness": {
+        "classicEligible": true,
+        "standaloneThreshold": 224,
+        "behavior": "approved non-expired policy-valid items only; combined pack is evaluated independently"
+      },
+      "sourceRegistryIds": [
+        "un-member-states"
+      ]
+    },
+    {
+      "categoryId": "tahadani-060",
+      "policyVersion": "2.0.0",
+      "modality": "classic",
+      "sourcePolicy": "identity_trios",
+      "allowedFacets": [
+        "معلومة محددة ضمن فئة مسيرة لاعب"
+      ],
+      "prohibitedFacets": [
+        "صياغة عامة لا تخص الفئة",
+        "ادعاء غير موثق",
+        "سؤال متعدد الإجابات في الوضع الكلاسيكي"
+      ],
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730,
+        "recheckOnWordingChange": false
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "specialist": false,
+        "rights": false,
+        "minimumSourcePackets": 1
+      },
+      "readiness": {
+        "classicEligible": true,
+        "standaloneThreshold": 224,
+        "behavior": "approved non-expired policy-valid items only; combined pack is evaluated independently"
+      },
+      "sourceRegistryIds": [
+        "unesco-world-heritage"
+      ]
+    },
+    {
+      "categoryId": "tahadani-061",
+      "policyVersion": "2.0.0",
+      "modality": "image",
+      "sourcePolicy": "producer_placeholder",
+      "allowedFacets": [
+        "تشكيل بصري مرخّص ومحدد التاريخ"
+      ],
+      "prohibitedFacets": [
+        "صياغة عامة لا تخص الفئة",
+        "ادعاء غير موثق",
+        "سؤال متعدد الإجابات في الوضع الكلاسيكي",
+        "رابط صورة خارجي",
+        "وسيط بلا حقوق نشر صريحة"
+      ],
+      "temporal": {
+        "class": "stable",
+        "recheckDays": 730,
+        "recheckOnWordingChange": false
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "specialist": false,
+        "rights": true,
+        "minimumSourcePackets": 1
+      },
+      "readiness": {
+        "classicEligible": false,
+        "standaloneThreshold": null,
+        "behavior": "blocked until question-specific media is local and explicitly publishable"
+      },
+      "sourceRegistryIds": [
+        "us-copyright-fair-use",
+        "us-copyright-facts-expression"
+      ]
+    },
+    {
+      "categoryId": "tahadani-062",
+      "policyVersion": "2.0.0",
+      "modality": "classic",
+      "sourcePolicy": "dated_sports_facts",
+      "allowedFacets": [
+        "جدول بطولة 2026 المؤرخ رسمياً"
+      ],
+      "prohibitedFacets": [
+        "صياغة عامة لا تخص الفئة",
+        "ادعاء غير موثق",
+        "سؤال متعدد الإجابات في الوضع الكلاسيكي"
+      ],
+      "temporal": {
+        "class": "dated",
+        "recheckDays": 30,
+        "recheckOnWordingChange": false
+      },
+      "review": {
+        "fact": true,
+        "arabic": true,
+        "specialist": false,
+        "rights": false,
+        "minimumSourcePackets": 2
+      },
+      "readiness": {
+        "classicEligible": true,
+        "standaloneThreshold": 224,
+        "behavior": "approved non-expired policy-valid items only; combined pack is evaluated independently"
+      },
+      "sourceRegistryIds": [
+        "fifa-world-cup-2026"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "question-bank-v3/academy-packet.v3.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["packetId", "candidateId", "answer", "publisher", "title", "description", "canonicalUrl", "locator", "supportAr", "evidenceType", "sourceTier", "retrievedAt", "httpStatus", "responseUrl", "responseContentType", "responseBytes", "remoteBodySha256", "sourceExcerptBase64", "sourceExcerptSha256", "normalizedEvidenceSha256", "temporal", "humanSenseSelectionRequired"],
+  "properties": {
+    "packetId": { "type": "string", "pattern": "^academy-v3-v3-v1-draft-[0-9]{3}$" },
+    "candidateId": { "type": "string", "pattern": "^v3-v1-draft-[0-9]{3}$" },
+    "answer": { "type": "string", "minLength": 1 },
+    "publisher": { "const": "مجمع اللغة العربية بالقاهرة" },
+    "title": { "type": "string", "minLength": 1 },
+    "description": { "type": "string", "minLength": 1 },
+    "canonicalUrl": { "type": "string", "pattern": "^https://www\\.arabicacademy\\.gov\\.eg/ar/" },
+    "locator": { "type": "string", "pattern": "^مطابق: .+" },
+    "supportAr": { "type": "string", "minLength": 1 },
+    "evidenceType": { "const": "dictionary_entry_snapshot" },
+    "sourceTier": { "const": "authoritative" },
+    "retrievedAt": { "type": "string", "format": "date" },
+    "httpStatus": { "type": "integer", "minimum": 200, "maximum": 299 },
+    "responseUrl": { "type": "string", "format": "uri" },
+    "responseContentType": { "type": ["string", "null"] },
+    "responseBytes": { "type": "integer", "minimum": 1 },
+    "remoteBodySha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourceExcerptBase64": { "type": "string", "minLength": 1 },
+    "sourceExcerptSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "normalizedEvidenceSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "temporal": { "type": "object", "additionalProperties": false, "required": ["class", "validUntil"], "properties": { "class": { "const": "stable" }, "validUntil": { "type": "null" } } },
+    "humanSenseSelectionRequired": { "const": true }
+  }
+}

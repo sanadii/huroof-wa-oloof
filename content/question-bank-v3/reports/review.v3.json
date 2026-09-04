@@ -1,0 +1,30 @@
+{
+  "schemaVersion": "3.0.0",
+  "imported": 284,
+  "states": {
+    "evidence_ready": 207,
+    "ready_for_human": 77
+  },
+  "evidencePackets": 284,
+  "approved": 0,
+  "released": 0,
+  "dispositions": {
+    "needs_evidence": 207,
+    "ready_for_human": 77
+  },
+  "receipts": {
+    "automated": 284,
+    "ai": 0,
+    "human": 0,
+    "specialist": 0,
+    "rights": 0
+  },
+  "actualCorpusReadinessSimulation": {
+    "rounds": 1000,
+    "sampled": 1000,
+    "approvedInventory": 0,
+    "runtimePlayable": 0,
+    "seed": 2654435769
+  },
+  "constraint": "Only policy-valid approved playable records count toward any target."
+}

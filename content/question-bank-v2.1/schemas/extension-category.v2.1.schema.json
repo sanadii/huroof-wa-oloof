@@ -1,0 +1,83 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "slug",
+    "displayNameAr",
+    "sourceMode",
+    "sourcePolicy",
+    "classicCompatibility",
+    "catalogStatus",
+    "origin",
+    "sortOrder",
+    "runtimeVisibility",
+    "questionReadiness",
+    "activation",
+    "cover"
+  ],
+  "properties": {
+    "id": {
+      "enum": [
+        "huroof-001",
+        "huroof-002",
+        "huroof-003",
+        "huroof-004"
+      ]
+    },
+    "slug": {
+      "type": "string",
+      "minLength": 1
+    },
+    "displayNameAr": {
+      "type": "string",
+      "minLength": 1
+    },
+    "sourceMode": {
+      "const": "trivia"
+    },
+    "sourcePolicy": {
+      "type": "string",
+      "minLength": 1
+    },
+    "classicCompatibility": {
+      "const": "text"
+    },
+    "catalogStatus": {
+      "const": "proposed"
+    },
+    "origin": {
+      "const": "v2.1_extension"
+    },
+    "sortOrder": {
+      "type": "integer",
+      "minimum": 63,
+      "maximum": 66
+    },
+    "runtimeVisibility": {
+      "const": false
+    },
+    "questionReadiness": {
+      "const": "authoring_only"
+    },
+    "activation": {
+      "const": "authoring_only"
+    },
+    "cover": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "state",
+        "publishable"
+      ],
+      "properties": {
+        "state": {
+          "const": "proposed"
+        },
+        "publishable": {
+          "const": false
+        }
+      }
+    }
+  }
+}

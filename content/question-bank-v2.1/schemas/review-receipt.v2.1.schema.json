@@ -1,0 +1,60 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "receiptId",
+    "itemId",
+    "kind",
+    "reviewer",
+    "reviewedAt",
+    "policyVersion",
+    "verdict",
+    "evidence",
+    "contentHash"
+  ],
+  "properties": {
+    "receiptId": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$"
+    },
+    "itemId": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$"
+    },
+    "kind": {
+      "enum": [
+        "fact",
+        "arabic",
+        "relevance",
+        "duplicate",
+        "temporal",
+        "rights"
+      ]
+    },
+    "reviewer": {
+      "type": "string",
+      "minLength": 1
+    },
+    "reviewedAt": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+    },
+    "policyVersion": {
+      "const": "2.1.0"
+    },
+    "verdict": {
+      "enum": [
+        "pass",
+        "fail"
+      ]
+    },
+    "evidence": {
+      "type": "string",
+      "minLength": 1
+    },
+    "contentHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    }
+  }
+}
