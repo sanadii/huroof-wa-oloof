@@ -1,0 +1,7 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Staging assets and all uploads are mediated by trusted Admin SDK code.
+    match /{allPaths=**} { allow read, write: if false; }
+  }
+}

@@ -10,7 +10,7 @@ export interface SafeRoomSummary {
   buzzWinnerUid?: string;
   teams?: { horizontal: string; vertical: string };
   members?: Array<{ displayName: string; team?: 'horizontal' | 'vertical'; ready: boolean; role: ClientRole }>;
-  matchSettings?: { demo: boolean; questionSeconds: number; opponentSeconds: number; teams: { horizontal: string; vertical: string }; categories: string[]; modality: 'classic' | 'image'; difficulty: string; mode: 'classic' | 'fast' | 'custom' };
+  matchSettings?: { demo: boolean; questionSeconds: number; opponentSeconds: number; teams: { horizontal: string; vertical: string }; categories: string[]; modality: 'classic' | 'image' | 'charades'; difficulty: string; mode: 'classic' | 'fast' | 'custom' };
   canStart?: boolean;
   startBlockedReason?: string;
 }
@@ -58,7 +58,7 @@ export type GameIntent = {
   payload: Record<string, unknown>;
 };
 
-export interface CreateRoomRequest { displayName?: string; demo?: boolean; bestOf?: 1 | 3 | 5 | 7; questionSeconds?: number; opponentSeconds?: number; teams?: { horizontal?: string; vertical?: string }; categories?: string[]; difficulty?: string; mode?: 'classic' | 'fast' | 'custom'; }
+export interface CreateRoomRequest { displayName?: string; demo?: boolean; bestOf?: 1 | 3 | 5 | 7; questionSeconds?: number; opponentSeconds?: number; teams?: { horizontal?: string; vertical?: string }; categories?: string[]; modality?: 'classic' | 'image' | 'charades'; difficulty?: string; mode?: 'classic' | 'fast' | 'custom'; }
 export interface JoinRoomRequest { roomCode: string; displayName?: string; }
 
 export interface GameRuntimeAdapter {

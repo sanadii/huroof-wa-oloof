@@ -14,6 +14,12 @@ export interface BoardCell {
 }
 
 export interface GameBoard { seed: number; cells: BoardCell[]; }
+export interface NearWinningCandidate {
+  /** The one neutral cell whose ownership would complete this specific path. */
+  candidateId: string;
+  /** The resulting deterministic domain path, including candidateId. */
+  path: string[];
+}
 export const BOARD_SIZE = 5;
 
 export function cellId(q: number, r: number): `cell-${number}-${number}` { return `cell-${q}-${r}`; }
@@ -82,4 +88,40 @@ export function findWinningPath(board: GameBoard, team: TeamAxis): string[] | un
     }
   }
   return undefined;
+}
+
+/**
+ * Finds the one deterministic neutral-cell claim that would complete a team path.
+ * Existing wins are deliberately excluded: this is feedback for a next move, not a
+ * second representation of an authoritative result.
+ */
+export function findNearWinningCandidate(board: GameBoard, team: TeamAxis): NearWinningCandidate | undefined {
+  if (findWinningPath(board, team)) return undefined;
+
+  const candidates = board.cells
+    .filter((cell) => !cell.owner)
+    .sort((left, right) => left.r - right.r || left.q - right.q || left.id.localeCompare(right.id))
+    .flatMap((candidate) => {
+      const path = findWinningPath(withOwner(board, candidate.id, team), team);
+      return path?.includes(candidate.id) ? [{ candidateId: candidate.id, path }] : [];
+    });
+
+  return candidates.sort((left, right) =>
+    left.path.length - right.path.length ||
+    compareCandidateCoordinates(board, left.candidateId, right.candidateId),
+  )[0];
+}
+
+/** Returns independently-derived near-win states; neither axis suppresses the other. */
+export function findNearWinningCandidates(board: GameBoard): Record<TeamAxis, NearWinningCandidate | undefined> {
+  return {
+    horizontal: findNearWinningCandidate(board, 'horizontal'),
+    vertical: findNearWinningCandidate(board, 'vertical'),
+  };
+}
+
+function compareCandidateCoordinates(board: GameBoard, leftId: string, rightId: string): number {
+  const left = board.cells.find((cell) => cell.id === leftId)!;
+  const right = board.cells.find((cell) => cell.id === rightId)!;
+  return left.r - right.r || left.q - right.q || left.id.localeCompare(right.id);
 }

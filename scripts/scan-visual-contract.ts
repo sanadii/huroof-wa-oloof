@@ -9,7 +9,8 @@ const forbidden = [
   /\b(?:yellow|amber|gold|violet|indigo)\b/i,
   /(?:linear|radial|conic)-gradient/i,
 ];
-const allowedShadows = new Set(['var(--focus-ring)', 'var(--shadow-raised)', 'var(--shadow-panel)', 'var(--shadow-control)']);
+const allowedShadows = new Set(['var(--focus-ring)', 'var(--shadow-raised)', 'var(--shadow-panel)', 'var(--shadow-control)', 'var(--spatial-board-shadow)', 'var(--spatial-dock-shadow)', 'var(--arena-stage-shadow)', 'var(--arena-panel-shadow)', 'var(--arena-score-shadow)']);
+const allowedRadii = new Set(['var(--radius-none)', 'var(--spatial-radius-control)', 'var(--spatial-radius-dock)', 'var(--arena-radius-panel)', 'var(--arena-radius-capsule)']);
 
 async function filesAt(path: string): Promise<string[]> {
   const entries = await readdir(path, { withFileTypes: true });
@@ -31,10 +32,10 @@ for (const file of await filesAt(sourceRoot)) {
     if (!allowedShadows.has(match[1].trim())) failures.push(`${file}: non-tokenized box-shadow`);
   }
   for (const match of content.matchAll(/border-radius\s*:\s*([^;]+);/g)) {
-    if (match[1].trim() !== 'var(--radius-none)') failures.push(`${file}: non-zero border radius`);
+    if (!allowedRadii.has(match[1].trim())) failures.push(`${file}: non-authorized border radius`);
   }
   const svgGradients = [...content.matchAll(/<linearGradient\b/g)].length;
-  if (svgGradients && !file.endsWith(join('features', 'board', 'game-board.tsx'))) failures.push(`${file}: SVG material gradient outside authentic board`);
+  if (svgGradients) failures.push(`${file}: SVG gradients are prohibited by the flat gameplay contract`);
   for (const match of content.matchAll(/stopColor=\{([^}]+)\}/g)) {
     if (!match[1].includes('var(--material-')) failures.push(`${file}: non-token SVG gradient stop`);
   }
@@ -44,5 +45,5 @@ if (failures.length) {
   console.error('Visual contract scan failed:\n' + failures.join('\n'));
   process.exitCode = 1;
 } else {
-  console.log('Visual contract scan completed: src/ uses no prohibited palette literals, raw gradients, non-tokenized shadows, or non-zero radii. This is structural evidence only, not aesthetic approval.');
+  console.log('Visual contract scan completed: src/ uses no prohibited palette literals, raw gradients, non-tokenized shadows, or unauthorized radii. This is structural evidence only, not aesthetic approval.');
 }

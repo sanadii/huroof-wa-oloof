@@ -35,3 +35,5 @@ pnpm-debug.log*
 .evidence-migration-staging/
 .playwright-cli/
 graphify-out/
+
+.vercel

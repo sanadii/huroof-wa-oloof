@@ -1,0 +1,13 @@
+export const ADMIN_ROLES = ['super_admin', 'content_admin', 'reviewer', 'game_ops', 'viewer'] as const;
+export type AdminRole = typeof ADMIN_ROLES[number];
+export type AdminCapability = 'session' | 'questions.read' | 'questions.write' | 'reviews.read' | 'reviews.decide' | 'categories.read' | 'categories.write' | 'releases.read' | 'releases.stage' | 'rooms.read' | 'rooms.act' | 'users.read' | 'users.write' | 'audit.read' | 'health.read' | 'settings.read' | 'settings.write';
+export type Page<T> = { items: T[]; nextCursor: string | null };
+export type Mutation = { operationId: string; revision: number; replayed: boolean; serverTime: string | null };
+export type AdminSession = { uid: string; roles: AdminRole[]; authzVersion: number; capabilities: AdminCapability[]; mutationMode: 'enabled' | 'staged' };
+export type QuestionSummary = { id: string; revision: number; status: string; categoryId: string; modality: string; headerAr: string; updatedAt?: unknown };
+export type QuestionDetail = QuestionSummary & { promptAr?: string; canonicalAnswer?: string; acceptedAnswers?: string[]; specialistRoles?: string[]; sources?: unknown[] };
+export type Review = { id: string; questionId: string; authorUid: string; status: string; revision: number; updatedAt?: unknown };
+export type Category = { id: string; revision?: number; titleAr?: string; descriptionAr?: string; enabled?: boolean; reviewerUids?: string[] };
+export type Release = { id: string; immutable?: boolean; approvedCount?: number; asOf?: string };
+export type RoomSummary = { id: string; revision: number; lifecycle: string; roomCode?: string; releaseId?: string; paused: boolean; memberCount?: number };
+export type AuditRow = { id: string; action: string; target: string; actorUid: string; createdAt?: unknown };

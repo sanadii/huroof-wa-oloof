@@ -1,8 +1,7 @@
 import { FormEvent, useEffect, useState } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { ThemeToggle } from '../design-system/ThemeToggle';
-import { EntryBoard } from '../features/board/entry-board';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { gameRuntime } from '../features/game/runtime';
+import { HomeSurface } from './HomeSurface';
 
 export function normalizeRoomCode(value: string) {
   return value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8);
@@ -14,15 +13,17 @@ export function EntryRoute() {
   const [roomCode, setRoomCode] = useState(() => normalizeRoomCode(search.get('room') ?? ''));
   const [name, setName] = useState('');
   const [message, setMessage] = useState('');
+  const [roomCodeError, setRoomCodeError] = useState('');
   const [busy, setBusy] = useState(false);
   const navigate = useNavigate();
 
   async function joinRoom(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!roomCode) {
-      setMessage('أدخل رمز الغرفة أولاً.');
+      setRoomCodeError('أدخل رمز الغرفة أولاً.');
       return;
     }
+    setRoomCodeError('');
     if (typeof fetch !== 'function') { setMessage(`سيُتابع الانضمام إلى الغرفة ${roomCode}.`); return; }
     setBusy(true); setMessage('');
     try {
@@ -34,46 +35,37 @@ export function EntryRoute() {
   }
 
   return (
-    <main className="entry-page" id="main-content">
-      <a className="skip-link" href="#main-content">تجاوز إلى المحتوى</a>
-      <header className="entry-header">
-        <p className="wordmark">استوديو الحروف</p>
-        <ThemeToggle />
-      </header>
-      <section className="entry-layout" aria-labelledby="entry-title">
-        <div className="entry-actions">
-          <p className="eyebrow">لعبة معرفة عربية مباشرة</p>
-          <h1 id="entry-title">استوديو الحروف</h1>
-          <p className="entry-intro">أسئلة عربية. فريقان. مسار واحد يفوز.</p>
-          <form className="join-form" onSubmit={joinRoom}>
-            <label htmlFor="room-code">رمز الغرفة</label>
-            <input
-              autoCapitalize="characters"
-              autoComplete="off"
-              dir="ltr"
-              id="room-code"
-              inputMode="text"
-              maxLength={8}
-              onChange={(event) => setRoomCode(normalizeRoomCode(event.target.value))}
-              pattern="[A-Z0-9]{1,8}"
-              placeholder="AB12CD34"
-              spellCheck="false"
-              value={roomCode}
-            />
-            <label htmlFor="player-name">اسم اللاعب <span aria-hidden="true">(اختياري)</span></label>
+    <HomeSurface
+      joinForm={
+        <form className="join-form" onSubmit={joinRoom}>
+          <label htmlFor="room-code">رمز الغرفة</label>
+          <input
+            autoCapitalize="characters"
+            autoComplete="off"
+            dir="ltr"
+            id="room-code"
+            inputMode="text"
+            maxLength={8}
+            aria-describedby={roomCodeError ? 'room-code-error' : undefined}
+            aria-invalid={Boolean(roomCodeError)}
+            onChange={(event) => {
+              setRoomCode(normalizeRoomCode(event.target.value));
+              if (roomCodeError) setRoomCodeError('');
+            }}
+            pattern="[A-Z0-9]{1,8}"
+            placeholder="AB12CD34"
+            spellCheck="false"
+            value={roomCode}
+          />
+          <details className="join-form__optional-name">
+            <summary>إضافة اسم اللاعب <span aria-hidden="true">(اختياري)</span></summary>
+            <label htmlFor="player-name">اسم اللاعب</label>
             <input id="player-name" onChange={(event) => setName(event.target.value)} placeholder="اسمك على لوحة الفريق" value={name} />
-            <button className="button button--primary" disabled={busy} type="submit">{busy ? 'جارٍ الانضمام…' : 'انضم إلى غرفة'}</button>
-          </form>
-          <Link className="button button--secondary" to="/host/new">أنشئ مباراة</Link>
-          <Link className="how-to-play" to="/how-to-play">كيف تلعب؟</Link>
-          <p aria-live="polite" className="form-message">{message}</p>
-          <p className="entry-facts">فريقان <span aria-hidden="true">·</span> أسئلة عربية <span aria-hidden="true">·</span> مسار يفوز</p>
-        </div>
-        <div className="entry-identity">
-          <EntryBoard />
-          <p className="board-caption"><span aria-hidden="true">↔</span> من اليسار إلى اليمين <span aria-hidden="true">↕</span> من الأعلى إلى الأسفل</p>
-        </div>
-      </section>
-    </main>
+          </details>
+          <button className="button button--primary" disabled={busy} type="submit">{busy ? 'جارٍ الانضمام…' : 'انضم إلى غرفة'}</button>
+        </form>
+      }
+      joinMessage={roomCodeError ? <p className="form-message" id="room-code-error" role="alert">{roomCodeError}</p> : message ? <p aria-live="polite" className="form-message">{message}</p> : null}
+    />
   );
 }

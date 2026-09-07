@@ -8,7 +8,7 @@
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "noEmit": true,
-    "types": ["node"]
+    "types": ["node", "vite/client"]
   },
   "include": ["vite.config.ts", "scripts/**/*.ts", "server/**/*.ts", "tests/**/*.test.ts", "src/question-bank.ts", "src/features/game/domain/**/*.ts"]
 }

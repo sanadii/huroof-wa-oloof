@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { connectionLabel, stateLabel } from '../../src/features/ui/game-state';
+import { connectionLabel, stateLabel } from '../../src/features/ui/game-state.js';
 
 describe('Arabic game-state labels', () => {
   it('never exposes a raw lifecycle enum to the presentation layer', () => {

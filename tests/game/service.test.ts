@@ -19,11 +19,21 @@ async function readyRoom(service: AuthoritativeGameService) {
 
 test('host-only demo rooms start, while any partial player roster still requires ready teams', async () => withService(async (service) => {
   assert.throws(() => service.create('host', false), /NO_APPROVED_QUESTION_STOCK/);
-  const soloDemo = service.create('host', true); const soloStart = await service.intent(soloDemo.roomId, soloDemo.token, { type: 'START_MATCH', intentId: 'solo-demo', expectedRevision: soloDemo.revision, payload: {} }); assert.equal(soloStart.projection.projection.room.state, 'ROUND_SETUP');
+  const soloDemo = service.create('host', true); const soloStart = await service.intent(soloDemo.roomId, soloDemo.token, { type: 'START_MATCH', intentId: 'solo-demo', expectedRevision: soloDemo.revision, payload: {} }); assert.equal(soloStart.projection.projection.room.state, 'ROUND_SETUP'); assert.equal(soloStart.projection.projection.room.readyCount, 0); assert.equal(soloStart.projection.projection.room.memberCount, 0);
   const host = service.create('host', true); const one = service.join(host.roomCode, 'one');
   await assert.rejects(() => service.intent(host.roomId, host.token, { type: 'START_MATCH', intentId: 'early', expectedRevision: one.revision, payload: {} }), /LOBBY_NEEDS_TWO_TEAMS/);
   const two = service.join(host.roomCode, 'two');
   await assert.rejects(() => service.intent(host.roomId, host.token, { type: 'START_MATCH', intentId: 'unready', expectedRevision: two.revision, payload: {} }), /LOBBY_ALL_MEMBERS_MUST_BE_READY/);
+}));
+
+test('room creation rejects a category scope that cannot fill the complete letter board', async () => withService(async (service) => {
+  assert.throws(
+    () => service.create('host', true, { categories: ['tahadani-001'] }),
+    /QUESTION_SCOPE_INSUFFICIENT_COVERAGE/,
+  );
+  const playable = service.create('host', true, { categories: ['tahadani-006'] });
+  const started = await service.intent(playable.roomId, playable.token, { type: 'START_MATCH', intentId: 'start-playable-scope', expectedRevision: playable.revision, payload: {} });
+  assert.equal(started.projection.projection.room.state, 'ROUND_SETUP');
 }));
 
 test('host team selection follows buzz lifecycle and keeps its public marker UID-free', async () => withService(async (service) => {
@@ -32,6 +42,25 @@ test('host team selection follows buzz lifecycle and keeps its public marker UID
   await intent('START_MATCH'); await intent('ROUND_READY'); const cell = service.metadata(host.roomId, host.token).projection.board![0]; await intent('SELECT_CELL', { cellId: cell.id }); await intent('LETTER_REVEALED'); const selected = await intent('HOST_SELECT_TEAM', { team: 'horizontal' });
   assert.equal(selected.projection.projection.room.state, 'FIRST_ANSWER'); assert.equal(selected.projection.projection.answeringTeam, 'horizontal'); assert.deepEqual(selected.projection.projection.buzzWinner, { displayName: 'فريق ↔', team: 'horizontal', method: 'host' }); assert.equal(JSON.stringify(selected.projection.projection.buzzWinner).includes('uid'), false);
   await intent('JUDGE_INCORRECT'); await assert.rejects(() => service.intent(host.roomId, host.token, { type: 'HOST_SELECT_TEAM', intentId: 'wrong-team', expectedRevision: revision, payload: { team: 'horizontal' } }), /HOST_TEAM_SELECTION_NOT_ALLOWED/); const opponent = await intent('HOST_SELECT_TEAM', { team: 'vertical' }); assert.equal(opponent.projection.projection.answeringTeam, 'vertical');
+}));
+
+test('a regular first cell gives the host its question immediately without exposing it before reveal', async () => withService(async (service) => {
+  const room = await readyRoom(service);
+  await room.hostIntent('START_MATCH');
+  await room.hostIntent('ROUND_READY');
+  const cell = service.metadata(room.host.roomId, room.host.token).projection.board!.find((item) => item.kind === 'letter')!;
+  const selected = await room.hostIntent('SELECT_CELL', { cellId: cell.id });
+  const hostQuestion = (selected.projection.projection as { question?: { headerAr?: string; promptAr?: string; primaryAnswer?: string } }).question;
+  assert.ok(hostQuestion?.headerAr?.trim());
+  assert.ok(hostQuestion?.promptAr?.trim());
+  assert.ok(hostQuestion?.primaryAnswer?.trim());
+  for (const token of [room.one.token, service.createAudienceCapability(room.host.roomId)]) {
+    const publicProjection = service.metadata(room.host.roomId, token).projection as { question?: unknown };
+    assert.equal(publicProjection.question, undefined);
+    assert.equal(JSON.stringify(publicProjection).includes('primaryAnswer'), false);
+  }
+  const revealed = await room.hostIntent('LETTER_REVEALED');
+  assert.deepEqual((revealed.projection.projection as { question?: unknown }).question, hostQuestion);
 }));
 
 test('new rooms fix the v2 rule while preserving rematch-safe categories and difficulty', async () => withService(async (service) => {

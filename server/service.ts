@@ -11,7 +11,7 @@ import type { ClientRole, GameIntent, ProjectionEnvelope, SafeProjection } from 
 
 type Member = { uid: string; role: ClientRole; displayName: string; team?: TeamAxis; ready: boolean };
 type StoredQuestion = RuntimeQuestionV32 & { targetLetter: string; sources?: unknown[]; status: string; difficulty?: string; useCount?: number; objectionCount?: number; reviewError?: string; readOnly?: boolean; sourceUrl?: string };
-export type MatchConfig = { questionSeconds: number; opponentSeconds: number; teams: Record<TeamAxis, string>; categories: string[]; modality: 'classic' | 'image'; difficulty: string; mode: 'classic' | 'fast' | 'custom' };
+export type MatchConfig = { questionSeconds: number; opponentSeconds: number; teams: Record<TeamAxis, string>; categories: string[]; modality: 'classic' | 'image' | 'charades'; difficulty: string; mode: 'classic' | 'fast' | 'custom' };
 type CreateMatchConfig = Partial<MatchConfig> & { bestOf?: 1 | 3 | 5 | 7 };
 type Room = { id: string; code: string; revision: number; demo: boolean; roomSchemaVersion: 1 | 2; ruleSet: RuleSet; config: MatchConfig; game: GameState; members: Member[]; intentIds: Record<string, number>; boardNonce: string; boardSequence: number; activeQuestion?: StoredQuestion; surpriseLetters: string[]; questionSelection?: MatchQuestionSelection; deadlineAt?: string; buzzOpen?: boolean; pausedTimer?: { remainingMs: number; buzzOpen: boolean }; buzzWinner?: { uid?: string; displayName: string; team: TeamAxis; method: 'player' | 'host' }; audit: Array<{ revision: number; type: string; at: string; actor: string; payload: unknown }> };
 type Capability = { roomId: string; uid: string; role: ClientRole };
@@ -42,7 +42,7 @@ function upcastRoom(value: unknown): Room {
   const room = boardDefaults(value as Room & { roomSchemaVersion?: number; ruleSet?: RuleSet; config?: MatchConfig & { bestOf?: 1 | 3 | 5 | 7 }; game?: GameState & { points?: Record<TeamAxis, number>; roundWins?: Record<TeamAxis, number> } });
   if (room.roomSchemaVersion === 2 && room.ruleSet === 'v2') return room;
   const legacyBestOf = room.config?.bestOf && [1, 3, 5, 7].includes(room.config.bestOf) ? room.config.bestOf : 3;
-  const config: MatchConfig = { questionSeconds: room.config?.questionSeconds ?? 20, opponentSeconds: room.config?.opponentSeconds ?? 10, teams: room.config?.teams ?? { horizontal: 'فريق ↔', vertical: 'فريق ↕' }, categories: room.config?.categories ?? [], modality: room.config?.modality === 'image' ? 'image' : 'classic', difficulty: room.config?.difficulty ?? 'mixed', mode: room.config?.mode ?? 'classic' };
+  const config: MatchConfig = { questionSeconds: room.config?.questionSeconds ?? 20, opponentSeconds: room.config?.opponentSeconds ?? 10, teams: room.config?.teams ?? { horizontal: 'فريق ↔', vertical: 'فريق ↕' }, categories: room.config?.categories ?? [], modality: room.config?.modality === 'image' || room.config?.modality === 'charades' ? room.config.modality : 'classic', difficulty: room.config?.difficulty ?? 'mixed', mode: room.config?.mode ?? 'classic' };
   if (!room.game || room.game.lifecycle === 'LOBBY') return { ...room, roomSchemaVersion: 2, ruleSet: 'v2', config, game: initialGameState() };
   const game = room.game;
   return {
@@ -96,7 +96,7 @@ export class AuthoritativeGameService {
     if (!demo && !this.questionsSync(false).length) throw new Error('NO_APPROVED_QUESTION_STOCK');
     const id = randomUUID(); const code = id.replaceAll('-', '').slice(0, 6).toUpperCase(); const host = { uid: randomUUID(), role: 'host' as const, displayName, ready: true };
     // bestOf is accepted only for stale clients and deliberately has no v2 effect.
-    const requestedCategories = [...new Set((requested.categories ?? []).filter((category): category is string => typeof category === 'string' && category.trim().length > 0).map((category) => category.trim()))].sort(); const categories = requestedCategories.length ? requestedCategories : demo ? [...new Set(this.questionsSync(true).map((question) => question.categoryId).filter((category): category is string => typeof category === 'string'))].sort() : []; if (!categories.length) throw new Error('QUESTION_CATEGORY_SCOPE_REQUIRED'); const modality = requested.modality === 'image' ? 'image' : 'classic'; const config: MatchConfig = { questionSeconds: Math.max(10, Math.min(60, requested.questionSeconds ?? 20)), opponentSeconds: Math.max(10, Math.min(60, requested.opponentSeconds ?? 10)), teams: { horizontal: requested.teams?.horizontal?.trim() || 'فريق ↔', vertical: requested.teams?.vertical?.trim() || 'فريق ↕' }, categories, modality, difficulty: requested.difficulty ?? 'mixed', mode: requested.mode ?? 'classic' };
+    const requestedCategories = [...new Set((requested.categories ?? []).filter((category): category is string => typeof category === 'string' && category.trim().length > 0).map((category) => category.trim()))].sort(); const categories = requestedCategories.length ? requestedCategories : demo ? [...new Set(this.questionsSync(true).map((question) => question.categoryId).filter((category): category is string => typeof category === 'string'))].sort() : []; if (!categories.length) throw new Error('QUESTION_CATEGORY_SCOPE_REQUIRED'); const modality = requested.modality === 'image' || requested.modality === 'charades' ? requested.modality : 'classic'; this.requirePlayableQuestionScope(demo, categories, modality); const config: MatchConfig = { questionSeconds: Math.max(10, Math.min(60, requested.questionSeconds ?? 20)), opponentSeconds: Math.max(10, Math.min(60, requested.opponentSeconds ?? 10)), teams: { horizontal: requested.teams?.horizontal?.trim() || 'فريق ↔', vertical: requested.teams?.vertical?.trim() || 'فريق ↕' }, categories, modality, difficulty: requested.difficulty ?? 'mixed', mode: requested.mode ?? 'classic' };
     const room: Room = { id, code, revision: 1, demo, roomSchemaVersion: 2, ruleSet: 'v2', config, game: initialGameState(), members: [host], intentIds: {}, boardNonce: this.newBoardNonce(), boardSequence: 0, surpriseLetters: [], audit: [{ revision: 1, type: 'ROOM_CREATED', at: this.now(), actor: host.uid, payload: { demo, config, ruleSet: 'v2' } }] };
     this.store.save(room); this.store.event(room, room.audit[0], this.now()); return { roomId: id, roomCode: code, revision: 1, token: this.token({ roomId: id, uid: host.uid, role: 'host' }), audienceToken: this.token({ roomId: id, uid: 'audience', role: 'audience' }) };
   }
@@ -167,13 +167,14 @@ export class AuthoritativeGameService {
     if (intent.type === 'START_NEXT_ROUND') { await this.startBoard(room, true); return; }
     if (intent.type === 'LETTER_REVEALED') {
       const cell = room.game.board?.cells.find((value) => value.id === room.game.activeCellId);
+      const questionMustBeSelectedNow = !room.activeQuestion || (cell?.kind === 'surprise' && !cell.revealedLetter);
       if (cell?.kind === 'surprise' && !cell.revealedLetter) {
         const letter = room.surpriseLetters.shift();
         if (!letter) throw new Error('NO_UNUSED_SURPRISE_LETTER');
         room.game = { ...room.game, board: revealSurprise(room.game.board!, cell.id, letter) };
       }
       room.game = reduceGame(room.game, { type: 'LETTER_REVEALED' });
-      await this.assignQuestion(room);
+      if (questionMustBeSelectedNow) await this.assignQuestion(room);
       return;
     }
     const events: Record<Exclude<GameIntent['type'], 'LOBBY_SET_READY' | 'START_MATCH' | 'START_NEXT_ROUND' | 'BUZZ' | 'HOST_SELECT_TEAM' | 'OPEN_QUESTION' | 'LETTER_REVEALED' | 'PAUSE' | 'RESUME'>, () => GameEvent> = {
@@ -185,6 +186,9 @@ export class AuthoritativeGameService {
     if (intent.type === 'JUDGE_INCORRECT' && room.game.lifecycle === 'OPPONENT_CHANCE') { room.buzzOpen = true; room.deadlineAt = new Date(this.clock().getTime() + room.config.opponentSeconds * 1000).toISOString(); room.buzzWinner = undefined; }
     if (intent.type === 'RETRY_CELL') room.buzzWinner = undefined;
     if (intent.type === 'SELECT_CELL') {
+      // A new cell starts a new question boundary. Surprise cells do not have a
+      // letter until LETTER_REVEALED, so they must not inherit the prior prompt.
+      room.activeQuestion = undefined;
       const cell = room.game.board?.cells.find((value) => value.id === room.game.activeCellId);
       if (cell?.kind === 'letter') await this.assignQuestion(room);
     }
@@ -197,6 +201,16 @@ export class AuthoritativeGameService {
   private questionsSync(demo: boolean): StoredQuestion[] {
     const file = demo ? join(process.cwd(), 'content', 'questions', 'drafts', 'questions.jsonl') : join(process.cwd(), 'content', 'questions', 'approved', 'questions.jsonl');
     try { return readFileSync(file, 'utf8').split(/\r?\n/).filter(Boolean).map((line) => { const question = JSON.parse(line) as Partial<StoredQuestion>; return { ...question, modality: question.modality ?? 'classic', answerConceptId: question.answerConceptId ?? `legacy:${question.id}` } as StoredQuestion; }).filter((question) => demo || question.status === 'approved'); } catch { return []; }
+  }
+  /** Reject an unusable category scope before it can create a lobby that will fail on start. */
+  private requirePlayableQuestionScope(demo: boolean, categories: string[], modality: MatchConfig['modality']): void {
+    if (modality === 'charades') return;
+    try {
+      createMatchQuestionSelection(this.questionsSync(demo), { categories, modality, seed: 0, reservePerLetter: demo ? 1 : 3 });
+    } catch (reason) {
+      if (reason instanceof Error && /^Insufficient (?:16 visible \+ 9 surprise letter coverage|concept reserve)/.test(reason.message)) throw new Error('QUESTION_SCOPE_INSUFFICIENT_COVERAGE');
+      throw reason;
+    }
   }
   private startBlockedReason(room: Room): string | undefined {
     if (!room.demo && !this.questionsSync(false).length) return 'NO_APPROVED_QUESTION_STOCK';
@@ -218,16 +232,16 @@ export class AuthoritativeGameService {
   private require(capability: Capability, role: ClientRole): void { if (capability.role !== role) throw new Error('FORBIDDEN_ROLE'); }
   private commit(room: Room, type: string, actor: string, payload: unknown, intentId?: string): void { room.revision++; if (intentId) room.intentIds[intentId] = room.revision; const audit = { revision: room.revision, type, at: this.now(), actor, payload }; room.audit.push(audit); this.store.save(room); this.store.event(room, audit, audit.at); }
   project(room: Room, capability: Capability): ProjectionEnvelope {
-    const member = room.members.find((value) => value.uid === capability.uid); const isHost = capability.role === 'host'; const active = room.game.lifecycle === 'QUESTION_READING' || room.game.lifecycle === 'FIRST_ANSWER' || room.game.lifecycle === 'OPPONENT_CHANCE' || room.game.lifecycle === 'QUESTION_FAILED';
+    const member = room.members.find((value) => value.uid === capability.uid); const isHost = capability.role === 'host'; const questionVisible = room.game.lifecycle === 'QUESTION_READING' || room.game.lifecycle === 'FIRST_ANSWER' || room.game.lifecycle === 'OPPONENT_CHANCE' || room.game.lifecycle === 'QUESTION_FAILED';
     const startBlockedReason = room.game.lifecycle === 'LOBBY' ? this.startBlockedReason(room) : undefined;
     const match = deriveMatch(room.game);
     const matchRule = room.ruleSet === 'v2'
       ? { ruleSet: 'v2' as const, victoryAr: 'تنتهي المباراة بفوز فريق بجولتين متتاليتين أو بثلاث جولات إجمالاً' }
       : { ruleSet: 'legacy-v1' as const, victoryAr: 'غرفة قديمة محفوظة بقواعدها السابقة' };
-    const projection: SafeProjection & Record<string, unknown> = { room: { roomCode: room.code, state: room.game.lifecycle, readyCount: room.members.filter((value) => value.role === 'player' && value.ready).length, memberCount: room.members.filter((value) => value.role !== 'audience').length, teams: room.config.teams, members: room.members.map(({ displayName, team, ready, role }) => ({ displayName, team, ready, role })), matchSettings: { demo: room.demo, questionSeconds: room.config.questionSeconds, opponentSeconds: room.config.opponentSeconds, teams: room.config.teams, categories: room.config.categories, modality: room.config.modality, difficulty: room.config.difficulty, mode: room.config.mode }, canStart: !startBlockedReason, ...(startBlockedReason ? { startBlockedReason } : {}) }, ...(room.demo ? { demo: true as const } : {}), matchRule, board: room.game.board?.cells.map((cell) => ({ id: cell.id, q: cell.q, r: cell.r, kind: cell.kind, visibleValue: cell.visibleValue, ...(cell.revealedLetter ? { revealedLetter: cell.revealedLetter } : {}), ...(cell.owner ? { owner: cell.owner } : {}) })), activeCellId: room.game.activeCellId, currentRound: room.game.currentRound, questionScores: room.game.questionScores, roundWins: match.roundWins, currentStreak: match.currentStreak, roundResults: match.roundResults.map(({ round, winner }) => ({ round, winner })), ...(match.matchWinner ? { matchWinner: match.matchWinner, matchWinReason: match.matchWinReason } : {}), entitledTeam: room.game.entitledTeam, answeringTeam: room.game.answeringTeam, winningPath: room.game.winningPath, ...(room.deadlineAt ? { deadlineAt: room.deadlineAt, buzzOpen: room.buzzOpen } : {}), ...(room.buzzWinner && (capability.role === 'host' || capability.role === 'audience') ? { buzzWinner: { displayName: room.buzzWinner.displayName, team: room.buzzWinner.team, method: room.buzzWinner.method } } : {}), ...(capability.role === 'audience' ? {} : { self: { uid: capability.uid, ready: member?.ready ?? false, team: member?.team, canBuzz: capability.role === 'player' && !room.buzzWinner && Boolean(room.buzzOpen) && (room.game.lifecycle === 'QUESTION_READING' || (room.game.lifecycle === 'OPPONENT_CHANCE' && member?.team === room.game.entitledTeam)), ...(room.buzzWinner?.method === 'player' && room.buzzWinner.uid === capability.uid ? { isBuzzWinner: true } : {}) } }) };
-    if (active && room.activeQuestion) projection.question = { headerAr: room.activeQuestion.headerAr, promptAr: room.activeQuestion.promptAr };
+    const projection: SafeProjection & Record<string, unknown> = { room: { roomCode: room.code, state: room.game.lifecycle, readyCount: room.members.filter((value) => value.role === 'player' && value.ready).length, memberCount: room.members.filter((value) => value.role === 'player').length, teams: room.config.teams, members: room.members.map(({ displayName, team, ready, role }) => ({ displayName, team, ready, role })), matchSettings: { demo: room.demo, questionSeconds: room.config.questionSeconds, opponentSeconds: room.config.opponentSeconds, teams: room.config.teams, categories: room.config.categories, modality: room.config.modality, difficulty: room.config.difficulty, mode: room.config.mode }, canStart: !startBlockedReason, ...(startBlockedReason ? { startBlockedReason } : {}) }, ...(room.demo ? { demo: true as const } : {}), matchRule, board: room.game.board?.cells.map((cell) => ({ id: cell.id, q: cell.q, r: cell.r, kind: cell.kind, visibleValue: cell.visibleValue, ...(cell.revealedLetter ? { revealedLetter: cell.revealedLetter } : {}), ...(cell.owner ? { owner: cell.owner } : {}) })), activeCellId: room.game.activeCellId, currentRound: room.game.currentRound, questionScores: room.game.questionScores, roundWins: match.roundWins, currentStreak: match.currentStreak, roundResults: match.roundResults.map(({ round, winner }) => ({ round, winner })), ...(match.matchWinner ? { matchWinner: match.matchWinner, matchWinReason: match.matchWinReason } : {}), entitledTeam: room.game.entitledTeam, answeringTeam: room.game.answeringTeam, winningPath: room.game.winningPath, ...(room.deadlineAt ? { deadlineAt: room.deadlineAt, buzzOpen: room.buzzOpen } : {}), ...(room.buzzWinner && (capability.role === 'host' || capability.role === 'audience') ? { buzzWinner: { displayName: room.buzzWinner.displayName, team: room.buzzWinner.team, method: room.buzzWinner.method } } : {}), ...(capability.role === 'audience' ? {} : { self: { uid: capability.uid, ready: member?.ready ?? false, team: member?.team, canBuzz: capability.role === 'player' && !room.buzzWinner && Boolean(room.buzzOpen) && (room.game.lifecycle === 'QUESTION_READING' || (room.game.lifecycle === 'OPPONENT_CHANCE' && member?.team === room.game.entitledTeam)), ...(room.buzzWinner?.method === 'player' && room.buzzWinner.uid === capability.uid ? { isBuzzWinner: true } : {}) } }) };
+    if (questionVisible && room.activeQuestion) projection.question = { headerAr: room.activeQuestion.headerAr, promptAr: room.activeQuestion.promptAr };
     if (room.game.lifecycle === 'QUESTION_FAILED' && room.activeQuestion) projection.question = { ...projection.question as object, revealedAnswer: room.activeQuestion.canonicalAnswer };
-    if (isHost) { if (room.activeQuestion) projection.question = { ...projection.question as object, primaryAnswer: room.activeQuestion.canonicalAnswer, acceptedAnswers: room.activeQuestion.acceptedAnswers, sources: room.activeQuestion.sources ?? [], moderation: { status: room.activeQuestion.status } }; if (room.game.correction) projection.correction = { ...room.game.correction, priorOwner: room.game.board?.cells.find((cell) => cell.id === room.game.correction?.cellId)?.owner }; projection.audit = room.audit.slice(-20); }
+    if (isHost) { if (room.activeQuestion) projection.question = { headerAr: room.activeQuestion.headerAr, promptAr: room.activeQuestion.promptAr, primaryAnswer: room.activeQuestion.canonicalAnswer, acceptedAnswers: room.activeQuestion.acceptedAnswers, sources: room.activeQuestion.sources ?? [], moderation: { status: room.activeQuestion.status } }; if (room.game.correction) projection.correction = { ...room.game.correction, priorOwner: room.game.board?.cells.find((cell) => cell.id === room.game.correction?.cellId)?.owner }; projection.audit = room.audit.slice(-20); }
     return { roomId: room.id, revision: room.revision, serverTime: this.now(), role: capability.role, projection };
   }
 }
