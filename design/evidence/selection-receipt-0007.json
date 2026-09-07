@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "visual-rollout-2026-09-05-007",
+  "recordedAt": "2026-09-05",
+  "selectedConceptId": "spatial-studio",
+  "selectedConceptNameAr": "مدار الحروف",
+  "selectionAuthority": "human-product-owner",
+  "reviewQuestion": "Please review the implemented C homepage at http://localhost:5173/ (desktop and phone captures linked above). Do you approve carrying this visual treatment across setup, gameplay, account, and admin pages, or want homepage changes first?",
+  "exactHumanAnswer": "Approve C homepage and continue across the app",
+  "historyPrefix": {
+    "recordId": "design-history-0006",
+    "path": "design/evidence/history/0006-spatial-studio-homepage-direction.md",
+    "sha256": "651F61920EDC000AA62961B1C168F4E23B821E62C2BCC93F6BA88963BC8BD84F"
+  },
+  "directionRecord": {
+    "recordId": "design-history-0007",
+    "path": "design/evidence/history/0007-spatial-studio-whole-app-rollout.md",
+    "sha256": "B6FF90DD167B0813A1118C23AC030B71260D66A71DCCC38B077643DE8EFB7510"
+  },
+  "reviewEvidence": [
+    { "path": "output/playwright/spatial-home-tactile-1440.png", "sha256": "308BC94CC0D54C36958554B610944D98D4F745689ADA8572FF043DD6CE375C9C" },
+    { "path": "output/playwright/spatial-home-tactile-390.png", "sha256": "0DF78E9BEC12F030C88E11FE3D1FBD314CBB42B0E28DB19C498F734E6522C769" },
+    { "path": "output/playwright/spatial-home-reduced-motion-asset-fallback-390.png", "sha256": "D6D8F69B7544C96A8C2268B43DAFA1DCD7B7B492541CC7A60E852996851F36AB" }
+  ],
+  "scope": "Approved C visual rollout across setup, gameplay, account/auth, and administration in reviewable batches. The canonical board geometry, projection privacy, authentication, and authorization boundaries remain binding.",
+  "validationRule": "Validate only the immutable numbered record and the exact immutable prior record/evidence listed here. Never validate this receipt against a mutable directory or whole-history hash."
+}

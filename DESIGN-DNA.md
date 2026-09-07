@@ -1,253 +1,179 @@
 # DESIGN DNA — استوديو الحروف
 
-Status: **binding visual and theme authority**  
-Selected concept: `concept-studio-letters`  
-Human-selection receipt: [`design/evidence/selection-receipt.json`](design/evidence/selection-receipt.json)  
-Immutable history record: SHA-256 `7D87203666937CEDB2BE1BEC99CD8767111A9E4A0DECF43EA83CA35BB4F03A21`
+Status: **binding current visual authority** · selected whole-app target: `spatial-studio` with human-approved whole-app rollout
 
-> **Owner override — 2026-09-03:** the amber/yellow canvas was explicitly rejected and
-> the coordinated light and dark theme pair was approved. Do not implement any amber,
-> yellow, or gold token, nor the earlier “no dark mode” rule contained in this historical
-> DNA. The binding replacement palette contract is
-> [`design/THEME-EXPLORATION.md`](design/THEME-EXPLORATION.md). Board topology, goal-edge
-> geometry, information hierarchy, typography, interaction, accessibility, and motion
-> clauses remain binding.
+## 0006 selected whole-app target; historical homepage-first gate
 
-This file governs aesthetic intent. [`design/TOKENS.md`](design/TOKENS.md) owns exact reusable values; [`DESIGN.md`](DESIGN.md) owns screens and implementation boundaries; [`GAME_REVIEW_AR.md`](GAME_REVIEW_AR.md) owns gameplay.
+The human product owner selected **“C — مدار الحروف: vivid blue spatial studio”** on
+2026-09-05. The immutable selection evidence is
+[`0006-spatial-studio-homepage-direction.md`](design/evidence/history/0006-spatial-studio-homepage-direction.md),
+its [receipt](design/evidence/selection-receipt-0006.json), and the exact-three
+[concept-set artifact](design/evidence/concept-set-immersive-2026-09-05.json).
 
-## North star
+`مدار الحروف` is the selected **whole-app target**. Current authorization is a homepage and
+create/join representative rollout followed by a mandatory new human live review. Other
+routes remain temporarily on their existing treatment until that review explicitly expands
+rollout; this is sequencing, not a permanent decision to keep flat gameplay. Future spatial
+gameplay preserves the canonical 25-cell six-neighbour board, physical crimson left/right
+and emerald top/bottom axes, fast legibility, permissions, and truthful data.
 
-**A live Arabic knowledge studio built from letters, not a generic quiz dashboard.**
+For `.spatial-home-page` only, 0006 supersedes prior flat/no-blue/no-radius/no-depth and
+nine-home-region clauses. Use `--spatial-*` tokens, opaque ice-white controls, cobalt
+architectural canvas, and real code-rendered board CSS perspective. Mockups are evidence,
+never bitmap product UI.
 
-The experience should feel like a contemporary cultural broadcast set translated into software: sunny, intelligent, competitive, and unmistakably driven by the hex-letter board. It must feel appropriate in a family majlis, a classroom, and on a projected event screen without becoming childish, ornamental, or “esports.”
+## 0007 whole-app rollout approved
 
-## Visual contract
+The human product owner approved the reviewed C homepage for whole-app rollout on 2026-09-05:
+**“Approve C homepage and continue across the app”**. Immutable authority is
+[`0007-spatial-studio-whole-app-rollout.md`](design/evidence/history/0007-spatial-studio-whole-app-rollout.md)
+and [receipt 0007](design/evidence/selection-receipt-0007.json), bound to immutable 0006 and
+review screenshots. 0007 supersedes the remaining flat-only/no-blue/no-depth/no-radius clauses
+from 0005 for future route implementations. Existing flat routes are temporary rollout fallback,
+not the selected target. The full 0007 visual contract is authoritative for batches; board
+geometry, team axes, truthful data, projection privacy, auth, and authorization remain invariant.
+## Current supersession summary
 
-> **Product mood and visual concept:** “استوديو الحروف” is a modern Arabic cultural game studio: calm, precise, and broadcast-ready rather than ornamental or esports-styled. Cultural confidence and live-game tension come from mineral-light or deep-charcoal canvases, crisp editorial typography, sharp flat geometry, and one mint interaction signal.
+The human-selected **استوديو الحروف** identity remains active. History
+[0005](design/evidence/history/0005-flat-broadcast-game-direction.md) is immutable historical gameplay evidence. Its former flat-midnight material treatment is superseded for future route implementation by 0007. Do not modify either record or receipt.
+
+[design/ROUTE-STATE-COVERAGE.md](design/ROUTE-STATE-COVERAGE.md) is the current route/state
+audit. [design/TOKENS.md](design/TOKENS.md) and `design/tokens.css` own exact values; this
+document assigns semantic roles only.
+
+[design/HOME-SURFACE-SPEC.md](design/HOME-SURFACE-SPEC.md) binds the individually audited
+homepage section mapping. It is a source-constrained build contract: this one-core-game product
+does not imply credits, rewards, purchases, gifts, catalogue variants, social/store
+destinations, or a copied Golbha homepage composition.
+
+The old nine-region homepage rhythm is historical scope only. The approved C homepage composition is defined by `HOME-SURFACE-SPEC.md` and 0007; unsupported reward, daily, commerce, analytics, legal, social, and store capability remains deferred.
+
+## Active visual contract
+
+> Product mood and visual concept: ‘استوديو الحروف’ is an Arabic party-game studio with a celebratory outer shell and a calm broadcast core. It should carry Golbha’s confidence, contrast, and group-play energy without reproducing its brand. The honeycomb board, Arabic letters, and two physical team axes remain the unmistakable identity.
 >
-> **Dominant focal point and scan order:** On game surfaces the hex board is always first; current question and timer are second; team score and match progress are third; secondary metadata is last. On the entry screen the cropped letter-board composition is first, the join/create action is second, and supporting explanation is third.
+> Dominant focal point and scan order: Entry and setup show the current decision first, its primary action second, and supporting explanation/status third. Live host and audience views show board first, question plus timer second, fixed side scores third, and operational controls last. Player view shows phase instruction first and the buzzer second; administration shows inventory health, filters, then records/editor.
 >
-> **Information density:** Default density is 5/10. Audience and player surfaces are sparse and glanceable; host and administration surfaces are compact but grouped by task. Empty space creates hierarchy, not pale text or decorative cards.
+> Information density: Public entry and lobby are 4/10; setup and host are 5/10; question administration is 6/10; player and audience are 3/10. Density comes from grouping and alignment, never tiny text, nested cards, or indiscriminate decoration.
 >
-> **Desktop and mobile composition:** Audience display is designed first for 16:9 at 1280×720 and 1920×1080. Host uses an asymmetric 62/38 board-to-control split at ≥1024px and a stacked board/control layout below that. Player phone is a one-thumb interface with one dominant hexagonal buzzer and no host-only information. RTL changes reading order and panel placement, never board coordinates, adjacency, or win axes.
+> Desktop and mobile composition: Shared pages use a centered maximum-width shell and decisive framed zones. Setup uses two balanced columns on desktop and one focused column on mobile. Host gameplay uses green score physically left, centered board, red score physically right, with the control console below; tablet stacks score summaries above the board. Audience is a 16:9 safe stage with the same physical score placement. Player is a phone-first one-thumb layout. RTL changes reading order, never physical board coordinates or win axes.
 >
-> **Typography roles:** Use one Arabic-first sans family, IBM Plex Sans Arabic, across display and UI. Large Arabic letters and scores carry the personality through scale and weight; body copy remains functional. Use tabular numerals for timers and scores. Technical codes remain isolated LTR.
+> Typography roles: Keep IBM Plex Sans Arabic as the Arabic-first family. Use 700 for brand/display/game letters and major scores, 600 for actions and section headings, 400–500 for body and metadata. Display scale is bold and compact; joined Arabic is never letter-spaced. Scores and timers use tabular figures; room codes and technical identifiers are isolated LTR.
 >
-> **Palette and surface treatment:** Light uses mineral white `#F2F1EC`, white surfaces, near-black ink, and mint `#79D4B6`. Dark uses deep charcoal `#0D1318`, slate surfaces, off-white text, and vivid mint `#4FE0BD`. Mint is limited to active/focus/ready states. Team ownership uses independent crimson and deep-green tokens plus pattern, axis icon, and label. Both themes are first-class. No amber, yellow, gold, gradients, glow, glass, or elevation shadows.
+> Palette and surface treatment: Preserve the approved light/dark/system themes and exact token authority. Shared pages use mineral light or deep charcoal canvases, high-contrast ink, matte paper/slate surfaces, mint only for active/focus/ready/primary action, crimson only for the horizontal team, and deep green only for the vertical team. Use solid color blocks, decisive rules, and bounded framed zones to create energy. History-0005 gameplay remains theme-invariant midnight and flat. No yellow, amber, gold, copied Golbha indigo/lime/red values, glow, glass, or unapproved gradients.
 >
-> **Spacing and shape rules:** Use a 4px-derived spacing system with deliberate 24–64px sectional rhythm. Panels, fields, score blocks, and buttons are square-cornered. Circles are reserved for countdown progress; hexagons are reserved for the board, buzzer, and game identity. Borders are visible and structural.
+> Spacing and shape rules: Use the existing 4px spacing scale with 24–64px section rhythm, stable max-width alignment, and a clear single focal zone per viewport. Preserve zero-radius rectangular structure, circle only for countdown, and hexagons only for game objects. Adapt the reference’s confidence through outline hierarchy and color blocking, not its pill system or rounded cards.
 >
-> **Icon and imagery direction:** Use one 2px-stroke outline icon family, preferably Lucide, with optical RTL correction and `currentColor`. Product identity is code-native: hex grids, edge markers, axis glyphs, numerals, and Arabic letterforms. Do not use stock Arabesques, mosque silhouettes, mascots, generic 3D art, or copied television imagery.
+> Icon and imagery direction: Use one 2px outline icon family with Arabic labels and currentColor. The authentic code-native board is the hero. Real Tahadani category covers are content media and must keep their aspect ratio, rights metadata, loading/error fallback, and readable title strip; they are not decorative wallpaper. No Golbha logo, artwork, avatars, screenshots, or copied illustrations ship.
 >
-> **Interaction and UI states:** Every control has rest, hover where applicable, focus-visible, pressed, loading, disabled-with-reason, success/error, offline, and reconnecting behavior. The buzzer has ready, locked, pressed, first, answer-now, missed, and disconnected states. Color never carries state alone.
+> Interaction and UI states: Every action has rest, hover where available, focus-visible, pressed, loading, disabled with a visible reason, success/error, offline, reconnecting, and stale handling. Selection count and the next legal action remain visible during setup. Buzzer, adjudication, correction, rematch, editor save/review, and empty/search states have explicit Arabic copy. Color never carries state alone.
 >
-> **Motion restraint:** Motion serves feedback, continuity, or hierarchy only. Use 120ms micro-feedback, 200ms state changes, and 320ms large transitions. Cell award follows the winning team’s axis; the winning path resolves once and stops. Reduced motion removes translation, scale, sweep, and pulses.
+> Motion restraint: Use 90–120ms press feedback and 200ms state transitions. A newly exact-one-away owned path flashes once for 320ms; an authoritative winning path pulses up/down exactly three finite 320ms iterations and then keeps its static 4px border. No looping ambient motion, floating cards, elastic springs, or timer color cycling. Reduced motion is instant/static.
 >
-> **Explicit anti-patterns:** no rounded-card dashboard, glassmorphism, default violet/indigo, dark gamer shell, gold gradients, decorative calligraphy, one-word display-font swaps, emoji icons, color-only teams, generic hero/feature grids, ornamental side stripes, fake photography, slow hover motion, or `transition: all`.
+> Explicit anti-patterns: no Golbha clone; no copied wordmark, copy, media, icons, category art, palette, typography, pill chrome, pricing layout, or branded game cards; no generic gamer neon; no glassmorphism; no yellow/gold; no dashboard made of nested rounded cards; no decorative hexagons unrelated to gameplay; no fake scores, fake players, fake questions, or planned features presented as implemented.
 
-## Reference lock
+## Non-negotiable semantics
 
-Primary light reference: V–A–C Refero style `ffef8672-f789-4329-8895-47e50f517d31`.
+- Arabic RTL shell; 25-cell six-neighbour board; physical crimson left/right horizontal axis and
+  deep-green top/bottom vertical axis. Board geometry never mirrors in RTL.
+- Shared routes are light/dark/system. Host/player/audience gameplay is flat midnight under all
+  theme choices and uses one real countdown state.
+- Identity is team color + Arabic label; owned cell interiors stay clear for letters. Answers/moderation are role-filtered.
+- Tahadani covers are rights-managed content media, not a palette or backdrop.
 
-Primary dark reference: Turso Refero style `30f57fef-66d5-4f84-a528-88deacf24080`.
+## Brand, board, typography, and color invariants
 
-Preserve:
+1. **The letter is the hero.** Arabic letters stay large, joined correctly, and legible at
+   distance. A code-native board—not a borrowed logo, photograph, or decorative hex field—is
+   the recognizable product mark.
+2. **The board explains the game.** Preserve the 440×440 viewBox, 25 pointy-side cells,
+   six-neighbour topology, fitted rail paths, rendered vertices, and hit-overlay centres.
+   Rails physically follow the outer hex boundary; they are not detached bars. Flat gameplay
+   uses flat faces and crisp inset outlines only.
+3. **Competition is structural.** Tension comes from legal selection, timer, buzzer,
+   ownership, path, and derived score. Correct/incorrect feedback is neutral icon/text/border
+   treatment, never generic green/red that conflicts with teams.
+4. **Arabic without costume.** Arabic language, direction, letterforms, and rhythm create
+   cultural confidence. No stock Arabesque, mosque silhouette, mascot, generic 3D art, copied
+   television imagery, ornamental calligraphy, or Latin display-font substitution.
+5. **Type is semantic.** IBM Plex Sans Arabic, Tahoma, Arial, sans-serif; weights 400 body,
+   500 metadata, 600 controls/subheads, 700 display/game letters/major scores. Use compact
+   bold display scale, 1.15/1.35/1.6 display/UI/body leading, normal Arabic tracking, and
+   tabular figures for scores, timers, ranks, and result columns. Audience public numbers may
+   use Arabic-Indic digits; room codes, UUIDs, URLs, timestamps, and technical logs remain
+   ASCII in `bdi dir="ltr"` or equivalent.
+6. **Color roles never exchange meaning.** Existing light/dark tokens own canvas/surface/ink.
+   Mint is active, selected, ready, focus, and primary action only. Crimson is horizontal
+   ownership/left-right rails only; deep green is vertical ownership/top-bottom rails only.
+   Yellow, amber, gold, violet, indigo, copied Golbha values, and ad-hoc gradient colors are
+   unassigned. Neutral cells use the exact theme cell role with strong outline.
 
-- Mineral-white or deep-charcoal canvas, high typographic contrast, oversized sans display text, and flat surfaces.
-- Sharp zero-radius component language.
-- Mint only as an active/focus/ready signal.
-- Exhibition-like asymmetry and generous sectional rhythm.
+## Accessibility, bidi, and interaction invariants
 
-Borrow only:
+- Set document `lang="ar"` and `dir="rtl"`; prefer logical CSS properties. Do not
+  `scaleX(-1)` an application shell or board. Board q/r coordinates, adjacency, physical
+  top/bottom and left/right goals, and path calculation do not change with direction.
+- Every interactive target is at least 44×44px; host primary controls remain reachable at
+  200% zoom. Use visible `:focus-visible`, semantic buttons/links, meaningful titles and
+  skip links, and Arabic labels for icon-only controls.
+- Cell accessible names include coordinate, visible/revealed value, owner team color, selection, and
+  winning-path state. Live regions announce meaningful buzzer, connection, award, correction,
+  round, and match changes but never every countdown tick.
+- Public/player payloads omit private accepted answers, alternatives, sources, and moderation
+  before the permitted reveal; visual hiding does not satisfy this rule.
+- Keyboard-only operation, reduced motion, 200% zoom, mixed Arabic-LTR readability, grayscale
+  identity, common color-vision distinction, offline/reconnect/stale handling, and explicit
+  disabled reasons are release evidence requirements.
 
-- Compact, aligned score numerals from Uniswap Cup; its fuchsia is explicitly omitted in V1.
-- Countdown clarity and immediate adjudication feedback from the Deezer quiz screen.
-- Leaderboard row hierarchy from Brilliant.
-- Symmetric team-score legibility from Apple TV match cards.
+## Motion and surface invariants
 
-Media strategy: all V1 identity graphics are code-native SVG/CSS primitives with real game data. The board is not a decorative illustration; it is the product. The historic photograph is research evidence only and is never shipped.
+- Rectangles, fields, panels, score blocks, and buttons are zero radius. Countdown alone can
+  be circular; hexagons are game objects only. Structural borders are 1px, selected/cell
+  borders 2px, winning path 4px; use existing spacing and token values.
+- Shared pages use matte mineral/charcoal surfaces and decisive outlined zones. Gameplay
+  remains midnight, flat, without elevation/shadow/gradient. No generic rounded-card
+  dashboard, glass, neon gamer shell, floating cards, or decorative hexagons.
+- Press feedback is 90–120ms; state changes 200ms; a new near-win flashes once for 320ms and an
+  authoritative winning path resolves with exactly three finite 320ms pulses before stopping on
+  its 4px border. Never delay legal actions for animation. Reduced motion removes translation,
+  scale, sweep, and pulse and limits opacity transitions to the existing token constraints.
 
-Reject: soft neutral averaging, “heritage beige,” decorative Arabic motifs, borrowed brand assets, image-led sports styling, and generic mobile-game gloss.
+## Reference lock and research boundary
 
-## Brand principles
+Golbha is secondary descriptive research only. Its dated observations, method, limitations,
+and route translation are in
+[design/evidence/golbha-public-site-study-2026-09-04.md](design/evidence/golbha-public-site-study-2026-09-04.md).
+The manifest preserves earlier research and records bounded Golbha/Refero roles.
 
-1. **The letter is the hero.** Arabic letters must remain large, correctly shaped, and legible from a distance.
-2. **The board explains the product.** A screenshot without the logo should still be recognizable as this game.
-3. **Competition is structural.** Tension comes from paths, timer, buzzer, and score—not neon effects.
-4. **Cultural without costume.** Arabic language, direction, rhythm, and geometry create identity; clichés do not.
-5. **One state, one meaning.** Brand, team, judgment, and system-status colors never silently exchange roles.
+The four owner-supplied Golbha homepage screenshots are retained only as hashed audit evidence
+in the homepage specification. They require a section-by-section Huroof mapping, not imitation;
+they add no route, feature, commerce, account, or content-data authority.
 
-## Composition system
+Permitted synthesis: Arabic-first confidence, contrast, grouped saturated blocks, strong framed
+zones, one primary decision, explicit empty/disabled states, category breadth, and focused live
+flows. Refero informs only sectional rhythm (Navigate), blunt solid fields (Cards Against
+Humanity), catalogue hierarchy (Spotify), filters (Resend), focused steps (Spline), empty/search
+clarity, results (Deezer), and room/game sequencing.
 
-### Entry screen
+Rejected: Golbha logo/wordmark/copy/media/category art/photography, palette, typography, pills
+or rounded chrome, composition, pricing, branded cards, mechanics; and all exact Refero
+compositions or branded assets.
 
-- Asymmetric 7/5 composition on desktop: a cropped, oversized neutral hex field occupies the visual side; the join/create block occupies the RTL reading start.
-- One large title, one concise value statement, one room-code field, and two explicit actions: `انضم إلى غرفة` and `أنشئ مباراة`.
-- No feature-card row. Supporting facts appear as a restrained inline sequence: `فريقان · أسئلة عربية · مسار يفوز`.
-- On mobile, the board crop becomes a shallow header field; join remains above create.
+## Governance and history integrity
 
-### Audience display
+- Immutable selection history and receipts are evidence, not mutable implementation notes.
+  `0004` is historical; `0005` is active gameplay supersession.
+- C1: “The deterministic validator may verify only evidence identity, structure, dimensions, provenance, and threshold consistency; it must never certify aesthetic quality or emit an aesthetic PASS.”
+- C2: “Every AI/model review is optional and advisory; it cannot authorize or block exact human selection or live-review gates. Distinct-family, distinct-session, read-only, provenance-backed review may be provenance-separated but remains advisory, and same-family or same-session review is never independent.”
+- C3: “History bindings must remain valid when later directions or outcomes are appended; no implementation may revalidate an old receipt against a different mutable whole-file history hash.”
+- C4: “Preserve all existing uncommitted and untracked work; do not reset, stash, broad-stage, auto-commit, or import stale runtime policy over canonical source.”
+- C5: “Use Golbha only as secondary, descriptive research evidence. Do not copy or ship its logo, wordmark, copy, category artwork, photography, palette, typography, pill/rounded chrome, page composition, or game mechanics.”
+- C6: “Do not edit numbered history records or existing receipts. If a proposed Golbha-derived clause changes the selected visual direction rather than clarifies it, stop and require exactly three new concepts, an explicit human selection, a new numbered record, and a new receipt.”
 
-- Board uses 60–70% of the usable stage and stays centered in the safe area.
-- The physical board silhouette is preserved: crimson sawtooth goal strips hug the full
-  left/right edges and deep-green sawtooth goal strips hug the full top/bottom edges.
-- Team scores use compact, symmetric readouts aligned near the board. Large detached
-  score cards are prohibited because the colored goal edges already carry team identity.
-- Timer stays near the active question, not in global navigation.
-- The question appears in a full-width lower band only during question states; it collapses when selecting a cell.
-- Match code and operational controls are absent or visually tertiary.
+## Admin surface application
 
-### Host console
+The administrative studio applies the approved shared-shell direction with a 6/10 density: right-side desktop rail, compact environment/account bar, semantic tables and framed records, zero-radius controls, and a single main workspace. It must stay Arabic-first and bidi-safe for technical IDs, retain 44px targets/focus visibility/reduced-motion behavior, and show truthful loading, empty, forbidden, stale, offline, conflict, success, and error states. It must not use fake metrics, rounded-card dashboards, decorative game hexagons, glass, gradients, or unimplemented publication claims.
 
-- Desktop: board/event context 62%; question, answer, timer, and judgment controls 38% at the RTL start edge.
-- The accepted answer and source are visually separated from audience-safe question copy.
-- Correct and incorrect actions remain fixed in position; destructive correction requires confirmation and reason.
-- Dense metadata uses dividers and alignment, not nested cards.
 
-### Player phone
 
-- Team name and connection state at top; current phase in the middle; large hex buzzer within thumb reach.
-- No answer, source, other players’ latency, or host controls.
-- After buzzing, replace the action label with an explicit status; do not leave an apparently tappable disabled control.
 
-### Question administration
-
-- Desktop-first work surface with filters, table/list, editor, evidence/source panel, and review status.
-- It uses the same colors and type but a quieter canvas and denser 6/10 layout.
-- This surface may use interactive rows; it must not wrap every grouping in a card.
-
-## Typography
-
-- Family: `IBM Plex Sans Arabic`, then `Tahoma`, `Arial`, sans-serif.
-- Load as a self-hosted variable WOFF2 when licensing/package verification is completed; use `font-display: swap`.
-- Weights: 400 body, 500 labels, 600 controls/subheads, 700 display letters and major scores.
-- App scale: 12, 14, 16, 20, 24, 32, 48, 72px. Audience letter tiles may scale with `clamp()` beyond 72px.
-- Arabic display tracking remains normal; do not copy Latin negative tracking rules onto joined Arabic glyphs.
-- Line heights: 1.15 display, 1.35 UI, 1.6 reading copy.
-- Scores, countdowns, ranks, and result columns use tabular figures.
-- Audience numbers default to Arabic-Indic digits. Room codes, UUIDs, technical logs, and URLs use ASCII digits inside `dir="ltr"` / `bdi`.
-
-## Color roles
-
-Exact values and contrast pairs live in [`design/TOKENS.md`](design/TOKENS.md).
-
-- Canvas and surface neutrals define the active light or dark theme; neither theme uses amber, yellow, or gold.
-- Mint means interactive readiness, selection, or keyboard focus, never team ownership or generic decoration.
-- Crimson means horizontal-team ownership only within game context.
-- Deep green means vertical-team ownership only within game context.
-- Correct/incorrect judgment uses neutral inverse treatment plus icon and text; it never uses generic green/red feedback that could be mistaken for team ownership.
-- Neutral cells use the theme's cell fill with a strong border so they remain distinct from the canvas.
-
-## Shape, border, and depth
-
-- Radius is `0` for panels, fields, buttons, menus, banners, and score blocks.
-- Hexagons are game objects, not decorative card masks.
-- Countdown rings may be circular because circular progress encodes elapsed time.
-- Default structural border is 1px; selected and board-cell borders are 2px; winning path is 4px.
-- No elevation shadow. Overlays use an ink scrim and a 2px ink border.
-- Focus uses a two-part ink-and-jade ring; this is a focus indicator, not elevation.
-
-## Motion language
-
-- Button press: 90–120ms, maximum scale change `0.98`.
-- Panel/state change: 200ms.
-- Modal/drawer: 240–320ms.
-- Cell award: 200ms directional fill aligned to `↔` or `↕`, plus an immediate ownership icon.
-- Winning path: sequential highlight completed within 320ms, then static.
-- Countdown: continuous visual decrement without bouncing or color cycling.
-- All motion is interruptible. Never delay a host ruling or buzzer lock for animation.
-- Under `prefers-reduced-motion`, use instant state changes or opacity-only transitions ≤100ms.
-
-## Accessibility and bidi invariants
-
-- Body text contrast ≥4.5:1; large text and meaningful graphics ≥3:1.
-- All interactive targets are ≥44×44px on touch; the player buzzer is substantially larger.
-- Focus uses `:focus-visible`; never remove focus without replacement.
-- Ownership is encoded by color + pattern + axis icon + accessible name.
-- Horizontal-team pattern runs horizontally and carries an `↔` SVG glyph; vertical-team pattern runs vertically and carries an `↕` SVG glyph.
-- `dir="rtl"` is set at the document root. Use logical CSS properties.
-- Board coordinate IDs, adjacency, top/bottom and left/right goal edges, and path computation never change with direction.
-- Live score, connection, timer, and adjudication changes use appropriate `aria-live` regions without announcing every countdown tick.
-- Reduced motion, 200% zoom, keyboard-only host operation, and common color-vision deficiencies are release gates.
-
-## Governance
-
-- This DNA became binding only after the exact three Refero-backed concepts and human selection were recorded.
-- Automated checks may validate evidence identity, structure, dimensions, provenance, token usage, and contrast thresholds. They must never certify aesthetic quality.
-- AI/model reviews are advisory and cannot approve or block the human visual gate.
-- Never edit the immutable selection record. A change of direction requires a new numbered history record and a new receipt that explicitly supersedes the old one.
-- The entry screen is implemented and human-reviewed before this visual language expands across the app.
-
-## Owner-approved premium material evolution — 2026-09-04
-
-This is an approved material-depth evolution inside the selected **Studio of Letters**
-direction, not a new identity. Immutable history records `0001`–`0003` remain untouched;
-the corresponding append-only record is
-[`design/evidence/history/0004-premium-material-evolution.md`](design/evidence/history/0004-premium-material-evolution.md).
-
-The product becomes a calm, tactile, contemporary Arabic broadcast tabletop: refined matte
-product depth, never esports, glass, neon, toy plastic, ornamental heritage, chrome, or a
-rounded-card dashboard. Things-style cool canvases and selective soft elevation inform the
-atmosphere; Playdate contributes only the tactile product-object treatment; Franky’s
-contributes only contained game-frame/inset material cues; restrained New Yorker mini-game
-screens inform the quiet puzzle-canvas hierarchy. Their yellow, violet, retro type, gold,
-and decorative languages are excluded.
-
-### Exact material code
-
-- Background imagery is decorative atmosphere only. `--studio-background-image` points to
-  the approved light/dark generated fields at `cover center / scroll`; its centre stays
-  low-detail and contains no semantic, team, active, or glyph information. Provenance is
-  recorded in [`design/evidence/background-provenance-2026-09-04.md`](design/evidence/background-provenance-2026-09-04.md).
-- Reusable material roles are the tokenized `surface-raised`, `surface-recessed`,
-  `edge-highlight`, `edge-low`, `shadow-soft`, `shadow-deep`, `shadow-raised`,
-  `shadow-panel`, and `shadow-control`. Light values include raised `#FFFFFF`, recessed
-  `#E5EAE8`, high edge `rgb(255 255 255 / 90%)`, low edge `#899592`; dark values include
-  raised `#1C2932`, recessed `#091116`, high edge `rgb(245 242 234 / 16%)`, low edge
-  `#05090C`. Exact values are in `design/tokens.css`.
-- Elevation is reserved for the central board/plinth, active question/control tray, buzzer,
-  and selected or primary actions. It never turns every section into a floating card.
-  Rectangular surfaces remain square-cornered.
-- Every authentic game cell retains its existing outer polygon, centre, overlay hit target,
-  board viewBox, and topology. A component-local SVG `<defs>` block provides token-only
-  vertical gradients named `neutral`, `active`, `horizontal`, and `vertical`; each cell is
-  a full-size shell polygon followed by an inset face calculated at 92% around the exact
-  same centre and shifted `-2` SVG units, then upper-left highlight/lower-right shade,
-  ownership pattern, letter, axis glyph, and title. A single board/plinth shadow is
-  allowed; per-cell SVG filters are not.
-- Each rail keeps its existing fitted path and divider positions. It gains one
-  `translate(0 4)` solid depth path in the matching strong team token below the existing
-  top face; this does not duplicate test IDs or semantic labels.
-- Controls use a tokenized 3px extrusion. Press feedback moves down 2px for 90ms; reduced
-  motion removes translation. State changes retain the existing 120/200/320ms limits.
-
-The implementation code shape is intentionally exact and narrow:
-
-```css
-.game-board-wrap { background: var(--surface-recessed); box-shadow: var(--shadow-panel); }
-.game-board__cell-shell { fill: var(--edge-low); stroke: var(--ink-primary); }
-.game-board__cell-face { stroke: var(--ink-primary); }
-.game-board__cell-highlight { stroke: var(--edge-highlight); }
-.game-board__cell-shade { stroke: var(--edge-low); }
-.button--primary, .buzzer { box-shadow: var(--shadow-control); }
-```
-
-```tsx
-<linearGradient id={`${prefix}-${state}`} x1="0" x2="0" y1="0" y2="1">
-  <stop offset="0" stopColor={`var(--material-${state}-top)`} />
-  <stop offset="1" stopColor={`var(--material-${state}-bottom)`} />
-</linearGradient>
-<polygon className="game-board__cell-shell" points={outerPoints} />
-<polygon className="game-board__cell-face" fill={`url(#${prefix}-${state})`} points={insetPoints} />
-<path className="game-board__rail-depth" d={railPath} transform="translate(0 4)" />
-```
-
-### Non-negotiable invariants
-
-Keep the 440×440 board silhouette, 25 cells, four half-cell rails, hit target centres,
-adjacency, physical LTR board axes, centred board with green score physically left and
-crimson score physically right, mobile two-column score row, Arabic-first type stack,
-mint-only interaction, crimson-horizontal/green-vertical ownership, zero yellow/amber/gold,
-and contrast/accessibility requirements. Automated validation may check geometry,
-provenance, contrast, dimensions, accessibility, and regressions; it is evidence only and
-must never claim aesthetic approval or replace human visual review.

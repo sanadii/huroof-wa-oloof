@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "artifactId": "immersive-concept-set-2026-09-05",
+  "recordedAt": "2026-09-05",
+  "purpose": "Exactly three native concept previews supplied for a human visual-direction selection. The images are provenance and aesthetic evidence only; none is shippable interface artwork.",
+  "historyPrefix": {
+    "recordId": "design-history-0005",
+    "path": "design/evidence/history/0005-flat-broadcast-game-direction.md",
+    "sha256": "C12D2B41CE656B4C98B1DC462456C841598C32F1051C6FEC82B27585142EA27C"
+  },
+  "concepts": [
+    {
+      "id": "CONCEPT-A",
+      "nameAr": "ساحة الحروف",
+      "name": "arena-3d",
+      "path": "design/mockups/immersive-2026-09-05/concept-a-arena.png",
+      "sha256": "E51826063F3E3C4146D419D479E0A16345E8E7BCD15C56D718EFEFFD1DC20EB1",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2314553
+    },
+    {
+      "id": "CONCEPT-B",
+      "nameAr": "نادي الحروف",
+      "name": "tabletop-club",
+      "path": "design/mockups/immersive-2026-09-05/concept-b-tabletop.png",
+      "sha256": "6640521F2F3B56E4C75C215A12BF12DE20453F5814DD90527F50E66594D3889C",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2058364
+    },
+    {
+      "id": "CONCEPT-C",
+      "nameAr": "مدار الحروف",
+      "name": "spatial-studio",
+      "path": "design/mockups/immersive-2026-09-05/concept-c-spatial.png",
+      "sha256": "906D7B1BA6C338F797EB2C2ADF5EB026CE71170E55E823BDAC0DD85A341B8D2C",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2140247
+    }
+  ],
+  "referenceScreenshots": [
+    { "path": "output/playwright/redesign-reference-spline.png", "sha256": "324C5F1B81FC8DC388E95B16C84489133E780D43064F37CE99561EFD46AD275B", "width": 1440, "height": 900 },
+    { "path": "output/playwright/redesign-reference-monument-valley.png", "sha256": "B03DB342D06CD698BCDB552CFFAE349761BE97CD66F7DC382D8E47487C18ED6C", "width": 1440, "height": 900 },
+    { "path": "output/playwright/redesign-reference-playdate.png", "sha256": "2067C4EC5F11DD9D1C01110A43955469187D23B8152037DF6DE874511053A497", "width": 1440, "height": 900 }
+  ],
+  "invariants": "Any implementation remains real DOM UI with canonical 25-cell, six-neighbour topology. Crimson stays physical left/right and emerald stays physical top/bottom. The generated depictions may not be used as product UI and do not authorize a topology or rail change."
+}

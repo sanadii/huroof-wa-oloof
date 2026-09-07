@@ -26,13 +26,19 @@ The SVG owns its `viewBox` and aspect ratio. Do not mirror the SVG with CSS unde
 
 - `team-horizontal` wins by connecting `q = 0` to `q = 4`.
 - `team-vertical` wins by connecting `r = 0` to `r = 4`.
-- The rendered board labels both goal-edge pairs with color, pattern, axis icon, and accessible text.
+- The rendered board labels both goal-edge pairs with team color and accessible text; owned cell interiors carry no pattern or axis arrow.
 - Rendered cells are horizontally widened while preserving their vertical pitch so the complete
   framed 5×5 silhouette has approximately equal visible width and height. This is presentation
   geometry only; q/r identity, odd-q adjacency, and pathfinding are unchanged.
 - Team names/colors may be customized, but their `horizontal` or `vertical` axis remains stable for the round.
 
 ## Rendering envelope
+
+### Flat midnight gameplay supersession
+
+- Each cell is one flat dark-navy face with its outer keyline and one crisp inset outline. Do not render shell/face depth, gradients, highlights, shades, or SVG filters.
+- Each of the four fitted rails is one continuous flat path. Do not render rail depth faces or divider elements.
+- Keep the existing 440×440 viewBox, vertices, centre points, overlays, q/r ordering, and rail path calculations exactly unchanged.
 
 - The cells render as one compact, contiguous interlocking field. Thin shared-looking
   borders are allowed; wide canvas channels that make rows or columns look detached are not.
@@ -83,17 +89,15 @@ The client receives only the public `visibleValue`. Hidden surprise letters and 
 | Selectable | `surface-cell` | 2px ink | Hover/focus uses compound ring; no color-only cue |
 | Selected | `action-active` | 2px ink | Selection marker and `aria-current="true"` |
 | Question active | `surface-ink` | 2px ink | Letter in theme active mint; active-cell label |
-| Owned horizontal | `team-horizontal` | 2px ink | Horizontal pattern + axis icon + white letter |
-| Owned vertical | `team-vertical` | 2px ink | Vertical pattern + axis icon + white letter |
+| Owned horizontal | `team-horizontal` | 2px ink | White letter; accessible name says red team |
+| Owned vertical | `team-vertical` | 2px ink | White letter; accessible name says green team |
 | Winning path | Team fill | 4px ink | Connected path overlay and `ضمن مسار الفوز` label |
 | Correcting | Paper/owner split | 2px dashed ink | Busy text and blocked interaction |
 
-## Pattern rules
+## Ownership interior rules
 
-- Horizontal ownership: thin horizontal lines at 20–25% opacity and an SVG double-arrow horizontal glyph.
-- Vertical ownership: thin vertical lines at 20–25% opacity and an SVG double-arrow vertical glyph.
-- Patterns must survive grayscale and cannot reduce letter contrast.
-- Do not use diagonal patterns merely because they are decorative; axis direction carries meaning.
+- Owned cells retain only the team fill, keyline, and high-contrast letter; do not render interior patterns or axis arrows.
+- Owner-aware accessible names use the team colors (red/green), not axis names.
 
 ## Interaction
 
@@ -130,7 +134,7 @@ Fixed tests must cover:
 
 ## Motion
 
-- Award fill travels along the team axis and completes in 200ms.
-- Winning path highlights once in path order and completes within 320ms.
+- When a team newly enters or changes an exact-one-neutral-cell-away domain path, its already-owned path cells flash once for 320ms; the neutral candidate remains unowned and unhinted.
+- A newly authoritative winning path pulses its ordered cells up/down for exactly three finite 320ms iterations, then keeps its static 4px border.
 - Motion never delays the authoritative state transition.
-- With reduced motion, state changes are instant and the final border/pattern carries the full meaning.
+- With reduced motion, state changes are instant and the final border and accessible labels carry the full meaning.

@@ -1,309 +1,291 @@
 # Product & Interface Design Specification
 
-Product working title: **استوديو الحروف**  
-Client: React + TypeScript + Vite  
-Direction: Arabic-first, RTL, light-only V1  
-Status: implementation-ready design baseline; product name and backend vendor remain open
+Product: **استوديو الحروف** · React + TypeScript + Vite · Arabic-first RTL
 
-## 1. Authority map
+## Selected direction and rollout
 
-Do not duplicate or silently override these sources:
+Human selection 2026-09-05: **“C — مدار الحروف: vivid blue spatial studio”**. It is the
+selected whole-app direction, recorded immutably in
+[`0006`](design/evidence/history/0006-spatial-studio-homepage-direction.md) with
+[receipt 0006](design/evidence/selection-receipt-0006.json). The homepage/create/join journey received human approval for full-route rollout in immutable 0007; existing flat surfaces are temporary fallback, not the selected long-term direction.
 
-| Concern | Authority |
+The homepage replaces the old nine-region composition with a cobalt spatial stage: utility
+header, headline, canonical board, opaque create/join rail, supported category chooser, and
+concise footer. Homepage-only radii, shadows, and depth use `--spatial-*` tokens.
+
+## 0007 whole-app rollout authority
+
+The human live review approved the C homepage for whole-app rollout on 2026-09-05: **“Approve C homepage and continue across the app”**. Immutable [0007](design/evidence/history/0007-spatial-studio-whole-app-rollout.md) and [receipt 0007](design/evidence/selection-receipt-0007.json) bind that authorization to immutable 0006 and reviewed screenshots. It supersedes the remaining 0005 flat-only treatment for new route work; setup, gameplay, account/auth, and administration now implement the 0007 contract in reviewable batches. Existing flat surfaces are temporary fallback, never the selected target.
+## Active authority and visual summary
+
+This is the current authority for screen composition and semantic use of existing tokens. The approved direction is **استوديو الحروف** inside the C cobalt architectural spatial world defined by 0007. It borrows only confidence, contrast, framed zones, and explicit action
+hierarchy observed on Golbha; it is not a Golbha derivative. The 25-cell Arabic honeycomb,
+physical team axes, and real match state remain the product identity.
+
+Shared routes retain light, dark, and system controls. Host, player, and audience use the 0007 spatial treatment while gameplay legibility remains theme-invariant. At desktop live play:
+vertical green score physical left, authentic board centered, horizontal crimson score physical
+right, control console below. RTL affects reading order only; it never mirrors board axes.
+
+| Concern | Binding authority |
 |---|---|
-| Historical findings and source confidence | [`report-source.md`](report-source.md) |
-| Gameplay, rules, roles, scoring, edge cases, and V1 scope | [`GAME_REVIEW_AR.md`](GAME_REVIEW_AR.md) |
-| Category import and letter-aware question production | [`QUESTIONS_PLAN.md`](QUESTIONS_PLAN.md) |
-| Aesthetic intent and non-negotiable visual rules | [`DESIGN-DNA.md`](DESIGN-DNA.md) |
-| Exact design values | [`design/TOKENS.md`](design/TOKENS.md) and [`design/tokens.css`](design/tokens.css) |
-| Routes and journeys | [`design/IA.md`](design/IA.md) |
-| Role-specific visibility/actions | [`design/UI-STATE-MATRIX.md`](design/UI-STATE-MATRIX.md) |
-| Hex geometry and board interaction | [`design/BOARD-SPEC.md`](design/BOARD-SPEC.md) |
-| Client/server responsibility | [`design/ADR-001-runtime-topology.md`](design/ADR-001-runtime-topology.md) |
-| Verification and release evidence | [`design/ACCEPTANCE.md`](design/ACCEPTANCE.md) |
-| Visual provenance and human selection | [`design/evidence/selection-receipt.json`](design/evidence/selection-receipt.json) |
+| Exact values and aliases | [design/TOKENS.md](design/TOKENS.md), [design/tokens.css](design/tokens.css) |
+| Visual concept, supersession, research boundary | [DESIGN-DNA.md](DESIGN-DNA.md) |
+| Route/state audit and current-vs-gap status | [design/ROUTE-STATE-COVERAGE.md](design/ROUTE-STATE-COVERAGE.md) |
+| Role projections and lifecycle treatments | [design/UI-STATE-MATRIX.md](design/UI-STATE-MATRIX.md) |
+| Route composition and responsive behavior | [design/ROUTE-VISUAL-CONTRACT.md](design/ROUTE-VISUAL-CONTRACT.md) |
+| Homepage section mapping, component/data ownership, and deferred-reference treatment | [design/HOME-SURFACE-SPEC.md](design/HOME-SURFACE-SPEC.md) |
+| Information architecture and authorization | [design/IA.md](design/IA.md) |
+| QA evidence and human-review boundary | [design/ACCEPTANCE.md](design/ACCEPTANCE.md) |
+| Runtime truth | [src/app/App.tsx](src/app/App.tsx), [src/features/game/domain/lifecycle.ts](src/features/game/domain/lifecycle.ts), [src/routes/GameRoutes.tsx](src/routes/GameRoutes.tsx) |
 
-When authorities conflict, game safety/data visibility outranks animation or layout. Gameplay changes belong in the game specification before they appear here.
+Source-backed role/data safety outranks visual treatment. A requirement is never described as
+implemented without source or test evidence.
 
-## 2. Product definition
+The homepage is one core-game entry surface, not a multi-game marketplace. All nine audited
+regions are binding scope in [the homepage surface specification](design/HOME-SURFACE-SPEC.md):
 
-This is a synchronous Arabic knowledge game for two teams. Players race to answer questions whose accepted answer begins with the selected cell’s letter. A correct answer captures the hex cell. The horizontal team wins a round by connecting left to right; the vertical team connects top to bottom.
+1. full product/navigation header;
+2. verification/reward notice;
+3. classic, fast, and custom mode shortcuts;
+4. daily challenge panel;
+5. offer/package area;
+6. featured core-game band;
+7. weekly-play discovery rail;
+8. Tahadani category catalogue for match setup; and
+9. complete product/support/legal footer.
 
-The application serves four distinct jobs:
+The mode and category sections are planned compositions over source-backed setup concepts.
+Unsupported account, credit, reward, daily, commerce, aggregate-analytics, legal, social, and
+store behavior stays explicitly deferred until its route, data owner, and authorization exist.
 
-1. **Audience stage:** understand the board and match in seconds.
-2. **Host console:** operate the game accurately under time pressure.
-3. **Player controller:** buzz reliably with one thumb and understand eligibility.
-4. **Question administration:** maintain a credible, sourced Arabic question bank.
+## Product semantics that do not move
 
-The design is not one dashboard resized four ways. Each surface is a role-filtered projection of the same authoritative match.
+- Arabic RTL reading order; technical codes, URLs, UUIDs, and identifiers are isolated LTR.
+- A 25-cell, six-neighbour honeycomb with physical crimson left/right horizontal rails and
+  physical deep-green top/bottom vertical rails.
+- Team identity is color + axis icon + pattern + Arabic label. Color alone never carries state.
+- Real state only: no fake players, scores, questions, timers, or planned modes.
+- Mint is active/focus/ready/primary action, never a team; use existing token authority only.
 
-## 3. Provisional V1 rule profile
+## Product jobs and experience principles
 
-Until the product owner changes it, fixtures and UI copy use the recommended profile from the game review:
+This is one realtime match expressed through four deliberately different projections, not one
+dashboard resized for every user:
 
-- Two teams: horizontal and vertical.
-- 5×5 board with 16 visible letters and 9 numbered surprise cells.
-- Best of 3 by default; configurable to 1/3/5/7.
-- 20-second first question, 10-second opponent chance.
-- First server-accepted buzz becomes the official answerer.
-- Incorrect first answer gives the other team one exclusive opportunity.
-- Correct answer awards 10 optional points and ownership of the cell.
-- Round winner is determined by completed path, not point total.
-- Human host adjudicates with explicit correct, incorrect, alternative, cancel, and correction actions.
-- Double failure uses a new question on the same cell in classic mode.
+1. **Audience stage:** make the board, question, timer, score, and winning path readable at a
+   glance and from a television distance.
+2. **Host console:** make the next legal action, private answer evidence, timer state, first
+   responder, adjudication, and correction consequences unambiguous under time pressure.
+3. **Player controller:** make eligibility and the one-thumb buzzer trustworthy; acknowledge
+   the server result instead of implying that a local tap won.
+4. **Question administration:** make stock health, source quality, review state, and validation
+   visible without leaking draft or private content into gameplay projections.
 
-These remain product assumptions, not newly claimed historical facts.
+The board precedes chrome. Explicit Arabic status precedes animation. Private/public separation
+is a data boundary, not a CSS treatment. The host sees the consequence of a correction before
+confirmation. English and technical fragments remain isolated exceptions inside an Arabic RTL
+layout.
 
-## 4. Experience principles
+## Screen compositions for every router pattern
 
-### Board before chrome
+| Pattern | Surface and focal order | Current stance |
+|---|---|---|
+| `/` | Current decision → primary join/create action → concise status → code-native board identity in a centered shared shell. The homepage section contract is in `HOME-SURFACE-SPEC.md`; it maps only the one core game and marks unsupported reference affordances deferred. | Implemented route; query/failure evidence is tracked. |
+| `/how-to-play` | Authentic annotated board → select → ask/buzz → capture → connect. | Implemented; long Arabic/bidi/zoom evidence required. |
+| `/host/new` | Two balanced desktop columns: configuration and selected-count/category summary; one focused mobile column. | Implemented; stock/error/success states are gap-tracked. |
+| `/room/:roomCode/lobby` | Room/readiness → physical-team rosters → legal host start action. | Implemented; lifecycle/connection projections require evidence. |
+| `/room/:roomCode/host` | Board → question/timer → fixed physical score flanks → console below. Under 768px, safe host limitation. | Implemented; full lifecycle/failure evidence required. |
+| `/room/:roomCode/play` | Phase instruction → one-thumb buzzer → eligibility/recovery copy. | Implemented; private data excluded. |
+| `/room/:roomCode/display` | 16:9: centered board, physical score flanks, timer/round above, question tray below. | Implemented; projection/closed/recovery evidence required. |
+| `/room/:roomCode/results` | Winner/path → derived rounds → role-filtered actions. Nonterminal deep links explain nonfinal status. | Implemented; rematch/history cases gap-tracked. |
+| `/questions` | Inventory health → filters → records, at dense 6/10. | Implemented; authorization/service states tracked. |
+| `/questions/new` | Blank editor → review/source context → validation/save status. | Implemented; publishing is source/authorization-bound. |
+| `/questions/:questionId` | Record status → fields → review evidence; approved records read-only. | Implemented; not-found/service/authorization tracked. |
+| `*` | Calm unknown-path/expired-session explanation and one safe return action. | Implemented NotFound route; wording/return evidence required. |
 
-In a five-second glance, a user must locate the board, active cell, timer, current question, and leading/winning team in that order. Navigation and settings recede during play.
+## Visual and interaction system
 
-### Explicit status before clever animation
+- IBM Plex Sans Arabic: 700 display letters/major scores, 600 controls/headings, 400–500
+  body; joined Arabic is never letter-spaced. Scores/timers use tabular figures.
+- Existing 4px scale and 24–64px section rhythm; zero-radius rectangles; circular countdown
+  only; hexagons only for game objects.
+- Bounded outlined zones and solid blocks create energy. Do not copy Golbha pills, rounded
+  cards, palette, layout, artwork, photography, language, or mechanics.
+- Every action has rest, hover where available, focus-visible, pressed, loading, disabled
+  with Arabic reason, success/error, offline, reconnecting, and stale treatment.
+- Motion: 90–120ms press, 200ms transition, one 320ms winning path. Reduced motion removes
+  translation, scale, sweep, and pulse; no ambient loops or timer color cycling.
 
-Every time-sensitive state uses clear Arabic copy. `مغلق` is more trustworthy than a dimmed buzzer with no explanation. Motion confirms state but never defines it.
+## Component and ownership contract
 
-### Host certainty
-
-Judgment controls remain stable in position. The host always sees what will happen before a destructive correction and can identify the active revision, player, team, cell, question, and timer.
-
-### Public/private separation
-
-The host’s accepted answer and source are separate data, not text visually hidden from other roles. Audience and player payloads omit them until reveal.
-
-### Arabic is the base layout
-
-The app starts RTL and uses CSS logical properties. English and technical fragments are isolated exceptions, not a reason to flip the whole interface.
-
-## 5. Main screen compositions
-
-### 5.1 Entry
-
-Desktop uses an asymmetric 7/5 grid. At the RTL start edge, the action column contains:
-
-- provisional wordmark;
-- title `استوديو الحروف`;
-- statement `أسئلة عربية. فريقان. مسار واحد يفوز.`;
-- room-code input;
-- primary action `انضم إلى غرفة`;
-- secondary action `أنشئ مباراة`;
-- text link `كيف تلعب؟`.
-
-The opposite field contains a cropped, oversized 5×5 code-native hex composition using actual Arabic letters and a single jade active cell. It is not a fake screenshot. On mobile it becomes a shallow header composition while the join form remains above the fold.
-
-### 5.2 Lobby
-
-- Top: room code, copy action, connection summary.
-- Main: horizontal and vertical roster columns with axis icons and pattern samples.
-- Each player row shows name, device connection, buzzer-test status, and ready state.
-- Host footer: missing requirements plus one specific `ابدأ المباراة` action.
-- Audience projection removes controls and enlarges names/readiness.
-
-### 5.3 Host console
-
-At ≥1024px:
-
-- 62% context region: board, team scores, round status, current selector, and concise event log.
-- 38% RTL control region: current letter/category, public prompt, private accepted answer/source, timer, buzz winner, and fixed judgment controls.
-- Secondary actions such as pause, replace question, and correction sit behind labeled disclosure—not icon-only mystery menus.
-
-At 768–1023px, board appears above a sticky judgment tray. Below 768px the host view is unsupported for active operation and displays a clear “use a larger screen” message while allowing safe pause/close.
-
-### 5.4 Player controller
-
-- Top: room, player, team axis, connection.
-- Center: one phase instruction.
-- Lower thumb zone: one large hexagonal buzzer.
-- Bottom: brief eligibility explanation and safe leave action.
-
-The buzzer states are `connecting`, `ready`, `open`, `pressed_pending`, `first`, `locked`, `opponent_only`, and `offline`. Each state changes copy, icon, and structure in addition to fill.
-
-### 5.5 Audience display
-
-- Designed for 16:9, full screen, and distance viewing.
-- Board occupies 60–70% of the safe stage.
-- Team scores remain aligned to their labels and axis icons.
-- During cell selection, the board expands and the question band collapses.
-- During a question, a lower band shows category, question, timer, and public buzzer state.
-- Round and match results use the winning path as the hero, not confetti or a generic trophy illustration.
-
-### 5.6 Match results
-
-- Champion and winning path.
-- Round score (`2–1`, for example) with tabular numerals.
-- Optional points, correct answers, average accepted response time, and question issues.
-- Host actions: rematch with same setup, new setup, question report, close room.
-- Player/audience actions omit moderation details.
-
-### 5.7 Question administration
-
-- Default overview is stock health by Arabic letter.
-- Filter rail and virtualized results list/table.
-- Editor holds prompt, target letter, answer, alternatives, normalization preview, category, difficulty, citation/source, explanation, status, and version note.
-- Objections and `needs_review` items are visually prominent through label + icon + border, not color alone.
-
-## 6. React component architecture
-
-Recommended ownership boundaries:
+Keep rendering, server authority, and role filtering separate. Recommended module boundaries:
 
 ```text
 src/
-  app/                 router, providers, document direction, error boundary
-  routes/              one route composition per IA route
-  design-system/       tokens, typography, Button, Field, Dialog, Status, Icon
-  features/room/       join, lobby, connection, roster
-  features/game/       projection types, adapters, state selectors, event copy
-  features/board/      axial geometry, HexBoard, HexCell, path visualization
-  features/host/       question panel, judgment, timer controls, correction
-  features/player/     buzzer and player status
-  features/display/    audience stage and result presentation
-  features/questions/  inventory, editor, source/review workflow
-  test/fixtures/       one fixture per game state and edge case
+  app/                 router, providers, document direction, fatal boundary
+  routes/              route composition only
+  design-system/       tokens, type, buttons, fields, dialogs, status, icons
+  features/room/       join, lobby, roster, connection
+  features/game/       projections, adapters, selectors, event copy
+  features/board/      geometry, HexBoard, HexCell, ownership/path rendering
+  features/host/       question evidence, timer controls, judgment, correction
+  features/player/     buzzer and personal status
+  features/display/    audience stage and public results
+  features/questions/  inventory, editor, source and review workflow
+  test/fixtures/       one role-safe fixture per state and recovery case
 ```
 
-### Core visual components
-
-| Component | Responsibility | Must not own |
+| Component | Owns | Must not own |
 |---|---|---|
-| `HexBoard` | Render coordinates, edges, ownership, selection, path | Winning logic or role authorization |
-| `HexCell` | One semantic/visual cell and its states | Hidden surprise value |
-| `TeamScoreBlock` | Name, axis, rounds, optional points, status | Winner calculation |
-| `QuestionStage` | Public question, category, active letter | Accepted answer before reveal |
-| `Countdown` | Render from server deadline and server offset | Decide expiry |
-| `PlayerBuzzer` | Emit one buzz intent and render acknowledgement | Decide first player |
-| `HostQuestionPanel` | Private question evidence | Public projection filtering |
-| `HostJudgmentControls` | Emit adjudication intents | Mutate ownership locally |
-| `ConnectionStatus` | Connecting/reconnecting/offline feedback | Transport implementation |
-| `RoundResult` | Completed path and public round summary | Recalculate result |
-| `QuestionEditor` | Draft and validation UI | Auto-publish generated content |
+| `HexBoard` / `HexCell` | coordinates, visible state, focus/hit target, ownership/path rendering | adjacency rules, winner calculation, hidden surprise value |
+| `TeamScoreBlock` | team name, axis/pattern, derived rounds and question score display | score mutation or winner calculation |
+| `QuestionStage` | public letter/category/prompt and permitted reveal | pre-reveal answer/source fields |
+| `Countdown` | display derived from authoritative deadline and offset | expiry decisions |
+| `PlayerBuzzer` | one intent, pending acknowledgement, explicit result | deciding who was first |
+| `HostQuestionPanel` | private accepted answers, sources, revision context | projection filtering |
+| `HostJudgmentControls` | fixed legal intent controls and disabled reasons | local ownership mutation |
+| `ConnectionStatus` | connecting/reconnecting/offline/stale feedback | transport implementation |
+| `RoundResult` | authoritative path and role-safe summary | recalculating the result |
+| `QuestionEditor` | draft fields, normalization preview, validation/save status | automatic approval or publication |
 
-Components receive semantic values (`team="horizontal"`, `phase="selected"`), never raw presentational colors.
+Components receive semantic values such as `team="horizontal"` and `phase="selected"`, not raw
+presentational colors.
 
-## 7. State and data rules
+## State/data boundary
 
-- Use discriminated TypeScript unions for the 14 authoritative states rather than one object with many optional booleans.
-- Render from a role-filtered projection and revision.
-- Intents include `expectedRevision`; reject and refresh stale actions.
-- Server deadlines are ISO timestamps plus synchronized server offset. The browser animation is display-only.
-- Keep match score, optional answer points, cell ownership, round result, and timer as distinct values.
-- Never infer permissions from the current route alone; the projection and server authorize actions.
-- URL state may hold route, room code, filters, and selected admin item. It must not hold answers or role secrets.
+Authoritative lifecycle names and legal reducer events are in the coverage artifact. Earlier
+documents used conceptual events such as `CANCEL_QUESTION`, `PATH_FOUND`,
+`COMPLETE_MATCH`, `REMATCH`, and `CLOSE_ROOM`; those are requirements, not current
+reducer events. Projection and server authorization—not URL—decide action/private-answer
+availability. Player/audience payloads omit answers, alternatives, sources, and moderation
+before permitted reveal.
 
-## 8. RTL and Arabic content
+- Use discriminated TypeScript unions for the 14 lifecycle values; do not build one object from
+  unrelated optional booleans.
+- Render from a role-filtered projection and revision. An intent includes the expected revision;
+  a stale response refreshes the projection and preserves only non-authoritative entered text.
+- Keep question-score points, cell ownership, effective round outcomes, match result, and timer
+  as separate values. Do not derive one from a visual counter.
+- URLs may contain routes, room codes, filters, and selected admin IDs. They never contain
+  accepted answers, role secrets, capability material, or moderation data.
 
-- Set `<html lang="ar" dir="rtl">`.
-- Use `margin-inline`, `padding-inline`, `inset-inline`, and `border-inline`; avoid directional left/right CSS except inside board geometry.
-- Do not apply `transform: scaleX(-1)` to app shells or the board.
-- Wrap room codes, UUIDs, URLs, timestamps, and latency values with `<bdi dir="ltr">`.
-- Do not letter-space joined Arabic display text.
-- Allow question text to wrap naturally; target 35–60 Arabic characters per line on the host and audience surfaces.
-- Use Arabic-Indic numerals for public scores/timers through `Intl.NumberFormat("ar-KW-u-nu-arab")`; technical identifiers stay ASCII.
-- All UI copy is stored as message keys from the start even if Arabic is the only V1 locale.
+## Arabic, RTL, icons, and media
 
-## 9. Icons and assets
+- Set `<html lang="ar" dir="rtl">`; use logical CSS properties. Do not mirror the app shell,
+  board, team axes, play/pause/check icons, or physical goal edges.
+- Wrap room codes, UUIDs, URLs, timestamps, and diagnostic latency with `<bdi dir="ltr">`.
+  Joined Arabic keeps normal tracking; question copy targets readable 35–60-character lines.
+- Public scores/timers may use `Intl.NumberFormat("ar-KW-u-nu-arab")`; technical identifiers
+  stay ASCII. Product copy is stored by message key even while Arabic is the only locale.
+- Use one outline icon family at 2px stroke and `currentColor`. Icon-only controls need an
+  Arabic accessible name and at least a 44×44px target.
+- The board, rails, patterns, timer, and winning path are code-native. Tahadani category covers
+  are real content media with provenance, aspect ratio, title, loading skeleton, unavailable
+  fallback, and rights state. Historic show photos, Golbha, and Refero screenshots are evidence
+  only and never production assets.
 
-- Use Lucide outline icons at 2px stroke, one library only.
-- Mirror only directional navigation icons whose meaning changes with reading direction. Do not mirror play, pause, check, X, vertical/horizontal axis, or board edges.
-- Icon buttons require Arabic `aria-label` and ≥44px hit area.
-- The brand graphic, entry composition, board, patterns, timer, and path are SVG/code-native.
-- Self-host the chosen Arabic font after verifying its package and license. Do not hotlink production fonts.
-- Historic show imagery and Refero screenshots are evidence only; they are not production assets.
+## Loading, error, and recovery contract
 
-## 10. Loading, error, and recovery
-
-| Condition | Treatment |
+| Condition | Required treatment |
 |---|---|
-| Initial route load | Stable geometry skeleton; preserve board/form dimensions |
-| Room not found | `لم نجد هذه الغرفة. تحقق من الرمز وحاول مرة أخرى.` plus focused code field |
-| Room closed | State when it closed and return to entry |
-| Reconnecting | Freeze actions and show `نعيد الاتصال بالغرفة…` once |
-| Player offline while buzzer open | Disable buzzer immediately and use assertive announcement |
-| Stale host action | Keep the entered ruling note, refresh projection, explain conflict |
-| Question unavailable | Host-only replacement flow; public surfaces show a neutral pause |
-| Invalid question | Cancel without penalty and create `needs_review` record |
-| Correction | Preview affected cell/path/round, require reason, then apply ordered event |
-| Fatal render error | Role-safe fallback with room code and reload; never print answer-bearing state |
+| Initial load | Stable skeleton that preserves form/board geometry and never implies readiness |
+| Room not found or closed | Plain Arabic explanation, room code when safe, and one return/retry path |
+| Reconnecting | Freeze unsafe actions, retain the last safe projection, announce once |
+| Offline while buzzer is open | Disable immediately, show the reason, use an assertive announcement |
+| Stale host action | Preserve the ruling note, refresh state, explain the conflict |
+| Question unavailable/invalid | Host-only replace/flag path; public neutral pause; no penalty implied |
+| Correction | Preview affected cell, score, path, and round; require reason; apply one ordered event |
+| Admin unauthorized | Explain restricted access without rendering the protected editor/data |
+| Save/rematch failure | Keep entered configuration where safe and expose a specific retry |
+| Fatal render failure | Role-safe reload/return with room code; never print answer-bearing state |
 
-## 11. Design decision ledger
+## Current scoring and result presentation
 
-| Decision | Source | Preserved role | Reason |
+The implementation’s lifecycle reducer treats one finalized owned cell as one question-score
+point for its physical team. Round wins and match result are derived from append-only round
+outcome history, rather than being independent decorative counters. For the current `v2`
+rules, a match winner is derived by either two consecutive round wins or three total round
+wins; legacy best-of counters are explicitly grandfathered behavior. Results therefore show
+real derived winner/path and round state first, question-score points second, and only
+role-authorized actions. A rematch UI is a requirement until an application-level source proves
+its behavior.
+
+## Reference synthesis decision ledger
+
+| Decision | Evidence | Bounded use | Exclusion |
 |---|---|---|---|
-| Mineral light canvas | V–A–C style | Light-theme canvas | Architectural calm and strong black-rule contrast |
-| Deep charcoal canvas | Turso style | Dark-theme canvas | Quiet low-light display without gamer glow |
-| Mint signal | V–A–C/Turso synthesis | Active/focus/ready only | Keeps one sharp interaction signal in both themes |
-| Sharp surfaces | V–A–C/Turso synthesis | Rectangular components | Prevents generic rounded-card UI |
-| Compact score numerals | Uniswap Cup style | Score/rank blocks only | Fast competitive scanning |
-| Countdown hierarchy | Deezer quiz screen | Timer and immediate feedback only | Time is understandable at a glance |
-| Leaderboard row hierarchy | Brilliant screen | Result ranking only | Highlights current player/team clearly |
-| Team-score symmetry | Apple TV screen | Public comparison only | Makes two sides readable at distance |
-| Code-native hex identity | Game image + rules | Board, buzzer, entry composition | Product-specific memorable visual move |
-| Server-authoritative buzz | Game review + runtime ADR | Ordering and timer truth | Fairness across devices |
-| Separate projections | Game review + runtime ADR | Data visibility | Prevents answer/control leakage |
+| Arabic-first confidence and framed zones | Golbha public-site study | Clear decisions, explicit empty/disabled states, focused live flow | No logo, wordmark, copy, assets, palette, typography, pill chrome, composition, mechanics |
+| Alternating sectional rhythm | Navigate / Refero | Shared-shell pacing and disciplined accents | No exact colors or rounded forms |
+| Direct tabletop hierarchy | Cards Against Humanity / Refero | Solid fields and blunt hierarchy | No palette, cards, brand, or copy |
+| Catalogue hierarchy | Spotify / Refero | Category browsing/media density | No sidebar, gradients, brand, layout |
+| Search/filter clarity | Resend / Refero | Inventory controls and grid/list hierarchy | No copied screen composition |
+| Focused setup | Spline / Refero | Visible progress and task focus | No copied UI styling |
+| Empty/search clarity | Untitled / Refero | Explicit empty state after controls | No copied copy/assets |
+| Result/replay hierarchy | Deezer + Playlist Quiz / Refero | Derived score/result/replay hierarchy | No brand, mechanics, visual copying |
+| Lobby-to-live boundary | Around / Refero | Presence, launch, help, exit treatment | No copied flow mechanics |
 
-## 12. Implementation sequence
+Read [the Golbha study](design/evidence/golbha-public-site-study-2026-09-04.md) and the
+[visual reference manifest](design/evidence/visual-reference-manifest.md) for observations,
+provenance, limitations, and exclusions.
 
-### Phase 0 — Foundation
+## Design governance
 
-- Scaffold React + TypeScript + Vite.
-- Install routing and one icon library.
-- Import `design/tokens.css` into the app token layer.
-- Add document language/direction, global reset, self-hosted font placeholder, and fixture adapter interfaces.
-- Add static checks for TypeScript, lint, tests, and production build.
+1. History `0004` remains immutable historical material context. `0005` is active for
+   gameplay and supersedes incompatible material-depth clauses only.
+2. Do not edit numbered history records or receipts. A Golbha-derived direction change requires
+   exactly three new concepts, explicit human selection, a new numbered record, and a receipt.
+3. The deterministic validator may verify only evidence identity, structure, dimensions,
+   provenance, and threshold consistency; it must never certify aesthetic quality or emit an
+   aesthetic PASS.
+4. Every AI/model review is optional and advisory; it cannot authorize or block exact human
+   selection or live-review gates. Distinct-family, distinct-session, read-only,
+   provenance-backed review may be provenance-separated but remains advisory, and same-family
+   or same-session review is never independent.
+5. History bindings must remain valid when later directions or outcomes are appended; no
+   implementation may revalidate an old receipt against a different mutable whole-file hash.
 
-### Phase 1 — Entry-screen gate
+## Delivery sequence from the current codebase
 
-- Implement `/` only, including 320, 390, 768, 1280, and 1440px states.
-- Capture light-theme screenshots at the acceptance viewports.
-- Complete [`design/reviews/ENTRY-SCREEN-REVIEW.md`](design/reviews/ENTRY-SCREEN-REVIEW.md) with a human decision.
-- Do not expand the aesthetic system to all routes until the human review accepts or amends it.
+1. **Authority alignment:** implement the shared-shell framed-zone treatment without changing
+   existing token values; keep history-0005 gameplay flat and midnight.
+2. **Shared routes:** finish entry, rules, setup, lobby, wildcard, and their light/dark/system,
+   loading, validation, empty, error, and authorization evidence.
+3. **Role surfaces:** complete every lifecycle and connection projection for host, player, and
+   audience, including sub-768 host limitation and public/private payload tests.
+4. **Results and administration:** complete both-winner results, nonterminal deep links,
+   rematch outcomes, inventory/editor save/review/read-only states, and Tahadani media fallbacks.
+5. **Verification:** capture the exact route/state/theme/viewport artifact matrix in
+   [design/ACCEPTANCE.md](design/ACCEPTANCE.md); deterministic checks remain evidence, while the
+   owner performs the live aesthetic review.
 
-### Phase 2 — Visual primitives and fixtures
+## Definition of design implementation done
 
-- Implement tokens, typography, focus, icons, Button/Field/Dialog/Status.
-- Implement `HexBoard`, cells, patterns, team blocks, timer, and path states.
-- Build deterministic fixture routes for all states in the UI matrix.
+- Every row in [design/ROUTE-STATE-COVERAGE.md](design/ROUTE-STATE-COVERAGE.md) is source-backed
+  and tested or is explicitly accepted as deferred; no required state is silently omitted.
+- Both shared themes and the midnight gameplay exception are verified at the required
+  viewports, with no P0/P1/P2 visual, accessibility, privacy, or responsive issue remaining.
+- The host can operate by keyboard at 200% zoom; player and display states remain readable on
+  their target devices; reduced motion and common color-vision/grayscale cases preserve meaning.
+- Player/audience payload tests prove pre-reveal private fields are absent. Board topology,
+  physical axes, score derivation, and winning path match the authoritative domain.
+- Production build, relevant type/lint/unit/component/browser checks, and human live review are
+  recorded without any automated aesthetic PASS claim.
 
-### Phase 3 — Room and player
+## Open decisions
 
-- Entry, join, lobby, team assignment, buzzer test, player controller, connection recovery.
+- Legally cleared product name and wordmark; final self-hosted Arabic font package/license.
+- Final production authentication/authorization for question administration and room roles.
+- Exact question-stock release threshold per visible letter and rights treatment for every
+  imported category cover.
+- Whether secondary question-score points stay visible throughout play or primarily at results;
+  any choice must not compete with round/match victory.
+- Whether team appearance becomes configurable after V1; axis, pattern, label, and contrast
+  redundancy remain mandatory.
 
-### Phase 4 — Host and audience game loop
+## Administrative studio
 
-- Host console and audience projection across all 14 states.
-- Correction preview and hidden-answer tests.
-- 16:9 projector/television verification.
+`/admin` is an Arabic-first, server-backed operations surface: desktop uses a right-side navigation rail, compact environment/account bar, one bounded workspace, and semantic inventory regions at 6/10 density. Mobile uses a horizontally reachable drawer-equivalent navigation row and single-column detail. It does not invent metrics, users, questions, release results, or successful publication. All administrative loading, empty, forbidden, stale, offline, conflict, success, and error outcomes require Arabic copy; the callable result—not a route guard—remains authoritative.
 
-### Phase 5 — Results and question administration
 
-- Match report, question issues, inventory health, editor, review/version states.
 
-### Phase 6 — Realtime integration
 
-- Replace fixture adapter with the approved server implementation.
-- Run contention, reconnect, stale revision, pause, and correction scenarios.
-
-## 13. Definition of design implementation done
-
-- All applicable checks in [`design/ACCEPTANCE.md`](design/ACCEPTANCE.md) pass.
-- Human entry-screen review is accepted and later visual expansion matches that receipt.
-- No P0/P1/P2 visual QA issues remain at required viewports.
-- Every authoritative game state has host, player, and audience fixture evidence.
-- Hidden-answer payload tests prove player/audience projections omit private fields.
-- RTL changes reading order but not board topology or team win axes.
-- Teams remain identifiable in grayscale and common color-vision simulations.
-- Keyboard, focus, screen-reader announcements, 200% zoom, reduced motion, offline/reconnect, and correction flows are verified.
-- Production build, typecheck, lint, unit tests, component tests, and targeted browser flows pass.
-
-## 14. Open decisions
-
-These do not block the design documents but must be resolved before production release:
-
-- Legally cleared product name and wordmark.
-- Final font package/license and whether Arabic-Indic digits remain the public default.
-- Backend/realtime/database/auth stack and hosting region.
-- Exact minimum question stock per visible letter.
-- Whether team colors are user-customizable in V1; any choice must retain pattern/icon/label redundancy.
-- Whether points are shown during play or only at results.
-- Approval or amendment of the eleven recommended product decisions in the game review.
