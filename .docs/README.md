@@ -60,3 +60,5 @@ Current category mapping request (2026-09-09): user authorized mapping all suppl
 T-14.3 source-mapping subtask accepted on2026-09-09: [all100 category mappings and revision counts](../tmp/bundle-import-20260908/t14.3-mapping-reconciliation-v1-summary.md). Full T-14.3 curation/release work remains open; mapping alone does not change playable setup availability.
 
 Local DB game connection accepted2026-09-09: [startup instructions](SETUP-AND-RUN.md), [handover](HANDOVER.md#local-database-game-connection-accepted--2026-09-09). Preview5199 now uses verified Firestore import questions through local authority8797:1184text questions/29categories, explicit draft testing. This supersedes the earlier8fixture-only local setup checkpoint, not production release status.
+
+Latest publication2026-09-09: [GitHub/Vercel evidence and remaining online prerequisites](DEPLOYMENT.md#publication-completed--2026-09-09), [current handover](HANDOVER.md#github-and-vercel-publication--2026-09-09). Public preview is explicitly limited; current full local database test app remains on8787 under [T16](T16-MASTER-IMPORT.md).

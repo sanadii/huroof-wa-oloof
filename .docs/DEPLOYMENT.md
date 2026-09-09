@@ -70,3 +70,13 @@ Full online gameplay preparation is explicitly authorized by the user in this re
 The independently publishable frontend uses an explicit static-preview flag and disables room creation/joining when no backend is deployed. Local runtime8787 remains running and unchanged by isolated deployment builds.
 
 Online Auth preparation completed2026-09-09T17:05Z: verified Vercel ownership/production alias, added only huroof-wa-oloof.vercel.app to Firebase Auth authorizedDomains, preserved the three existing entries, and read back the exact expected list. Security boundary review found no concrete concern with this additive exact-domain change. Local receipt: output/release-20260909/auth-domain-preparation.json. Rollback removes only the added domain from a fresh list. No sign-in provider, App Check enforcement, billing, game data or release pointer changed.
+
+### Publication completed — 2026-09-09
+
+Safe Git delta published on codex/app-update-2026-09-07: assets07cc407a, implementationc22e647a, documentation96ad511f. Remote branch readback matched96ad511f9fabbbcb29e38b3d8eb8a919c7c7cacc. Existing public historical content was preserved; no new private master-import questions/media/database/archive payload was published.
+
+Vercel Preview READY: https://huroof-wa-oloof-ql23s3kp6-sanad-general.vercel.app (deployment dpl_Wo8EbmZQxuGpXtqnDceCxvdmEFMw). Explicit build flags VITE_STATIC_PREVIEW=true and VITE_GAME_RUNTIME=fixture; matching branch-specific Preview environment variables registered. Production alias was not promoted. Preview protection remains enabled.
+
+Verification: clean Git and stripped195-file Vercel source builds/typechecks pass;31focusedUI checks; independent Gate2/2; Node22.23.2 Functions compile; production-only audit0. Root browser verified both setup kinds and direct room/admin/import-review guards with zero API/callable requests. Protected live HTTP homepage/deep-link/mainJS200; deployed mainJS SHA2565742314062cd74a219647d177116979d73de237789af923be473d4d603bbfb20 matches the browser-tested candidate. Vercel adds its standard preview feedback script to HTML. Existing large-vendor-chunk warning remains. Full online gameplay remains blocked by the activation sequence above; this publication does not change draft approvals or enable a backend.
+
+Local evidence: output/release-20260909/packaging-report.md and gate-release-package.md. Local database-backed app remains available on127.0.0.1:8787. Next authorized action: after user billing setup, recheck Firebase billing and complete App Check, immutable catalog binding and genuine reviewed-release preparation before deployment/activation.
