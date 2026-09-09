@@ -1,0 +1,32 @@
+.vercel
+
+# Vercel serves a static Vite client. Do not upload local intake, test evidence,
+# private media, or local service state with that client build.
+.docs/
+docs/
+tests/
+scripts/
+functions/
+server/**
+!server/local-admin-guard.ts
+content/
+public/assets/questions/
+output/
+tmp/
+.agent-runtime/
+.codex/
+.playwright-cli/
+graphify-out/
+.evidence-migration-backups/
+.evidence-migration-staging/
+node_modules/
+dist/
+functions/node_modules/
+functions/lib/
+*.sqlite
+*.sqlite-*
+*.db
+*.zip
+*.log
+.env*
+!.env.example

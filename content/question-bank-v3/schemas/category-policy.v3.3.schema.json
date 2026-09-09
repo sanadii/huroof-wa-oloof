@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "policyVersion",
+    "categoryId",
+    "modality",
+    "selectionMode",
+    "supportedAnswerLetters",
+    "minimumApproved",
+    "preferredCandidates",
+    "reservePerLetter",
+    "conceptFacets",
+    "performanceFacets",
+    "slotQuotas",
+    "policyHash"
+  ],
+  "properties": {
+    "policyVersion": { "const": "question-bank-v3.3-weighted-slots-v1" },
+    "categoryId": { "pattern": "^tahadani-(0[0-5][0-9]|06[0-2])$" },
+    "modality": { "enum": ["classic", "image", "charades"] },
+    "selectionMode": {
+      "enum": ["standalone", "combined_only", "charades_only"]
+    },
+    "supportedAnswerLetters": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "pattern": "^[ء-ي]$" }
+    },
+    "minimumApproved": { "const": 300 },
+    "preferredCandidates": { "const": 336 },
+    "reservePerLetter": { "const": 3 },
+    "conceptFacets": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "performanceFacets": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "closedDomainConceptReuseCap": { "const": 2 },
+    "slotQuotas": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "oneOf": [
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["targetLetter", "facetId", "count"],
+            "properties": {
+              "targetLetter": { "pattern": "^[ء-ي]$" },
+              "facetId": { "type": "string", "minLength": 1 },
+              "count": { "type": "integer", "minimum": 1 }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["performanceFacetId", "count"],
+            "properties": {
+              "performanceFacetId": { "type": "string", "minLength": 1 },
+              "count": { "type": "integer", "minimum": 1 }
+            }
+          }
+        ]
+      }
+    },
+    "policyHash": { "pattern": "^[a-f0-9]{64}$" }
+  }
+}

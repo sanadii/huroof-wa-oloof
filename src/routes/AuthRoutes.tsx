@@ -3,7 +3,7 @@ import { type ReactNode, useEffect } from 'react';
 import { useFirebaseAuth } from '../features/auth/AuthProvider';
 
 function useDocumentTitle(title: string) {
-  useEffect(() => { document.title = `${title} | استوديو الحروف`; }, [title]);
+  useEffect(() => { document.title = `${title} | تحدي الخلية`; }, [title]);
 }
 
 function AuthShell({ children }: { children: ReactNode }) {

@@ -1,7 +1,18 @@
 import { httpsCallable } from 'firebase/functions';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { getOptionalFirebaseClient, signInAnonymouslyIfNeeded } from '../../../lib/firebase/client.js';
-import type { ClientRole, CreateRoomRequest, GameIntent, GameRuntimeAdapter, JoinRoomRequest, ProjectionEnvelope } from './contracts.js';
+import type { ClientRole, CreateRoomRequest, GameIntent, GameRuntimeAdapter, HostPresenceSnapshot, JoinRoomRequest, ProjectionEnvelope } from './contracts.js';
+
+const PRESENCE_SNAPSHOT_FRESHNESS_MS = 30_000;
+
+export const acceptsFreshHostPresence = (
+  startedAt: number,
+  requestGeneration: number,
+  currentGeneration: number,
+  currentTime = performance.now(),
+) =>
+  requestGeneration === currentGeneration &&
+  currentTime - startedAt <= PRESENCE_SNAPSHOT_FRESHNESS_MS;
 
 function configuredClient() {
   const client = getOptionalFirebaseClient();
@@ -50,6 +61,11 @@ export class FirebaseGameAdapter implements GameRuntimeAdapter {
     return (await httpsCallable<{ roomId: string }, { revision: number; expired: boolean }>(configuredClient().functions, 'syncRoomDeadline')({ roomId })).data;
   }
 
+  async getCurrentQuestionMedia(request: { roomId: string; mediaId: string; assetSha256: string }) {
+    await signInAnonymouslyIfNeeded();
+    return (await httpsCallable<typeof request, { mediaId: string; assetSha256: string; url: string; expiresAt: string }>(configuredClient().functions, 'getCurrentQuestionMedia')(request)).data;
+  }
+
   subscribeProjection(roomId: string, role: ClientRole, uid: string, onProjection: (value: ProjectionEnvelope) => void, onError?: (error: Error) => void) {
     let cancelled = false; let unsubscribe: (() => void) | undefined;
     void (async () => {
@@ -57,12 +73,73 @@ export class FirebaseGameAdapter implements GameRuntimeAdapter {
         const client = configuredClient();
         const projectionId = await projectionIdAfterAuth(client.auth, role, uid);
         if (cancelled) return;
-        unsubscribe = onSnapshot(doc(client.firestore, 'rooms', roomId, 'projections', projectionId), (snapshot) => {
-          if (snapshot.exists()) onProjection(snapshot.data() as ProjectionEnvelope);
+        unsubscribe = onSnapshot(doc(client.firestore, 'rooms', roomId, 'projections', projectionId), { includeMetadataChanges: true }, (snapshot) => {
+          if (snapshot.exists()) onProjection({
+            ...(snapshot.data() as ProjectionEnvelope),
+            authoritative: !snapshot.metadata.fromCache,
+          });
           else onError?.(new Error('ROOM_PROJECTION_MISSING'));
         }, (error) => onError?.(error));
       } catch (error) { if (!cancelled) onError?.(error instanceof Error ? error : new Error(String(error))); }
     })();
     return () => { cancelled = true; unsubscribe?.(); };
+  }
+
+  subscribeHostPresence(roomId: string, onPresence: (value: HostPresenceSnapshot) => void, onError?: (error: Error) => void) {
+    let stopped = false;
+    let generation = 0;
+    let inFlightGeneration: number | undefined;
+    const read = async () => {
+      const requestGeneration = generation;
+      if (stopped || inFlightGeneration === requestGeneration) return;
+      inFlightGeneration = requestGeneration;
+      const startedAt = performance.now();
+      try {
+        await signInAnonymouslyIfNeeded();
+        const result = await httpsCallable<{ roomId: string }, HostPresenceSnapshot>(configuredClient().functions, 'getRoomPresence')({ roomId });
+        if (!stopped && acceptsFreshHostPresence(startedAt, requestGeneration, generation))
+          onPresence(result.data);
+      } catch (error) {
+        if (!stopped && requestGeneration === generation)
+          onError?.(error instanceof Error ? error : new Error(String(error)));
+      } finally {
+        if (inFlightGeneration === requestGeneration) inFlightGeneration = undefined;
+      }
+    };
+    void read();
+    const timer = window.setInterval(() => void read(), 10_000);
+    const refresh = () => void read();
+    window.addEventListener('online', refresh);
+    window.addEventListener('focus', refresh);
+    const visible = () => {
+      if (document.visibilityState !== 'visible') return;
+      generation += 1;
+      void read();
+    };
+    document.addEventListener('visibilitychange', visible);
+    return () => { stopped = true; window.clearInterval(timer); window.removeEventListener('online', refresh); window.removeEventListener('focus', refresh); document.removeEventListener('visibilitychange', visible); };
+  }
+
+  startPlayerPresence(roomId: string, onError?: (error: Error) => void) {
+    let stopped = false;
+    let inFlight = false;
+    const renew = async () => {
+      if (stopped || inFlight) return;
+      inFlight = true;
+      try {
+        await signInAnonymouslyIfNeeded();
+        await httpsCallable<{ roomId: string }, { expiresAtMs: number }>(configuredClient().functions, 'renewPresence')({ roomId });
+      } catch (error) {
+        if (!stopped) onError?.(error instanceof Error ? error : new Error(String(error)));
+      } finally { inFlight = false; }
+    };
+    void renew();
+    const timer = window.setInterval(() => void renew(), 15_000);
+    const refresh = () => void renew();
+    window.addEventListener('online', refresh);
+    window.addEventListener('focus', refresh);
+    const visible = () => { if (document.visibilityState === 'visible') void renew(); };
+    document.addEventListener('visibilitychange', visible);
+    return () => { stopped = true; window.clearInterval(timer); window.removeEventListener('online', refresh); window.removeEventListener('focus', refresh); document.removeEventListener('visibilitychange', visible); };
   }
 }

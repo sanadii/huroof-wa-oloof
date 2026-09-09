@@ -36,4 +36,25 @@ pnpm-debug.log*
 .playwright-cli/
 graphify-out/
 
+# Private intake and local-master-import material. Public app presentation metadata
+# lives under src/data and public/assets; never add raw questions or private media.
+content/questions/
+content/question-media/
+content/categories/originals/
+content/categories/extensions/
+content/categories/asset-manifest.json
+content/categories/import-receipt.json
+content/question-bank-v3/*
+!content/question-bank-v3/schemas/
+!content/question-bank-v3/schemas/*.json
+!content/question-bank-v3/v3.3/
+content/question-bank-v3/v3.3/**
+!content/question-bank-v3/v3.3/*.json
+public/assets/questions/
+tmp/
+*.sqlite
+*.sqlite-*
+*.db
+*.zip
+
 .vercel

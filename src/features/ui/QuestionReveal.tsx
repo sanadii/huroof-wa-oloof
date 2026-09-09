@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
-const REVEAL_DURATION_MS = 3_000;
+const REVEAL_DURATION_MS = 750;
 
 type GraphemeSegmenter = {
   segment(value: string): Iterable<{ segment: string }>;
@@ -31,6 +31,7 @@ function prefersReducedMotion() {
 type QuestionRevealProps = {
   prompt?: string;
   questionKey: string;
+  paused?: boolean;
 };
 
 /**
@@ -38,9 +39,10 @@ type QuestionRevealProps = {
  * completed line breaks. The two runs remain in one inline formatting context,
  * so the prompt stays centered and no individual letters are wrapped.
  */
-export function QuestionReveal({ prompt, questionKey }: QuestionRevealProps) {
+export function QuestionReveal({ prompt, questionKey, paused = false }: QuestionRevealProps) {
   const graphemes = useMemo(() => splitGraphemes(prompt ?? ""), [prompt]);
   const [reducedMotion, setReducedMotion] = useState(prefersReducedMotion);
+  const elapsedMs = useRef(0);
   const [visibleCount, setVisibleCount] = useState(() =>
     prefersReducedMotion() ? graphemes.length : 0,
   );
@@ -54,18 +56,25 @@ export function QuestionReveal({ prompt, questionKey }: QuestionRevealProps) {
   }, []);
 
   useEffect(() => {
+    elapsedMs.current = 0;
+    setVisibleCount(reducedMotion ? graphemes.length : 0);
+  }, [graphemes, questionKey, reducedMotion]);
+
+  useEffect(() => {
+    if (paused) return;
     if (reducedMotion) {
       setVisibleCount(graphemes.length);
       return;
     }
 
-    setVisibleCount(0);
     if (!graphemes.length) return;
 
     const startedAt = Date.now();
-    let timer: ReturnType<typeof window.setTimeout> | undefined;
+    // This effect always schedules in the browser; Node's ambient timer overload
+    // must not turn the DOM handle into a Timeout object during app typechecking.
+    let timer: number | undefined;
     const tick = () => {
-      const elapsed = Date.now() - startedAt;
+      const elapsed = elapsedMs.current + Date.now() - startedAt;
       const nextCount = Math.min(
         graphemes.length,
         Math.floor((elapsed / REVEAL_DURATION_MS) * graphemes.length),
@@ -83,16 +92,17 @@ export function QuestionReveal({ prompt, questionKey }: QuestionRevealProps) {
       Math.min(50, Math.max(1, REVEAL_DURATION_MS / graphemes.length)),
     );
     return () => {
+      elapsedMs.current += Date.now() - startedAt;
       if (timer !== undefined) window.clearTimeout(timer);
     };
-  }, [graphemes, questionKey, reducedMotion]);
+  }, [graphemes, questionKey, reducedMotion, paused]);
 
   if (!prompt) return null;
 
   return (
     <span className="question-reveal" dir="rtl" lang="ar">
       <span className="sr-only">
-        {prompt}
+        {graphemes.slice(0, visibleCount).join("")}
       </span>
       <span
         aria-hidden="true"

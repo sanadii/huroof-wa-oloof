@@ -1,0 +1,1012 @@
+{
+  "schemaVersion": "huroof-source-category-registry-v1",
+  "provenance": {
+    "bundleFile": "huroof_everything_available_bundle.zip",
+    "bundleSha256": "7afd1423925b68e11f3f0cab5253879154763994272203b1a4df8007f9cd31ec",
+    "entryPrefix": "huroof_everything_bundle/huroof_questions_md/",
+    "entryCount": 100,
+    "authority": "outer_direct_markdown_category_headers"
+  },
+  "categories": [
+    {
+      "sourceIndex": "001",
+      "sourceCategoryId": "tahadani-001",
+      "sourceTitleAr": "من أنا - دول",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/001-من أنا - دول.md",
+      "sourceFileSha256": "691b08fcd023c43f0c17bc8a128e336bdec7f45bd8d6b5ea2bc6c0c6be89eead",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": "tahadani-001",
+      "runtimeMapping": "explicit_legacy_identity"
+    },
+    {
+      "sourceIndex": "002",
+      "sourceCategoryId": "tahadani-002",
+      "sourceTitleAr": "من أنا - لاعبين كرة قدم",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/002-من أنا - لاعبين كرة قدم.md",
+      "sourceFileSha256": "5f07edad4db7cbf46153eb932785cc9aad4063ec06d1057353fdcaaea7b17888",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": "tahadani-002",
+      "runtimeMapping": "explicit_legacy_identity"
+    },
+    {
+      "sourceIndex": "003",
+      "sourceCategoryId": "tahadani-003",
+      "sourceTitleAr": "من أنا - حيوانات",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/003-من أنا - حيوانات.md",
+      "sourceFileSha256": "5f90946bad5d63704633ad881bad98c9e86a940321292b44342fcffc5faf1e1a",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": "tahadani-003",
+      "runtimeMapping": "explicit_legacy_identity"
+    },
+    {
+      "sourceIndex": "004",
+      "sourceCategoryId": "tahadani-004",
+      "sourceTitleAr": "من أنا - مسلسلات عربية",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/004-من أنا - مسلسلات عربية.md",
+      "sourceFileSha256": "d0c476a482f84f1cab5591cd2806a365056e7add0d5839cad8973c0499c438db",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": "tahadani-004",
+      "runtimeMapping": "explicit_legacy_identity"
+    },
+    {
+      "sourceIndex": "005",
+      "sourceCategoryId": "tahadani-005",
+      "sourceTitleAr": "من أنا - ممثلين",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/005-من أنا - ممثلين.md",
+      "sourceFileSha256": "ca9d50de8f03d3a9a0d13f5706368a0c911175c3834a21df81a133ae13b2e065",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": "tahadani-005",
+      "runtimeMapping": "explicit_legacy_identity"
+    },
+    {
+      "sourceIndex": "006",
+      "sourceCategoryId": "tahadani-006",
+      "sourceTitleAr": "معلومات عامة",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/006-معلومات عامة.md",
+      "sourceFileSha256": "65554740310b0ce4732d98a1ac86dd3bad79a94914d645d4f2b9396a02af31a8",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": "tahadani-006",
+      "runtimeMapping": "explicit_legacy_identity"
+    },
+    {
+      "sourceIndex": "007",
+      "sourceCategoryId": "tahadani-007",
+      "sourceTitleAr": "عالم الحيوان",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/007-عالم الحيوان.md",
+      "sourceFileSha256": "4c38b1e50b9b0f183694dcf148c98f6e60d2608f418cee5b2b4c3cfd3681933f",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": "tahadani-007",
+      "runtimeMapping": "explicit_legacy_identity"
+    },
+    {
+      "sourceIndex": "008",
+      "sourceCategoryId": "tahadani-008",
+      "sourceTitleAr": "تكنولوجيا",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/008-تكنولوجيا.md",
+      "sourceFileSha256": "f134f6aaebcb5b2a4541a94db67846b96f16749cf71ee4f01f414b32bdadd422",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": "tahadani-008",
+      "runtimeMapping": "explicit_legacy_identity"
+    },
+    {
+      "sourceIndex": "009",
+      "sourceCategoryId": "tahadani-009",
+      "sourceTitleAr": "تاريخ",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/009-تاريخ.md",
+      "sourceFileSha256": "e8e3c6e0447145bcabd67d931f47c521294f5e09254e78763acb97374323feff",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": "tahadani-009",
+      "runtimeMapping": "explicit_legacy_identity"
+    },
+    {
+      "sourceIndex": "010",
+      "sourceCategoryId": "tahadani-010",
+      "sourceTitleAr": "منو المشهور",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/010-منو المشهور.md",
+      "sourceFileSha256": "6d710dfa9d3a1e59a49264b050f8a575529aebdb77245f8f489f70b729af7252",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": "tahadani-010",
+      "runtimeMapping": "explicit_legacy_identity"
+    },
+    {
+      "sourceIndex": "011",
+      "sourceCategoryId": "tahadani-011",
+      "sourceTitleAr": "خمن الصورة",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/011-خمن الصورة.md",
+      "sourceFileSha256": "b43ad097b84c6cb187dbbfad719191d21e57a0f0eda9751f0deeef7c9d17d735",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": "tahadani-011",
+      "runtimeMapping": "explicit_legacy_identity"
+    },
+    {
+      "sourceIndex": "012",
+      "sourceCategoryId": "tahadani-012",
+      "sourceTitleAr": "شنو هذا",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/012-شنو هذا.md",
+      "sourceFileSha256": "5f31409e813bfc46851e93cdf923ce30b24dcb5f784a7eb6891d1f77e1b61642",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": "tahadani-012",
+      "runtimeMapping": "explicit_legacy_identity"
+    },
+    {
+      "sourceIndex": "013",
+      "sourceCategoryId": "tahadani-013",
+      "sourceTitleAr": "ألغاز",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/013-ألغاز.md",
+      "sourceFileSha256": "c5852b7945572f5a9c6c3a8807fa9514d2d507d2465a1a4cdcc60d8085342139",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": "tahadani-013",
+      "runtimeMapping": "explicit_legacy_identity"
+    },
+    {
+      "sourceIndex": "014",
+      "sourceCategoryId": "tahadani-014",
+      "sourceTitleAr": "الجزء المفقود",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/014-الجزء المفقود.md",
+      "sourceFileSha256": "141abf3d23f65afad0cbe553d9ceda5108ccc9c599de1a3e4dc52c1eb5299d30",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": "tahadani-014",
+      "runtimeMapping": "explicit_legacy_identity"
+    },
+    {
+      "sourceIndex": "015",
+      "sourceCategoryId": "tahadani-015",
+      "sourceTitleAr": "أمثال وغطاوي",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/015-أمثال وغطاوي.md",
+      "sourceFileSha256": "06456b55250b5f44b604ebcc7d3d0694040cf36b4c92c8ca6d6e50c7f930a005",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": "tahadani-015",
+      "runtimeMapping": "explicit_legacy_identity"
+    },
+    {
+      "sourceIndex": "016",
+      "sourceCategoryId": "tahadani-016",
+      "sourceTitleAr": "حيوانات - ولا كلمة",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/016-حيوانات - ولا كلمة.md",
+      "sourceFileSha256": "7c9482d442748f2aeef05fc18b39c16d1d722f62251a5c2c09e24645e74dd271",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": "tahadani-016",
+      "runtimeMapping": "explicit_legacy_identity"
+    },
+    {
+      "sourceIndex": "017",
+      "sourceCategoryId": "tahadani-017",
+      "sourceTitleAr": "أغاني عربية - ولا كلمة",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/017-أغاني عربية - ولا كلمة.md",
+      "sourceFileSha256": "2ede3912e7765e906966093e4227a82c446064812dd0783ac08a6922a9a86c7a",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": "tahadani-017",
+      "runtimeMapping": "explicit_legacy_identity"
+    },
+    {
+      "sourceIndex": "018",
+      "sourceCategoryId": "tahadani-018",
+      "sourceTitleAr": "مشاهير عرب - ولا كلمة",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/018-مشاهير عرب - ولا كلمة.md",
+      "sourceFileSha256": "6a4a3064dd9e744d18974bac7ec6be5a77c80a8b640b84e1968815698b119634",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": "tahadani-018",
+      "runtimeMapping": "explicit_legacy_identity"
+    },
+    {
+      "sourceIndex": "019",
+      "sourceCategoryId": "tahadani-019",
+      "sourceTitleAr": "كرتون - ولا كلمة",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/019-كرتون - ولا كلمة.md",
+      "sourceFileSha256": "df3ec4a17fb27f275a14ca4d9cbd6151b4fb02d68a98b82f63b50be8029b3fa7",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": "tahadani-019",
+      "runtimeMapping": "explicit_legacy_identity"
+    },
+    {
+      "sourceIndex": "020",
+      "sourceCategoryId": "tahadani-020",
+      "sourceTitleAr": "دول - ولا كلمة",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/020-دول - ولا كلمة.md",
+      "sourceFileSha256": "d691b010e2263553691e8775cc795717b14ea5365d8b05294e59a6ab04b26a88",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": "tahadani-020",
+      "runtimeMapping": "explicit_legacy_identity"
+    },
+    {
+      "sourceIndex": "021",
+      "sourceCategoryId": "tahadani-021",
+      "sourceTitleAr": "ريال مدريد",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/021-ريال مدريد.md",
+      "sourceFileSha256": "c46581b8c9fe58738c9a720ccbdcfda2e4858257d0f9718796fc776727ade739",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": "tahadani-021",
+      "runtimeMapping": "explicit_legacy_identity"
+    },
+    {
+      "sourceIndex": "022",
+      "sourceCategoryId": "tahadani-022",
+      "sourceTitleAr": "برشلونة",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/022-برشلونة.md",
+      "sourceFileSha256": "ac74a5e23eb45dbce20de65b6f1cf450ff3447f4f92e1e1e7fab50a552b109d1",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": "tahadani-022",
+      "runtimeMapping": "explicit_legacy_identity"
+    },
+    {
+      "sourceIndex": "023",
+      "sourceCategoryId": "tahadani-023",
+      "sourceTitleAr": "كأس العالم",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/023-كأس العالم.md",
+      "sourceFileSha256": "e3c2cae1c777e38aa824c77a32499fc52a57fc3fe4e4db1e6197804f261b1a9a",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": "tahadani-023",
+      "runtimeMapping": "explicit_legacy_identity"
+    },
+    {
+      "sourceIndex": "024",
+      "sourceCategoryId": "tahadani-024",
+      "sourceTitleAr": "ميسي وكرستيانو",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/024-ميسي وكرستيانو.md",
+      "sourceFileSha256": "8d37a5736458c7d20e914fdfac1b16ae72eaf49bb36292d8f94cd155cad3ed0d",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": "tahadani-024",
+      "runtimeMapping": "explicit_legacy_identity"
+    },
+    {
+      "sourceIndex": "025",
+      "sourceCategoryId": "tahadani-025",
+      "sourceTitleAr": "من هو اللاعب",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/025-من هو اللاعب.md",
+      "sourceFileSha256": "a2b441f70806a0a83fc1583d42ba7976e7b95fcc8059b2dc3c4d3982436f8d52",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": "tahadani-025",
+      "runtimeMapping": "explicit_legacy_identity"
+    },
+    {
+      "sourceIndex": "026",
+      "sourceCategoryId": "tahadani-026",
+      "sourceTitleAr": "طاش ما طاش",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/026-طاش ما طاش.md",
+      "sourceFileSha256": "c201bfb53f64bb71c87ac59edc3427338d12198aec49f7a044b6fb7de35ff360",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": "tahadani-026",
+      "runtimeMapping": "explicit_legacy_identity"
+    },
+    {
+      "sourceIndex": "027",
+      "sourceCategoryId": "tahadani-027",
+      "sourceTitleAr": "باب الحارة",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/027-باب الحارة.md",
+      "sourceFileSha256": "182385a83f801214315a04c2d40d2059268e4506c3503f94838f3f3fecc083a2",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": "tahadani-027",
+      "runtimeMapping": "explicit_legacy_identity"
+    },
+    {
+      "sourceIndex": "028",
+      "sourceCategoryId": "tahadani-028",
+      "sourceTitleAr": "أفلام كلاسيك",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/028-أفلام كلاسيك.md",
+      "sourceFileSha256": "b150aa03ebe8967a68a57bcc702912ff7e912718b0ba45d442e5239805a41491",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": "tahadani-028",
+      "runtimeMapping": "explicit_legacy_identity"
+    },
+    {
+      "sourceIndex": "029",
+      "sourceCategoryId": "tahadani-029",
+      "sourceTitleAr": "أفلام رعب",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/029-أفلام رعب.md",
+      "sourceFileSha256": "7fa6dcc04fd0b23f56b078ce5d57f45ddebb7ad5fc60840b36f277990025950c",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": "tahadani-029",
+      "runtimeMapping": "explicit_legacy_identity"
+    },
+    {
+      "sourceIndex": "030",
+      "sourceCategoryId": "tahadani-030",
+      "sourceTitleAr": "Game Of Thrones",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/030-Game Of Thrones.md",
+      "sourceFileSha256": "15d95253e34094b7c5c8215918b5662f037b613dc66af74b5d7a33b06dbed7b0",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": "tahadani-030",
+      "runtimeMapping": "explicit_legacy_identity"
+    },
+    {
+      "sourceIndex": "031",
+      "sourceCategoryId": "tahadani-031",
+      "sourceTitleAr": "الزمن الجميل",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/031-الزمن الجميل.md",
+      "sourceFileSha256": "d3c61642a2ebb405b2477e0f5e6aa39910b0eca04c64b76569774f3e4ec5b352",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": "tahadani-031",
+      "runtimeMapping": "explicit_legacy_identity"
+    },
+    {
+      "sourceIndex": "032",
+      "sourceCategoryId": "tahadani-032",
+      "sourceTitleAr": "أم كلثوم",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/032-أم كلثوم.md",
+      "sourceFileSha256": "abaa09ee36b018c6e464cfb8b344083a3c3f75a16e9e929b9bca61926c0c5c28",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": "tahadani-032",
+      "runtimeMapping": "explicit_legacy_identity"
+    },
+    {
+      "sourceIndex": "033",
+      "sourceCategoryId": "tahadani-033",
+      "sourceTitleAr": "نشيد وطني",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/033-نشيد وطني.md",
+      "sourceFileSha256": "feaabccfd084167a1702defc16dc1bbf31523fbc97ba0ec4c4d7ae47e5967980",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": "tahadani-033",
+      "runtimeMapping": "explicit_legacy_identity"
+    },
+    {
+      "sourceIndex": "034",
+      "sourceCategoryId": "tahadani-034",
+      "sourceTitleAr": "أغاني أجنبية",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/034-أغاني أجنبية.md",
+      "sourceFileSha256": "a83509f84a2a92c437e1248c1c1868fdd77ca5615af9e7f92acc6c189cf0c013",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": "tahadani-034",
+      "runtimeMapping": "explicit_legacy_identity"
+    },
+    {
+      "sourceIndex": "035",
+      "sourceCategoryId": "tahadani-035",
+      "sourceTitleAr": "عبدالكريم عبدالقادر",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/035-عبدالكريم عبدالقادر.md",
+      "sourceFileSha256": "01fc498844cde7fbe36c4f964f2042224c3901e8b808d3331119dd9bddd3a898",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": "tahadani-035",
+      "runtimeMapping": "explicit_legacy_identity"
+    },
+    {
+      "sourceIndex": "036",
+      "sourceCategoryId": "tahadani-036",
+      "sourceTitleAr": "One Piece",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/036-One Piece.md",
+      "sourceFileSha256": "ba903d717816393dc3c3c5e6ebbfdd69ab5ba6c8ca3314490741a94ff00db473",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": "tahadani-036",
+      "runtimeMapping": "explicit_legacy_identity"
+    },
+    {
+      "sourceIndex": "037",
+      "sourceCategoryId": "tahadani-037",
+      "sourceTitleAr": "Attack on Titan",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/037-Attack on Titan.md",
+      "sourceFileSha256": "7ec61672fdcfaba757bc18b73fc3b312b1526cf48ab784fbadffec56de23c2fa",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": "tahadani-037",
+      "runtimeMapping": "explicit_legacy_identity"
+    },
+    {
+      "sourceIndex": "038",
+      "sourceCategoryId": "tahadani-038",
+      "sourceTitleAr": "Naruto",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/038-Naruto.md",
+      "sourceFileSha256": "24da52d0a7a66962587753626822d71bdc1d76e55a1b595116a6419964ae12b3",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": "tahadani-038",
+      "runtimeMapping": "explicit_legacy_identity"
+    },
+    {
+      "sourceIndex": "039",
+      "sourceCategoryId": "tahadani-039",
+      "sourceTitleAr": "المحقق كونان",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/039-المحقق كونان.md",
+      "sourceFileSha256": "1f47ba88c5a8307db0cdf14946f75f441c57586f5ea07da6ad35871d95ad756f",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": "tahadani-039",
+      "runtimeMapping": "explicit_legacy_identity"
+    },
+    {
+      "sourceIndex": "040",
+      "sourceCategoryId": "tahadani-040",
+      "sourceTitleAr": "PUBG",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/040-PUBG.md",
+      "sourceFileSha256": "95fd67950259612c07e435ef90487e0b7ae7f2567a824efa7868d8d82fef3350",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": "tahadani-040",
+      "runtimeMapping": "explicit_legacy_identity"
+    },
+    {
+      "sourceIndex": "041",
+      "sourceCategoryId": "tahadani-041",
+      "sourceTitleAr": "Call Of Duty",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/041-Call Of Duty.md",
+      "sourceFileSha256": "820df817c1689e0b56789c041527f4ff449c8287bf56729058c1f4dea947d3bb",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": "tahadani-041",
+      "runtimeMapping": "explicit_legacy_identity"
+    },
+    {
+      "sourceIndex": "042",
+      "sourceCategoryId": "tahadani-042",
+      "sourceTitleAr": "Minecraft",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/042-Minecraft.md",
+      "sourceFileSha256": "06bc686565242faa58fa2c8e0d6f302ad11ede1d8fc4f74fded701d9897ae0fd",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": "tahadani-042",
+      "runtimeMapping": "explicit_legacy_identity"
+    },
+    {
+      "sourceIndex": "043",
+      "sourceCategoryId": "tahadani-043",
+      "sourceTitleAr": "ألعاب الطفولة",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/043-ألعاب الطفولة.md",
+      "sourceFileSha256": "bc035366102ea678594f04a6a99d5e056b7d5e4858c49212041779926e7f3d00",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": "tahadani-043",
+      "runtimeMapping": "explicit_legacy_identity"
+    },
+    {
+      "sourceIndex": "044",
+      "sourceCategoryId": "tahadani-044",
+      "sourceTitleAr": "أعلام",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/044-أعلام.md",
+      "sourceFileSha256": "caea6be186b8955bfe0d82e07d9a85989ac6c535293763911766e9db32dc86f9",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": "tahadani-044",
+      "runtimeMapping": "explicit_legacy_identity"
+    },
+    {
+      "sourceIndex": "045",
+      "sourceCategoryId": "tahadani-045",
+      "sourceTitleAr": "عواصم",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/045-عواصم.md",
+      "sourceFileSha256": "5a870c43bc22b76f16d2c1c26232082a1d081b3883806412bfd78e37574362bb",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": "tahadani-045",
+      "runtimeMapping": "explicit_legacy_identity"
+    },
+    {
+      "sourceIndex": "046",
+      "sourceCategoryId": "tahadani-046",
+      "sourceTitleAr": "دول وعواصم",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/046-دول وعواصم.md",
+      "sourceFileSha256": "97561bda21a1dade744a5bb66de2d83239ea4ada0e3a0177bc2fcd969907cef9",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": "tahadani-046",
+      "runtimeMapping": "explicit_legacy_identity"
+    },
+    {
+      "sourceIndex": "047",
+      "sourceCategoryId": "tahadani-047",
+      "sourceTitleAr": "عملات",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/047-عملات.md",
+      "sourceFileSha256": "08ed342ad3970a558504df4ebd935f57fbc613d03a00bcaab27f68cd22b4c7b7",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": "tahadani-047",
+      "runtimeMapping": "explicit_legacy_identity"
+    },
+    {
+      "sourceIndex": "048",
+      "sourceCategoryId": "tahadani-048",
+      "sourceTitleAr": "UFC والفنون القتالية",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/048-UFC والفنون القتالية.md",
+      "sourceFileSha256": "dc5bfdb38c18a9b9cc4c6eaafbc27377809b4a8521a6904f385977ab37f82982",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": "tahadani-048",
+      "runtimeMapping": "explicit_legacy_identity"
+    },
+    {
+      "sourceIndex": "049",
+      "sourceCategoryId": "tahadani-049",
+      "sourceTitleAr": "تنس",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/049-تنس.md",
+      "sourceFileSha256": "00bc33035aed5adf3a40296fe235224c1613f181ae8bfbe671892cc2bc8a8659",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": "tahadani-049",
+      "runtimeMapping": "explicit_legacy_identity"
+    },
+    {
+      "sourceIndex": "050",
+      "sourceCategoryId": "tahadani-050",
+      "sourceTitleAr": "Formula One",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/050-Formula One.md",
+      "sourceFileSha256": "43f18a2eca85d14034cf70dcd2acab3b7fabf3d9eec3feb5f50b037279176ee4",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": "tahadani-050",
+      "runtimeMapping": "explicit_legacy_identity"
+    },
+    {
+      "sourceIndex": "051",
+      "sourceCategoryId": "tahadani-051",
+      "sourceTitleAr": "سيارات",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/051-سيارات.md",
+      "sourceFileSha256": "65febeb742a846fdea710aa00d6b03f2a0c71d55760e5721eac349b4c53dff51",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": "tahadani-051",
+      "runtimeMapping": "explicit_legacy_identity"
+    },
+    {
+      "sourceIndex": "052",
+      "sourceCategoryId": "tahadani-052",
+      "sourceTitleAr": "منوعات كرة قدم",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/052-منوعات كرة قدم.md",
+      "sourceFileSha256": "ecfceba2bde3762d8aee94a8e3619612b33ca5ababad82f40d8a39918664bd11",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": "tahadani-052",
+      "runtimeMapping": "explicit_legacy_identity"
+    },
+    {
+      "sourceIndex": "053",
+      "sourceCategoryId": "tahadani-053",
+      "sourceTitleAr": "منوعات شعرية",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/053-منوعات شعرية.md",
+      "sourceFileSha256": "efaecabf74a73b06d117cff970b900290059fdbd408789775574b9af17652cd0",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": "tahadani-053",
+      "runtimeMapping": "explicit_legacy_identity"
+    },
+    {
+      "sourceIndex": "054",
+      "sourceCategoryId": "tahadani-054",
+      "sourceTitleAr": "كرة قدم عالمية",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/054-كرة قدم عالمية.md",
+      "sourceFileSha256": "f86f93184931084ce0d7b4eda0592b62c18a49789cb7739dc368f5b850baf0e5",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": "tahadani-054",
+      "runtimeMapping": "explicit_legacy_identity"
+    },
+    {
+      "sourceIndex": "055",
+      "sourceCategoryId": "tahadani-055",
+      "sourceTitleAr": "الكرة الإيطالية",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/055-الكرة الإيطالية.md",
+      "sourceFileSha256": "dd9589b7b5031956e0797e4a2d726f2f76aef2cecc64cfbf7853ea90c58f0e2f",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": "tahadani-055",
+      "runtimeMapping": "explicit_legacy_identity"
+    },
+    {
+      "sourceIndex": "056",
+      "sourceCategoryId": "tahadani-056",
+      "sourceTitleAr": "قصص الأنبياء",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/056-قصص الأنبياء.md",
+      "sourceFileSha256": "5ea8b7c82580d1fd81c26c6076127fc07e63a780599585da65f5c4750850b53d",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": "tahadani-056",
+      "runtimeMapping": "explicit_legacy_identity"
+    },
+    {
+      "sourceIndex": "057",
+      "sourceCategoryId": "tahadani-057",
+      "sourceTitleAr": "القرآن الكريم",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/057-القرآن الكريم.md",
+      "sourceFileSha256": "ef85312bf0a92c02f83a753b4f6eda1340d700ae429a941c05b53f3e6803fea7",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": "tahadani-057",
+      "runtimeMapping": "explicit_legacy_identity"
+    },
+    {
+      "sourceIndex": "058",
+      "sourceCategoryId": "tahadani-058",
+      "sourceTitleAr": "مطاعم الكويت",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/058-مطاعم الكويت.md",
+      "sourceFileSha256": "23585eee84c1ca9fa1c462021362ff28f0d03efc740b8b0b2fb50219aab7bc33",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": "tahadani-058",
+      "runtimeMapping": "explicit_legacy_identity"
+    },
+    {
+      "sourceIndex": "059",
+      "sourceCategoryId": "tahadani-059",
+      "sourceTitleAr": "من أنا جغرافيا",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/059-من أنا جغرافيا.md",
+      "sourceFileSha256": "0a5957e661163bd00b9f7b99775aed5e1f66a108b33d1fc7bf2126c66915567f",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": "tahadani-059",
+      "runtimeMapping": "explicit_legacy_identity"
+    },
+    {
+      "sourceIndex": "060",
+      "sourceCategoryId": "tahadani-060",
+      "sourceTitleAr": "مسيرة لاعب",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/060-مسيرة لاعب.md",
+      "sourceFileSha256": "e8a045df96bccca9b48a2160e6010e6968a81b1593026f33a39b27cbddff2357",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": "tahadani-060",
+      "runtimeMapping": "explicit_legacy_identity"
+    },
+    {
+      "sourceIndex": "061",
+      "sourceCategoryId": "tahadani-061",
+      "sourceTitleAr": "LineUp",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/061-LineUp.md",
+      "sourceFileSha256": "7e85468a26769f3b96e7413c82b3c3f45bd1e15853b4ff19a3b3759d57300f66",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": "tahadani-061",
+      "runtimeMapping": "explicit_legacy_identity"
+    },
+    {
+      "sourceIndex": "062",
+      "sourceCategoryId": "tahadani-062",
+      "sourceTitleAr": "كأس العالم 2026",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/062-كأس العالم 2026.md",
+      "sourceFileSha256": "b68d27ebee30433fdd7477446c5acf1f70016ee6fdc957b5b7ef7ca91c4cd033",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": "tahadani-062",
+      "runtimeMapping": "explicit_legacy_identity"
+    },
+    {
+      "sourceIndex": "063",
+      "sourceCategoryId": "huroof-063",
+      "sourceTitleAr": "كرة السلة وNBA",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/063-كرة السلة وNBA.md",
+      "sourceFileSha256": "a846dacc4e998cdb685ea9162a813fc54e6f4afd447102a1aa8a5e9d0e16f747",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": null,
+      "runtimeMapping": "source_only_no_runtime_target"
+    },
+    {
+      "sourceIndex": "064",
+      "sourceCategoryId": "huroof-064",
+      "sourceTitleAr": "دوري أبطال أوروبا",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/064-دوري أبطال أوروبا.md",
+      "sourceFileSha256": "7b9e1bd37545cf80c38819c6ffc593ade5d22e8fa36f11dfea06afa75de6d02e",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": null,
+      "runtimeMapping": "source_only_no_runtime_target"
+    },
+    {
+      "sourceIndex": "065",
+      "sourceCategoryId": "huroof-065",
+      "sourceTitleAr": "الدوري الإنجليزي",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/065-الدوري الإنجليزي.md",
+      "sourceFileSha256": "e0073e1bbe82f6767090f79b0e545479623797cab286b558a69fa23518101566",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": null,
+      "runtimeMapping": "source_only_no_runtime_target"
+    },
+    {
+      "sourceIndex": "066",
+      "sourceCategoryId": "huroof-066",
+      "sourceTitleAr": "الدوري الإسباني",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/066-الدوري الإسباني.md",
+      "sourceFileSha256": "0a3226fbee962aed07bd6a834c60e62d25f77bc92df7bdc95e35da0b4f4acb14",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": null,
+      "runtimeMapping": "source_only_no_runtime_target"
+    },
+    {
+      "sourceIndex": "067",
+      "sourceCategoryId": "huroof-067",
+      "sourceTitleAr": "الدوري السعودي",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/067-الدوري السعودي.md",
+      "sourceFileSha256": "ef716ee28d81c40c67b571cc6dc18089324274e7479db1952a897bb4eed15dd4",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": null,
+      "runtimeMapping": "source_only_no_runtime_target"
+    },
+    {
+      "sourceIndex": "068",
+      "sourceCategoryId": "huroof-068",
+      "sourceTitleAr": "منتخب الكويت",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/068-منتخب الكويت.md",
+      "sourceFileSha256": "bd03b84110f72272ff01e303badf3d47999c154e8bfed2d0c70a5fe52e30bf9b",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": null,
+      "runtimeMapping": "source_only_no_runtime_target"
+    },
+    {
+      "sourceIndex": "069",
+      "sourceCategoryId": "huroof-069",
+      "sourceTitleAr": "كرة القدم الكويتية",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/069-كرة القدم الكويتية.md",
+      "sourceFileSha256": "f8ae87e54b06779970f8ad63638a4c63070e5a2424974c3303982559aeeb2534",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": null,
+      "runtimeMapping": "source_only_no_runtime_target"
+    },
+    {
+      "sourceIndex": "070",
+      "sourceCategoryId": "huroof-070",
+      "sourceTitleAr": "الألعاب الأولمبية",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/070-الألعاب الأولمبية.md",
+      "sourceFileSha256": "fc52fa1c6635c453accfa62c435458ecf4ea4a49032dd0413ed11ce73946e4f7",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": null,
+      "runtimeMapping": "source_only_no_runtime_target"
+    },
+    {
+      "sourceIndex": "071",
+      "sourceCategoryId": "huroof-071",
+      "sourceTitleAr": "WWE",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/071-WWE.md",
+      "sourceFileSha256": "a30a22eeda7e129b58ac9b90f2c565784d2e6e6e93111b1b20c7472bbf201ecd",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": null,
+      "runtimeMapping": "source_only_no_runtime_target"
+    },
+    {
+      "sourceIndex": "072",
+      "sourceCategoryId": "huroof-072",
+      "sourceTitleAr": "الملاكمة",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/072-الملاكمة.md",
+      "sourceFileSha256": "9a16c2af2820be826e4502c8be72a03140e45ee7463bb5b7fcd51888375e7e17",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": null,
+      "runtimeMapping": "source_only_no_runtime_target"
+    },
+    {
+      "sourceIndex": "073",
+      "sourceCategoryId": "huroof-073",
+      "sourceTitleAr": "ألعاب الفيديو",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/073-ألعاب الفيديو.md",
+      "sourceFileSha256": "8e914336926fd4837fdb591a6546daab23548ed9759e9954dfad8d10885a7145",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": null,
+      "runtimeMapping": "source_only_no_runtime_target"
+    },
+    {
+      "sourceIndex": "074",
+      "sourceCategoryId": "huroof-074",
+      "sourceTitleAr": "PlayStation",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/074-PlayStation.md",
+      "sourceFileSha256": "5482fdab3353f15984fcbd09eb81275545903cdb1c9dbad7f17a701fecbef469",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": null,
+      "runtimeMapping": "source_only_no_runtime_target"
+    },
+    {
+      "sourceIndex": "075",
+      "sourceCategoryId": "huroof-075",
+      "sourceTitleAr": "Nintendo",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/075-Nintendo.md",
+      "sourceFileSha256": "68ad3aa06b1d6a36a024b45ac443a7fa93db6650ed064c06c0fe5cf4aa338c8c",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": null,
+      "runtimeMapping": "source_only_no_runtime_target"
+    },
+    {
+      "sourceIndex": "076",
+      "sourceCategoryId": "huroof-076",
+      "sourceTitleAr": "Fortnite",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/076-Fortnite.md",
+      "sourceFileSha256": "0a348de812eeaa03346e14b1b2553c55723a6acc5496f57f9b2d3f69ac38c18f",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": null,
+      "runtimeMapping": "source_only_no_runtime_target"
+    },
+    {
+      "sourceIndex": "077",
+      "sourceCategoryId": "huroof-077",
+      "sourceTitleAr": "Pokémon",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/077-Pokémon.md",
+      "sourceFileSha256": "f4a7ef51b5e59d0761f78053659cd81de87dfd8d96197f3e95a095b6980f168f",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": null,
+      "runtimeMapping": "source_only_no_runtime_target"
+    },
+    {
+      "sourceIndex": "078",
+      "sourceCategoryId": "huroof-078",
+      "sourceTitleAr": "Dragon Ball",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/078-Dragon Ball.md",
+      "sourceFileSha256": "9b42cb9476932bc69008504596ab3590ef84e49a1abef4236d0ccf8be760211b",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": null,
+      "runtimeMapping": "source_only_no_runtime_target"
+    },
+    {
+      "sourceIndex": "079",
+      "sourceCategoryId": "huroof-079",
+      "sourceTitleAr": "أفلام ديزني وبيكسار",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/079-أفلام ديزني وبيكسار.md",
+      "sourceFileSha256": "74da2389b3b6a81363994ebf3b559967f019cc58e9f039e16d6274e1e0dc048d",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": null,
+      "runtimeMapping": "source_only_no_runtime_target"
+    },
+    {
+      "sourceIndex": "080",
+      "sourceCategoryId": "huroof-080",
+      "sourceTitleAr": "Marvel",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/080-Marvel.md",
+      "sourceFileSha256": "95d1c3abf69dfa0597bed15300576f855a56b35f6ec85f5dd689f878ceb96014",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": null,
+      "runtimeMapping": "source_only_no_runtime_target"
+    },
+    {
+      "sourceIndex": "081",
+      "sourceCategoryId": "huroof-081",
+      "sourceTitleAr": "DC Comics",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/081-DC Comics.md",
+      "sourceFileSha256": "38ea38d242fc12524ce20e4e2b81f4050410fbd33e3c98f1a6ca0790bc1f7e87",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": null,
+      "runtimeMapping": "source_only_no_runtime_target"
+    },
+    {
+      "sourceIndex": "082",
+      "sourceCategoryId": "huroof-082",
+      "sourceTitleAr": "Harry Potter",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/082-Harry Potter.md",
+      "sourceFileSha256": "c0e6adbac9f2ede443d9d39c7fed25b5e128b1169b256754e7b6f9990fbd5534",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": null,
+      "runtimeMapping": "source_only_no_runtime_target"
+    },
+    {
+      "sourceIndex": "083",
+      "sourceCategoryId": "huroof-083",
+      "sourceTitleAr": "Friends",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/083-Friends.md",
+      "sourceFileSha256": "65eed5e05b32e697812596348e42b34293a309818ae3318e3d3952f984eacb18",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": null,
+      "runtimeMapping": "source_only_no_runtime_target"
+    },
+    {
+      "sourceIndex": "084",
+      "sourceCategoryId": "huroof-084",
+      "sourceTitleAr": "Breaking Bad",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/084-Breaking Bad.md",
+      "sourceFileSha256": "73462b605bb5724cb3b120c5fa95aa0acf42c8cc625f3de27ecd5cf4e97d7c2a",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": null,
+      "runtimeMapping": "source_only_no_runtime_target"
+    },
+    {
+      "sourceIndex": "085",
+      "sourceCategoryId": "huroof-085",
+      "sourceTitleAr": "مسلسلات أجنبية",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/085-مسلسلات أجنبية.md",
+      "sourceFileSha256": "fcf98daaefdb1006eebbbfe038faf933eef2178ffae142e0a857b33c55949af3",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": null,
+      "runtimeMapping": "source_only_no_runtime_target"
+    },
+    {
+      "sourceIndex": "086",
+      "sourceCategoryId": "huroof-086",
+      "sourceTitleAr": "أفلام هوليوود",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/086-أفلام هوليوود.md",
+      "sourceFileSha256": "e33718ad6fd6d34e9582204b4dfa6b6693e299280e758f4ee6ef4c1aaa216172",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": null,
+      "runtimeMapping": "source_only_no_runtime_target"
+    },
+    {
+      "sourceIndex": "087",
+      "sourceCategoryId": "huroof-087",
+      "sourceTitleAr": "أفلام عربية",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/087-أفلام عربية.md",
+      "sourceFileSha256": "cc0951ff7a0ee2fc7ac4c43dc48559eaeb1c68197bba85b4ef2c5deccf2c971f",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": null,
+      "runtimeMapping": "source_only_no_runtime_target"
+    },
+    {
+      "sourceIndex": "088",
+      "sourceCategoryId": "huroof-088",
+      "sourceTitleAr": "مسلسلات خليجية",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/088-مسلسلات خليجية.md",
+      "sourceFileSha256": "3b137a580303dbe226a5ed61d0ecf52a8dbf508bd49f786b437914d060ed7ab3",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": null,
+      "runtimeMapping": "source_only_no_runtime_target"
+    },
+    {
+      "sourceIndex": "089",
+      "sourceCategoryId": "huroof-089",
+      "sourceTitleAr": "مسلسلات كويتية",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/089-مسلسلات كويتية.md",
+      "sourceFileSha256": "6f6f3c406903204256239fdae6ebfef6f75ffe12aea5fac7e09570a96fb22fa3",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": null,
+      "runtimeMapping": "source_only_no_runtime_target"
+    },
+    {
+      "sourceIndex": "090",
+      "sourceCategoryId": "huroof-090",
+      "sourceTitleAr": "مشاهير الكويت",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/090-مشاهير الكويت.md",
+      "sourceFileSha256": "98426ba4396acfbfac9b01fae14132c86ae4a37edd10db8fdad4e0546499915d",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": null,
+      "runtimeMapping": "source_only_no_runtime_target"
+    },
+    {
+      "sourceIndex": "091",
+      "sourceCategoryId": "huroof-091",
+      "sourceTitleAr": "مشاهير العرب",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/091-مشاهير العرب.md",
+      "sourceFileSha256": "6cdcb9427ef61469d5b57f44183a7ed7859099de48ba2165b554b5c0272dd454",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": null,
+      "runtimeMapping": "source_only_no_runtime_target"
+    },
+    {
+      "sourceIndex": "092",
+      "sourceCategoryId": "huroof-092",
+      "sourceTitleAr": "أغاني خليجية",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/092-أغاني خليجية.md",
+      "sourceFileSha256": "4bd8070f6754081d80189970e91047ff1ba6b50ca9b56d36c4f9c7d77534aec3",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": null,
+      "runtimeMapping": "source_only_no_runtime_target"
+    },
+    {
+      "sourceIndex": "093",
+      "sourceCategoryId": "huroof-093",
+      "sourceTitleAr": "أغاني كويتية",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/093-أغاني كويتية.md",
+      "sourceFileSha256": "70e51ece5818ba167265622d09435d2aa42f64a67069facea7d71c88ea4426d6",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": null,
+      "runtimeMapping": "source_only_no_runtime_target"
+    },
+    {
+      "sourceIndex": "094",
+      "sourceCategoryId": "huroof-094",
+      "sourceTitleAr": "السيرة النبوية",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/094-السيرة النبوية.md",
+      "sourceFileSha256": "1a118c3344d98aa97289a0f82ed8f9e937d92898b4b00a94675506288e81d632",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": null,
+      "runtimeMapping": "source_only_no_runtime_target"
+    },
+    {
+      "sourceIndex": "095",
+      "sourceCategoryId": "huroof-095",
+      "sourceTitleAr": "الصحابة",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/095-الصحابة.md",
+      "sourceFileSha256": "d4df4ccefdb103c5666d1cca8ce56a5af7d10cb805e74d751d4892317ac2c557",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": null,
+      "runtimeMapping": "source_only_no_runtime_target"
+    },
+    {
+      "sourceIndex": "096",
+      "sourceCategoryId": "huroof-096",
+      "sourceTitleAr": "الحضارة الإسلامية",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/096-الحضارة الإسلامية.md",
+      "sourceFileSha256": "eec2deac7fafe36a57e00829b6403e4d1903eaf08fc65ea384be1f556dce4c09",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": null,
+      "runtimeMapping": "source_only_no_runtime_target"
+    },
+    {
+      "sourceIndex": "097",
+      "sourceCategoryId": "huroof-097",
+      "sourceTitleAr": "علوم",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/097-علوم.md",
+      "sourceFileSha256": "089272a8e41234d6d52d2fa683cb93676dc1fd4f94c53a995287dbc666f10a25",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": null,
+      "runtimeMapping": "source_only_no_runtime_target"
+    },
+    {
+      "sourceIndex": "098",
+      "sourceCategoryId": "huroof-098",
+      "sourceTitleAr": "فضاء وفلك",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/098-فضاء وفلك.md",
+      "sourceFileSha256": "442697ae5f51f8972c1180ac0fa65c5615a82c0905c996b0d51537b64c904113",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": null,
+      "runtimeMapping": "source_only_no_runtime_target"
+    },
+    {
+      "sourceIndex": "099",
+      "sourceCategoryId": "huroof-099",
+      "sourceTitleAr": "طب وجسم الإنسان",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/099-طب وجسم الإنسان.md",
+      "sourceFileSha256": "85e20eb1f7a3484fda7baaa2e5dc56b1591d7bd74488b814d4a95eb6575b05b1",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": null,
+      "runtimeMapping": "source_only_no_runtime_target"
+    },
+    {
+      "sourceIndex": "100",
+      "sourceCategoryId": "huroof-100",
+      "sourceTitleAr": "جغرافيا العالم",
+      "sourceFile": "huroof_everything_bundle/huroof_questions_md/100-جغرافيا العالم.md",
+      "sourceFileSha256": "dead487ce0c14bf8323c49fa804be6b0499ab2fdd001537390b466aeca334420",
+      "declaredMode": "unclassified",
+      "runtimeCategoryId": null,
+      "runtimeMapping": "source_only_no_runtime_target"
+    }
+  ]
+}

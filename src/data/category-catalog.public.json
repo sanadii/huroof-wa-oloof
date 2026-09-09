@@ -1,0 +1,625 @@
+{
+  "schemaVersion": 1,
+  "categories": [
+    {
+      "id": "tahadani-001",
+      "displayNameAr": "من أنا / دول",
+      "questionReadiness": "empty",
+      "cover": {
+        "web320": "assets/categories/320/category-001.webp",
+        "altAr": "غلاف فئة من أنا / دول",
+        "publishable": false
+      }
+    },
+    {
+      "id": "tahadani-002",
+      "displayNameAr": "من أنا / لاعبين كرة قدم",
+      "questionReadiness": "empty",
+      "cover": {
+        "web320": "assets/categories/320/category-002.webp",
+        "altAr": "غلاف فئة من أنا / لاعبين كرة قدم",
+        "publishable": false
+      }
+    },
+    {
+      "id": "tahadani-003",
+      "displayNameAr": "من أنا / حيوانات",
+      "questionReadiness": "empty",
+      "cover": {
+        "web320": "assets/categories/320/category-003.webp",
+        "altAr": "غلاف فئة من أنا / حيوانات",
+        "publishable": false
+      }
+    },
+    {
+      "id": "tahadani-004",
+      "displayNameAr": "من أنا / مسلسلات عربيه",
+      "questionReadiness": "empty",
+      "cover": {
+        "web320": "assets/categories/320/category-004.webp",
+        "altAr": "غلاف فئة من أنا / مسلسلات عربيه",
+        "publishable": false
+      }
+    },
+    {
+      "id": "tahadani-005",
+      "displayNameAr": "من أنا / ممثلين",
+      "questionReadiness": "empty",
+      "cover": {
+        "web320": "assets/categories/320/category-005.webp",
+        "altAr": "غلاف فئة من أنا / ممثلين",
+        "publishable": false
+      }
+    },
+    {
+      "id": "tahadani-006",
+      "displayNameAr": "معلومات عامة",
+      "questionReadiness": "drafting",
+      "cover": {
+        "web320": "assets/categories/320/category-006.webp",
+        "altAr": "غلاف فئة معلومات عامة",
+        "publishable": false
+      }
+    },
+    {
+      "id": "tahadani-007",
+      "displayNameAr": "عالم الحيوان",
+      "questionReadiness": "drafting",
+      "cover": {
+        "web320": "assets/categories/320/category-007.webp",
+        "altAr": "غلاف فئة عالم الحيوان",
+        "publishable": false
+      }
+    },
+    {
+      "id": "tahadani-008",
+      "displayNameAr": "تكنولوجيا",
+      "questionReadiness": "drafting",
+      "cover": {
+        "web320": "assets/categories/320/category-008.webp",
+        "altAr": "غلاف فئة تكنولوجيا",
+        "publishable": false
+      }
+    },
+    {
+      "id": "tahadani-009",
+      "displayNameAr": "تاريخ",
+      "questionReadiness": "empty",
+      "cover": {
+        "web320": "assets/categories/320/category-009.webp",
+        "altAr": "غلاف فئة تاريخ",
+        "publishable": false
+      }
+    },
+    {
+      "id": "tahadani-010",
+      "displayNameAr": "منو المشهور",
+      "questionReadiness": "empty",
+      "cover": {
+        "web320": "assets/categories/320/category-010.webp",
+        "altAr": "غلاف فئة منو المشهور",
+        "publishable": false
+      }
+    },
+    {
+      "id": "tahadani-011",
+      "displayNameAr": "خمن الصورة",
+      "questionReadiness": "empty",
+      "cover": {
+        "web320": "assets/categories/320/category-011.webp",
+        "altAr": "غلاف فئة خمن الصورة",
+        "publishable": false
+      }
+    },
+    {
+      "id": "tahadani-012",
+      "displayNameAr": "شنو هذا؟",
+      "questionReadiness": "empty",
+      "cover": {
+        "web320": "assets/categories/320/category-012.webp",
+        "altAr": "غلاف فئة شنو هذا؟",
+        "publishable": false
+      }
+    },
+    {
+      "id": "tahadani-013",
+      "displayNameAr": "ألغاز",
+      "questionReadiness": "drafting",
+      "cover": {
+        "web320": "assets/categories/320/category-013.webp",
+        "altAr": "غلاف فئة ألغاز",
+        "publishable": false
+      }
+    },
+    {
+      "id": "tahadani-014",
+      "displayNameAr": "الجزء المفقود",
+      "questionReadiness": "empty",
+      "cover": {
+        "web320": "assets/categories/320/category-014.webp",
+        "altAr": "غلاف فئة الجزء المفقود",
+        "publishable": false
+      }
+    },
+    {
+      "id": "tahadani-015",
+      "displayNameAr": "أمثال وغطاوي",
+      "questionReadiness": "empty",
+      "cover": {
+        "web320": "assets/categories/320/category-015.webp",
+        "altAr": "غلاف فئة أمثال وغطاوي",
+        "publishable": false
+      }
+    },
+    {
+      "id": "tahadani-016",
+      "displayNameAr": "حيوانات / ولا كلمة",
+      "questionReadiness": "empty",
+      "cover": {
+        "web320": "assets/categories/320/category-016.webp",
+        "altAr": "غلاف فئة حيوانات / ولا كلمة",
+        "publishable": false
+      }
+    },
+    {
+      "id": "tahadani-017",
+      "displayNameAr": "أغاني عربية / ولا كلمة",
+      "questionReadiness": "empty",
+      "cover": {
+        "web320": "assets/categories/320/category-017.webp",
+        "altAr": "غلاف فئة أغاني عربية / ولا كلمة",
+        "publishable": false
+      }
+    },
+    {
+      "id": "tahadani-018",
+      "displayNameAr": "مشاهير عرب / ولا كلمة",
+      "questionReadiness": "empty",
+      "cover": {
+        "web320": "assets/categories/320/category-018.webp",
+        "altAr": "غلاف فئة مشاهير عرب / ولا كلمة",
+        "publishable": false
+      }
+    },
+    {
+      "id": "tahadani-019",
+      "displayNameAr": "كرتون / ولا كلمة",
+      "questionReadiness": "empty",
+      "cover": {
+        "web320": "assets/categories/320/category-019.webp",
+        "altAr": "غلاف فئة كرتون / ولا كلمة",
+        "publishable": false
+      }
+    },
+    {
+      "id": "tahadani-020",
+      "displayNameAr": "دول / ولا كلمة",
+      "questionReadiness": "empty",
+      "cover": {
+        "web320": "assets/categories/320/category-020.webp",
+        "altAr": "غلاف فئة دول / ولا كلمة",
+        "publishable": false
+      }
+    },
+    {
+      "id": "tahadani-021",
+      "displayNameAr": "ريال مدريد",
+      "questionReadiness": "empty",
+      "cover": {
+        "web320": "assets/categories/320/category-021.webp",
+        "altAr": "غلاف فئة ريال مدريد",
+        "publishable": false
+      }
+    },
+    {
+      "id": "tahadani-022",
+      "displayNameAr": "برشلونة",
+      "questionReadiness": "empty",
+      "cover": {
+        "web320": "assets/categories/320/category-022.webp",
+        "altAr": "غلاف فئة برشلونة",
+        "publishable": false
+      }
+    },
+    {
+      "id": "tahadani-023",
+      "displayNameAr": "كأس العالم",
+      "questionReadiness": "empty",
+      "cover": {
+        "web320": "assets/categories/320/category-023.webp",
+        "altAr": "غلاف فئة كأس العالم",
+        "publishable": false
+      }
+    },
+    {
+      "id": "tahadani-024",
+      "displayNameAr": "ميسي وكرستيانو",
+      "questionReadiness": "empty",
+      "cover": {
+        "web320": "assets/categories/320/category-024.webp",
+        "altAr": "غلاف فئة ميسي وكرستيانو",
+        "publishable": false
+      }
+    },
+    {
+      "id": "tahadani-025",
+      "displayNameAr": "من هو اللاعب",
+      "questionReadiness": "empty",
+      "cover": {
+        "web320": "assets/categories/320/category-025.webp",
+        "altAr": "غلاف فئة من هو اللاعب",
+        "publishable": false
+      }
+    },
+    {
+      "id": "tahadani-026",
+      "displayNameAr": "طاش ماطاش",
+      "questionReadiness": "empty",
+      "cover": {
+        "web320": "assets/categories/320/category-026.webp",
+        "altAr": "غلاف فئة طاش ماطاش",
+        "publishable": false
+      }
+    },
+    {
+      "id": "tahadani-027",
+      "displayNameAr": "باب الحارة",
+      "questionReadiness": "empty",
+      "cover": {
+        "web320": "assets/categories/320/category-027.webp",
+        "altAr": "غلاف فئة باب الحارة",
+        "publishable": false
+      }
+    },
+    {
+      "id": "tahadani-028",
+      "displayNameAr": "أفلام كلاسيك",
+      "questionReadiness": "empty",
+      "cover": {
+        "web320": "assets/categories/320/category-028.webp",
+        "altAr": "غلاف فئة أفلام كلاسيك",
+        "publishable": false
+      }
+    },
+    {
+      "id": "tahadani-029",
+      "displayNameAr": "أفلام رعب",
+      "questionReadiness": "empty",
+      "cover": {
+        "web320": "assets/categories/320/category-029.webp",
+        "altAr": "غلاف فئة أفلام رعب",
+        "publishable": false
+      }
+    },
+    {
+      "id": "tahadani-030",
+      "displayNameAr": "Game Of Thrones",
+      "questionReadiness": "empty",
+      "cover": {
+        "web320": "assets/categories/320/category-030.webp",
+        "altAr": "غلاف فئة Game Of Thrones",
+        "publishable": false
+      }
+    },
+    {
+      "id": "tahadani-031",
+      "displayNameAr": "أغاني الزمن الجميل",
+      "questionReadiness": "empty",
+      "cover": {
+        "web320": "assets/categories/320/category-031.webp",
+        "altAr": "غلاف فئة أغاني الزمن الجميل",
+        "publishable": false
+      }
+    },
+    {
+      "id": "tahadani-032",
+      "displayNameAr": "أم كلثوم",
+      "questionReadiness": "empty",
+      "cover": {
+        "web320": "assets/categories/320/category-032.webp",
+        "altAr": "غلاف فئة أم كلثوم",
+        "publishable": false
+      }
+    },
+    {
+      "id": "tahadani-033",
+      "displayNameAr": "أغاني وطنية",
+      "questionReadiness": "empty",
+      "cover": {
+        "web320": "assets/categories/320/category-033.webp",
+        "altAr": "غلاف فئة أغاني وطنية",
+        "publishable": false
+      }
+    },
+    {
+      "id": "tahadani-034",
+      "displayNameAr": "أغاني أجنبية",
+      "questionReadiness": "empty",
+      "cover": {
+        "web320": "assets/categories/320/category-034.webp",
+        "altAr": "غلاف فئة أغاني أجنبية",
+        "publishable": false
+      }
+    },
+    {
+      "id": "tahadani-035",
+      "displayNameAr": "عبدالكريم عبدالقادر",
+      "questionReadiness": "empty",
+      "cover": {
+        "web320": "assets/categories/320/category-035.webp",
+        "altAr": "غلاف فئة عبدالكريم عبدالقادر",
+        "publishable": false
+      }
+    },
+    {
+      "id": "tahadani-036",
+      "displayNameAr": "One Piece",
+      "questionReadiness": "empty",
+      "cover": {
+        "web320": "assets/categories/320/category-036.webp",
+        "altAr": "غلاف فئة One Piece",
+        "publishable": false
+      }
+    },
+    {
+      "id": "tahadani-037",
+      "displayNameAr": "Attack on Titan",
+      "questionReadiness": "empty",
+      "cover": {
+        "web320": "assets/categories/320/category-037.webp",
+        "altAr": "غلاف فئة Attack on Titan",
+        "publishable": false
+      }
+    },
+    {
+      "id": "tahadani-038",
+      "displayNameAr": "Naruto",
+      "questionReadiness": "empty",
+      "cover": {
+        "web320": "assets/categories/320/category-038.webp",
+        "altAr": "غلاف فئة Naruto",
+        "publishable": false
+      }
+    },
+    {
+      "id": "tahadani-039",
+      "displayNameAr": "كونان",
+      "questionReadiness": "empty",
+      "cover": {
+        "web320": "assets/categories/320/category-039.webp",
+        "altAr": "غلاف فئة كونان",
+        "publishable": false
+      }
+    },
+    {
+      "id": "tahadani-040",
+      "displayNameAr": "لعبة PUBG",
+      "questionReadiness": "empty",
+      "cover": {
+        "web320": "assets/categories/320/category-040.webp",
+        "altAr": "غلاف فئة لعبة PUBG",
+        "publishable": false
+      }
+    },
+    {
+      "id": "tahadani-041",
+      "displayNameAr": "Call of Duty",
+      "questionReadiness": "empty",
+      "cover": {
+        "web320": "assets/categories/320/category-041.webp",
+        "altAr": "غلاف فئة Call of Duty",
+        "publishable": false
+      }
+    },
+    {
+      "id": "tahadani-042",
+      "displayNameAr": "Minecraft",
+      "questionReadiness": "empty",
+      "cover": {
+        "web320": "assets/categories/320/category-042.webp",
+        "altAr": "غلاف فئة Minecraft",
+        "publishable": false
+      }
+    },
+    {
+      "id": "tahadani-043",
+      "displayNameAr": "العاب الطفولة",
+      "questionReadiness": "empty",
+      "cover": {
+        "web320": "assets/categories/320/category-043.webp",
+        "altAr": "غلاف فئة العاب الطفولة",
+        "publishable": false
+      }
+    },
+    {
+      "id": "tahadani-044",
+      "displayNameAr": "أعلام",
+      "questionReadiness": "empty",
+      "cover": {
+        "web320": "assets/categories/320/category-044.webp",
+        "altAr": "غلاف فئة أعلام",
+        "publishable": false
+      }
+    },
+    {
+      "id": "tahadani-045",
+      "displayNameAr": "عواصم",
+      "questionReadiness": "drafting",
+      "cover": {
+        "web320": "assets/categories/320/category-045.webp",
+        "altAr": "غلاف فئة عواصم",
+        "publishable": false
+      }
+    },
+    {
+      "id": "tahadani-046",
+      "displayNameAr": "دول و عواصم",
+      "questionReadiness": "drafting",
+      "cover": {
+        "web320": "assets/categories/320/category-046.webp",
+        "altAr": "غلاف فئة دول و عواصم",
+        "publishable": false
+      }
+    },
+    {
+      "id": "tahadani-047",
+      "displayNameAr": "عملات",
+      "questionReadiness": "drafting",
+      "cover": {
+        "web320": "assets/categories/320/category-047.webp",
+        "altAr": "غلاف فئة عملات",
+        "publishable": false
+      }
+    },
+    {
+      "id": "tahadani-048",
+      "displayNameAr": "الفنون القتالية",
+      "questionReadiness": "empty",
+      "cover": {
+        "web320": "assets/categories/320/category-048.webp",
+        "altAr": "غلاف فئة الفنون القتالية",
+        "publishable": false
+      }
+    },
+    {
+      "id": "tahadani-049",
+      "displayNameAr": "تنس",
+      "questionReadiness": "empty",
+      "cover": {
+        "web320": "assets/categories/320/category-049.webp",
+        "altAr": "غلاف فئة تنس",
+        "publishable": false
+      }
+    },
+    {
+      "id": "tahadani-050",
+      "displayNameAr": "Formula 1",
+      "questionReadiness": "empty",
+      "cover": {
+        "web320": "assets/categories/320/category-050.webp",
+        "altAr": "غلاف فئة Formula 1",
+        "publishable": false
+      }
+    },
+    {
+      "id": "tahadani-051",
+      "displayNameAr": "سيارات",
+      "questionReadiness": "drafting",
+      "cover": {
+        "web320": "assets/categories/320/category-051.webp",
+        "altAr": "غلاف فئة سيارات",
+        "publishable": false
+      }
+    },
+    {
+      "id": "tahadani-052",
+      "displayNameAr": "منوعات كرة قدم",
+      "questionReadiness": "empty",
+      "cover": {
+        "web320": "assets/categories/320/category-052.webp",
+        "altAr": "غلاف فئة منوعات كرة قدم",
+        "publishable": false
+      }
+    },
+    {
+      "id": "tahadani-053",
+      "displayNameAr": "منوعات شعرية",
+      "questionReadiness": "empty",
+      "cover": {
+        "web320": "assets/categories/320/category-053.webp",
+        "altAr": "غلاف فئة منوعات شعرية",
+        "publishable": false
+      }
+    },
+    {
+      "id": "tahadani-054",
+      "displayNameAr": "كرة قدم عالمية",
+      "questionReadiness": "empty",
+      "cover": {
+        "web320": "assets/categories/320/category-054.webp",
+        "altAr": "غلاف فئة كرة قدم عالمية",
+        "publishable": false
+      }
+    },
+    {
+      "id": "tahadani-055",
+      "displayNameAr": "كرة قدم ايطالية",
+      "questionReadiness": "empty",
+      "cover": {
+        "web320": "assets/categories/320/category-055.webp",
+        "altAr": "غلاف فئة كرة قدم ايطالية",
+        "publishable": false
+      }
+    },
+    {
+      "id": "tahadani-056",
+      "displayNameAr": "قصص الأنبياء",
+      "questionReadiness": "empty",
+      "cover": {
+        "web320": "assets/categories/320/category-056.webp",
+        "altAr": "غلاف فئة قصص الأنبياء",
+        "publishable": false
+      }
+    },
+    {
+      "id": "tahadani-057",
+      "displayNameAr": "القرآن الكريم",
+      "questionReadiness": "empty",
+      "cover": {
+        "web320": "assets/categories/320/category-057.webp",
+        "altAr": "غلاف فئة القرآن الكريم",
+        "publishable": false
+      }
+    },
+    {
+      "id": "tahadani-058",
+      "displayNameAr": "مطاعم الكويت",
+      "questionReadiness": "empty",
+      "cover": {
+        "web320": "assets/categories/320/category-058.webp",
+        "altAr": "غلاف فئة مطاعم الكويت",
+        "publishable": false
+      }
+    },
+    {
+      "id": "tahadani-059",
+      "displayNameAr": "توقعني (دول)",
+      "questionReadiness": "empty",
+      "cover": {
+        "web320": "assets/categories/320/category-059.webp",
+        "altAr": "غلاف فئة توقعني (دول)",
+        "publishable": false
+      }
+    },
+    {
+      "id": "tahadani-060",
+      "displayNameAr": "مسيرة لاعب",
+      "questionReadiness": "empty",
+      "cover": {
+        "web320": "assets/categories/320/category-060.webp",
+        "altAr": "غلاف فئة مسيرة لاعب",
+        "publishable": false
+      }
+    },
+    {
+      "id": "tahadani-061",
+      "displayNameAr": "تشكيلات",
+      "questionReadiness": "empty",
+      "cover": {
+        "web320": "assets/categories/320/category-061.webp",
+        "altAr": "غلاف فئة تشكيلات",
+        "publishable": false
+      }
+    },
+    {
+      "id": "tahadani-062",
+      "displayNameAr": "كأس العالم 2026",
+      "questionReadiness": "empty",
+      "cover": {
+        "web320": "assets/categories/320/category-062.webp",
+        "altAr": "غلاف فئة كأس العالم 2026",
+        "publishable": false
+      }
+    }
+  ]
+}

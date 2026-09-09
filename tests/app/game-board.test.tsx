@@ -61,7 +61,50 @@ it("exposes exactly one keyboard-operable cell overlay in its initial roving sta
   const first = screen.getByTestId("cell-0-0");
   expect(first).toHaveAttribute("tabindex", "0");
   fireEvent.keyDown(first, { key: "ArrowRight" });
-  expect(document.activeElement?.id).toBe("board-cell-1-0");
+  expect(document.activeElement).toBe(screen.getByTestId("cell-1-0"));
+});
+
+it("keeps arrow focus inside the board instance when a correction board is also mounted", () => {
+  render(<><GameBoard cells={cells} selectable /><GameBoard allowOwnedSelection cells={cells} selectable /></>);
+  const [gameCell, correctionCell] = screen.getAllByTestId("cell-0-0");
+  const [gameNext, correctionNext] = screen.getAllByTestId("cell-1-0");
+  expect(gameCell.id).not.toBe(correctionCell.id);
+  fireEvent.keyDown(correctionCell, { key: "ArrowRight" });
+  expect(document.activeElement).toBe(correctionNext);
+  expect(document.activeElement).not.toBe(gameNext);
+});
+
+it("keeps owned cells unavailable in play but enables them only with the correction opt-in", () => {
+  const owned = withOwners(["cell-0-0"], "horizontal");
+  const play = render(<GameBoard cells={owned} selectable />);
+  expect(screen.getByTestId("cell-0-0")).toBeDisabled();
+  play.unmount();
+  render(<GameBoard allowOwnedSelection cells={owned} selectable />);
+  expect(screen.getByTestId("cell-0-0")).toBeEnabled();
+});
+
+it("renders a category title and occurrence in the cell while retaining its full accessible label", () => {
+  const categoryCells = cells.map((cell, index) => index === 0
+    ? { ...cell, kind: "category" as const, visibleValue: "فئة", categoryLabelAr: "من أنا / لاعبين كرة قدم", categoryOccurrence: 7 }
+    : cell,
+  );
+  render(<GameBoard cells={categoryCells} selectable />);
+
+  expect(screen.getByTestId("cell-0-0")).toHaveAccessibleName("اختر الفئة من أنا / لاعبين كرة قدم، الترتيب 7، 1-1");
+  const svgCell = document.querySelector(".game-board__cell");
+  expect(svgCell?.querySelectorAll(".game-board__cell-label--category tspan")).toHaveLength(3);
+  expect(svgCell).toHaveTextContent("#7");
+});
+
+it("keeps a numbered surprise identity visible when its replacement letter changes", () => {
+  const surpriseCells = cells.map((cell, index) => index === 0
+    ? { ...cell, kind: "surprise" as const, visibleValue: "4", revealedLetter: "ج" }
+    : cell,
+  );
+  render(<GameBoard cells={surpriseCells} selectable />);
+
+  expect(screen.getByTestId("cell-0-0")).toHaveAccessibleName("اختر الخلية المفاجأة رقم 4، حرفها الحالي ج، 1-1");
+  expect(document.querySelector(".game-board__cell")).toHaveTextContent("4ج");
 });
 
 it("renders four single-path flat rails on a square outer frame", () => {
@@ -180,6 +223,74 @@ it("does not replay a pre-existing near win, then flashes only its owned path on
   expect(screen.getByTestId("cell-0-2")).toBe(flashed);
 });
 
+it("does not animate an initial board snapshot, then acknowledges only a server-delivered replacement cell", () => {
+  const original = cells.map((cell, index) => index === 0
+    ? { ...cell, kind: "surprise" as const, visibleValue: "6", revealedLetter: "ب" }
+    : cell,
+  );
+  const { container, rerender } = render(<GameBoard cells={original} />);
+  expect(container.querySelectorAll("[data-content-transition]")).toHaveLength(0);
+
+  rerender(<GameBoard cells={original.map((cell, index) => index === 0 ? { ...cell, revealedLetter: "ت" } : cell)} />);
+  expect(screen.getByTestId("cell-0-0")).toHaveAttribute("data-content-transition");
+  expect(container.querySelectorAll("[data-content-transition]")).toHaveLength(1);
+});
+
+it("baselines stale and cached snapshots, then animates only the next live server transition", () => {
+  const original = cells.map((cell, index) => index === 0
+    ? { ...cell, kind: "surprise" as const, visibleValue: "6", revealedLetter: "ب" }
+    : cell,
+  );
+  const cachedReplacement = original.map((cell, index) => index === 0
+    ? { ...cell, revealedLetter: "ت" }
+    : cell,
+  );
+  const liveReplacement = original.map((cell, index) => index === 0
+    ? { ...cell, revealedLetter: "ج" }
+    : cell,
+  );
+  const { container, rerender } = render(
+    <GameBoard cells={original} motionBaselineKey="connected:server" />,
+  );
+
+  rerender(<GameBoard cells={cachedReplacement} motionEnabled={false} motionBaselineKey="offline:cached" />);
+  expect(container.querySelectorAll("[data-content-transition]")).toHaveLength(0);
+  rerender(<GameBoard cells={cachedReplacement} motionBaselineKey="connected:server" />);
+  expect(container.querySelectorAll("[data-content-transition]")).toHaveLength(0);
+
+  rerender(<GameBoard cells={liveReplacement} motionBaselineKey="connected:server" />);
+  expect(container.querySelectorAll("[data-content-transition]")).toHaveLength(1);
+  expect(screen.getByTestId("cell-0-0")).toHaveAttribute("data-content-transition");
+});
+
+it("does not replay stale near-win or winning paths after reconnect, then plays a new live win", () => {
+  const nearPath = ["cell-0-2", "cell-1-2", "cell-3-2", "cell-4-2"];
+  const winPath = ["cell-0-1", "cell-1-1", "cell-2-1", "cell-3-1", "cell-4-1"];
+  const near = withOwners(nearPath, "horizontal");
+  const winning = withOwners(winPath, "horizontal");
+  const { container, rerender } = render(
+    <GameBoard cells={cells} motionBaselineKey="connected:server" />,
+  );
+
+  rerender(<GameBoard cells={near} motionEnabled={false} motionBaselineKey="offline:cached" />);
+  rerender(<GameBoard cells={near} motionBaselineKey="connected:server" />);
+  expect(container.querySelectorAll("[data-near-flash]")).toHaveLength(0);
+
+  rerender(<GameBoard cells={cells} motionBaselineKey="connected:server" />);
+  rerender(<GameBoard cells={near} motionBaselineKey="connected:server" />);
+  expect(container.querySelectorAll("[data-near-flash]")).toHaveLength(nearPath.length);
+
+  rerender(<GameBoard cells={winning} winningPath={winPath} motionEnabled={false} motionBaselineKey="offline:cached" />);
+  rerender(<GameBoard cells={winning} winningPath={winPath} motionBaselineKey="connected:server" />);
+  expect(container.querySelectorAll(".game-board__cell--winning-pulse")).toHaveLength(0);
+  expect(screen.queryByRole("status")).toBeNull();
+
+  rerender(<GameBoard cells={winning} winningPath={[]} motionBaselineKey="connected:server" />);
+  rerender(<GameBoard cells={winning} winningPath={winPath} motionBaselineKey="connected:server" />);
+  expect(container.querySelectorAll(".game-board__cell--winning-pulse")).toHaveLength(winPath.length);
+  expect(screen.getByRole("status")).toHaveTextContent("فاز الفريق الأحمر بالجولة");
+});
+
 it("pulses each newly authoritative winning path cell exactly three times in path order and announces once", () => {
   const path = ["cell-0-1", "cell-1-1", "cell-2-1", "cell-3-1", "cell-4-1"];
   const winningCells = withOwners(path, "horizontal");
@@ -203,7 +314,7 @@ it("pulses each newly authoritative winning path cell exactly three times in pat
   expect(screen.getByTestId("cell-0-1")).toBe(firstPulse);
 });
 
-it("uses the fixed broadcast score label and five real round markers", () => {
+it("uses the fixed broadcast score label while keeping round markers on the host surface", () => {
   render(
     <TeamScoreCard
       axis="vertical"
@@ -228,6 +339,23 @@ it("uses the fixed broadcast score label and five real round markers", () => {
   expect(screen.getByText("النقاط")).toBeInTheDocument();
   expect(document.querySelector(".team-score__points-value")).toHaveTextContent("2");
   expect(document.querySelector(".team-score__points")).toHaveTextContent("نقاط الإجابات: 2");
+  expect(document.querySelectorAll(".round-markers__marker")).toHaveLength(0);
+});
+
+it("shows five real round markers in the host score card", () => {
+  render(
+    <TeamScoreCard
+      axis="vertical"
+      currentRound={3}
+      points={2}
+      roundResults={[
+        { round: 1, winner: "vertical" },
+        { round: 2, winner: "horizontal" },
+      ]}
+      rounds={1}
+      variant="host"
+    />,
+  );
   expect(document.querySelectorAll(".round-markers__marker")).toHaveLength(5);
   expect(document.querySelector('[data-round="1"]')).toHaveClass(
     "round-markers__marker--won",

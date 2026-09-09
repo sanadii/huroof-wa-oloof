@@ -9,15 +9,61 @@ export type BoardCell = {
   id: string;
   q: number;
   r: number;
-  kind: "letter" | "surprise";
+  kind: "letter" | "surprise" | "category";
   visibleValue: string;
   revealedLetter?: string;
+  categoryId?: string;
+  categoryLabelAr?: string;
+  categoryOccurrence?: number;
   owner?: "horizontal" | "vertical";
 };
 
 type NearWinState = Record<TeamAxis, NearWinningCandidate | undefined>;
 type EffectTokens = Partial<Record<TeamAxis, { token: number; signature: string }>>;
+type ContentEffectTokens = Record<string, { token: number; signature: string }>;
 const teams: TeamAxis[] = ["horizontal", "vertical"];
+
+function splitCategoryLabel(label: string) {
+  const words = label.trim().split(/\s+/).filter(Boolean);
+  if (words.length < 2) return [label];
+  const target = Math.ceil(label.length / 2);
+  let left = "";
+  let index = 0;
+  while (index < words.length - 1 && `${left} ${words[index]}`.trim().length <= target) {
+    left = `${left} ${words[index]}`.trim();
+    index += 1;
+  }
+  return [left, words.slice(index).join(" ")].filter(Boolean);
+}
+
+function cellText(cell: BoardCell) {
+  if (cell.kind === "category" && cell.categoryLabelAr) {
+    return {
+      accessible: `الفئة ${cell.categoryLabelAr}، الترتيب ${cell.categoryOccurrence ?? "غير محدد"}`,
+      lines: [...splitCategoryLabel(cell.categoryLabelAr), `#${cell.categoryOccurrence ?? "—"}`],
+      variant: "category" as const,
+    };
+  }
+  if (cell.kind === "surprise" && cell.revealedLetter) {
+    return {
+      accessible: `الخلية المفاجأة رقم ${cell.visibleValue}، حرفها الحالي ${cell.revealedLetter}`,
+      lines: [cell.visibleValue, cell.revealedLetter],
+      variant: "surprise-revealed" as const,
+    };
+  }
+  return {
+    accessible: cell.revealedLetter ?? cell.visibleValue,
+    lines: [cell.revealedLetter ?? cell.visibleValue],
+    variant: "value" as const,
+  };
+}
+
+function contentByCell(cells: readonly BoardCell[]) {
+  return Object.fromEntries(cells.map((cell) => [
+    cell.id,
+    [cell.kind, cell.visibleValue, cell.revealedLetter ?? "", cell.categoryLabelAr ?? "", cell.categoryOccurrence ?? ""].join("|"),
+  ]));
+}
 
 function ownershipContent(cells: readonly BoardCell[]) {
   return [...cells]
@@ -217,20 +263,30 @@ export function GameBoard({
   activeCellId,
   winningPath = [],
   selectable = false,
+  allowOwnedSelection = false,
   onSelect,
   className = "",
   presentation = "flat",
+  motionBaselineKey = "authoritative",
+  motionEnabled = true,
 }: {
   cells: BoardCell[];
   activeCellId?: string;
   winningPath?: string[];
   selectable?: boolean;
+  /** Correction-only opt-in. Gameplay keeps owned cells unavailable by default. */
+  allowOwnedSelection?: boolean;
   onSelect?: (cellId: string) => void;
   className?: string;
   /** Decorative only. Gameplay stays flat unless an isolated presentation opts in. */
   presentation?: "flat" | "tactile";
+  /** A new server/cache/connection baseline suppresses historical replay effects. */
+  motionBaselineKey?: string;
+  motionEnabled?: boolean;
 }) {
   const materialId = useId().replace(/:/g, "");
+  const boardId = useId().replace(/:/g, "");
+  const boardRootRef = useRef<HTMLDivElement>(null);
   const materialStyle = presentation === "tactile"
     ? {
         "--board-tactile-face": `url(#${materialId}-face)`,
@@ -258,13 +314,30 @@ export function GameBoard({
   );
   const winningSignature = winningPath.join("|");
   const winningTeam = winnerForPath(cells, winningPath);
+  const contentSignatures = useMemo(() => contentByCell(cells), [cells]);
   const [nearFlashTokens, setNearFlashTokens] = useState<EffectTokens>({});
+  const [contentEffectTokens, setContentEffectTokens] = useState<ContentEffectTokens>({});
   const [winningPulse, setWinningPulse] = useState<{ token: number; signature: string }>();
   const [winAnnouncement, setWinAnnouncement] = useState<string>();
   const previousOwnership = useRef<string | undefined>(undefined);
   const previousNear = useRef<Record<TeamAxis, string> | undefined>(undefined);
   const previousWinningPath = useRef<string | undefined>(undefined);
+  const previousContent = useRef<Record<string, string> | undefined>(undefined);
+  const previousMotionBaseline = useRef<string | undefined>(undefined);
   const nextEffectToken = useRef(0);
+
+  useEffect(() => {
+    if (motionEnabled && previousMotionBaseline.current === motionBaselineKey) return;
+    previousMotionBaseline.current = motionBaselineKey;
+    previousOwnership.current = ownershipSignature;
+    previousNear.current = nearSignatures;
+    previousWinningPath.current = winningSignature;
+    previousContent.current = contentSignatures;
+    setNearFlashTokens({});
+    setContentEffectTokens({});
+    setWinningPulse(undefined);
+    setWinAnnouncement(undefined);
+  }, [contentSignatures, motionBaselineKey, motionEnabled, nearSignatures, ownershipSignature, winningSignature]);
 
   useEffect(() => {
     if (previousOwnership.current !== undefined && previousOwnership.current !== ownershipSignature) {
@@ -284,6 +357,24 @@ export function GameBoard({
     previousOwnership.current = ownershipSignature;
     previousNear.current = nearSignatures;
   }, [nearSignatures, ownershipSignature]);
+
+  useEffect(() => {
+    if (previousContent.current) {
+      const changed = Object.entries(contentSignatures).filter(
+        ([cellId, signature]) => previousContent.current?.[cellId] !== signature,
+      );
+      if (changed.length) {
+        setContentEffectTokens((current) => {
+          const next = { ...current };
+          for (const [cellId, signature] of changed) {
+            next[cellId] = { token: ++nextEffectToken.current, signature };
+          }
+          return next;
+        });
+      }
+    }
+    previousContent.current = contentSignatures;
+  }, [contentSignatures]);
 
   useEffect(() => {
     if (previousWinningPath.current === undefined) {
@@ -314,10 +405,15 @@ export function GameBoard({
     const next = nearestCell(cells, cell.q, cell.r, event.key);
     if (!next) return;
     event.preventDefault();
-    document.getElementById(`board-${next.id}`)?.focus();
+    const nextButton = boardRootRef.current
+      ?.querySelector<HTMLButtonElement>(`#board-${boardId}-${next.id}`);
+    if (typeof nextButton?.scrollIntoView === "function") {
+      nextButton.scrollIntoView({ block: "nearest", inline: "center" });
+    }
+    nextButton?.focus({ preventScroll: true });
   };
   return (
-    <div className={`game-board-wrap ${presentation === "tactile" ? "game-board-wrap--tactile" : ""} ${className}`} dir="ltr">
+    <div className={`game-board-wrap ${presentation === "tactile" ? "game-board-wrap--tactile" : ""} ${className}`} dir="ltr" ref={boardRootRef}>
       <span className="sr-only">
         لوحة سداسية من 25 خلية. الفريق الأحمر يصل اليسار باليمين والفريق الأخضر
         يصل الأعلى بالأسفل.
@@ -360,13 +456,19 @@ export function GameBoard({
             ? nearFlash.token
             : undefined;
           const isWinningPulse = won && winningPulse?.signature === winningSignature;
-          const value = cell.revealedLetter ?? cell.visibleValue;
-          const label = `خلية ${cell.q + 1}-${cell.r + 1}: ${value}${cell.owner ? (cell.owner === "horizontal" ? "، ملك الفريق الأحمر" : "، ملك الفريق الأخضر") : ""}${active ? "، الخلية النشطة" : ""}${won ? "، ضمن مسار الفوز" : ""}`;
+          const content = cellText(cell);
+          const contentEffect = contentEffectTokens[cell.id];
+          const contentTransition = contentEffect?.signature === contentSignatures[cell.id]
+            ? contentEffect.token
+            : undefined;
+          const label = `خلية ${cell.q + 1}-${cell.r + 1}: ${content.accessible}${cell.owner ? (cell.owner === "horizontal" ? "، ملك الفريق الأحمر" : "، ملك الفريق الأخضر") : ""}${active ? "، الخلية النشطة" : ""}${won ? "، ضمن مسار الفوز" : ""}`;
           const c = center(cell.q, cell.r);
+          const lineHeight = content.variant === "category" ? 14 : 12;
           return (
             <g
-              className={`game-board__cell game-cell ${cell.owner ? `game-board__cell--${cell.owner}` : ""} ${active ? "game-board__cell--active" : ""} ${nearTeam ? "game-board__cell--near-path" : ""} ${nearFlashToken ? "game-board__cell--near-flash" : ""} ${won ? "game-board__cell--winning" : ""} ${isWinningPulse ? "game-board__cell--winning-pulse" : ""}`}
+              className={`game-board__cell game-cell ${cell.owner ? `game-board__cell--${cell.owner}` : ""} ${active ? "game-board__cell--active" : ""} ${nearTeam ? "game-board__cell--near-path" : ""} ${nearFlashToken ? "game-board__cell--near-flash" : ""} ${contentTransition ? "game-board__cell--content-updated" : ""} ${won ? "game-board__cell--winning" : ""} ${isWinningPulse ? "game-board__cell--winning-pulse" : ""}`}
               data-active={active || undefined}
+              data-content-transition={contentTransition || undefined}
               data-near-flash={nearFlashToken || undefined}
               data-near-path={nearTeam || undefined}
               data-owned={cell.owner || undefined}
@@ -374,7 +476,7 @@ export function GameBoard({
               data-winning={won || undefined}
               data-winning-index={winningIndex >= 0 ? winningIndex : undefined}
               data-winning-pulse-count={isWinningPulse ? 3 : undefined}
-              key={`${cell.id}:${nearFlashToken ?? "rest"}:${won ? isWinningPulse ? winningPulse.token : "static" : ""}`}
+              key={`${cell.id}:${nearFlashToken ?? "rest"}:${contentTransition ?? "stable"}:${won ? isWinningPulse ? winningPulse.token : "static" : ""}`}
             >
               {presentation === "tactile" ? (
                 <>
@@ -410,12 +512,17 @@ export function GameBoard({
               )}
               <text
                 aria-hidden="true"
+                className={`game-board__cell-label game-board__cell-label--${content.variant}`}
                 dominantBaseline="middle"
                 textAnchor="middle"
                 x={c.x}
-                y={c.y + 4}
+                y={c.y + 4 - (content.lines.length - 1) * lineHeight / 2}
               >
-                {value}
+                {content.lines.map((line, index) => (
+                  <tspan dy={index === 0 ? 0 : lineHeight} key={`${cell.id}-${index}`} x={c.x}>
+                    {line}
+                  </tspan>
+                ))}
               </text>
               {!selectable && <title>{label}</title>}
             </g>
@@ -432,11 +539,11 @@ export function GameBoard({
           {cells.map((cell, index) => (
             <button
               aria-current={cell.id === activeCellId ? "true" : undefined}
-              aria-label={`اختر ${cell.revealedLetter ?? cell.visibleValue}، ${cell.q + 1}-${cell.r + 1}`}
+              aria-label={`اختر ${cellText(cell).accessible}، ${cell.q + 1}-${cell.r + 1}`}
               className="game-board__button"
               data-testid={`cell-${cell.q}-${cell.r}`}
-              disabled={Boolean(cell.owner)}
-              id={`board-${cell.id}`}
+              disabled={Boolean(cell.owner) && !allowOwnedSelection}
+              id={`board-${boardId}-${cell.id}`}
               key={cell.id}
               onClick={() => onSelect?.(cell.id)}
               onKeyDown={(event) => keyMove(event, cell)}
@@ -447,8 +554,8 @@ export function GameBoard({
               tabIndex={
                 cell.id === activeCellId ||
                 (!activeCellId &&
-                  !cell.owner &&
-                  index === cells.findIndex((candidate) => !candidate.owner))
+                  (allowOwnedSelection || !cell.owner) &&
+                  index === cells.findIndex((candidate) => allowOwnedSelection || !candidate.owner))
                   ? 0
                   : -1
               }

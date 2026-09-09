@@ -28,8 +28,6 @@ test('an admin can create, run, and score a room without any players', async ({ 
     const hostState = (value: string) => hostPage.locator(`.host-page[data-state="${value}"]`);
     await expect(hostState('CELL_SELECTION')).toBeVisible();
     await hostPage.locator('.game-board__button').first().click();
-    await expect(hostState('LETTER_REVEAL')).toBeVisible();
-    await hostPage.getByRole('button', { name: 'اكشف الحرف' }).click();
     await expect(hostState('QUESTION_READING')).toBeVisible();
 
     await expect(hostPage.getByRole('button', { name: 'افتح البازر' })).toHaveCount(0);
@@ -44,9 +42,7 @@ test('an admin can create, run, and score a room without any players', async ({ 
     await expect(audiencePage.locator('.buzz-winner')).toContainText('الأحمر');
 
     await hostPage.getByRole('button', { name: 'إجابة صحيحة' }).click();
-    await expect(hostState('CELL_AWARDED')).toBeVisible();
-    await hostPage.getByRole('button', { name: 'ثبّت الخلية (+1 نقطة)' }).click();
-    await expect(hostState('PATH_CHECK')).toBeVisible();
+    await expect(hostState('CELL_SELECTION')).toBeVisible();
     await expect(hostPage.getByTestId('host-score-horizontal')).toContainText('نقاط الإجابات: 1');
     await expect(audiencePage.locator('.stage-score--horizontal')).toContainText('نقاط الإجابات: 1');
 

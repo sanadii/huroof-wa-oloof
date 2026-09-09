@@ -36,6 +36,14 @@ async function main() {
   const { applicationDefault, getApps, initializeApp } = await import('firebase-admin/app'); const { getFirestore } = await import('firebase-admin/firestore'); const app = getApps()[0] ?? initializeApp({ credential: applicationDefault(), projectId: process.env.GCLOUD_PROJECT }); const database = getFirestore(app);
   const root = database.doc(`releases/${plan.releaseId}`); if ((await root.get()).exists) throw new Error(`Immutable demo fixture already exists: ${root.path}`);
   for (const group of chunks(plan.documents)) { const batch = database.batch(); for (const entry of group) batch.create(database.doc(entry.path), entry.data); await batch.commit(); }
+  // Category boards freeze labels read from this trusted server catalog. These
+  // writes run only behind the explicit emulator guard above.
+  const catalog = JSON.parse(await readFile(resolve(ROOT, 'content/categories/categories.json'), 'utf8')) as { categories?: Array<{ id?: unknown; displayNameAr?: unknown }> };
+  for (const group of chunks((catalog.categories ?? []).flatMap((category) => typeof category.id === 'string' && typeof category.displayNameAr === 'string' && category.displayNameAr.trim() ? [{ id: category.id, displayNameAr: category.displayNameAr.trim() }] : []))) {
+    const batch = database.batch();
+    for (const category of group) batch.set(database.doc(`categories/${category.id}`), { displayNameAr: category.displayNameAr, seededDemoCatalog: true });
+    await batch.commit();
+  }
   await root.create({ releaseId: plan.releaseId, immutable: true, demoFixture: true, unreviewed: true, approvedCount: plan.documents.length, documentRootSha256: plan.documentRootSha256, distinctLetters: plan.letters });
   await database.doc('runtime/activeRelease').set({ releaseId: plan.releaseId, demoFixture: true, unreviewed: true });
   console.log(`Seeded ${plan.documents.length} explicitly unreviewed draft questions to the demo emulator.`);

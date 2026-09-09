@@ -24,7 +24,7 @@ export class FixtureGameAdapter implements GameRuntimeAdapter {
   subscribeProjection(_roomId: string, role: 'host' | 'player' | 'audience', uid: string, onProjection: (value: ProjectionEnvelope) => void) {
     onProjection({
       roomId: 'fixture-room', revision: this.revision, serverTime: new Date(0).toISOString(), role,
-      projection: { room: { roomCode: 'FIXTURE1', state: 'LOBBY', readyCount: 0, memberCount: 1 }, self: role === 'audience' ? undefined : { uid, ready: false, canBuzz: false } },
+      projection: { room: { roomCode: 'FIXTURE1', state: 'LOBBY', readyCount: 0, memberCount: 0 }, self: role === 'audience' ? undefined : { uid, ready: false, canBuzz: false } },
     });
     return () => undefined;
   }

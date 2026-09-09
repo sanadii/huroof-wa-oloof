@@ -64,7 +64,12 @@ async function main() {
   }
   const args = ['emulators:exec', '--config', configPath, '--only', 'auth,firestore,functions,storage', '--project', firebaseE2EProjectId, 'scripts\\run-firebase-e2e.cmd'];
   const child = spawn(process.execPath, [firebaseCli, ...args], { cwd: root, env, stdio: 'inherit' });
-  child.once('exit', (code) => { cleanup(); process.exitCode = code ?? 1; });
+  const code = await new Promise<number>((resolve, reject) => {
+    child.once('error', reject);
+    child.once('exit', (status) => resolve(status ?? 1));
+  });
+  cleanup();
+  process.exitCode = code;
 }
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1])) main().catch((error) => { console.error(error instanceof Error ? error.message : error); process.exitCode = 1; });

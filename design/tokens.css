@@ -6,7 +6,7 @@
     --surface-stage: #f2f1ec;
     --on-surface-stage: #171717;
     --midnight-canvas: #090d10;
-    --gameplay-background-image: url("/assets/backgrounds/gameplay-field-v1.webp");
+    --gameplay-background-image: url("/assets/backgrounds/cell-challenge-categories-v1.webp");
     --gameplay-ink: #f5f2ea;
     --gameplay-muted: #b9c2c7;
     --gameplay-rule: #5a6872;
@@ -59,7 +59,7 @@
     --edge-low: #899592;
     --shadow-soft: rgb(13 19 24 / 10%);
     --shadow-control: 0 3px 0 var(--edge-low), 0 5px 10px var(--shadow-soft);
-    --studio-background-image: url("/assets/backgrounds/studio-field-light.webp");
+    --studio-background-image: url("/assets/backgrounds/cell-challenge-categories-v1.webp");
     /* 0006: scoped to .spatial-home-page; supporting routes retain their existing tokens. */
     --spatial-canvas: #133ca8;
     --spatial-canvas-deep: #07175d;
@@ -73,7 +73,32 @@
     --spatial-dock-shadow: 0 14px 28px rgb(1 11 56 / 34%);
     --spatial-radius-control: 0.75rem;
     --spatial-radius-dock: 1.25rem;
-    --spatial-background-image: url("/assets/backgrounds/spatial-studio-v1.webp");
+    --spatial-background-image: url("/assets/backgrounds/cell-challenge-categories-v1.webp");
+    --semantic-qr-paper: #fff;
+    --semantic-qr-ink: #071d38;
+    --semantic-team-green: #087849;
+    --semantic-team-green-line: #20bc80;
+    --semantic-team-green-deep: #10483c;
+    --semantic-team-green-light: #74e6bf;
+    --semantic-team-green-ink: #e7fff6;
+    --semantic-team-red: #391523;
+    --semantic-team-red-hover: #572238;
+    --semantic-team-red-line: #f36582;
+    --semantic-team-red-light: #ffa4b7;
+    --semantic-team-red-ink: #fff0f3;
+    --semantic-team-on-color: #fff;
+    --semantic-team-on-color-muted: #ffffff80;
+    --shadow-action-focus: 0 0 0 0.2rem color-mix(in srgb, var(--action-active) 30%, transparent);
+    --shadow-elevated: 0 1rem 2.5rem color-mix(in srgb, var(--ink-primary) 24%, transparent);
+    --shadow-compact: 0 var(--space-1) var(--space-2) color-mix(in srgb, var(--spatial-canvas-deep) 24%, transparent);
+    --shadow-stage: 0 0.65rem 0.75rem rgb(0 7 39 / 36%);
+    --shadow-team-focus: inset 0 0 0 2px var(--spatial-cyan);
+    --shadow-team-outline: inset 0 0 0 1px currentColor;
+    --shadow-board-ring: inset 0 0 0 clamp(var(--space-2), 1.5vw, var(--space-4)) color-mix(in srgb, var(--on-team) 28%, transparent);
+    --shadow-board-ring-strong: inset 0 0 0 clamp(var(--space-3), 2vw, var(--space-6)) color-mix(in srgb, var(--on-team) 38%, transparent);
+    --shadow-board-path: inset 0 0 0 var(--border-path) var(--on-team);
+    --shadow-nav-active: inset -3px 0 0 var(--spatial-cyan-ink);
+
     /* Audience arena: scoped to .game-arena. */
     --arena-canvas: #06184b;
     --arena-panel: #08235e;
@@ -108,6 +133,7 @@
     --arena-score-shadow: 0 12px 0 var(--arena-panel-deep), 0 22px 34px rgb(0 7 39 / 42%);
     --arena-radius-panel: 1.5rem;
     --arena-radius-capsule: 999px;
+    --player-buzzer-deep-base: #000;
 
     --font-ui: "IBM Plex Sans Arabic", Tahoma, Arial, sans-serif;
     --weight-regular: 400;
@@ -200,7 +226,7 @@
     --scrim: rgb(0 0 0 / 72%);
     --edge-low: #05090c;
     --shadow-soft: rgb(0 0 0 / 36%);
-    --studio-background-image: url("/assets/backgrounds/studio-field-dark.webp");
+    --studio-background-image: url("/assets/backgrounds/cell-challenge-categories-v1.webp");
     --spatial-canvas: #0a237c;
     --spatial-canvas-deep: #041142;
     --spatial-ink: #061641;
@@ -211,7 +237,7 @@
     --spatial-board-shell: #13358e;
     --spatial-board-shadow: 0 18px 0 #04134c, 0 28px 40px rgb(0 0 0 / 42%);
     --spatial-dock-shadow: 0 14px 28px rgb(0 0 0 / 34%);
-    --spatial-background-image: url("/assets/backgrounds/spatial-studio-v1.webp");
+    --spatial-background-image: url("/assets/backgrounds/cell-challenge-categories-v1.webp");
     --arena-canvas: #06184b;
     --arena-panel: #08235e;
     --arena-panel-deep: #03133f;

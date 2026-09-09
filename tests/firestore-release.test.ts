@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, realpath, rm, symlink, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
-import { assertExactV32ProductionRelease, assertFirestoreDocumentPath, assertProductionReleaseAcceptance, assertReleaseDocumentsExcludeEvidencePayload, assertUniqueReleaseDocuments, buildFirestoreReleasePlan, canonicalApprovedJsonl, classifyReleaseDocuments, releaseDocumentWriteMode } from '../scripts/build-firestore-release.js';
+import { assertExactV32ProductionRelease, assertExternalV33TrustRootPath, assertFirestoreDocumentPath, assertProductionReleaseAcceptance, assertReleaseDocumentsExcludeEvidencePayload, assertUniqueReleaseDocuments, buildFirestoreReleasePlan, buildV18MediaUploadPlan, buildV18ReleaseMediaDocuments, canonicalApprovedJsonl, classifyReleaseDocuments, loadV33ProductionReleaseInput, releaseDocumentWriteMode } from '../scripts/build-firestore-release.js';
 import type { Question } from '../src/question-bank.js';
 import { answerConceptIdV32, validateQuestionBankV32, type CategoryPolicyV32, type QuestionV32 } from '../src/question-bank-v3.2.js';
 
@@ -20,11 +20,49 @@ async function planFor(questions: Question[], categoriesFixture = categories) {
   await Promise.all([writeFile(paths.approvedPath, questions.map((question) => JSON.stringify(question)).join('\n')), writeFile(paths.manifestPath, JSON.stringify({ schemaVersion: 1, approvedQuestionCount: questions.length, approvedBankSha256: crypto.createHash('sha256').update(canonical).digest('hex') })), writeFile(paths.categoriesPath, JSON.stringify(categoriesFixture))]);
   return { folder, plan: await buildFirestoreReleasePlan(paths) };
 }
+const v33TopLevelArtifacts = ['as-of.v3.3.json', 'categories', 'evidence-bodies.v3.3.json', 'evidence.v3.3.jsonl', 'media.v3.3.jsonl', 'policies.v3.3.json', 'receipts.v3.3.jsonl', 'scope.manifest.v3.3.json', 'slots.v3.3.jsonl', 'source-policy-registry.v3.3.json', 'validation-report.v3.3.json'];
+async function v33LoaderFixture() {
+  const folder = join(tmpdir(), `huroof-v33-loader-${Date.now()}-${Math.random()}`); const corpus = join(folder, 'corpus'); const trustRoot = join(folder, 'trust-root.json'); await mkdir(join(corpus, 'categories'), { recursive: true });
+  await Promise.all([writeFile(trustRoot, '{}'), ...v33TopLevelArtifacts.filter((name) => name !== 'categories').map((name) => writeFile(join(corpus, name), '{}'))]);
+  const trustRootSha256 = (await import('node:crypto')).createHash('sha256').update('{}').digest('hex');
+  return { folder, corpus, trustRoot, trustRootSha256 };
+}
 
 test('canonical JSONL sorts keys and IDs and rejects duplicate or unsafe IDs', () => {
   assert.equal(canonicalApprovedJsonl('{"id":"b","z":1,"a":2}\n{"id":"a","b":1}\n'), '{"b":1,"id":"a"}\n{"a":2,"id":"b","z":1}');
   assert.throws(() => canonicalApprovedJsonl('{"id":"a/a"}'), /path-unsafe/i);
   assert.throws(() => canonicalApprovedJsonl('{"id":"same"}\n{"id":"same"}'), /duplicate/i);
+});
+
+test('canonical trust-root containment rejects only the corpus and real descendants', () => {
+  const root = 'C:\\repo\\content\\question-bank-v3\\v3.3';
+  assert.throws(() => assertExternalV33TrustRootPath(root, root), /outside/i); assert.throws(() => assertExternalV33TrustRootPath(root, `${root}\\trust.json`), /outside/i);
+  assert.doesNotThrow(() => assertExternalV33TrustRootPath(root, 'C:\\repo\\content\\question-bank-v3\\..evil\\trust.json')); assert.doesNotThrow(() => assertExternalV33TrustRootPath(root, 'C:\\trusted\\trust.json'));
+});
+
+test('canonical trust-root containment rejects a symlink alias into the corpus when supported', async (t) => {
+  const folder = join(tmpdir(), `huroof-trust-path-${Date.now()}-${Math.random()}`); const corpus = join(folder, 'corpus'); const alias = join(folder, 'outside-alias'); await mkdir(corpus, { recursive: true });
+  try {
+    try { await symlink(corpus, alias, 'junction'); } catch { t.skip('Symlink/junction creation unavailable on this platform/account.'); return; }
+    const [canonicalCorpus, canonicalAlias] = await Promise.all([realpath(corpus), realpath(alias)]); assert.throws(() => assertExternalV33TrustRootPath(canonicalCorpus, canonicalAlias), /outside/i);
+  } finally { await rm(folder, { recursive: true, force: true }); }
+});
+
+test('v3.3 production loader rejects any unexpected top-level artifact before consuming corpus content', async () => {
+  const fixture = await v33LoaderFixture();
+  try {
+    await writeFile(join(fixture.corpus, 'candidate-counts.v3.3.json'), '{}');
+    await assert.rejects(loadV33ProductionReleaseInput({ root: fixture.corpus, trustRootPath: fixture.trustRoot, trustRootSha256: fixture.trustRootSha256 }), /top-level artifact layout/i);
+  } finally { await rm(fixture.folder, { recursive: true, force: true }); }
+});
+
+test('v3.3 production loader rejects top-level symlinks before consuming corpus content', async (t) => {
+  const fixture = await v33LoaderFixture(); const linkedTarget = join(fixture.folder, 'linked-policies.json');
+  try {
+    await writeFile(linkedTarget, '{}'); await rm(join(fixture.corpus, 'policies.v3.3.json'));
+    try { await symlink(linkedTarget, join(fixture.corpus, 'policies.v3.3.json'), 'file'); } catch { t.skip('Symlink creation unavailable on this platform/account.'); return; }
+    await assert.rejects(loadV33ProductionReleaseInput({ root: fixture.corpus, trustRootPath: fixture.trustRoot, trustRootSha256: fixture.trustRootSha256 }), /top-level artifact layout.*link/i);
+  } finally { await rm(fixture.folder, { recursive: true, force: true }); }
 });
 
 test('normal release plans fail closed on zero approved questions', async () => { await assert.rejects(buildFirestoreReleasePlan(), /zero approved/i); });
@@ -91,6 +129,17 @@ test('demo fixtures retain their emulator-only active pointer', async () => {
   assert.ok(immutable.length > 0); assert.deepEqual(mutable.map((entry) => entry.path), ['runtime/activeRelease']);
   assert.ok(immutable.every((entry) => releaseDocumentWriteMode(entry.path) === 'create'));
   assert.equal(releaseDocumentWriteMode('runtime/activeRelease'), 'set');
+});
+
+test('v18 media dry run preserves private immutable object associations and requires upload generations', async () => {
+  const media = await buildV18MediaUploadPlan();
+  assert.equal(media.dryRun, true); assert.equal(media.assetCount, 240); assert.match(media.manifestSha256, /^[a-f0-9]{64}$/);
+  assert.equal(new Set(media.uploads.map((item) => item.mediaId)).size, 240);
+  assert.ok(media.uploads.every((item) => item.createOnly && item.objectName === `question-media/v18/${item.assetSha256}.png` && item.localFile === `originals/${item.assetSha256}.png`));
+  const first = media.uploads[0];
+  const docs = buildV18ReleaseMediaDocuments('release-0123456789abcdef', [{ ...first, generation: '123456789' }]);
+  assert.deepEqual(docs[0], { path: `releases/release-0123456789abcdef/media/${first.mediaId}`, data: { mediaId: first.mediaId, assetSha256: first.assetSha256, objectName: first.objectName, generation: '123456789', immutable: true } });
+  assert.throws(() => buildV18ReleaseMediaDocuments('release-0123456789abcdef', [{ ...first, generation: 'pending' }]), /readback/i);
 });
 
 test('release documents reject authoring-only evidence body fields and paths recursively', () => {
