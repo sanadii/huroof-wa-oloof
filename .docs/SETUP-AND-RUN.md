@@ -9,7 +9,57 @@ $env:VITE_GAME_RUNTIME = 'local'
 npm run dev
 ```
 
-Open **http://localhost:5173**. This starts the local server and Vite. Do not use `127.0.0.1:5173`, which belongs to unrelated user work in this environment.
+The current task-owned preview is **http://127.0.0.1:8787**, with the imported SQLite bank enabled for explicitly labelled local test games. Open `/host/new` to test Huroof or Categories, or `/local-import-review` to inspect all intake records. It serves the built app and multiplayer traffic together. To recreate it after stopping the existing task process:
+
+```powershell
+$env:VITE_GAME_RUNTIME = 'local'
+npm run build
+$env:PORT = '8787'
+$env:GAME_HOST = '127.0.0.1'
+$env:LOCAL_DB_QUESTION_SOURCE = 'sqlite-import'
+$env:GAME_DB_PATH = Join-Path $env:TEMP 'huroof-wa-oloof-local-game.sqlite'
+npm run start:local
+```
+
+Confirm port ownership before launching; do not start a second server on an occupied port. Rebuild after source changes because this preview serves `dist`. For source-live development, run the authority separately and bind Vite to a verified free port such as `npx vite --host 127.0.0.1 --port 5188 --strictPort`. Do not use port 5173 in this environment: it belongs to unrelated user work, and hostname spelling does not establish ownership.
+
+This local test source reads6533 imported SQLite rows plus280 preserved file records:6213 usable text/identity questions,600 staged unsupported records,6813 total logical records. It changes no approvals. With no Huroof categories selected, setup uses an imported scope with verified letter coverage; for a quick Categories test select `huroof-068` and `huroof-069`. Existing rooms pin a source snapshot; create a new room after changing source configuration. To return to the old file-only demo source, remove `LOCAL_DB_QUESTION_SOURCE` and restart the owned authority.
+
+### Local private-import demo source (two terminals)
+
+This read-only local demo source is opt-in. It reads only the pinned private Firestore import through the server's Firebase CLI credentials, keeps question content server-side, and never activates a production release. Use the following two terminals together; `8797` avoids the existing authority on `8787`.
+
+```powershell
+# Terminal 1 — local authority and bounded, read-only Firestore source
+$env:LOCAL_DB_QUESTION_SOURCE = 'firestore-import'
+$env:LOCAL_DB_TRUSTED_ORIGINS = 'http://127.0.0.1:5199'
+$env:PORT = '8797'
+$env:GAME_HOST = '127.0.0.1'
+npm run start:local
+```
+
+```powershell
+# Terminal 2 — browser development server, proxied only to Terminal 1
+$env:VITE_GAME_RUNTIME = 'local'
+$env:LOCAL_DB_QUESTION_SOURCE = 'firestore-import'
+$env:LOCAL_GAME_SERVER_PORT = '8797'
+npx vite --host 127.0.0.1 --port 5199 --strictPort
+```
+
+Open `http://127.0.0.1:5199`. The setup page labels this inventory as imported demo content; leave demo mode enabled. If the server cannot verify its pinned records, it fails to start rather than falling back to fixtures.
+
+### Joining from phones on the same network
+
+Keep the normal local command for one-computer work. To let players scan a host QR code on the same LAN, start a separate local session with an address that their phones can reach:
+
+```powershell
+$env:VITE_GAME_RUNTIME = 'local'
+$env:VITE_ALLOW_LAN = 'true'
+$env:VITE_PUBLIC_JOIN_ORIGIN = 'http://192.168.1.10:5173'
+npm run dev
+```
+
+Replace the example address with the host computer's actual LAN address. The QR panel refuses `localhost` because it is not reachable from a phone. The browser still proxies game traffic to the loopback-only local authority; direct remote calls to every `/api/admin` path are rejected before proxying. Do not enable LAN listening on an untrusted network.
 
 `.env.example` intentionally retains `VITE_GAME_RUNTIME=fixture` as the safe default. Set `local` only for local multiplayer work; set `firebase` only with explicit emulator/browser configuration below.
 
@@ -19,6 +69,8 @@ Firebase web config values are public identifiers but real values must not be co
 
 ```dotenv
 VITE_GAME_RUNTIME=fixture
+VITE_PUBLIC_JOIN_ORIGIN=
+VITE_ALLOW_LAN=false
 VITE_FIREBASE_API_KEY=
 VITE_FIREBASE_AUTH_DOMAIN=
 VITE_FIREBASE_PROJECT_ID=

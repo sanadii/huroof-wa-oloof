@@ -1,5 +1,7 @@
 # Progress
 
+**Latest checkpoint — 2026-09-09:** T-15 app polish and both game modes are complete with root acceptance and final technical Gate PASS. [Current evidence](T15-EXECUTION.md), [walkthrough](../output/T15-WALKTHROUGH.md), and [handover](HANDOVER.md) supersede the historical counts below. Production readiness and final human visual feedback are not inferred.
+
 **Current checkpoint:** C whole-app source implementation is frozen after the final Gate selector/material repairs. The user authorized expansion of the human-approved homepage treatment in 0007. Gate technical review has passed; no deployment is authorized.
 
 **Completed:** all 17 docs; C selection/rollout authority; public/setup/lobby/role/results/auth/admin C implementation; tactile neutral/owned cell materials; entry validation/lobby routing/copy/rematch/results recovery; lazy chunks; configurable emulator ports; isolated E2E harness; demo seed compatibility; watch exclusions; final selector compatibility repair.

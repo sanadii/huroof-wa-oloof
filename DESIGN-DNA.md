@@ -1,4 +1,10 @@
-# DESIGN DNA — استوديو الحروف
+# DESIGN DNA — تحدي الخلية
+
+## Current user-directed brand and background amendment — 2026-09-09
+
+The user renamed the app **تحدي الخلية**, approved the glowing hexagonal-cell artwork, and explicitly requested: “remove all the letters and just add other categoreis”, “remove the text at the top”, and “put it as background for the app”. This narrow amendment supersedes older product-name and decorative-background requirements below. Historical selections and receipts remain unchanged; this is not a new whole-app layout direction or inferred visual approval of the rendered integration.
+
+Use category-only, text-free artwork at `/assets/backgrounds/cell-challenge-categories-v1.webp` as the shared decorative background. The concept combines a luminous central cell with geography, literature, science, cinema, sport, and music symbols. Preserve existing Arabic typography, responsive RTL layouts, functional controls, and readable foreground surfaces. Home actions and actual gameplay questions/boards retain priority over the background; the decorative homepage board may be removed to expose the artwork. Actual game boards, letter/category modes, physical team axes, and runtime identifiers remain unchanged. No new ambient animation is authorized. The artwork's approved colors apply to imagery; existing semantic control tokens remain authoritative.
 
 Status: **binding current visual authority** · selected whole-app target: `spatial-studio` with human-approved whole-app rollout
 
