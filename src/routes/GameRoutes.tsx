@@ -2003,6 +2003,68 @@ function BuzzWinnerBanner({
     </p>
   );
 }
+
+function EndWithoutWinnerDialog({
+  open,
+  onCancel,
+  onConfirm,
+}: {
+  open: boolean;
+  onCancel: () => void;
+  onConfirm: () => void;
+}) {
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const cancelRef = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+    if (open && !dialog.open) {
+      if (typeof dialog.showModal === "function") dialog.showModal();
+      else dialog.setAttribute("open", "");
+      queueMicrotask(() => cancelRef.current?.focus());
+    }
+    if (!open && dialog.open) {
+      if (typeof dialog.close === "function") dialog.close();
+      else dialog.removeAttribute("open");
+    }
+  }, [open]);
+  return (
+    <dialog
+      aria-describedby="end-without-winner-description"
+      aria-labelledby="end-without-winner-title"
+      className="correction-dialog"
+      data-testid="end-without-winner-dialog"
+      onCancel={(event) => {
+        event.preventDefault();
+        onCancel();
+      }}
+      onClose={onCancel}
+      ref={dialogRef}
+    >
+      <div className="correction-dialog__surface">
+        <header className="correction-dialog__header">
+          <h2 id="end-without-winner-title">إنهاء المباراة بلا فائز</h2>
+        </header>
+        <p id="end-without-winner-description">
+          سيُنهي هذا الخيار المباراة كاملةً الآن، ولن يحتسب أي فريق فائزًا.
+        </p>
+        <div className="control-grid">
+          <button
+            className="button button--primary"
+            onClick={onConfirm}
+            type="button"
+          >
+            إنهاء المباراة كاملةً
+          </button>
+          <button className="button" onClick={onCancel} ref={cancelRef} type="button">
+            متابعة اللعب
+          </button>
+        </div>
+      </div>
+    </dialog>
+  );
+}
+
 export function HostActions({
   state,
   action,
@@ -2028,10 +2090,32 @@ export function HostActions({
     state === "QUESTION_READING" || state === "OPPONENT_CHANCE";
   const hostOnly = playerCount === 0;
   const selectionLabel = gameKind === "categories" ? "فئة" : "حرفًا";
-  const confirmEndWithoutWinner = () =>
-    window.confirm(
-      "سيؤدي هذا إلى إنهاء المباراة كاملةً بلا فائز. هل تريد المتابعة؟",
-    );
+  const [endConfirmOpen, setEndConfirmOpen] = useState(false);
+  const endTriggerRef = useRef<HTMLButtonElement>(null);
+  const closeEndConfirmation = () => {
+    setEndConfirmOpen(false);
+    window.setTimeout(() => endTriggerRef.current?.focus(), 0);
+  };
+  const endButton = (
+    <button
+      className={`button${contentHold ? " button--primary" : ""}`}
+      onClick={() => setEndConfirmOpen(true)}
+      ref={endTriggerRef}
+      type="button"
+    >
+      إنهاء المباراة كاملةً بلا فائز
+    </button>
+  );
+  const endConfirmation = (
+    <EndWithoutWinnerDialog
+      onCancel={closeEndConfirmation}
+      onConfirm={() => {
+        setEndConfirmOpen(false);
+        action("END_WITHOUT_WINNER");
+      }}
+      open={endConfirmOpen}
+    />
+  );
   const primary: Partial<Record<string, [IntentType, string]>> = {
     ROUND_SETUP: ["ROUND_READY", "جهّز الجولة"],
     ROUND_COMPLETE: ["START_NEXT_ROUND", "جولة جديدة"],
@@ -2052,26 +2136,23 @@ export function HostActions({
   }
   if (contentHold) {
     return (
-      <div className="control-grid control-grid--content-hold" role="status">
-        <p>
-          توقف اختيار المحتوى: لا يتوفر بديل صالح لهذه الخطوة. لا تُحتسب أي نقطة
-          ولا تتغير ملكية الخلية.
-        </p>
-        <button
-          className="button button--primary"
-          onClick={() => {
-            if (confirmEndWithoutWinner()) action("END_WITHOUT_WINNER");
-          }}
-        >
-          إنهاء المباراة كاملةً بلا فائز
-        </button>
-      </div>
+      <>
+        <div className="control-grid control-grid--content-hold" role="status">
+          <p>
+            توقف اختيار المحتوى: لا يتوفر بديل صالح لهذه الخطوة. لا تُحتسب أي نقطة
+            ولا تتغير ملكية الخلية.
+          </p>
+          {endButton}
+        </div>
+        {endConfirmation}
+      </>
     );
   }
   return (
-    <div
-      className={`control-grid ${manualSelection && !hostOnly ? "control-grid--player-override" : ""}`}
-    >
+    <>
+      <div
+        className={`control-grid ${manualSelection && !hostOnly ? "control-grid--player-override" : ""}`}
+      >
       {state === "CELL_SELECTION" && (
         <button
           className="button button--primary host-select-cell"
@@ -2112,14 +2193,7 @@ export function HostActions({
           >
             {`استبدل الخلية واختر ${selectionLabel} آخر`}
           </button>
-          <button
-            className="button"
-            onClick={() => {
-              if (confirmEndWithoutWinner()) action("END_WITHOUT_WINNER");
-            }}
-          >
-            إنهاء المباراة كاملةً بلا فائز
-          </button>
+          {endButton}
         </>
       )}
       {primary[state] && (
@@ -2151,7 +2225,9 @@ export function HostActions({
           </div>
         </section>
       )}
-    </div>
+      </div>
+      {endConfirmation}
+    </>
   );
 }
 

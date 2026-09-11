@@ -117,11 +117,10 @@ describe("RoomRoute held and incomplete game surfaces", () => {
     fireEvent.click(screen.getByTestId("correction-trigger"));
     expect(await screen.findByText(/سجل التدقيق متاح للقراءة فقط/)).toBeVisible();
     expect(screen.queryByRole("button", { name: "معاينة التصحيح" })).not.toBeInTheDocument();
-    const confirm = vi.spyOn(window, "confirm").mockReturnValue(true);
     fireEvent.click(screen.getByRole("button", { name: "إنهاء المباراة كاملةً بلا فائز" }));
+    fireEvent.click(screen.getByRole("button", { name: "إنهاء المباراة كاملةً" }));
     await waitFor(() => expect(runtime.submitGameIntent).toHaveBeenCalledTimes(1));
     expect(runtime.submitGameIntent.mock.calls[0][1]).toMatchObject({ type: "END_WITHOUT_WINNER" });
-    confirm.mockRestore();
   });
 
   it("opens a modal enlarged category board, then restores trigger focus after Escape", async () => {

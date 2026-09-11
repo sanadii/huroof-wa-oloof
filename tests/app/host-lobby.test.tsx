@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { createRef } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { expect, it, vi } from 'vitest';
@@ -309,10 +309,9 @@ it('opens the question and buzzer from cell selection without manual host action
   expect(container.querySelector('.control-grid .host-controls__pause')).toBeNull();
 });
 
-it('makes an unanswered question continue to the next board cell and confirms full-match termination', () => {
+it('makes an unanswered question continue to the next board cell and confirms full-match termination', async () => {
   const action = vi.fn();
   const teams = { horizontal: 'الأحمر', vertical: 'الأخضر' };
-  const confirm = vi.spyOn(window, 'confirm').mockReturnValue(false);
   const { rerender } = render(<HostActions action={action} playerCount={2} state="QUESTION_FAILED" teams={teams} />);
 
   expect(screen.getByRole('status')).toHaveTextContent('اختر حرفًا آخر من اللوحة');
@@ -320,16 +319,18 @@ it('makes an unanswered question continue to the next board cell and confirms fu
   expect(action).toHaveBeenCalledWith('RETRY_CELL');
   expect(screen.queryByRole('button', { name: 'أعد الخلية' })).not.toBeInTheDocument();
   fireEvent.click(screen.getByRole('button', { name: 'إنهاء المباراة كاملةً بلا فائز' }));
-  expect(confirm).toHaveBeenCalledWith('سيؤدي هذا إلى إنهاء المباراة كاملةً بلا فائز. هل تريد المتابعة؟');
+  expect(screen.getByTestId('end-without-winner-dialog')).toHaveAttribute('open');
+  const cancel = screen.getByRole('button', { name: 'متابعة اللعب' });
+  await waitFor(() => expect(cancel).toHaveFocus());
+  fireEvent.click(cancel);
   expect(action).toHaveBeenCalledTimes(1);
 
   rerender(<HostActions action={action} contentHold={{ reason: 'CONTENT_EXHAUSTED', operation: 'SELECT_CELL' }} playerCount={2} state="CELL_SELECTION" teams={teams} />);
   expect(screen.getByRole('status')).toHaveTextContent('لا تتغير ملكية الخلية');
   expect(screen.queryByRole('button', { name: 'اختر حرفًا من اللوحة' })).not.toBeInTheDocument();
-  confirm.mockReturnValue(true);
   fireEvent.click(screen.getByRole('button', { name: 'إنهاء المباراة كاملةً بلا فائز' }));
+  fireEvent.click(screen.getByRole('button', { name: 'إنهاء المباراة كاملةً' }));
   expect(action).toHaveBeenLastCalledWith('END_WITHOUT_WINNER');
-  confirm.mockRestore();
 });
 
 it('gives a completed host a same-settings new-match path', () => {
