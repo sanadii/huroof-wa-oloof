@@ -1,6 +1,30 @@
 # Implementation plan — current state
 
+## Design integration follow-up — 2026-09-11
+
+Scope: the approved C rollout (0006/0007), amended by the September 9 **تحدي الخلية** identity and category-only background, plus the user's September 11 homepage refinement and board-choice placement request. This supplements completed T-01–07; it does not reopen production or content-import milestones.
+
+Owner: root for acceptance and records; Forge for the implemented home/setup changes. Dependencies: binding `DESIGN-DNA.md`, existing game setup behavior and real category catalogue. Preserve historical receipts and all unrelated working-tree edits.
+
+- [x] Keep the Arabic text wordmark, approved shared artwork, semantic palette and actual content.
+- [x] Refine home hierarchy around create/join, readable foreground panels and responsive artwork placement.
+- [x] Place descriptive board-type cards at the start of game creation; home CTA routes to `/host/new`.
+- [x] Preserve RTL keyboard selection and existing mode/category setup behavior.
+- [x] Verify 1440/390/320 layouts, focused tests, typecheck, lint, visual scanner and build. Entry/setup tests re-run September 11: 29/29 pass; existing category-cover React act warning remains.
+- [x] Human visual acceptance recorded: after the rendered review and explicit approval question, the user replied “OK continue, do it all” on September 11. This approves the presented integration and authorizes remaining design work.
+- [x] Complete the bounded loading/chunk-error presentation follow-up using the existing approved spatial panels; preserve retry behavior and accessible status announcements. Forge implemented App.tsx and focused verification; root reviewed the diff, desktop loading and mobile error renders.
+
+Evidence: [implementation and rendered review](../output/homepage-refinement-20260911.md), [mobile setup](../output/playwright/board-kind-placement-setup-390.png), [desktop home](../output/playwright/board-kind-placement-home-1440.png). Changed implementation files: `HomeSurface.tsx`, `GameRoutes.tsx`, homepage/setup CSS and two focused route test files. No standalone pictorial logo has been accepted; current identity is the Arabic text wordmark. The broad phrase “logo and all” is not evidence of acceptance of an additional mark.
+
+Status: Done — root accepted September 11 after human approval and final bounded verification. Loading/error panels now reuse the spatial design; auth status uses plain Arabic and the home title reads الرئيسية. Route-status/auth/entry tests: 15/15; typecheck, touched-file lint, visual scanner and local build passed. Initial auth test failed because it asserted replaced copy; the assertion was updated and passed. Existing build chunk warning remains. Browser fault injection on the real GameRoutes chunk produced the error panel, and retry recovered to setup with the board-kind selector. No overflow at 1440/390/320. Evidence: [desktop loading](../output/playwright/route-fallback-loading-1440.png), [mobile actual chunk failure](../output/playwright/route-fallback-natural-error-390.png). Root also verified rebuilt homepage title and login copy live. Rollback, if needed, is limited to this follow-up's source hunks; never discard the mixed working tree. Production M-6 and later data/release tasks remain separate.
+
 ## T-09 — QR joining and host player moves (2026-09-08)
+
+### Inline lobby QR follow-up — September 11
+
+Completion: **Done — root accepted** after 20/20 host-lobby tests, app typecheck, lint, visual scanner and local build. The rendered public-origin QR decoded to the exact sample player-room URL at 1440/390/320 without overflow. Root reviewed source and mobile capture. Shared URL-keyed state prevents stale images; explicit errors replace loading on failure. [Final handover and screenshot](HANDOVER.md#inline-lobby-qr--september-11). The following intake text is historical; its in-progress status is superseded by this completion record. Public deployment was not performed.
+
+User request: display the actual scannable QR image in the lobby instead of the text-only QR trigger. User clarified that players join through the deployed public website. Owner: Forge for GameRoutes, scoped CSS and focused tests; root for review. Reuse locally generated QR encoding of the validated player join URL. Share origin/payload state between inline image and enlarged dialog, retain loopback/configuration guidance, and preserve existing host controls and game state. Acceptance: visible decodable image for a valid public origin; room-only player URL without host credentials; working enlargement and origin synchronization; loading/error states; no overflow at 320/mobile/desktop. Verify focused tests, app typecheck, lint, build and actual QR decode. No production deployment or mutation of the user's current room is included. Status: implementation in progress.
 
 **Milestone:** M-8. **Owner:** Forge; root acceptance with security-boundary review and Gate. **Status:** Done — root accepted 2026-09-08. **Authorization:** user requested QR joining and drag/drop into team boxes, explicitly including during a match.
 
@@ -626,3 +650,6 @@ User explicitly requests connecting database questions to the game after source 
 
 T16.7 follow-up accepted: the requested local game connection reads SQLite intake and preserved baseline through the existing snapshot/selector boundary.6213 explicit test questions across58 categories;600 records remain staged. Root verified live imported-source Huroof/Categories questions, terminal-failure replacement, answer secrecy and browser launch. [Runtime handoff](../output/master-import-20260909/RUNTIME-TEST-REPORT.md). No stored data/approval change.
 Done — root accepted2026-09-09. User-authorized validated6540-record stream imported into the actual local preview store, with verified backup, preservation,240 media associations and zero-duplicate rerun. [T16-MASTER-IMPORT.md](T16-MASTER-IMPORT.md) records scope/rollback and [final report](../output/master-import-20260909/IMPORT-REPORT.md) contains source/category accounting and independent evidence. Stored6813, approved/playable0; existing280 demo records unchanged. No production target or historical intake modified. Forge T16.2–5 and root/Gate T16.1/4/6 complete.
+
+## T-17 — Goal videos and image questions — 2026-09-11
+User-approved implementation: [canonical task details, decisions, checks and rollback](T17-QUESTION-MEDIA.md). T17.1 media/data and T17.2 runtime/UI are Done; T17.3 implementation/deployment preparation is accepted after final Gate PASS. Online rollout remains blocked by Firebase authentication and actual reviewed release inputs. Local and Firebase-emulator image/goal flows are verified; no production activation is claimed.

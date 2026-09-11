@@ -89,3 +89,9 @@ T-15 checkpoint — 2026-09-09 Kuwait: M-POLISH-02/T-15.2 accepted after root re
 
 T16.7 follow-up complete: the user-authorized local SQLite test runtime now exposes6213 supported records/58 categories; both game kinds independently verified against imported content. Stored data/approvals unchanged. [Runtime evidence](../output/master-import-20260909/RUNTIME-TEST-REPORT.md).
 Done — root accepted2026-09-09. Dependencies and tasks T16.1–6 satisfied: validated input, verified backup,6540 outcomes, preserved baseline,240 loaded private media, live import/readback and zero-new-row rerun; technical Gate PASS. [T16-MASTER-IMPORT.md](T16-MASTER-IMPORT.md), [final evidence](../output/master-import-20260909/IMPORT-REPORT.md). No dependency on production T-13/T-14 completion.
+
+## T-17 media sequence — 2026-09-11
+[M-MEDIA-01 / T17.1 -> M-MEDIA-02 / T17.2 -> M-MEDIA-03 / T17.3](T17-QUESTION-MEDIA.md). T17.1 and T17.2 are Done. T17.3 implementation/preparation is accepted with final Gate PASS; online rollout remains blocked by external authentication and reviewed-release prerequisites. Ordered dependencies, verification evidence and exact continuation are in the canonical task detail.
+
+## T17.3a — Consolidated Firebase content sync — 2026-09-11
+Authorized source reconciliation/private upload follow-up under T17.3. [Execution contract](FIREBASE-CONTENT-SYNC.md). T17.3a.1 offline preparation accepted after Database review, ten focused tests, full asset validation, typecheck and Gate v4. T17.3a.2 cloud upload blocked: fresh SDK authentication works with Windows system CA, but production billing is disabled and no Storage bucket exists. Nineteen photo entries remain rate-limited. No cloud mutation occurred; [report and exact continuation](../output/firebase-sync-20260911/FIREBASE-SYNC-REPORT.md).

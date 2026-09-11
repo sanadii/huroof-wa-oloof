@@ -1,0 +1,13 @@
+# تحدي الخلية — category background
+
+User-directed refinement, 2026-09-09. The user approved the central glowing-cell concept, then requested category objects only, no letters or title, use as app background, and the app name **تحدي الخلية** throughout the interface.
+
+- Web asset: `public/assets/backgrounds/cell-challenge-categories-v1.webp`, 1254 × 1254, WebP quality 88.
+- Original bitmap: `C:/Users/User/.codex/generated_images/01a085fc-e497-7251-8d6a-08ed5e6992eb/exec-09782804-d6d0-4683-be1e-b60a1f7f2b68.png`.
+- Generation: built-in image tool; original remains unchanged. WebP encoding used Sharp without changing composition.
+- Reference: preceding approved category-and-letter illustration `exec-641d7b82-acdf-4bd2-8174-bbcfeb53bc66.png` in the same generation directory.
+- Visual inspection: globe, book, clapperboard, musical notes, flask, and football surround a central luminous hexagonal cell. No app title or alphabet letters appear in the final background.
+
+## Final generation prompt
+
+Edit this approved artwork for use as an app background. Remove ALL text at the top completely, leaving a beautifully calm dark midnight indigo negative-space upper quarter for real app UI. Remove ALL Arabic letters and replace them with additional recognizable category objects. Preserve the central luminous golden hexagonal portal, dramatic dimension, blue night setting, orange left light stream and teal right light stream, and polished premium 3D glass/enamel art direction. Keep existing geography globe on mid left, open book on left, science flask on mid right. Replace large orange ح lower left with a tasteful orange-gold cinema clapperboard with blank stripes and NO lettering. Replace large teal ل lower right with a sculptural teal football with recognizable pentagonal panels to represent sports. Replace teal ف upper right with a teal musical eighth-note pair to represent music, clearly musical notation not alphabet. Six categories total: geography globe, literature book with blank unmarked pages, science flask, cinema clapperboard no writing, sports ball, music notes. All symbols match the original physical lighting and premium enamel/glass material style. Absolutely no Arabic or Latin letters, no words, no numerals, no title, no logos, no watermarks anywhere. Do not render a game board or white hexagonal tile array. Central hero remains the warm luminous hexagonal cell, beautiful curved trails draw category objects toward it, visual clarity, uncluttered. Square high resolution image, quiet dark upper quarter and edges suitable for app background; preserve the approved composition and mood.

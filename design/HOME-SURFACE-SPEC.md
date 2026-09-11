@@ -1,5 +1,9 @@
 # Homepage Surface Specification — استوديو الحروف
 
+## Current integration — September 11
+
+Current product name: **تحدي الخلية**. The September 9 DESIGN-DNA amendment replaces the decorative home board with approved category-only background artwork. Current home composition is utility header, headline and create/join panel, real category chooser, and footer. Board-type selection appears first in game creation; the primary home link targets `/host/new`. The user approved the presented integration with “OK continue, do it all.” These narrow amendments supersede conflicting historical home composition and product-name statements below; immutable receipts remain unchanged.
+
 Status: **binding build-facing contract** · 2026-09-05. This specification narrows the
 Golbha audit to the homepage regions visible in the owner-supplied screenshots. It does not
 authorize a new visual direction, source route, data model, asset, entitlement, or game mode.

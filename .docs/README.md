@@ -1,5 +1,13 @@
 # تحدي الخلية — documentation index
 
+Visual review accepted (2026-09-11): the user replied “OK continue, do it all” to the rendered integration review. [Current checklist](IMPLEMENTATION-PLAN.md#design-integration-follow-up--2026-09-11) tracks the final bounded loading/error and copy polish. This supersedes older pending-acceptance status below.
+
+Local v19 import (2026-09-11): all 600 questions from the user's `ALL_QUESTIONS.md` are saved as drafts across 20 categories. SQLite now holds 7,193 question rows; all 6,593 prior rows, including the photo-question set, were preserved. Read-back, integrity and duplicate-free rerun passed. [Import report and backup evidence](../output/v19-db-import-20260911/IMPORT-REPORT.md).
+
+Current visual review (2026-09-11): homepage refinement and board-choice placement are implemented and technically checked. [Follow-up checklist](IMPLEMENTATION-PLAN.md#design-integration-follow-up--2026-09-11) and [handover](HANDOVER.md#current-visual-integration-review--2026-09-11) distinguish completed implementation from pending human visual acceptance.
+
+Local photo-question follow-up (2026-09-11): the rebuilt category 011 set is saved in the local SQLite intake database as 60 new drafts, with 51 verified photo associations and 9 missing-photo records. All 6,533 prior SQLite rows were preserved; the new total is 6,593. [Import, backup and verification report](../output/rebuilt-photo-db-import-20260911/DB-IMPORT-REPORT.md). This does not activate image gameplay or change production.
+
 Current test runtime (2026-09-09): T16.7 is complete. The app at127.0.0.1:8787 now uses the imported SQLite bank for explicit local test games:6213 usable questions/58 categories,600 staged unsupported records. Both Huroof and Categories reached imported questions and passed root flow checks. [Runtime report](../output/master-import-20260909/RUNTIME-TEST-REPORT.md), [launch instructions](SETUP-AND-RUN.md). Normal approvals and stored content remain unchanged.
 
 Current task completed (2026-09-09): [T-16 local master-bundle import](T16-MASTER-IMPORT.md), [final report](../output/master-import-20260909/IMPORT-REPORT.md). All6540 incoming rows accounted; stored6813/approved0,240 images verified, repeated apply/check zero new rows. Root accepted after technical Gate and independent live/browser checks. This local request does not modify production intake or reopen completed polish/branding work.
@@ -62,3 +70,7 @@ T-14.3 source-mapping subtask accepted on2026-09-09: [all100 category mappings a
 Local DB game connection accepted2026-09-09: [startup instructions](SETUP-AND-RUN.md), [handover](HANDOVER.md#local-database-game-connection-accepted--2026-09-09). Preview5199 now uses verified Firestore import questions through local authority8797:1184text questions/29categories, explicit draft testing. This supersedes the earlier8fixture-only local setup checkpoint, not production release status.
 
 Latest publication2026-09-09: [GitHub/Vercel evidence and remaining online prerequisites](DEPLOYMENT.md#publication-completed--2026-09-09), [current handover](HANDOVER.md#github-and-vercel-publication--2026-09-09). Public preview is explicitly limited; current full local database test app remains on8787 under [T16](T16-MASTER-IMPORT.md).
+
+Current authorized media work (2026-09-11): [T-17 goal video and image gameplay](T17-QUESTION-MEDIA.md) defines three ordered milestones, protected shared reveal, local imports and online rollout.
+
+Current authorized Firebase data consolidation: [T17.3a content sync](FIREBASE-CONTENT-SYNC.md), including related-task source recovery and private media upload; gameplay rollout remains T17.

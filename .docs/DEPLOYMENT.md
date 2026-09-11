@@ -1,5 +1,15 @@
 # Deployment and rollback plan
 
+## GitHub and Vercel production update — 2026-09-11
+
+User authorization: “Update GitHub and vercel production.” This authorizes publishing the current completed application changes and updating the existing Vercel production project. Root coordinates under the existing GitHub/Vercel publication contract below; Forge prepares an isolated source snapshot and explicit file allowlist, then Gate reviews the exact package before root push/deployment.
+
+Scope: completed application, category artwork, accepted T17 runtime support, matching tests and release documentation. Inspect changed files and dependencies before selection. Exclude private question bodies, databases, source-media originals, import receipts, credentials and unaccepted in-progress Firebase consolidation tooling. Preserve all concurrent working-tree changes. No mass question approval, database migration or Firebase release activation is implied by this frontend publication.
+
+Sequence and acceptance: verify remote branch/project/environment identity; capture immutable selected-file hashes; build/typecheck/test isolated Git source and the reduced Vercel upload; pass the release Gate including private-payload checks; publish intentional asset/implementation/documentation commits; deploy a production candidate with delayed domain assignment when supported; check HTTP/browser/deep links and matching build; promote and verify production alias. Retain the currently configured runtime unless live backend/release prerequisites support an explicit change. Record the exact runtime and any limitations without describing a static frontend as an online database deployment.
+
+Rollback: restore the verified previous Vercel production deployment by promotion/rollback. Revert only task-owned Git commits if needed; never reset the mixed workspace or restore a whole database. Root owns final acceptance and updates this section with evidence. Status: preparing isolated release snapshot; no push or deployment yet.
+
 ## Authority and current state
 
 Current authority (2026-09-09): the user authorized the bundle import and explicitly approved publication/activation with “i validate, do it now.” Production intake has performed and verified 38,950 private source/provenance writes, including 18,698 question revisions. This is not a playable release. No runtime activation or service deployment has occurred. See [T-14 execution authorization](HANDOVER.md#t-14-execution-authorization--2026-09-09) and [the import receipt](../tmp/bundle-import-20260908/production-resume-20260909.receipt.json).

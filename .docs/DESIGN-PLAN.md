@@ -1,5 +1,7 @@
 # Design plan
 
+Current amendment (September 11): retain selected C with the **تحدي الخلية** name and approved category-only shared artwork defined in [DESIGN-DNA](../DESIGN-DNA.md). Home/setup integration is human-approved; [current follow-up](IMPLEMENTATION-PLAN.md#design-integration-follow-up--2026-09-11) tracks remaining polish. Earlier product-name and background statements below describe the original selection and are superseded only on those points.
+
 ## Selected direction
 
 **مدار الحروف** is the selected whole-app direction for **استوديو الحروف**. It uses a cobalt/ultramarine architectural canvas, dimensional ice-white neutral letter tiles, deep-blue ink, cyan action/focus, and physical crimson-horizontal / emerald-vertical ownership. Controls are opaque and readable; 3D comes from contact shadows, bevels, and finite CSS motion rather than a bitmap interface or WebGL.

@@ -1,5 +1,7 @@
 # Project brief
 
+Current amendment (September 11): the product is **تحدي الخلية**, following the September 9 binding amendment in [DESIGN-DNA](../DESIGN-DNA.md). The descriptive board choice is now in game creation. The user approved the presented home/setup integration with “OK continue, do it all.” The original C rationale below remains historical where it names the former product or background.
+
 ## Product
 
 **استوديو الحروف** is an RTL Arabic party-game studio. Hosts create a room, choose supported game/category settings, share a room code, and run a live 25-cell letter board. Players receive only their role projection; audience views remain public; administration stays permission-guarded.

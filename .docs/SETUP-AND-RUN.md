@@ -23,7 +23,13 @@ npm run start:local
 
 Confirm port ownership before launching; do not start a second server on an occupied port. Rebuild after source changes because this preview serves `dist`. For source-live development, run the authority separately and bind Vite to a verified free port such as `npx vite --host 127.0.0.1 --port 5188 --strictPort`. Do not use port 5173 in this environment: it belongs to unrelated user work, and hostname spelling does not establish ownership.
 
-This local test source reads6533 imported SQLite rows plus280 preserved file records:6213 usable text/identity questions,600 staged unsupported records,6813 total logical records. It changes no approvals. With no Huroof categories selected, setup uses an imported scope with verified letter coverage; for a quick Categories test select `huroof-068` and `huroof-069`. Existing rooms pin a source snapshot; create a new room after changing source configuration. To return to the old file-only demo source, remove `LOCAL_DB_QUESTION_SOURCE` and restart the owned authority.
+As of 2026-09-11, this local test source reads 7,193 imported SQLite rows plus 280 preserved file records: 6,813 usable text/identity questions and 660 held records. All 87 stored categories appear in the catalog; 78 are ready for category games and 9 are held-only. Inventory and new-room requests refresh SQLite automatically. It changes no approvals. With no Huroof categories selected, setup uses an imported scope with verified letter coverage; for a quick Categories test select `huroof-068` and `huroof-069`. Existing rooms retain their source snapshot during in-process refresh; create a new room after a server restart. To return to the old file-only demo source, remove `LOCAL_DB_QUESTION_SOURCE` and restart the owned authority.
+
+### T17 media update — 2026-09-11
+
+The current SQLite-backed app at **http://127.0.0.1:8787** includes 88 catalog categories, all 99 `goals-2026` questions and 291 verified PNG/JPEG image bindings. These counts supersede the earlier media-held inventory above; separate imports can increase the text totals. Select **من سجل الهدف؟** for goal videos or **خمن الصورة** for verified photos. The host's **إظهار الإجابة** action reveals the answer and switches both host/display to the clear clip. Goal questions are category-mode only. Huroof recommendations now use the actual classic selector, including concept reserves.
+
+Keep the ignored `content/question-media/` packages on the server: the database stores references rather than file bytes. Missing media stays unavailable. Original clips remain under the ignored `resources/100-best-goals-2026-clips/` directory. [T17 plan and verification](T17-QUESTION-MEDIA.md) records media preparation and rollback. Production Firebase/Vercel activation remains separate and is not provided by a static preview.
 
 ### Local private-import demo source (two terminals)
 
