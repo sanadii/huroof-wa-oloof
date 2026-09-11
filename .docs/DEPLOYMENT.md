@@ -1,5 +1,14 @@
 # Deployment and rollback plan
 
+## Hide unavailable categories and question-count report — 2026-09-11
+
+User requests categories with insufficient questions omitted from selection and a Markdown generation backlog with counts for all categories. This supersedes the earlier disabled-card presentation, not the complete underlying inventory. Local/preview Huroof uses existing positive letter-question coverage; category mode uses existing distinct-concept eligibility. Approved Firebase catalogs use their per-mode playable flags. Filtering precedes search/topics/counts and prunes stale selections. Existing design, static-preview restriction and server-side final validation remain.
+
+Fresh metadata-only local inventory matches the checked-in projection exactly: 88 categories, 12,603 usable references, 429 held references; 52 Huroof-visible and 83 category-mode-visible. [All category counts and generation backlog](../docs/CATEGORY-QUESTION-COUNTS.md) retains all 88 rows, identifies 36 zero-Huroof and five category-mode-unavailable categories, and distinguishes held records from distinct usable questions. No question bodies, approval/database changes or backend activation.
+
+Verification/release status: Done — source accepted, pushed and production promoted. Implementation commit451aee1d96633520f11597c37c08ddc92e846085. Root reproduced11 focused tests; Forge24 setup tests and builds pass; Gate4 independent tests and reduced-tree build pass. Existing React act warnings and >500kB bundle advisory remain. Exact810-file upload manifest45ade74b8db1776864268afc835549beb3c0fdd748ad7767cc97d980619102a0. Production deploymentdpl_4uk1GFcH63gbaknWHXTjGstjMe3a. Candidate/public browser checks:52Huroof,83category-mode,Flags hidden only inHuroof,held cards omitted,deep-link cleanup/search verified. Public main bundle /assets/index-C_cGngEn.js matches reviewed candidate/local SHA25612f6b63598f0c1e5a153791c5d03ce0ccec6b9efe46260a94d89bdc66ac7444b. Retain VITE_STATIC_PREVIEW=true and VITE_GAME_RUNTIME=fixture. Rollback: promote dpl_2kkkGnRsUawu7WLpQgi3oDXfD2oo; revert only this bounded source delta. Evidence directory: output/category-question-report-20260911.
+
+
 ## Live rooms and full-question review authorization — 2026-09-11
 
 User explicitly requests live rooms/gameplay and approval of all questions. This authorizes completing the existing T-14.4–6/T17.3 production sequence, with actual approval provenance and validation; it does not establish that every record is correct or erase unsupported/missing-media findings. No invented reviewer identities, signatures or factual-review receipts. Preserve existing intake/history and the current 88-category preview while prerequisites remain incomplete.
