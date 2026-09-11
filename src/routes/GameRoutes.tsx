@@ -63,8 +63,9 @@ type ViewProjection = SafeProjection & {
     primaryAnswer?: string;
     acceptedAnswers?: string[];
     revealedAnswer?: string;
+    occurrence?: string;
     sources?: Array<{ title?: string; url?: string }>;
-    media?: { mediaId: string; assetSha256: string; altAr: string };
+    media?: { mediaId: string; assetSha256: string; altAr: string; type?: "image" | "video"; contentType?: string };
   };
   audit?: Array<{ revision: number; type: string; payload?: unknown }>;
 };
@@ -91,7 +92,7 @@ export function CurrentQuestionMedia({
   load,
 }: {
   roomId: string;
-  media: { mediaId: string; assetSha256: string; altAr: string };
+  media: { mediaId: string; assetSha256: string; altAr: string; type?: "image" | "video"; contentType?: string };
   load?: (
     request: CurrentQuestionMediaRequest,
   ) => Promise<CurrentQuestionMediaGrant>;
@@ -99,6 +100,9 @@ export function CurrentQuestionMedia({
   const [url, setUrl] = useState("");
   const [failed, setFailed] = useState(false);
   const [refresh, setRefresh] = useState(0);
+  const activeUrl = useRef("");
+  const activeBinding = useRef("");
+  const binding = `${roomId}\u0000${media.mediaId}\u0000${media.assetSha256}`;
   const request = useCallback(() => {
     const value = {
       roomId,
@@ -112,12 +116,28 @@ export function CurrentQuestionMedia({
       Promise.reject(new Error("MEDIA_UNAVAILABLE"))
     );
   }, [load, media.assetSha256, media.mediaId, roomId]);
+  // A reauthorization for the same immutable video must not replace its Blob
+  // URL: replacing src would make the native autoplay attribute replay it.
+  useEffect(
+    () => () => {
+      revokeObjectUrl(activeUrl.current);
+      activeUrl.current = "";
+      activeBinding.current = "";
+    },
+    [binding],
+  );
   useEffect(() => {
     let alive = true;
-    let objectUrl = "";
+    let receivedUrl = "";
     let refreshTimer: number | undefined;
-    setUrl("");
-    setFailed(false);
+    const preserveVideo =
+      media.type === "video" &&
+      activeBinding.current === binding &&
+      Boolean(activeUrl.current);
+    if (!preserveVideo) {
+      setUrl("");
+      setFailed(false);
+    }
     void request()
       .then((value) => {
         if (!alive) {
@@ -135,22 +155,29 @@ export function CurrentQuestionMedia({
           setFailed(true);
           return;
         }
-        objectUrl = value.url;
-        setUrl(value.url);
+        receivedUrl = value.url;
+        if (preserveVideo) revokeObjectUrl(value.url);
+        else {
+          revokeObjectUrl(activeUrl.current);
+          activeBinding.current = binding;
+          activeUrl.current = value.url;
+          setUrl(value.url);
+        }
         refreshTimer = window.setTimeout(
           () => setRefresh((current) => current + 1),
           Math.max(0, expiresAtMs - Date.now() - 1_000),
         );
       })
       .catch(() => {
-        if (alive) setFailed(true);
+        if (alive && !preserveVideo) setFailed(true);
       });
     return () => {
       alive = false;
       if (refreshTimer !== undefined) window.clearTimeout(refreshTimer);
-      revokeObjectUrl(objectUrl);
+      if (receivedUrl && receivedUrl !== activeUrl.current)
+        revokeObjectUrl(receivedUrl);
     };
-  }, [request, refresh]);
+  }, [binding, media.type, refresh, request]);
   if (failed)
     return (
       <section
@@ -158,7 +185,7 @@ export function CurrentQuestionMedia({
         aria-live="polite"
         data-testid="question-media-error"
       >
-        <p>تعذر تحميل صورة السؤال.</p>
+        <p>تعذر تحميل وسائط السؤال.</p>
         <button
           className="button button--quiet"
           onClick={() => setRefresh((value) => value + 1)}
@@ -174,10 +201,12 @@ export function CurrentQuestionMedia({
       aria-busy={!url}
       data-testid="question-media"
     >
-      {url ? (
+      {url && media.type === "video" ? (
+        <video autoPlay controls muted onError={() => setFailed(true)} playsInline src={url} />
+      ) : url ? (
         <img alt={media.altAr} onError={() => setFailed(true)} src={url} />
       ) : (
-        <p aria-live="polite">جارٍ تحميل صورة السؤال…</p>
+        <p aria-live="polite">جارٍ تحميل وسائط السؤال…</p>
       )}
     </figure>
   );
@@ -414,6 +443,22 @@ const AxisMark = ({ axis }: { axis: "horizontal" | "vertical" }) => (
 );
 const defaultCategoryCover = "/assets/categories/320/category-006.webp";
 const maximumSelectedCategories = 10;
+const setupGameKindCardDescriptions = {
+  huroof: "إجابات تبدأ بحرف الخلية",
+  categories: "أسئلة من الفئات التي تختارها",
+} as const;
+
+function SetupGameKindIcon({ kind }: { kind: "huroof" | "categories" }) {
+  return kind === "huroof" ? (
+    <svg aria-hidden="true" className="setup-kind-selector__icon" viewBox="0 0 24 24">
+      <path d="m12 3 7 4v10l-7 4-7-4V7zM9 9h6M9 12h6M9 15h6" />
+    </svg>
+  ) : (
+    <svg aria-hidden="true" className="setup-kind-selector__icon" viewBox="0 0 24 24">
+      <path d="M5 5.5h5v5H5zM14 5.5h5v5h-5zM5 14h5v5H5zM14 14h5v5h-5z" />
+    </svg>
+  );
+}
 
 export function HostNewRoute() {
   useDocumentTitle("إنشاء مباراة");
@@ -479,18 +524,43 @@ export function HostNewRoute() {
   const availableCategoryCatalog = useMemo(() => {
     if (localQuestionInventoryError) return [];
     if (!localQuestionInventory) return legacyAvailableCategoryCatalog;
-    const covers = inventoryCategoryCovers(localQuestionInventory);
+    return inventoryCategoryCovers(localQuestionInventory);
+  }, [localQuestionInventory, localQuestionInventoryError]);
+  const localCategoryById = useMemo(
+    () =>
+      new Map(
+        localQuestionInventory?.categories.map((category) => [
+          category.id,
+          category,
+        ]) ?? [],
+      ),
+    [localQuestionInventory],
+  );
+  const categorySelectionAllowed = (id: string) => {
+    if (!localQuestionInventory) return true;
+    const category = localCategoryById.get(id);
+    if (!category) return false;
     return form.gameKind === "categories"
-      ? covers.filter(
-          (category) =>
-            localQuestionInventory.categories.find(
-              (item) => item.id === category.id,
-            )?.categoryGameEligible,
-        )
-      : localQuestionInventory.huroofAvailable
-        ? covers
-        : [];
-  }, [form.gameKind, localQuestionInventory, localQuestionInventoryError]);
+      ? category.categoryGameEligible
+      : localQuestionInventory.huroofAvailable && category.huroofQuestionCount > 0;
+  };
+  useEffect(() => {
+    if (!localQuestionInventory) return;
+    setForm((current) => {
+      const categories = current.categories.filter((id) => {
+        const category = localCategoryById.get(id);
+        return current.gameKind === "categories"
+          ? Boolean(category?.categoryGameEligible)
+          : Boolean(
+              localQuestionInventory.huroofAvailable &&
+                category?.huroofQuestionCount,
+            );
+      });
+      return categories.length === current.categories.length
+        ? current
+        : { ...current, categories };
+    });
+  }, [form.gameKind, localCategoryById, localQuestionInventory]);
   const availableCategoryTopics = useMemo(
     () =>
       categoryTopics.flatMap((topic) => {
@@ -598,6 +668,7 @@ export function HostNewRoute() {
     selectGameKind(nextIndex, true);
   };
   const toggleCategory = (id: string) => {
+    if (!categorySelectionAllowed(id)) return;
     const isSelected = form.categories.includes(id);
     if (!isSelected && form.categories.length >= maximumSelectedCategories) {
       setSelectionLimitMessage(
@@ -734,13 +805,15 @@ export function HostNewRoute() {
           <section>
             <h2>نوع اللوح</h2>
             <div
-              className="segmented setup-kind-selector"
+              className="setup-kind-selector"
               role="radiogroup"
               aria-label="نوع اللوح"
             >
               {setupGameKindOptions.map((kind, index) => (
                 <button
                   aria-checked={form.gameKind === kind.id}
+                  aria-describedby={`setup-kind-${kind.id}-description`}
+                  aria-label={kind.labelAr}
                   className={form.gameKind === kind.id ? "is-selected" : ""}
                   key={kind.id}
                   onClick={() => selectGameKind(index)}
@@ -752,16 +825,15 @@ export function HostNewRoute() {
                   tabIndex={form.gameKind === kind.id ? 0 : -1}
                   type="button"
                 >
-                  {kind.labelAr}
+                  <SetupGameKindIcon kind={kind.id} />
+                  <strong>{kind.labelAr}</strong>
+                  <small id={`setup-kind-${kind.id}-description`}>
+                    {setupGameKindCardDescriptions[kind.id]}
+                  </small>
+                  <span aria-hidden="true" className="setup-kind-selector__check">✓</span>
                 </button>
               ))}
             </div>
-            <p className="field-note">
-              {
-                setupGameKindOptions.find((kind) => kind.id === form.gameKind)
-                  ?.descriptionAr
-              }
-            </p>
           </section>
           <section>
             <h2>المباراة</h2>
@@ -958,11 +1030,21 @@ export function HostNewRoute() {
               {visibleCategories.map((category) =>
                 (() => {
                   const isFallbackCover = unavailableCovers.has(category.id);
+                  const localCategory = localCategoryById.get(category.id);
+                  const selectable = categorySelectionAllowed(category.id);
+                  const unavailableMessage = !selectable
+                    ? localCategory?.availability === "held_only"
+                      ? "أسئلة هذه الفئة قيد المراجعة وليست متاحة للعب بعد."
+                      : form.gameKind === "categories"
+                        ? "لا تكفي أسئلة هذه الفئة للعبة الفئات بعد."
+                        : "لا توجد تغطية حروف كافية لاستخدام هذه الفئة الآن."
+                    : "";
                   return (
                     <button
-                      aria-label={`${category.displayNameAr}${form.categories.includes(category.id) ? " — محددة" : " — أضف إلى الاختيار"}`}
+                      aria-label={`${category.displayNameAr}${!selectable ? " — غير متاحة للعب بعد" : form.categories.includes(category.id) ? " — محددة" : " — أضف إلى الاختيار"}`}
                       aria-pressed={form.categories.includes(category.id)}
                       className={`category-choice ${form.categories.includes(category.id) ? "is-selected" : ""}`}
+                      disabled={!selectable}
                       key={category.id}
                       onClick={() => toggleCategory(category.id)}
                       type="button"
@@ -988,6 +1070,7 @@ export function HostNewRoute() {
                       <span className="category-choice__title">
                         {category.displayNameAr}
                       </span>
+                      {unavailableMessage ? <small>{unavailableMessage}</small> : null}
                     </button>
                   );
                 })(),
@@ -2384,43 +2467,40 @@ function HostTeamManagementStatus({ state }: { state: string }) {
   );
 }
 
-export function HostJoinDialog({
-  onDismiss,
-  open,
-  roomCode,
-}: {
-  onDismiss: () => void;
-  open: boolean;
-  roomCode: string;
-}) {
-  const dialogRef = useRef<HTMLDialogElement>(null);
+type HostJoinLink = {
+  copyLink: () => Promise<void>;
+  copyStatus: string;
+  origin: string;
+  originIsInvalid: boolean;
+  qrDataUrl: string;
+  qrError: string;
+  setOrigin: (origin: string) => void;
+  joinUrl: string | undefined;
+};
+
+function useHostJoinLink(roomCode: string): HostJoinLink {
   const [origin, setOrigin] = useState(
     () =>
       import.meta.env.VITE_PUBLIC_JOIN_ORIGIN ||
       (typeof window === "undefined" ? "" : window.location.origin),
   );
-  const [qrDataUrl, setQrDataUrl] = useState("");
+  const [qr, setQr] = useState<{ joinUrl: string; value: string }>();
+  const [qrFailure, setQrFailure] = useState<{
+    joinUrl: string;
+    message: string;
+  }>();
   const [copyStatus, setCopyStatus] = useState("");
   const joinUrl = playerJoinUrl(origin, roomCode);
   const originIsInvalid =
     Boolean(origin.trim()) && !normalizedJoinOrigin(origin);
-
-  useEffect(() => {
-    const dialog = dialogRef.current;
-    if (!dialog) return;
-    if (open && !dialog.open) {
-      if (typeof dialog.showModal === "function") dialog.showModal();
-      else dialog.setAttribute("open", "");
-    }
-    if (!open && dialog.open) {
-      if (typeof dialog.close === "function") dialog.close();
-      else dialog.removeAttribute("open");
-    }
-  }, [open]);
+  const qrDataUrl = qr && qr.joinUrl === joinUrl ? qr.value : "";
+  const qrError =
+    qrFailure && qrFailure.joinUrl === joinUrl ? qrFailure.message : "";
 
   useEffect(() => {
     let cancelled = false;
-    setQrDataUrl("");
+    setQr(undefined);
+    setQrFailure(undefined);
     if (!joinUrl) return;
     void QRCode.toDataURL(joinUrl, {
       color: { dark: "#071d38", light: "#ffffffff" },
@@ -2429,11 +2509,14 @@ export function HostJoinDialog({
       width: 280,
     })
       .then((value) => {
-        if (!cancelled) setQrDataUrl(value);
+        if (!cancelled) setQr({ joinUrl, value });
       })
       .catch(() => {
         if (!cancelled)
-          setCopyStatus("تعذر إنشاء رمز QR محلياً. يمكنك نسخ الرابط.");
+          setQrFailure({
+            joinUrl,
+            message: "تعذر إنشاء رمز QR محلياً. يمكنك نسخ الرابط.",
+          });
       });
     return () => {
       cancelled = true;
@@ -2451,6 +2534,88 @@ export function HostJoinDialog({
       setCopyStatus(readableError(reason));
     }
   };
+
+  return {
+    copyLink,
+    copyStatus,
+    joinUrl,
+    origin,
+    originIsInvalid,
+    qrDataUrl,
+    qrError,
+    setOrigin,
+  };
+}
+
+export function HostJoinInlineQr({
+  join,
+  onOpen,
+}: {
+  join: HostJoinLink;
+  onOpen: () => void;
+}) {
+  const status = join.joinUrl
+    ? join.qrError || "امسح الرمز للانضمام إلى هذه المباراة."
+    : join.originIsInvalid
+      ? "عنوان الموقع غير صالح للهاتف. اضغط لتعديله."
+      : "اضبط عنوان الموقع القابل للوصول لإظهار الرمز.";
+  return (
+    <aside className="lobby-join-qr" aria-label="انضمام اللاعبين برمز QR">
+      <button
+        aria-describedby="lobby-join-qr-caption"
+        aria-label={
+          join.qrError
+            ? "فتح إعدادات رمز QR بعد تعذر إنشائه"
+            : join.joinUrl
+              ? "تكبير رمز QR للانضمام"
+              : "إعداد عنوان انضمام اللاعبين"
+        }
+        className="lobby-join-qr__trigger"
+        data-testid="lobby-join-qr"
+        onClick={onOpen}
+        type="button"
+      >
+        <span className="lobby-join-qr__code">
+          {join.qrDataUrl ? (
+            <img alt="رمز QR لرابط انضمام اللاعب" src={join.qrDataUrl} />
+          ) : join.qrError ? (
+            <span role="alert">تعذر إنشاء الرمز</span>
+          ) : (
+            <span role="status">
+              {join.joinUrl ? "جارٍ إنشاء الرمز…" : "إعداد رمز الانضمام"}
+            </span>
+          )}
+        </span>
+        <span className="lobby-join-qr__label">رمز QR للانضمام</span>
+      </button>
+      <p id="lobby-join-qr-caption">{status}</p>
+    </aside>
+  );
+}
+
+export function HostJoinDialog({
+  join,
+  onDismiss,
+  open,
+}: {
+  join: HostJoinLink;
+  onDismiss: () => void;
+  open: boolean;
+}) {
+  const dialogRef = useRef<HTMLDialogElement>(null);
+
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+    if (open && !dialog.open) {
+      if (typeof dialog.showModal === "function") dialog.showModal();
+      else dialog.setAttribute("open", "");
+    }
+    if (!open && dialog.open) {
+      if (typeof dialog.close === "function") dialog.close();
+      else dialog.removeAttribute("open");
+    }
+  }, [open]);
 
   return (
     <dialog
@@ -2485,35 +2650,37 @@ export function HostJoinDialog({
             aria-describedby="host-join-origin-help"
             dir="ltr"
             inputMode="url"
-            onChange={(event) => setOrigin(event.target.value)}
+            onChange={(event) => join.setOrigin(event.target.value)}
             placeholder="http://192.168.1.10:5173"
-            value={origin}
+            value={join.origin}
           />
         </label>
         <p className="host-join-dialog__hint" id="host-join-origin-help">
-          {originIsInvalid
+          {join.originIsInvalid
             ? "استخدم عنوان http أو https عاماً أو من الشبكة المحلية. لا يمكن مسح localhost من هاتف."
             : "عند تشغيل التطبيق على localhost، أدخل عنوان الشبكة المحلية أو العنوان العام الذي يصل إليه اللاعبون."}
         </p>
-        {joinUrl ? (
+        {join.joinUrl ? (
           <>
             <div
               className="host-join-dialog__qr"
               aria-label="رمز QR لرابط انضمام اللاعب"
             >
-              {qrDataUrl ? (
-                <img alt="رمز QR لرابط انضمام اللاعب" src={qrDataUrl} />
+              {join.qrDataUrl ? (
+                <img alt="رمز QR لرابط انضمام اللاعب" src={join.qrDataUrl} />
+              ) : join.qrError ? (
+                <p role="alert">تعذر إنشاء الرمز.</p>
               ) : (
                 <p role="status">جارٍ إنشاء الرمز…</p>
               )}
             </div>
             <label className="host-join-dialog__link">
               <span>رابط انضمام اللاعب</span>
-              <input dir="ltr" readOnly value={joinUrl} />
+              <input dir="ltr" readOnly value={join.joinUrl} />
             </label>
             <button
               className="button"
-              onClick={() => void copyLink()}
+              onClick={() => void join.copyLink()}
               type="button"
             >
               انسخ رابط الانضمام
@@ -2521,7 +2688,7 @@ export function HostJoinDialog({
           </>
         ) : null}
         <p aria-live="polite" className="form-message">
-          {copyStatus}
+          {join.qrError || join.copyStatus}
         </p>
       </section>
     </dialog>
@@ -2575,6 +2742,9 @@ function RoomRouteInstance({
   const [visibilityBusy, setVisibilityBusy] = useState(false);
   const [showHostAnswer, setShowHostAnswer] = useState(true);
   const [joinDialogOpen, setJoinDialogOpen] = useState(false);
+  const hostJoin = useHostJoinLink(
+    envelope?.role === "host" ? projection?.room.roomCode ?? "" : "",
+  );
   const [draggedTeamTarget, setDraggedTeamTarget] =
     useState<AssignmentTarget>();
   const liveTeamFocusTarget = useRef<string | undefined>(undefined);
@@ -2948,7 +3118,7 @@ function RoomRouteInstance({
       >
         <AppHeader />
         <section className="lobby-page spatial-lobby">
-          <div className="lobby-title">
+          <div className={`lobby-title${host ? " lobby-title--host" : ""}`}>
             <div className="lobby-title__identity">
               <p className="eyebrow">غرفة مباشرة</p>
               <h1>ردهة المباراة</h1>
@@ -2968,18 +3138,14 @@ function RoomRouteInstance({
                 >
                   انسخ الرمز
                 </button>
-                {host && (
-                  <button
-                    className="copy-button"
-                    data-testid="lobby-join-qr"
-                    onClick={() => setJoinDialogOpen(true)}
-                    type="button"
-                  >
-                    رمز QR
-                  </button>
-                )}
               </div>
             </div>
+            {host && (
+              <HostJoinInlineQr
+                join={hostJoin}
+                onOpen={() => setJoinDialogOpen(true)}
+              />
+            )}
             {host && (
               <div className="lobby-start">
                 <button
@@ -3063,12 +3229,12 @@ function RoomRouteInstance({
             {error}
           </p>
         </section>
-        {host && (
-          <HostJoinDialog
-            onDismiss={() => setJoinDialogOpen(false)}
-            open={joinDialogOpen}
-            roomCode={projection.room.roomCode}
-          />
+          {host && (
+            <HostJoinDialog
+              join={hostJoin}
+              onDismiss={() => setJoinDialogOpen(false)}
+              open={joinDialogOpen}
+            />
         )}
       </main>
     );
@@ -3306,6 +3472,25 @@ function RoomRouteInstance({
             </>
           ) : (
             <>
+              <h1>
+                {projection.question?.promptAr ? (
+                  state === "QUESTION_READING" || state === "OPPONENT_CHANCE" ? (
+                    <QuestionReveal
+                      prompt={projection.question.promptAr}
+                      questionKey={[
+                        roomCode ?? projection.room.roomCode,
+                        projection.currentRound ?? "",
+                        projection.activeCellId ?? "",
+                        projection.question.promptAr,
+                      ].join("|")}
+                    />
+                  ) : (
+                    projection.question.promptAr
+                  )
+                ) : (
+                  projection.messageAr || "بانتظار السؤال"
+                )}
+              </h1>
               {questionMediaVisible && projection.question?.media ? (
                 <CurrentQuestionMedia
                   key={`${envelope.roomId}:${projection.activeCellId ?? ""}:${projection.question.media.mediaId}:${projection.question.media.assetSha256}`}
@@ -3313,25 +3498,11 @@ function RoomRouteInstance({
                   media={projection.question.media}
                 />
               ) : null}
-              <h1>
-                {projection.question?.promptAr ? (
-                  <QuestionReveal
-                    paused={
-                      state !== "QUESTION_READING" &&
-                      state !== "OPPONENT_CHANCE"
-                    }
-                    prompt={projection.question.promptAr}
-                    questionKey={[
-                      roomCode ?? projection.room.roomCode,
-                      projection.currentRound ?? "",
-                      projection.activeCellId ?? "",
-                      projection.question.promptAr,
-                    ].join("|")}
-                  />
-                ) : (
-                  projection.messageAr || "بانتظار السؤال"
-                )}
-              </h1>
+              {projection.question?.revealedAnswer ? (
+                <p className="question-band__revealed-answer" data-testid="shared-revealed-answer">
+                  <b>الإجابة:</b> {projection.question.revealedAnswer}
+                </p>
+              ) : null}
             </>
           )}
         </section>
@@ -3503,6 +3674,11 @@ function RoomRouteInstance({
                 <p>بانتظار اختيار الخلية</p>
               ) : (
                 <>
+                  <h3>
+                    {projection.question?.promptAr ||
+                      projection.messageAr ||
+                      "بانتظار السؤال"}
+                  </h3>
                   {questionMediaVisible && projection.question?.media ? (
                     <CurrentQuestionMedia
                       key={`${envelope.roomId}:${projection.activeCellId ?? ""}:${projection.question.media.mediaId}:${projection.question.media.assetSha256}`}
@@ -3510,11 +3686,11 @@ function RoomRouteInstance({
                       media={projection.question.media}
                     />
                   ) : null}
-                  <h3>
-                    {projection.question?.promptAr ||
-                      projection.messageAr ||
-                      "بانتظار السؤال"}
-                  </h3>
+                  {projection.question?.revealedAnswer ? (
+                    <p className="host-question-band__revealed-answer" data-testid="shared-revealed-answer">
+                      <b>الإجابة:</b> {projection.question.revealedAnswer}
+                    </p>
+                  ) : null}
                 </>
               )}
             </section>
@@ -3647,6 +3823,16 @@ function RoomRouteInstance({
                 />
               </div>
               {visibilityControls}
+              {projection.question?.occurrence && ["QUESTION_READING", "FIRST_ANSWER", "OPPONENT_CHANCE", "QUESTION_FAILED", "PAUSED"].includes(state) ? (
+                <button
+                  className="button button--quiet"
+                  data-testid="shared-answer-reveal"
+                  onClick={() => action("REVEAL_ANSWER", { occurrence: projection.question!.occurrence })}
+                  type="button"
+                >
+                  إظهار الإجابة
+                </button>
+              ) : null}
               {shouldShowHostAnswers(showHostAnswer, projection.question) &&
                 projection.question && (
                   <section className="private-question">
@@ -3730,9 +3916,9 @@ function RoomRouteInstance({
         </aside>
         {host && (
           <HostJoinDialog
+            join={hostJoin}
             onDismiss={() => setJoinDialogOpen(false)}
             open={joinDialogOpen}
-            roomCode={projection.room.roomCode}
           />
         )}
         {host && projection.room.matchSettings?.gameKind === "categories" ? (

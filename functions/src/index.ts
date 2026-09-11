@@ -1,4 +1,4 @@
-import { randomBytes, randomUUID } from "node:crypto";
+import { createHash, randomBytes, randomUUID } from "node:crypto";
 import { getApps, initializeApp } from "firebase-admin/app";
 import { FieldPath, FieldValue, getFirestore } from "firebase-admin/firestore";
 import { getStorage } from "firebase-admin/storage";
@@ -108,7 +108,7 @@ function teamNames(value: unknown) {
 }
 export function validateQuestionScope(value: unknown): {
   categories: string[];
-  modality: "classic" | "image" | "charades";
+  modality: "classic" | "image" | "video" | "charades";
   gameKind: "huroof" | "categories";
 } {
   const source =
@@ -132,13 +132,13 @@ export function validateQuestionScope(value: unknown): {
   const gameKind = source.gameKind === undefined ? "huroof" : source.gameKind;
   if (
     !categories.length ||
-    (modality !== "classic" && modality !== "image" && modality !== "charades") ||
+    (modality !== "classic" && modality !== "image" && modality !== "video" && modality !== "charades") ||
     (gameKind !== "huroof" && gameKind !== "categories") ||
     (gameKind === "categories" && (categories.length < 2 || categories.length > 10 || modality !== "classic"))
   )
     throw new HttpsError(
       "invalid-argument",
-      "A non-empty classic, image, or separate charades category scope is required.",
+      "A non-empty classic, image, video, or separate charades category scope is required.",
     );
   return { categories, modality, gameKind };
 }
@@ -279,6 +279,7 @@ async function releaseQuestions(
         typeof item.categoryId !== "string" ||
         (item.modality !== "classic" &&
           item.modality !== "image" &&
+          item.modality !== "video" &&
           item.modality !== "charades") ||
         typeof item.answerConceptId !== "string" ||
         !item.answerConceptId ||
@@ -313,14 +314,21 @@ const runtimeQuestions = (questions: CanonicalQuestion[]) =>
 /** Category labels are trusted only from Firestore and frozen into the room at create. */
 async function pinnedCategorySnapshot(
   tx: FirebaseFirestore.Transaction,
+  release: { releaseId: string; demoFixture: boolean },
   categories: string[],
 ) {
-  const docs = await Promise.all(
-    categories.map((id) => tx.get(database.doc(`categories/${id}`))),
+  let docs = await Promise.all(
+    categories.map((id) => tx.get(database.doc(`releases/${release.releaseId}/catalogCategories/${id}`))),
   );
+  // Older emulator fixtures predate release-owned catalogs. Approved releases
+  // cannot fall back to mutable catalog rows.
+  if (release.demoFixture && docs.some((doc) => !doc.exists))
+    docs = await Promise.all(
+      categories.map((id) => tx.get(database.doc(`catalogCategories/${id}`))),
+    );
   const snapshot = docs.map((doc, index) => {
     const data = doc.data();
-    const labelAr = data?.displayNameAr;
+    const labelAr = data?.labelAr ?? data?.displayNameAr;
     if (!doc.exists || typeof labelAr !== "string" || !labelAr.trim())
       throw new HttpsError("failed-precondition", `Category ${categories[index]} has no trusted Arabic label.`);
     return { id: categories[index], labelAr: labelAr.trim() };
@@ -609,7 +617,7 @@ export const createRoom = onCall(callable, async (request) => {
   return database.runTransaction(async (tx) => {
     const release = await activeRelease(tx, demo);
     const categorySnapshot = scope.gameKind === "categories"
-      ? await pinnedCategorySnapshot(tx, scope.categories)
+      ? await pinnedCategorySnapshot(tx, release, scope.categories)
       : undefined;
     let roomCode: string | undefined;
     for (const candidate of candidates)
@@ -1066,7 +1074,7 @@ export const syncRoomDeadline = onCall(callable, async (request) => {
   });
 });
 
-/** A 60s V4 bearer URL is issued only after current room/member/media binding checks. */
+/** Authenticated callable byte delivery; no Storage URL is exposed to a browser. */
 export const getCurrentQuestionMedia = onCall(callable, async (request) => {
   const actor = uid(request);
   const data = request.data;
@@ -1087,16 +1095,25 @@ export const getCurrentQuestionMedia = onCall(callable, async (request) => {
   if (typeof releaseId !== 'string') throw new HttpsError('failed-precondition', 'Invalid pinned release.');
   const releaseMedia = await database.doc(`releases/${releaseId}/media/${binding.mediaId}`).get();
   const item = releaseMedia.data();
-  const expectedObjectName = `question-media/v18/${binding.assetSha256}.png`;
-  if (!releaseMedia.exists || item?.mediaId !== binding.mediaId || item?.assetSha256 !== binding.assetSha256 || item?.objectName !== expectedObjectName || item?.immutable !== true || typeof item?.generation !== 'string' || !/^[1-9][0-9]*$/.test(item.generation)) throw new HttpsError('failed-precondition', 'Immutable media binding is unavailable.');
+  const video = binding.type === 'video' || room?.activeQuestion?.modality === 'video';
+  const rebuiltJpeg = !video && binding.contentType === 'image/jpeg' && /^rebuild-v2-photo-\d{3}-\d{3}$/.test(binding.mediaId);
+  const contentType = video ? 'video/mp4' : rebuiltJpeg ? 'image/jpeg' : 'image/png';
+  const expectedObjectName = video
+    ? `question-media/goal-quiz-2026/assets/${binding.assetSha256}.mp4`
+    : rebuiltJpeg
+      ? `question-media/guess-picture-rebuild-v2/assets/${binding.assetSha256}.jpg`
+      : `question-media/v18/${binding.assetSha256}.png`;
+  if (!releaseMedia.exists || item?.mediaId !== binding.mediaId || item?.assetSha256 !== binding.assetSha256 || item?.objectName !== expectedObjectName || item?.contentType !== contentType || item?.immutable !== true || typeof item?.generation !== 'string' || !/^[1-9][0-9]*$/.test(item.generation)) throw new HttpsError('failed-precondition', 'Immutable media binding is unavailable.');
   if (process.env.FUNCTIONS_EMULATOR === 'true') {
     const url = await emulatorCurrentQuestionMediaUrl(binding);
     return { mediaId: binding.mediaId, assetSha256: binding.assetSha256, url, expiresAt: new Date(Date.now() + 60_000).toISOString() };
   }
   const file = getStorage().bucket().file(item.objectName, { generation: item.generation });
-  const [metadata] = await file.getMetadata();
-  if (metadata.generation !== item.generation || metadata.metadata?.assetSha256 !== binding.assetSha256) throw new HttpsError('failed-precondition', 'Immutable media generation mismatch.');
-  const expiresAtMs = Date.now() + 60_000;
-  const [url] = await file.getSignedUrl({ action: 'read', version: 'v4', expires: expiresAtMs });
-  return { mediaId: binding.mediaId, assetSha256: binding.assetSha256, url, expiresAt: new Date(expiresAtMs).toISOString() };
+  const [metadataResponse, downloaded] = await Promise.all([file.getMetadata(), file.download()]);
+  const metadata = metadataResponse[0], bytes = downloaded[0];
+  if (metadata.generation !== item.generation || metadata.metadata?.assetSha256 !== binding.assetSha256 || metadata.contentType !== contentType || bytes.length > 1_000_000 || createHash('sha256').update(bytes).digest('hex') !== binding.assetSha256) throw new HttpsError('failed-precondition', 'Immutable media generation mismatch.');
+  if (video && bytes.subarray(4, 8).toString('ascii') !== 'ftyp') throw new HttpsError('failed-precondition', 'Immutable media format mismatch.');
+  if (rebuiltJpeg && !bytes.subarray(0, 3).equals(Buffer.from([0xff, 0xd8, 0xff]))) throw new HttpsError('failed-precondition', 'Immutable media format mismatch.');
+  if (!video && !rebuiltJpeg && !bytes.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))) throw new HttpsError('failed-precondition', 'Immutable media format mismatch.');
+  return { mediaId: binding.mediaId, assetSha256: binding.assetSha256, url: `data:${contentType};base64,${bytes.toString('base64')}`, expiresAt: new Date(Date.now() + 60_000).toISOString() };
 });

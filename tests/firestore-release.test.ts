@@ -20,7 +20,7 @@ async function planFor(questions: Question[], categoriesFixture = categories) {
   await Promise.all([writeFile(paths.approvedPath, questions.map((question) => JSON.stringify(question)).join('\n')), writeFile(paths.manifestPath, JSON.stringify({ schemaVersion: 1, approvedQuestionCount: questions.length, approvedBankSha256: crypto.createHash('sha256').update(canonical).digest('hex') })), writeFile(paths.categoriesPath, JSON.stringify(categoriesFixture))]);
   return { folder, plan: await buildFirestoreReleasePlan(paths) };
 }
-const v33TopLevelArtifacts = ['as-of.v3.3.json', 'categories', 'evidence-bodies.v3.3.json', 'evidence.v3.3.jsonl', 'media.v3.3.jsonl', 'policies.v3.3.json', 'receipts.v3.3.jsonl', 'scope.manifest.v3.3.json', 'slots.v3.3.jsonl', 'source-policy-registry.v3.3.json', 'validation-report.v3.3.json'];
+const v33TopLevelArtifacts = ['as-of.v3.3.json', 'catalog.v3.3.json', 'categories', 'evidence-bodies.v3.3.json', 'evidence.v3.3.jsonl', 'media.v3.3.jsonl', 'policies.v3.3.json', 'receipts.v3.3.jsonl', 'scope.manifest.v3.3.json', 'slots.v3.3.jsonl', 'source-policy-registry.v3.3.json', 'validation-report.v3.3.json'];
 async function v33LoaderFixture() {
   const folder = join(tmpdir(), `huroof-v33-loader-${Date.now()}-${Math.random()}`); const corpus = join(folder, 'corpus'); const trustRoot = join(folder, 'trust-root.json'); await mkdir(join(corpus, 'categories'), { recursive: true });
   await Promise.all([writeFile(trustRoot, '{}'), ...v33TopLevelArtifacts.filter((name) => name !== 'categories').map((name) => writeFile(join(corpus, name), '{}'))]);
@@ -119,6 +119,8 @@ test('release plan binds count/hash, uses full derived ID, and excludes the acti
     assert.equal(fixture.plan.approvedCount, 1); assert.equal(fixture.plan.releaseId, `release-${fixture.plan.approvedJsonlSha256}`);
     assert.ok(/^[a-f0-9]{64}$/.test(fixture.plan.catalogSha256)); assert.ok(/^[a-f0-9]{64}$/.test(fixture.plan.documentRootSha256));
     assert.ok(fixture.plan.documents.some((entry) => entry.path.endsWith('/questions/q-firestore-test'))); assert.ok(!fixture.plan.documents.some((entry) => entry.path === 'runtime/activeRelease'));
+    assert.ok(fixture.plan.documents.some((entry) => entry.path === `releases/${fixture.plan.releaseId}/catalogCategories/tahadani-006`));
+    assert.ok(!fixture.plan.documents.some((entry) => entry.path === 'catalogCategories/tahadani-006'));
     assert.deepEqual(classifyReleaseDocuments(fixture.plan.documents).mutable, []);
   } finally { await rm(fixture.folder, { recursive: true, force: true }); }
 });
@@ -138,7 +140,7 @@ test('v18 media dry run preserves private immutable object associations and requ
   assert.ok(media.uploads.every((item) => item.createOnly && item.objectName === `question-media/v18/${item.assetSha256}.png` && item.localFile === `originals/${item.assetSha256}.png`));
   const first = media.uploads[0];
   const docs = buildV18ReleaseMediaDocuments('release-0123456789abcdef', [{ ...first, generation: '123456789' }]);
-  assert.deepEqual(docs[0], { path: `releases/release-0123456789abcdef/media/${first.mediaId}`, data: { mediaId: first.mediaId, assetSha256: first.assetSha256, objectName: first.objectName, generation: '123456789', immutable: true } });
+  assert.deepEqual(docs[0], { path: `releases/release-0123456789abcdef/media/${first.mediaId}`, data: { mediaId: first.mediaId, assetSha256: first.assetSha256, objectName: first.objectName, generation: '123456789', contentType: 'image/png', immutable: true } });
   assert.throws(() => buildV18ReleaseMediaDocuments('release-0123456789abcdef', [{ ...first, generation: 'pending' }]), /readback/i);
 });
 

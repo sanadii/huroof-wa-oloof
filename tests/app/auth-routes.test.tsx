@@ -34,7 +34,7 @@ afterEach(() => {
 
 it('renders unavailable login honestly without Firebase web configuration', () => {
   render(<MemoryRouter><FirebaseAuthProvider><LoginRoute /></FirebaseAuthProvider></MemoryRouter>);
-  expect(screen.getByText(/إعداد Firebase العام غير مكتمل/)).toBeVisible();
+  expect(screen.getByText('تسجيل الدخول غير متاح في هذه النسخة حالياً.')).toBeVisible();
   expect(screen.getByRole('button', { name: 'المتابعة مع Google' })).toBeDisabled();
 });
 

@@ -54,7 +54,7 @@ export interface SafeProjection {
   /** Public only for host/audience; players learn only whether they themselves won. */
   buzzWinner?: { displayName: string; team: 'horizontal' | 'vertical'; method: 'player' | 'host' };
   /** Immutable identity only. A delivery grant is authorized separately. */
-  question?: { headerAr?: string; promptAr?: string; media?: { mediaId: string; assetSha256: string; altAr: string }; revealedAnswer?: string; primaryAnswer?: string; acceptedAnswers?: string[]; sources?: unknown[]; moderation?: unknown };
+  question?: { occurrence?: string; headerAr?: string; promptAr?: string; media?: { mediaId: string; assetSha256: string; altAr: string; type?: "image" | "video"; contentType?: string }; revealedAnswer?: string; primaryAnswer?: string; acceptedAnswers?: string[]; sources?: unknown[]; moderation?: unknown };
 }
 
 export interface ProjectionEnvelope<TProjection extends SafeProjection = SafeProjection> {
@@ -72,7 +72,7 @@ export interface ProjectionEnvelope<TProjection extends SafeProjection = SafePro
 }
 
 /** TIME_EXPIRED is deliberately absent: only the server clock may emit it. */
-export type IntentType = 'LOBBY_SET_READY' | 'LOBBY_ASSIGN_TEAM' | 'LOBBY_ADD_MANUAL_PLAYER' | 'START_MATCH' | 'ROUND_READY' | 'SELECT_CELL' | 'LETTER_REVEALED' | 'OPEN_QUESTION' | 'BUZZ' | 'HOST_SELECT_TEAM' | 'JUDGE_CORRECT' | 'JUDGE_INCORRECT' | 'RETRY_CELL' | 'RETURN_CELL' | 'END_WITHOUT_WINNER' | 'AWARD_CELL' | 'CHECK_PATH' | 'START_NEXT_ROUND' | 'PAUSE' | 'RESUME' | 'BEGIN_CORRECTION' | 'CONFIRM_CORRECTION' | 'CANCEL_CORRECTION' | 'SET_AUDIENCE_QUESTION_VISIBILITY';
+export type IntentType = 'LOBBY_SET_READY' | 'LOBBY_ASSIGN_TEAM' | 'LOBBY_ADD_MANUAL_PLAYER' | 'START_MATCH' | 'ROUND_READY' | 'SELECT_CELL' | 'LETTER_REVEALED' | 'OPEN_QUESTION' | 'BUZZ' | 'HOST_SELECT_TEAM' | 'JUDGE_CORRECT' | 'JUDGE_INCORRECT' | 'RETRY_CELL' | 'RETURN_CELL' | 'END_WITHOUT_WINNER' | 'AWARD_CELL' | 'CHECK_PATH' | 'START_NEXT_ROUND' | 'PAUSE' | 'RESUME' | 'BEGIN_CORRECTION' | 'CONFIRM_CORRECTION' | 'CANCEL_CORRECTION' | 'SET_AUDIENCE_QUESTION_VISIBILITY' | 'REVEAL_ANSWER';
 export type GameIntent = {
   type: IntentType;
   intentId: string;
@@ -101,7 +101,7 @@ export interface GameRuntimeAdapter {
   subscribeProjection(roomId: string, role: ClientRole, uid: string, onProjection: (value: ProjectionEnvelope) => void, onError?: (error: Error) => void): () => void;
   subscribeHostPresence?(roomId: string, onPresence: (value: HostPresenceSnapshot) => void, onError?: (error: Error) => void): () => void;
   startPlayerPresence?(roomId: string, onError?: (error: Error) => void): () => void;
-  /** Grants one short-lived read URL for the current immutable image binding. */
+  /** Returns bytes for the current immutable media binding as a revocable local URL. */
   getCurrentQuestionMedia?(request: { roomId: string; mediaId: string; assetSha256: string }): Promise<{ mediaId: string; assetSha256: string; url: string; expiresAt: string }>;
   /** Restores a route-owned local capability after a page load without exposing it in a projection. */
   setCapabilityToken?(token: string): void;

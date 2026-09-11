@@ -74,6 +74,17 @@ function renderHost(surface: "host" | "results" = "host") {
     </ThemeProvider>,
   );
 }
+function renderDisplay() {
+  return render(
+    <ThemeProvider>
+      <MemoryRouter initialEntries={["/room/HOLD42/display"]}>
+        <Routes>
+          <Route path="/room/:roomCode/display" element={<RoomRoute surface="display" />} />
+        </Routes>
+      </MemoryRouter>
+    </ThemeProvider>,
+  );
+}
 
 beforeEach(() => {
   projection = hostProjection();
@@ -158,6 +169,23 @@ describe("RoomRoute held and incomplete game surfaces", () => {
     callbacks.get("room-old")!({ ...old, revision: 99, projection: { ...old.projection, room: { ...old.projection.room, state: "ROUND_SETUP" } } });
     expect(screen.getByTestId("room-location")).toHaveTextContent("/room/NEW/lobby");
     expect(runtime.submitGameIntent).not.toHaveBeenCalled();
+  });
+
+  it("renders a restored failed display prompt immediately instead of leaving an empty reveal", async () => {
+    const base = hostProjection({ state: "QUESTION_FAILED" });
+    projection = {
+      ...base,
+      role: "audience",
+      projection: {
+        ...base.projection,
+        room: { ...base.projection.room, audienceQuestionVisible: true },
+        question: { headerAr: "فئة", promptAr: "السؤال المستعاد", revealedAnswer: "الإجابة" },
+      },
+    };
+    sessionStorage.setItem("huroof:room-hold:audience", JSON.stringify({ token: "", role: "audience" }));
+    renderDisplay();
+    expect(await screen.findByRole("heading", { name: "السؤال المستعاد" })).toBeVisible();
+    expect(screen.getByTestId("shared-revealed-answer")).toHaveTextContent("الإجابة");
   });
 });
 

@@ -1,7 +1,19 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { createRef } from 'react';
 import { expect, it, vi } from 'vitest';
-import { applyLocalIntentResponse, audienceQuestionBandVisible, canManageTeamsInState, CorrectionDialog, createGameIntentId, HostActions, HostJoinDialog, HostLobbyControls, HostPauseAction, HostVisibilityControls, isReadOnlyFixtureRoom, playerJoinUrl, shouldShowHostAnswers } from '../../src/routes/GameRoutes';
+import { applyLocalIntentResponse, audienceQuestionBandVisible, canManageTeamsInState, CorrectionDialog, createGameIntentId, HostActions, HostJoinDialog, HostJoinInlineQr, HostLobbyControls, HostPauseAction, HostVisibilityControls, isReadOnlyFixtureRoom, playerJoinUrl, shouldShowHostAnswers } from '../../src/routes/GameRoutes';
+
+const hostJoin = (overrides = {}) => ({
+  copyLink: vi.fn().mockResolvedValue(undefined),
+  copyStatus: '',
+  joinUrl: 'https://play.example.test/?room=ABC123',
+  origin: 'https://play.example.test',
+  originIsInvalid: false,
+  qrDataUrl: 'data:image/png;base64,player-join-qr',
+  qrError: '',
+  setOrigin: vi.fn(),
+  ...overrides,
+});
 
 
 it('treats an HTTP-successful stale local intent as a failed action after refreshing its projection', () => {
@@ -88,12 +100,51 @@ it('keeps identified roster capsules unavailable while offline or busy', () => {
 
 it('opens and dismisses the host QR join dialog used from the waiting room', () => {
   const onDismiss = vi.fn();
-  render(<HostJoinDialog onDismiss={onDismiss} open roomCode="ABC123" />);
+  const join = hostJoin();
+  render(<HostJoinDialog join={join} onDismiss={onDismiss} open />);
 
   expect(screen.getByRole('dialog')).toHaveAttribute('open');
   expect(screen.getByRole('heading', { name: 'امسح رمز QR للانضمام' })).toBeVisible();
+  expect(screen.getByRole('img', { name: 'رمز QR لرابط انضمام اللاعب' })).toHaveAttribute('src', join.qrDataUrl);
+  fireEvent.change(screen.getByLabelText('عنوان الموقع للاعبين'), { target: { value: 'https://join.example.test' } });
+  expect(join.setOrigin).toHaveBeenCalledWith('https://join.example.test');
   fireEvent.click(screen.getByRole('button', { name: 'إغلاق رمز الانضمام' }));
   expect(onDismiss).toHaveBeenCalledTimes(1);
+});
+
+it('keeps the lobby QR scannable for a public origin and opens its shared configuration', () => {
+  const onOpen = vi.fn();
+  const join = hostJoin();
+  render(<HostJoinInlineQr join={join} onOpen={onOpen} />);
+
+  expect(screen.getByRole('img', { name: 'رمز QR لرابط انضمام اللاعب' })).toHaveAttribute('src', join.qrDataUrl);
+  expect(screen.getByText('امسح الرمز للانضمام إلى هذه المباراة.')).toBeVisible();
+  fireEvent.click(screen.getByRole('button', { name: 'تكبير رمز QR للانضمام' }));
+  expect(onOpen).toHaveBeenCalledTimes(1);
+});
+
+it('asks for a reachable origin instead of showing a localhost QR in the lobby', () => {
+  render(
+    <HostJoinInlineQr
+      join={hostJoin({ joinUrl: undefined, origin: 'http://127.0.0.1:8787', originIsInvalid: true, qrDataUrl: '' })}
+      onOpen={vi.fn()}
+    />,
+  );
+
+  expect(screen.queryByRole('img', { name: 'رمز QR لرابط انضمام اللاعب' })).not.toBeInTheDocument();
+  expect(screen.getByText('عنوان الموقع غير صالح للهاتف. اضغط لتعديله.')).toBeVisible();
+});
+
+it('shows an explicit inline QR failure instead of leaving a loading state behind', () => {
+  render(
+    <HostJoinInlineQr
+      join={hostJoin({ qrDataUrl: '', qrError: 'تعذر إنشاء رمز QR محلياً. يمكنك نسخ الرابط.' })}
+      onOpen={vi.fn()}
+    />,
+  );
+
+  expect(screen.getByRole('alert')).toHaveTextContent('تعذر إنشاء الرمز');
+  expect(screen.getByRole('button', { name: 'فتح إعدادات رمز QR بعد تعذر إنشائه' })).toBeVisible();
 });
 
 it('renders the two host visibility controls with an available local answer switch and a disabled shared setting state', () => {

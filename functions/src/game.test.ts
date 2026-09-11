@@ -54,6 +54,33 @@ test('policy version defaults only legacy Huroof rooms and malformed envelopes f
   assert.equal(validIntent({ ...valid, expectedRevision: Number.MAX_SAFE_INTEGER + 1 }), false);
   assert.equal(validIntent({ ...valid, extra: true }), false);
 });
+test('shared reveal requires the active occurrence and freezes a video question without scoring', () => {
+  const host: CanonicalMember = { ...player, uid: 'host', role: 'host', team: undefined };
+  const videoRoom = { ...room(), activeQuestionOccurrence: '2:cell-0-0:video-q', activeQuestion: { id: 'video-q', modality: 'video' as const, headerAr: 'عنوان', promptAr: 'سؤال', canonicalAnswer: 'جواب', acceptedAnswers: ['جواب'], media: { mediaId: 'goal-quiz-2026:001:blur', assetSha256: 'a'.repeat(64), altAr: 'مقطع', type: 'video' as const }, answerMedia: { mediaId: 'goal-quiz-2026:001:clean', assetSha256: 'b'.repeat(64), altAr: 'الإجابة', type: 'video' as const } } };
+  const reveal = { type: 'REVEAL_ANSWER' as const, intentId: 'reveal-video', expectedRevision: 2, payload: { occurrence: videoRoom.activeQuestionOccurrence } };
+  assert.equal(validIntent(reveal), true);
+  assert.equal(validIntent({ ...reveal, payload: { occurrence: 'bad/path' } }), false);
+  assert.throws(() => reduceIntent(videoRoom, host, { ...reveal, payload: { occurrence: 'old' } }, 1_000, undefined, [host]), /stale-question-occurrence/);
+  const revealed = reduceIntent(videoRoom, host, reveal, 1_000, undefined, [host]);
+  assert.equal(revealed.room.answerRevealedOccurrence, videoRoom.activeQuestionOccurrence);
+  assert.equal(revealed.room.timer, undefined);
+  assert.equal(revealed.room.game.questionScores.horizontal, videoRoom.game.questionScores.horizontal);
+  const audience = projectRoom('media-room', revealed.room, [host], 'audience', undefined, 1_000).projection as { question?: { occurrence?: string; media?: { mediaId: string }; revealedAnswer?: string } };
+  assert.equal(audience.question?.occurrence, videoRoom.activeQuestionOccurrence);
+  assert.equal(audience.question?.media?.mediaId, 'goal-quiz-2026:001:clean');
+  assert.equal(audience.question?.revealedAnswer, 'جواب');
+  const classic = projectRoom('classic-room', { ...room(), activeQuestionOccurrence: '2:cell-0-0:classic-q', activeQuestion: { id: 'classic-q', modality: 'classic', headerAr: 'عنوان', promptAr: 'سؤال', canonicalAnswer: 'جواب', acceptedAnswers: ['جواب'] } }, [host], 'host', host.uid, 1_000).projection as { question?: { occurrence?: string } };
+  assert.equal(classic.question?.occurrence, '2:cell-0-0:classic-q');
+});
+test('legacy Firebase questions without an occurrence never treat absent fields as a reveal', () => {
+  const host: CanonicalMember = { ...player, uid: 'host', role: 'host', team: undefined };
+  for (const modality of ['image', 'video'] as const) {
+    const legacy = { ...room(), activeQuestion: { id: `${modality}-legacy`, modality, headerAr: 'عنوان', promptAr: 'سؤال', canonicalAnswer: `سر-${modality}`, acceptedAnswers: [`سر-${modality}`], media: { mediaId: modality === 'video' ? 'goal-quiz-2026:001:blur' : 'v18-011-001', assetSha256: 'a'.repeat(64), altAr: 'وسيط', type: modality }, ...(modality === 'video' ? { answerMedia: { mediaId: 'goal-quiz-2026:001:clean', assetSha256: 'b'.repeat(64), altAr: 'إجابة', type: 'video' as const } } : {}) } };
+    const audience = projectRoom('legacy', legacy, [host], 'audience', undefined, 1_000).projection as { question?: { revealedAnswer?: string; media?: { mediaId?: string } } };
+    assert.equal(audience.question?.revealedAnswer, undefined);
+    assert.equal(audience.question?.media?.mediaId, legacy.activeQuestion.media?.mediaId);
+  }
+});
 test('content hold is projected and host end leaves the original match intact without a fabricated winner', () => {
   const host: CanonicalMember = { ...player, uid: 'host', role: 'host', team: undefined };
   const held = { ...room(), game: { ...room().game, contentHold: { reason: 'CONTENT_EXHAUSTED' as const, operation: 'SELECT_CELL' as const, cellId: 'cell-0-0', heldAtRevision: 3 } } };
@@ -152,7 +179,7 @@ test('non-charades retry and return clear disclosed state before returning to ce
 test('selecting a regular or surprise cell atomically reveals its question and opens one timer', () => {
   const letters = [...'ابتثجحخدذرزسشصضطظعغفقكلمنهوي']; const board = generateBoard(4, letters); const regular = board.cells.find((cell) => cell.kind === 'letter')!; const surprise = board.cells.find((cell) => cell.kind === 'surprise')!; const host: CanonicalMember = { ...player, uid: 'host', role: 'host', team: undefined }; const stale = { id: 'stale', targetLetter: 'ا', headerAr: 'قديم', promptAr: 'سؤال قديم', canonicalAnswer: 'جواب قديم', acceptedAnswers: ['جواب قديم'] }; const question = { id: 'fresh', targetLetter: regular.visibleValue, headerAr: 'عنوان جديد', promptAr: 'سؤال جديد', canonicalAnswer: 'جواب جديد', acceptedAnswers: ['جواب جديد'] }; const selecting = { ...room(), game: { ...room().game, lifecycle: 'CELL_SELECTION' as const, board }, activeQuestion: stale };
   const selected = reduceIntent(selecting, host, { type: 'SELECT_CELL', intentId: 'regular', expectedRevision: 2, payload: { cellId: regular.id } }, 1_000, question, [host]);
-  assert.equal(selected.room.game.lifecycle, 'QUESTION_READING'); assert.equal(selected.room.activeQuestion?.id, question.id); assert.equal(selected.room.questionCursor, 1); assert.deepEqual(selected.room.timer, { deadlineMs: 21_000, buzzOpen: true }); const hostProjection = projectRoom('r', selected.room, [host], 'host', host.uid, 1_000).projection as { question?: { headerAr?: string; promptAr?: string; primaryAnswer?: string } }; assert.deepEqual(hostProjection.question, { headerAr: question.headerAr, promptAr: question.promptAr, primaryAnswer: question.canonicalAnswer, acceptedAnswers: question.acceptedAnswers, sources: [] });
+  assert.equal(selected.room.game.lifecycle, 'QUESTION_READING'); assert.equal(selected.room.activeQuestion?.id, question.id); assert.equal(selected.room.questionCursor, 1); assert.deepEqual(selected.room.timer, { deadlineMs: 21_000, buzzOpen: true }); const hostProjection = projectRoom('r', selected.room, [host], 'host', host.uid, 1_000).projection as { question?: { occurrence?: string; headerAr?: string; promptAr?: string; primaryAnswer?: string } }; assert.deepEqual(hostProjection.question, { occurrence: selected.room.activeQuestionOccurrence, headerAr: question.headerAr, promptAr: question.promptAr, primaryAnswer: question.canonicalAnswer, acceptedAnswers: question.acceptedAnswers, sources: [] });
   for (const role of ['player', 'audience'] as const) { const publicProjection = projectRoom('r', selected.room, [player], role, role === 'player' ? player.uid : undefined, 1_000).projection as { question?: { headerAr?: string } }; assert.equal(publicProjection.question?.headerAr, question.headerAr); assert.equal(JSON.stringify(publicProjection).includes('جواب جديد'), false); }
   const surpriseLetter = letters.find((letter) => !board.cells.some((cell) => cell.kind === 'letter' && cell.visibleValue === letter))!; const surpriseQuestion = { ...question, id: 'surprise', targetLetter: surpriseLetter }; const surpriseSelection = reduceIntent(selecting, host, { type: 'SELECT_CELL', intentId: 'surprise', expectedRevision: 2, payload: { cellId: surprise.id } }, 1_000, surpriseQuestion, [host], undefined, surpriseLetter); assert.equal(surpriseSelection.room.game.lifecycle, 'QUESTION_READING'); assert.equal(surpriseSelection.room.activeQuestion?.id, surpriseQuestion.id); assert.equal(surpriseSelection.room.game.board?.cells.find((cell) => cell.id === surprise.id)?.revealedLetter, surpriseLetter); assert.equal(surpriseSelection.room.questionCursor, 1); assert.deepEqual(surpriseSelection.room.timer, { deadlineMs: 21_000, buzzOpen: true });
 });

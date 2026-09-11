@@ -100,7 +100,7 @@ export function buildV18ReleaseMediaDocuments(releaseId: string, uploaded: Array
   const documents = uploaded.map((item) => {
     if (!/^v18-(?:tahadani-)?(011|012|014|061)-\d{3}$/.test(item.mediaId) || ids.has(item.mediaId) || !/^[a-f0-9]{64}$/.test(item.assetSha256) || item.objectName !== `question-media/v18/${item.assetSha256}.png` || !/^\d{1,32}$/.test(item.generation)) throw new Error("Invalid immutable v18 media upload readback.");
     ids.add(item.mediaId);
-    return { path: `releases/${releaseId}/media/${item.mediaId}`, data: { mediaId: item.mediaId, assetSha256: item.assetSha256, objectName: item.objectName, generation: item.generation, immutable: true } };
+    return { path: `releases/${releaseId}/media/${item.mediaId}`, data: { mediaId: item.mediaId, assetSha256: item.assetSha256, objectName: item.objectName, generation: item.generation, contentType: "image/png", immutable: true } };
   }).sort(byPath);
   assertUniqueReleaseDocuments(documents);
   return documents;
@@ -339,9 +339,10 @@ export function buildV33FirestoreReleasePlan(input: {
   );
   const releaseId = verified.releaseId;
   const media = new Map(input.corpus.media.map((item) => [item.mediaId, item]));
+  const labels = new Map(input.corpus.catalog.categories.map((category) => [category.id, category.labelAr]));
   const catalogDocuments = input.corpus.scope.categoryIds.map((id) => ({
-    path: `catalogCategories/${id}`,
-    data: { id, runtimeScope: "question-bank-v3.3-runtime-62" },
+    path: `releases/${releaseId}/catalogCategories/${id}`,
+    data: { id, labelAr: labels.get(id), runtimeScope: "question-bank-v3.3-runtime-62" },
   }));
   const questionDocuments = verified.aggregate.map((question) => ({
     path: `releases/${releaseId}/questions/${question.candidateId}`,
@@ -504,6 +505,7 @@ export function assertExternalV33TrustRootPath(
     );
 }
 type V33SchemaKind =
+  | "catalog"
   | "candidate"
   | "question"
   | "policy"
@@ -514,6 +516,7 @@ type V33SchemaKind =
   | "report"
   | "manifest";
 const V33_SCHEMA_FILES: Record<V33SchemaKind, string> = {
+  catalog: "category-catalog.v3.3.schema.json",
   candidate: "candidate.v3.3.schema.json",
   question: "question.v3.3.schema.json",
   policy: "category-policy.v3.3.schema.json",
@@ -527,6 +530,7 @@ const V33_SCHEMA_FILES: Record<V33SchemaKind, string> = {
 /** Production loading applies the frozen JSON Schemas before any weaker semantic projection can erase presence errors. */
 export async function assertV33ProductionSchemas(input: {
   scope: V33Corpus["scope"];
+  catalog: V33Corpus["catalog"];
   policies: V33Corpus["policies"];
   slots: V33Corpus["slots"];
   candidates: V33Corpus["candidates"];
@@ -560,6 +564,7 @@ export async function assertV33ProductionSchemas(input: {
   ) as Record<V33SchemaKind, ReturnType<typeof ajv.compile>>;
   const rows: Array<[V33SchemaKind, unknown, string]> = [
     ["manifest", input.scope, "scope"],
+    ["catalog", input.catalog, "catalog"],
     ["report", input.report, "report"],
     ...input.policies.map(
       (item) =>
@@ -639,6 +644,7 @@ export async function assertV33ProductionSchemas(input: {
 /** The only production v3.3 input layout.  It deliberately has no aggregate question file. */
 const V33_TOP_LEVEL_ARTIFACTS = [
   "as-of.v3.3.json",
+  "catalog.v3.3.json",
   "categories",
   "evidence-bodies.v3.3.json",
   "evidence.v3.3.jsonl",
@@ -692,6 +698,7 @@ export async function loadV33ProductionReleaseInput(
     );
   const artifact = (name: string) => join(root, name);
   const scopePath = artifact("scope.manifest.v3.3.json");
+  const catalogPath = artifact("catalog.v3.3.json");
   const policiesPath = artifact("policies.v3.3.json");
   const slotsPath = artifact("slots.v3.3.jsonl");
   const evidencePath = artifact("evidence.v3.3.jsonl");
@@ -703,6 +710,7 @@ export async function loadV33ProductionReleaseInput(
   const reportPath = artifact("validation-report.v3.3.json");
   const [
     scope,
+    catalog,
     policies,
     slotsRaw,
     evidenceRaw,
@@ -715,6 +723,7 @@ export async function loadV33ProductionReleaseInput(
     trustRootRaw,
   ] = await Promise.all([
     readJson<V33Corpus["scope"]>(scopePath),
+    readJson<V33Corpus["catalog"]>(catalogPath),
     readJson<V33Corpus["policies"]>(policiesPath),
     readFile(slotsPath, "utf8"),
     readFile(evidencePath, "utf8"),
@@ -833,6 +842,7 @@ export async function loadV33ProductionReleaseInput(
   const candidates = candidateRows.flat();
   await assertV33ProductionSchemas({
     scope,
+    catalog,
     policies,
     slots,
     candidates,
@@ -844,6 +854,7 @@ export async function loadV33ProductionReleaseInput(
   });
   const corpus: V33Corpus = {
     scope,
+    catalog,
     policies,
     slots,
     candidates,
@@ -1015,7 +1026,7 @@ export async function buildFirestoreReleasePlan(
         `Approved question ${question.id} has an unknown or path-unsafe categoryId.`,
       );
   const catalogDocuments = categories.map((category) => ({
-    path: `catalogCategories/${category.id}`,
+    path: `releases/${releaseId}/catalogCategories/${category.id}`,
     data: category as Record<string, unknown>,
   }));
   const questionDocuments = bank.questions.map((question) => ({

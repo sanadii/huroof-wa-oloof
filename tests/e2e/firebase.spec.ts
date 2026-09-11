@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { mkdir } from "node:fs/promises";
+import { mkdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { getApps, initializeApp } from "firebase-admin/app";
 import { getFirestore } from "firebase-admin/firestore";
@@ -67,7 +67,7 @@ test('Firebase emulator serves the four actual v18 image fixtures only through c
       await Promise.all([
         database.doc(`rooms/${roomId}/members/${hostUid}`).set({ uid: hostUid, role: 'host', displayName: 'مضيف', active: true, ready: true }),
         database.doc(`rooms/${roomId}/members/${audienceUid}`).set({ uid: audienceUid, role: 'audience', displayName: 'جمهور', active: true, ready: false }),
-        database.doc(`releases/release-media-emulator-fixture/media/${mediaId}`).set({ mediaId, assetSha256, objectName: `question-media/v18/${assetSha256}.png`, generation: '1', immutable: true }),
+        database.doc(`releases/release-media-emulator-fixture/media/${mediaId}`).set({ mediaId, assetSha256, objectName: `question-media/v18/${assetSha256}.png`, generation: '1', contentType: 'image/png', immutable: true }),
       ]);
       const request = { roomId, mediaId, assetSha256 };
       const [hostResult, audienceResult] = await Promise.all([mediaCall(request), audienceCall(request)]);
@@ -115,13 +115,13 @@ test('Firebase host and audience render a real private image without crop, overf
         config: { ...canonical.config, releaseId: 'release-media-ui-fixture', releaseRootSha256: 'a'.repeat(64), showQuestionOnAudience: true },
         game: { ...canonical.game, lifecycle: 'QUESTION_READING' }, timer: { deadlineMs: Date.now() + 30_000, buzzOpen: true }, questionCursor: 1, activeQuestion: question,
       }),
-      database.doc(`releases/release-media-ui-fixture/media/${fixture.mediaId}`).set({ mediaId: fixture.mediaId, assetSha256: fixture.assetSha256, objectName: `question-media/v18/${fixture.assetSha256}.png`, generation: '1', immutable: true }),
+      database.doc(`releases/release-media-ui-fixture/media/${fixture.mediaId}`).set({ mediaId: fixture.mediaId, assetSha256: fixture.assetSha256, objectName: `question-media/v18/${fixture.assetSha256}.png`, generation: '1', contentType: 'image/png', immutable: true }),
       database.doc(`rooms/${roomId}/projections/host`).set({ projection: { question: { ...question, primaryAnswer: question.canonicalAnswer }, room: { state: 'QUESTION_READING' } } }, { merge: true }),
       database.doc(`rooms/${roomId}/projections/audience`).set({ projection: { question: { headerAr: question.headerAr, promptAr: question.promptAr, media: fixture }, room: { state: 'QUESTION_READING', audienceQuestionVisible: true } } }, { merge: true }),
     ]);
     for (const page of [hostPage, audiencePage]) {
       await expect(page.getByTestId('question-media')).toBeVisible();
-      await expect(page.getByTestId('question-media').locator('img')).toHaveAttribute('src', /^data:image\/png;base64,/);
+      await expect(page.getByTestId('question-media').locator('img')).toHaveAttribute('src', /^blob:/);
       await expect.poll(() => page.getByTestId('question-media').locator('img').evaluate((image) => image.naturalWidth > 0 && image.naturalHeight > 0)).toBe(true);
     }
     await expect(audiencePage.locator('body')).not.toContainText('ممنوع-للجمهور');
@@ -139,6 +139,32 @@ test('Firebase host and audience render a real private image without crop, overf
     await capture(hostPage, 'host-image', 320, 568);
     await capture(audiencePage, 'audience-image', 1440, 900);
     await capture(audiencePage, 'audience-image', 320, 568);
+  } finally { await Promise.all([host.close(), audience.close()]); }
+});
+
+test('Firebase host reveal replaces a real goal blur video with its clear pair for host and display', async ({ browser, baseURL }) => {
+  test.setTimeout(120_000);
+  const registry = JSON.parse(await readFile(join(process.cwd(), 'content', 'question-media', 'goal-quiz-2026', 'media-registry.json'), 'utf8')) as { assets: Array<{ mediaId: string; sha256: string; privateObject: string; bytes: number; width: number; height: number; durationSeconds: number }> };
+  const blur = registry.assets.find((asset) => asset.mediaId === 'goal-quiz-2026:001:blur')!, clean = registry.assets.find((asset) => asset.mediaId === 'goal-quiz-2026:001:clean')!;
+  expect(blur).toBeTruthy(); expect(clean).toBeTruthy();
+  const host = await browser.newContext(), audience = await browser.newContext();
+  try {
+    const hostPage = await host.newPage(); await hostPage.goto(`${baseURL}/host/new?demo=1`); await hostPage.getByTestId('create-room').click(); await expect(hostPage.getByRole('heading', { name: 'ردهة المباراة' })).toBeVisible();
+    const code = (await hostPage.locator('.lobby-room-code bdi').textContent())!, roomId = await hostPage.evaluate((roomCode) => sessionStorage.getItem(`huroof:code:${roomCode}`), code); expect(roomId).toBeTruthy();
+    const audiencePage = await audience.newPage(); await audiencePage.goto(`${baseURL}/room/${code}/display`); await expect(audiencePage.locator('.stage[data-state="LOBBY"]')).toBeVisible(); await hostPage.goto(`${baseURL}/room/${code}/host`);
+    const database = getFirestore(getApps()[0] ?? initializeApp({ projectId: 'demo-huroof-wa-oloof' })), roomRef = database.doc(`rooms/${roomId}`), canonical = (await roomRef.get()).data()!, occurrence = '1:goal-video-cell:goal-quiz-2026-001';
+    const promptMedia = { mediaId: blur.mediaId, assetSha256: blur.sha256, altAr: 'مقطع السؤال', type: 'video', contentType: 'video/mp4' }, answerMedia = { mediaId: clean.mediaId, assetSha256: clean.sha256, altAr: 'مقطع الإجابة', type: 'video', contentType: 'video/mp4' }, question = { id: 'goal-quiz-2026-001', categoryId: 'goals-2026', modality: 'video', answerConceptId: 'goal:001', headerAr: 'من سجل الهدف؟', promptAr: 'من سجل هذا الهدف؟', canonicalAnswer: 'إجابة اختبار خاصة', acceptedAnswers: ['إجابة اختبار خاصة'], media: promptMedia, answerMedia };
+    const mediaDocument = (asset: typeof blur) => ({ mediaId: asset.mediaId, assetSha256: asset.sha256, objectName: asset.privateObject, generation: '1', contentType: 'video/mp4', byteSize: asset.bytes, width: asset.width, height: asset.height, durationSeconds: asset.durationSeconds, immutable: true });
+    await Promise.all([
+      roomRef.update({ config: { ...canonical.config, releaseId: 'release-goal-video-ui-fixture', releaseRootSha256: 'a'.repeat(64), showQuestionOnAudience: true }, game: { ...canonical.game, lifecycle: 'QUESTION_READING' }, timer: { deadlineMs: Date.now() + 30_000, buzzOpen: true }, questionCursor: 1, activeQuestionOccurrence: occurrence, activeQuestion: question }),
+      database.doc(`releases/release-goal-video-ui-fixture/media/${blur.mediaId}`).set(mediaDocument(blur)), database.doc(`releases/release-goal-video-ui-fixture/media/${clean.mediaId}`).set(mediaDocument(clean)),
+      database.doc(`rooms/${roomId}/projections/host`).set({ revision: canonical.revision, projection: { question: { ...question, occurrence, primaryAnswer: question.canonicalAnswer }, room: { state: 'QUESTION_READING' } } }, { merge: true }),
+      database.doc(`rooms/${roomId}/projections/audience`).set({ revision: canonical.revision, projection: { question: { headerAr: question.headerAr, promptAr: question.promptAr, occurrence, media: promptMedia }, room: { state: 'QUESTION_READING', audienceQuestionVisible: true } } }, { merge: true }),
+    ]);
+    const before = new Map<typeof hostPage, string>(); for (const page of [hostPage, audiencePage]) { const video = page.getByTestId('question-media').locator('video'); await expect(video).toHaveAttribute('src', /^blob:/); await expect.poll(() => video.evaluate((element) => element.readyState > 0)).toBe(true); before.set(page, (await video.getAttribute('src'))!); }
+    await expect(audiencePage.locator('body')).not.toContainText(question.canonicalAnswer); await hostPage.getByTestId('shared-answer-reveal').click();
+    for (const page of [hostPage, audiencePage]) { const video = page.getByTestId('question-media').locator('video'); await expect(video).toHaveAttribute('src', /^blob:/); await expect.poll(async () => (await video.getAttribute('src')) !== before.get(page)).toBe(true); await expect.poll(() => video.evaluate((element) => element.readyState > 0)).toBe(true); await expect(page.locator('body')).toContainText(question.canonicalAnswer); }
+    const after = (await roomRef.get()).data()!; expect(after.answerRevealedOccurrence).toBe(occurrence); expect(after.timer?.buzzOpen ?? false).toBe(false); expect(after.game.questionScores).toEqual(canonical.game.questionScores);
   } finally { await Promise.all([host.close(), audience.close()]); }
 });
 

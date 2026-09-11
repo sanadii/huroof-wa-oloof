@@ -1,7 +1,7 @@
 export type RuntimeQuestionV32 = {
   id: string;
   categoryId: string;
-  modality: "classic" | "image" | "charades";
+  modality: "classic" | "image" | "video" | "charades";
   targetLetter?: string;
   answerConceptId: string;
   headerAr: string;
@@ -53,7 +53,7 @@ function planCategoryAllocation(
   questions: RuntimeQuestionV32[], categories: string[], slotsPerCategory: number,
 ): Map<string, Set<string>> | undefined {
   const slots = categories.flatMap((category) => Array.from({ length: slotsPerCategory }, () => category));
-  const conceptsFor = new Map(categories.map((category) => [category, [...new Set(questions.filter((question) => question.categoryId === category && question.modality === "classic").map((question) => question.answerConceptId))].sort()]));
+  const conceptsFor = new Map(categories.map((category) => [category, [...new Set(questions.filter((question) => question.categoryId === category && question.modality !== "charades").map((question) => question.answerConceptId))].sort()]));
   const owner = new Map<string, number>();
   const visit = (slot: number, seen: Set<string>): boolean => {
     for (const concept of conceptsFor.get(slots[slot]) ?? []) {
@@ -126,13 +126,11 @@ export function createCategoryQuestionSelection(
   const categories = [...new Set(options.categories)].sort();
   if (categories.length < 2 || categories.length > 10)
     throw new Error("Category selection requires two to ten categories.");
-  if (options.modality !== "classic")
-    throw new Error("Category boards currently support classic text questions only.");
   const queues: Record<string, string[]> = {};
   const slotsPerCategory = Math.ceil(25 / categories.length) + 1;
   for (const category of categories) {
     const eligible = questions
-      .filter((question) => question.modality === "classic" && question.categoryId === category)
+      .filter((question) => question.modality !== "charades" && question.categoryId === category)
       .sort((left, right) => left.id.localeCompare(right.id));
     const uniqueConcepts = new Set(eligible.map((question) => question.answerConceptId)).size;
     // The balanced 25-cell board assigns at most ceil(25/categoryCount) cells
@@ -145,7 +143,7 @@ export function createCategoryQuestionSelection(
   if (!allocation)
     throw new Error("Category scope has overlapping concepts that cannot cover its board allocation and replacement reserve.");
   for (const category of categories) {
-    const categoryQuestions = questions.filter((question) => question.categoryId === category && question.modality === "classic").sort((left, right) => left.id.localeCompare(right.id));
+    const categoryQuestions = questions.filter((question) => question.categoryId === category && question.modality !== "charades").sort((left, right) => left.id.localeCompare(right.id));
     const reservedConcepts = allocation.get(category)!;
     const preferred = categoryQuestions.filter((question) => reservedConcepts.has(question.answerConceptId));
     const remaining = categoryQuestions.filter((question) => !reservedConcepts.has(question.answerConceptId));

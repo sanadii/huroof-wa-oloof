@@ -76,7 +76,7 @@ test('chunking honors 399/400/401 documents and byte caps', () => {
 test('prepare is resumable for equal documents, preserves catalog entries, and writes a receipt', async () => {
   const fixture = await planFor(); const adapter = new FakeAdapter();
   try {
-    const first = await prepareProductionRelease(fixture.plan, adapter); assert.ok(first.created > 1); assert.ok(adapter.docs.has('catalogCategories/tahadani-006')); assert.ok(adapter.docs.has(first.receipt.path));
+    const first = await prepareProductionRelease(fixture.plan, adapter); assert.ok(first.created > 1); assert.ok(adapter.docs.has(`releases/${fixture.plan.releaseId}/catalogCategories/tahadani-006`)); assert.ok(adapter.docs.has(first.receipt.path));
     const second = await prepareProductionRelease(fixture.plan, adapter); assert.equal(second.created, 0); assert.equal(second.skipped, fixture.plan.documents.length);
   } finally { await rm(fixture.folder, { recursive: true, force: true }); }
 });

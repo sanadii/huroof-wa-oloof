@@ -38,14 +38,31 @@ it('replaces legacy setup cards with the metadata-only local DB inventory', asyn
     source: 'local_firestore_import',
     huroofAvailable: true,
     categories: [
-      { id: 'huroof-068', labelAr: 'منتخب الكويت', sourceOnly: true, categoryGameEligible: true },
-      { id: 'tahadani-015', labelAr: 'أمثال وغطاوي', sourceOnly: false, categoryGameEligible: true },
+      { id: 'huroof-068', labelAr: 'منتخب الكويت', sourceOnly: true, questionCount: 14, heldQuestionCount: 0, huroofQuestionCount: 14, availability: 'ready', categoryGameEligible: true },
+      { id: 'tahadani-015', labelAr: 'أمثال وغطاوي', sourceOnly: false, questionCount: 14, heldQuestionCount: 0, huroofQuestionCount: 14, availability: 'ready', categoryGameEligible: true },
     ],
   })));
   render(<ThemeProvider><MemoryRouter><HostNewRoute /></MemoryRouter></ThemeProvider>);
   await waitFor(() => expect(screen.getByRole('button', { name: /منتخب الكويت/ })).toBeVisible());
   expect(screen.getByRole('option', { name: 'كل الموضوعات (2)' })).toBeInTheDocument();
   expect(screen.queryByRole('button', { name: /معلومات عامة/ })).not.toBeInTheDocument();
+});
+
+it('shows held-only local categories with a disabled Arabic availability state', async () => {
+  vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(JSON.stringify({
+    source: 'local_sqlite_import',
+    huroofAvailable: true,
+    categories: [
+      { id: 'tahadani-ready', labelAr: 'فئة جاهزة', sourceOnly: true, questionCount: 14, heldQuestionCount: 0, huroofQuestionCount: 14, availability: 'ready', categoryGameEligible: true },
+      { id: 'tahadani-held', labelAr: 'فئة مؤجلة', sourceOnly: true, questionCount: 0, heldQuestionCount: 6, huroofQuestionCount: 0, availability: 'held_only', categoryGameEligible: false },
+    ],
+  })));
+  render(<ThemeProvider><MemoryRouter><HostNewRoute /></MemoryRouter></ThemeProvider>);
+  const held = await screen.findByRole('button', { name: 'فئة مؤجلة — غير متاحة للعب بعد' });
+  expect(held).toBeDisabled();
+  expect(held).toHaveTextContent('أسئلة هذه الفئة قيد المراجعة وليست متاحة للعب بعد.');
+  await userEvent.click(screen.getByRole('radio', { name: 'الفئات' }));
+  expect(screen.getByRole('button', { name: 'فئة جاهزة — أضف إلى الاختيار' })).toBeEnabled();
 });
 
 it('does not silently show fixture categories after a DB inventory error and can retry', async () => {
@@ -201,11 +218,15 @@ it('keeps board kind separate from pace and blocks a category board until two ca
   const huroof = screen.getByRole('radio', { name: 'الحروف' });
   const categories = screen.getByRole('radio', { name: 'الفئات' });
   expect(huroof).toHaveAttribute('aria-checked', 'true');
+  expect(huroof).toHaveAttribute('aria-describedby', 'setup-kind-huroof-description');
+  expect(screen.getByText('إجابات تبدأ بحرف الخلية')).toBeVisible();
+  expect(screen.getByText('أسئلة من الفئات التي تختارها')).toBeVisible();
   expect(screen.getByRole('radio', { name: 'كلاسيكية' })).toHaveAttribute('aria-checked', 'true');
 
-  await user.click(categories);
+  huroof.focus();
+  await user.keyboard('{ArrowLeft}');
+  expect(categories).toHaveFocus();
   expect(categories).toHaveAttribute('aria-checked', 'true');
-  expect(screen.getByText(/الرقم يميز تكرار الخلية وليس نقاطاً/)).toBeVisible();
   await user.click(screen.getByTestId('create-room'));
   expect(screen.getByText('لإنشاء لعبة الفئات، اختر فئتين مختلفتين على الأقل من الفئات المختارة.')).toBeVisible();
   expect(screen.getByRole('searchbox', { name: 'تصفية الفئات' })).toHaveFocus();

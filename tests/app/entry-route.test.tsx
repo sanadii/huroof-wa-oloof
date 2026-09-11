@@ -25,7 +25,7 @@ describe('EntryRoute', () => {
   it('normalizes a room code to uppercase LTR ASCII before continuing to the room name step', async () => {
     const user = userEvent.setup();
     renderJoinJourney();
-    expect(document.title).toBe('الدخول | تحدي الخلية');
+    expect(document.title).toBe('الرئيسية | تحدي الخلية');
     const input = screen.getByLabelText('رمز الغرفة');
     await user.type(input, 'ab-12 عرب c');
     expect(input).toHaveValue('AB12C');
@@ -85,8 +85,7 @@ describe('EntryRoute', () => {
     expect(screen.getByRole('button', { name: 'دخول الغرفة' })).toBeDisabled();
   });
 
-  it('keeps creation separate from joining and carries the selected game kind into setup', async () => {
-    const user = userEvent.setup();
+  it('keeps creation separate from joining and sends board selection to setup', () => {
     render(<ThemeProvider><MemoryRouter><EntryRoute /></MemoryRouter></ThemeProvider>);
     expect(Array.from(document.querySelectorAll('[data-home-region]')).map((node) => node.getAttribute('data-home-region'))).toEqual([
       'header',
@@ -97,10 +96,8 @@ describe('EntryRoute', () => {
     ]);
     expect(screen.getByRole('region', { name: 'أنشئ مباراة جديدة' })).not.toContainElement(screen.getByLabelText('رمز الغرفة'));
     expect(screen.getByRole('region', { name: 'انضم إلى غرفة' })).toContainElement(screen.getByLabelText('رمز الغرفة'));
-    expect(screen.getByRole('radio', { name: 'الحروف' })).toBeChecked();
-    expect(screen.getByRole('link', { name: 'أنشئ مباراة' })).toHaveAttribute('href', '/host/new?kind=huroof&mode=classic');
-    await user.click(screen.getByRole('radio', { name: 'الفئات' }));
-    expect(screen.getByRole('link', { name: 'أنشئ مباراة' })).toHaveAttribute('href', '/host/new?kind=categories&mode=classic');
+    expect(screen.queryByRole('radiogroup', { name: 'اختر نوع اللوح' })).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'أنشئ مباراة' })).toHaveAttribute('href', '/host/new');
     expect(screen.getByRole('link', { name: 'تسجيل الدخول' })).toHaveAttribute('href', '/login');
     expect(screen.queryByTestId('spatial-board-scene')).not.toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'تحدي الخلية' })).toBeInTheDocument();

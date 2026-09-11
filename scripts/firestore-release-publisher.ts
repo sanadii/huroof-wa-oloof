@@ -3,6 +3,7 @@ import { fileURLToPath } from 'node:url';
 import { resolve } from 'node:path';
 import { assertReleaseDocumentsExcludeEvidencePayload, buildV33FirestoreReleasePlan, loadV33ProductionReleaseInput, type FirestoreReleasePlan, type ReleaseDocument } from './build-firestore-release.js';
 import { canonicalJson } from './firestore-release-canonical.js';
+import { buildReviewedMediaCompositeReleasePlan, loadImmutableBaseReleasePlan, loadReviewedGoalSupplement, loadReviewedSupplementReviewReport, loadTrustedReviewedAuthority } from './reviewed-media-composite-release.js';
 
 export const PRODUCTION_PROJECT = 'huroof-a3ee7';
 export const PRODUCTION_DATABASE = '(default)';
@@ -77,10 +78,22 @@ function releaseRoot(plan: FirestoreReleasePlan): ReleaseDocument {
   return root;
 }
 
+/** A composite may only inherit a base that is already published and whose committed review claims still belong to that base. */
+async function assertCompositeBaseProvenance(plan: FirestoreReleasePlan, adapter: FirestorePublicationAdapter): Promise<void> {
+  const root = releaseRoot(plan).data;
+  if (root.composite !== true) return;
+  const baseReleaseId = root.baseReleaseId, baseDocumentRootSha256 = root.baseDocumentRootSha256, baseCatalogSha256 = root.baseCatalogSha256, baseSourceManifestSha256 = root.baseSourceManifestSha256, baseApprovedJsonlSha256 = root.baseApprovedJsonlSha256, claims = root.baseReviewNonceClaimHashes;
+  if (typeof baseReleaseId !== 'string' || !/^[A-Za-z0-9_-]{1,120}$/.test(baseReleaseId) || typeof baseDocumentRootSha256 !== 'string' || !/^[a-f0-9]{64}$/u.test(baseDocumentRootSha256) || typeof baseCatalogSha256 !== 'string' || !/^[a-f0-9]{64}$/u.test(baseCatalogSha256) || typeof baseSourceManifestSha256 !== 'string' || !/^[a-f0-9]{64}$/u.test(baseSourceManifestSha256) || typeof baseApprovedJsonlSha256 !== 'string' || !/^[a-f0-9]{64}$/u.test(baseApprovedJsonlSha256) || !Array.isArray(claims) || claims.length === 0 || claims.some((value) => typeof value !== 'string' || !REVIEW_NONCE_CLAIM_HASH.test(value)) || new Set(claims).size !== claims.length || canonicalJson(claims) !== canonicalJson(claims.slice().sort())) throw new Error('Composite base provenance is missing or malformed.');
+  const publicationPath = `releases/${baseReleaseId}/publicationReceipts/publication-${baseDocumentRootSha256}`;
+  const expectedClaims = claims.map((reviewNonceHash) => `reviewNonceClaims/${reviewNonceHash}`);
+  const [baseRoot, publication, ...storedClaims] = await adapter.read([`releases/${baseReleaseId}`, publicationPath, ...expectedClaims]);
+  if (!baseRoot?.exists || !publication?.exists || baseRoot.data?.immutable !== true || baseRoot.data?.releaseId !== baseReleaseId || baseRoot.data?.documentRootSha256 !== baseDocumentRootSha256 || baseRoot.data?.catalogSha256 !== baseCatalogSha256 || baseRoot.data?.sourceManifestSha256 !== baseSourceManifestSha256 || publication.data?.releaseId !== baseReleaseId || publication.data?.documentRootSha256 !== baseDocumentRootSha256 || publication.data?.catalogSha256 !== baseCatalogSha256 || publication.data?.sourceManifestSha256 !== baseSourceManifestSha256 || publication.data?.approvedJsonlSha256 !== baseApprovedJsonlSha256 || canonicalJson(publication.data?.reviewNonceClaimHashes) !== canonicalJson(claims) || storedClaims.some((claim, index) => !claim?.exists || claim.data?.immutable !== true || claim.data?.reviewNonceHash !== claims[index] || claim.data?.releaseId !== baseReleaseId || claim.data?.documentRootSha256 !== baseDocumentRootSha256)) throw new Error('Composite base root, publication receipt, or review-nonce provenance is unavailable or differs.');
+}
+
 export function publicationReceipt(plan: FirestoreReleasePlan): ReleaseDocument {
   return {
     path: `releases/${plan.releaseId}/publicationReceipts/publication-${plan.documentRootSha256}`,
-    data: { releaseId: plan.releaseId, asOf: plan.asOf, approvedCount: plan.approvedCount, approvedJsonlSha256: plan.approvedJsonlSha256, catalogSha256: plan.catalogSha256, documentRootSha256: plan.documentRootSha256, sourceManifestSha256: plan.sourceManifestSha256, documentCount: plan.documents.length, immutable: true },
+    data: { releaseId: plan.releaseId, asOf: plan.asOf, approvedCount: plan.approvedCount, approvedJsonlSha256: plan.approvedJsonlSha256, catalogSha256: plan.catalogSha256, documentRootSha256: plan.documentRootSha256, sourceManifestSha256: plan.sourceManifestSha256, documentCount: plan.documents.length, reviewNonceClaimHashes: plan.reviewNonceClaimHashes ?? [], immutable: true },
   };
 }
 
@@ -175,6 +188,7 @@ export async function prepareProductionRelease(plan: FirestoreReleasePlan, adapt
   const pointer = plan.documents.find((document) => document.path === 'runtime/activeRelease');
   if (pointer) throw new Error('Production preparation must not include runtime/activeRelease.');
   await assertVerifiedTarget(adapter);
+  await assertCompositeBaseProvenance(plan, adapter);
   await claimReviewNonces(plan, adapter);
   const existing = await readByPath(adapter, plan.documents); const pending: ReleaseDocument[] = []; let skipped = 0;
   for (const document of plan.documents) {
@@ -195,7 +209,7 @@ export async function prepareProductionRelease(plan: FirestoreReleasePlan, adapt
 /** Read-only confirmation that every planned document and its publication receipt are exact. */
 export async function verifyPreparedProductionRelease(plan: FirestoreReleasePlan, adapter: FirestorePublicationAdapter, verifiedAt = new Date()): Promise<ReleaseDocument> {
   if (!adapter.listPrefix) throw new Error('Verification requires exact release-prefix enumeration.');
-  await assertReviewNonceClaims(plan, adapter);
+  await assertCompositeBaseProvenance(plan, adapter); await assertReviewNonceClaims(plan, adapter);
   await assertExactProductionReleaseAudit(plan, adapter);
   const receipt = verificationReceipt(plan, verifiedAt);
   const current = (await adapter.read([receipt.path]))[0];
@@ -240,7 +254,7 @@ export function activationDocuments(plan: FirestoreReleasePlan, expectedPrevious
 /** Moves the active pointer only through the adapter's atomic root/receipt/CAS transaction. */
 export async function activateProductionRelease(plan: FirestoreReleasePlan, adapter: FirestorePublicationAdapter, expectedPreviousReleaseId: string | null, operationReference: string, verification: ReleaseDocument): Promise<void> {
   assertReleaseDocumentsExcludeEvidencePayload(plan.documents);
-  await assertExactProductionReleaseAudit(plan, adapter);
+  await assertCompositeBaseProvenance(plan, adapter); await assertExactProductionReleaseAudit(plan, adapter);
   await assertReviewNonceClaims(plan, adapter);
   assertVerificationReceipt(plan, verification);
   const stored = (await adapter.read([verification.path]))[0];
@@ -345,6 +359,21 @@ async function productionPlan(flags: Record<string, string>): Promise<FirestoreR
   return plan;
 }
 
+/** Explicit D17.5 route: a reviewed external supplement composes one immutable root with a verified V3.3 base. */
+export async function compositeProductionPlan(flags: Record<string, string>): Promise<FirestoreReleasePlan> {
+  assertProductionTarget(flags);
+  const [base, supplement, report] = await Promise.all([
+    loadImmutableBaseReleasePlan(flags['base-plan'], flags['base-document-root-sha256']),
+    loadReviewedGoalSupplement(flags.supplement, flags['supplement-content-hash']),
+    loadReviewedSupplementReviewReport(flags['review-report'], flags['review-report-sha256']),
+  ]);
+  const authority = await loadTrustedReviewedAuthority(flags['trust-root'], flags['trust-root-sha256'], [flags['base-plan'], flags.supplement]);
+  const plan = buildReviewedMediaCompositeReleasePlan(base, supplement, authority, report);
+  if (flags['release-id'] && flags['release-id'] !== plan.releaseId) throw new Error('--release-id does not match the derived immutable composite release ID.');
+  if (flags['approved-sha256'] && flags['approved-sha256'] !== plan.approvedJsonlSha256) throw new Error('--approved-sha256 does not match the composite approved commitment.');
+  return plan;
+}
+
 async function main(): Promise<void> {
   const [operation, ...values] = process.argv.slice(2);
   if (operation === 'plan') {
@@ -352,12 +381,22 @@ async function main(): Promise<void> {
     if (process.env.FIRESTORE_EMULATOR_HOST) throw new Error('Production plan rejects FIRESTORE_EMULATOR_HOST.');
     const plan = buildV33FirestoreReleasePlan(await loadV33ProductionReleaseInput({ trustRootPath: flags['trust-root'], trustRootSha256: flags['trust-root-sha256'] })); console.log(JSON.stringify({ releaseId: plan.releaseId, asOf: plan.asOf, approvedCount: plan.approvedCount, approvedJsonlSha256: plan.approvedJsonlSha256, catalogSha256: plan.catalogSha256, documentRootSha256: plan.documentRootSha256, sourceManifestSha256: plan.sourceManifestSha256, documentCount: plan.documents.length }, null, 2)); return;
   }
+  if (operation === 'composite-plan') {
+    const flags = parseFlags(values); requireFlags(flags, ['project', 'database', 'location', 'base-plan', 'base-document-root-sha256', 'supplement', 'supplement-content-hash', 'review-report', 'review-report-sha256', 'trust-root', 'trust-root-sha256']);
+    if (process.env.FIRESTORE_EMULATOR_HOST) throw new Error('Composite production plan rejects FIRESTORE_EMULATOR_HOST.');
+    const plan = await compositeProductionPlan(flags); console.log(JSON.stringify({ releaseId: plan.releaseId, asOf: plan.asOf, approvedCount: plan.approvedCount, approvedJsonlSha256: plan.approvedJsonlSha256, catalogSha256: plan.catalogSha256, documentRootSha256: plan.documentRootSha256, sourceManifestSha256: plan.sourceManifestSha256, documentCount: plan.documents.length }, null, 2)); return;
+  }
   const flags = parseFlags(values);
   if (operation === 'prepare') { requireFlags(flags, ['project', 'database', 'location', 'release-id', 'approved-sha256', 'trust-root', 'trust-root-sha256']); const plan = await productionPlan(flags); const result = await prepareProductionRelease(plan, await createAdminProductionAdapter()); console.log(JSON.stringify({ operation, releaseId: plan.releaseId, ...result }, null, 2)); return; }
   if (operation === 'verify') { requireFlags(flags, ['project', 'database', 'location', 'release-id', 'approved-sha256', 'trust-root', 'trust-root-sha256']); const plan = await productionPlan(flags); const receipt = await verifyPreparedProductionRelease(plan, await createAdminProductionAdapter()); console.log(JSON.stringify({ operation, releaseId: plan.releaseId, verified: true, verificationReceipt: receipt }, null, 2)); return; }
   if (operation === 'activate') { requireFlags(flags, ['project', 'database', 'location', 'release-id', 'approved-sha256', 'expected-active-release', 'operation-reference', 'verification-receipt', 'trust-root', 'trust-root-sha256']); const plan = await productionPlan(flags); const expected = flags['expected-active-release'] === 'none' ? null : flags['expected-active-release']; const adapter = await createAdminProductionAdapter(); const stored = (await adapter.read([flags['verification-receipt']]))[0]; if (!stored?.exists || !stored.data) throw new Error('Activation requires an existing verification barrier receipt.'); await activateProductionRelease(plan, adapter, expected, flags['operation-reference'], { path: flags['verification-receipt'], data: stored.data }); console.log(JSON.stringify({ operation, releaseId: plan.releaseId, activated: true }, null, 2)); return; }
   if (operation === 'audit') { requireFlags(flags, ['project', 'database', 'location', 'release-id', 'approved-sha256', 'trust-root', 'trust-root-sha256']); const plan = await productionPlan(flags); const audit = await auditProductionRelease(plan, await createAdminProductionAdapter()); console.log(JSON.stringify({ operation, ...audit }, null, 2)); return; }
   if (operation === 'rollback-none') { requireFlags(flags, ['project', 'database', 'location', 'release-id', 'approved-sha256', 'operation-reference', 'trust-root', 'trust-root-sha256']); const plan = await productionPlan(flags); await rollbackProductionRelease(plan, null, await createAdminProductionAdapter(), flags['operation-reference']); console.log(JSON.stringify({ operation, releaseId: plan.releaseId, rolledBack: true }, null, 2)); return; }
-  throw new Error('Usage: firestore-release-publisher <plan|prepare|verify|activate|audit|rollback-none> [required flags].');
+  const compositeNames = ['project', 'database', 'location', 'release-id', 'approved-sha256', 'base-plan', 'base-document-root-sha256', 'supplement', 'supplement-content-hash', 'review-report', 'review-report-sha256', 'trust-root', 'trust-root-sha256'];
+  if (operation === 'composite-prepare') { requireFlags(flags, compositeNames); const plan = await compositeProductionPlan(flags); const result = await prepareProductionRelease(plan, await createAdminProductionAdapter()); console.log(JSON.stringify({ operation, releaseId: plan.releaseId, ...result }, null, 2)); return; }
+  if (operation === 'composite-verify') { requireFlags(flags, compositeNames); const plan = await compositeProductionPlan(flags); const receipt = await verifyPreparedProductionRelease(plan, await createAdminProductionAdapter()); console.log(JSON.stringify({ operation, releaseId: plan.releaseId, verified: true, verificationReceipt: receipt }, null, 2)); return; }
+  if (operation === 'composite-activate') { requireFlags(flags, [...compositeNames, 'expected-active-release', 'operation-reference', 'verification-receipt']); const plan = await compositeProductionPlan(flags); const expected = flags['expected-active-release'] === 'none' ? null : flags['expected-active-release']; const adapter = await createAdminProductionAdapter(); const stored = (await adapter.read([flags['verification-receipt']]))[0]; if (!stored?.exists || !stored.data) throw new Error('Activation requires an existing verification barrier receipt.'); await activateProductionRelease(plan, adapter, expected, flags['operation-reference'], { path: flags['verification-receipt'], data: stored.data }); console.log(JSON.stringify({ operation, releaseId: plan.releaseId, activated: true }, null, 2)); return; }
+  if (operation === 'composite-audit') { requireFlags(flags, compositeNames); const plan = await compositeProductionPlan(flags); const audit = await auditProductionRelease(plan, await createAdminProductionAdapter()); console.log(JSON.stringify({ operation, ...audit }, null, 2)); return; }
+  throw new Error('Usage: firestore-release-publisher <plan|prepare|verify|activate|audit|rollback-none|composite-plan|composite-prepare|composite-verify|composite-activate|composite-audit> [required flags].');
 }
 if (process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1])) main().catch((error) => { console.error(error instanceof Error ? error.message : error); process.exitCode = 1; });

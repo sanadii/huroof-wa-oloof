@@ -4,7 +4,7 @@ import {
   randomUUID,
   timingSafeEqual,
 } from "node:crypto";
-import { readFile } from "node:fs/promises";
+import { lstat, readFile } from "node:fs/promises";
 import { readFileSync } from "node:fs";
 import { DatabaseSync } from "node:sqlite";
 import { join, relative, resolve, sep } from "node:path";
@@ -51,7 +51,14 @@ type Member = {
   ready: boolean;
 };
 type ManualParticipant = { id: string; displayName: string; team: TeamAxis };
-type QuestionMedia = { mediaId: string; assetSha256: string; altAr: string };
+type QuestionMedia = { mediaId: string; assetSha256: string; altAr: string; type?: "image" | "video"; contentType?: string };
+const hasRevealedOccurrence = (
+  activeOccurrence: unknown,
+  revealedOccurrence: unknown,
+) =>
+  typeof activeOccurrence === "string" &&
+  activeOccurrence.length > 0 &&
+  activeOccurrence === revealedOccurrence;
 type StoredQuestion = RuntimeQuestionV32 & {
   targetLetter?: string;
   sources?: unknown[];
@@ -63,6 +70,7 @@ type StoredQuestion = RuntimeQuestionV32 & {
   readOnly?: boolean;
   sourceUrl?: string;
   media?: QuestionMedia;
+  answerMedia?: QuestionMedia;
 };
 export type MatchConfig = {
   policyVersion?: 1;
@@ -96,6 +104,8 @@ type Room = {
   boardSequence: number;
   categoryOccurrences?: Record<string, number>;
   activeQuestion?: StoredQuestion;
+  activeQuestionOccurrence?: string;
+  answerRevealedOccurrence?: string;
   surpriseLetters: string[];
   questionSelection?: MatchQuestionSelection;
   deadlineAt?: string;
@@ -181,7 +191,10 @@ const canonicalIntentHash = (intent: GameIntent) =>
       ),
     ),
   });
-const trustedCategorySnapshot = (ids: string[]) => {
+const trustedCategorySnapshot = (
+  ids: string[],
+  importedCategories: ReadonlyArray<{ id: string; labelAr: string }> = [],
+) => {
   const source = JSON.parse(
     readFileSync(
       join(process.cwd(), "content", "categories", "categories.json"),
@@ -199,6 +212,11 @@ const trustedCategorySnapshot = (ids: string[]) => {
   );
   for (const category of sourceCategoryRegistry.categories)
     labels.set(category.sourceCategoryId, category.sourceTitleAr);
+  // Local import inventory is validated while reading the pinned source.  It is
+  // the authority for imported category names; a browser never supplies labels.
+  for (const category of importedCategories)
+    if (typeof category.id === "string" && typeof category.labelAr === "string" && category.labelAr.trim())
+      labels.set(category.id, category.labelAr.trim());
   const snapshot = ids
     .map((id) => ({ id, labelAr: labels.get(id) }))
     .filter((item): item is { id: string; labelAr: string } =>
@@ -275,6 +293,8 @@ function validIntent(intent: unknown): intent is GameIntent {
       value.payload.reason.trim().length > 0 &&
       value.payload.reason.length <= 240
     );
+  if (value.type === "REVEAL_ANSWER")
+    return keys.length === 1 && typeof value.payload.occurrence === "string" && /^[A-Za-z0-9:_-]{1,180}$/.test(value.payload.occurrence);
   return (
     [
       "START_MATCH",
@@ -475,7 +495,11 @@ export class AuthoritativeGameService {
   private readonly secret: string;
   private readonly clock: Clock;
   private readonly newBoardNonce: () => string;
-  private readonly localFirestoreQuestionSource?: LocalRuntimeQuestionSource;
+  private localFirestoreQuestionSource?: LocalRuntimeQuestionSource;
+  private readonly localQuestionSourcesBySnapshot = new Map<
+    string,
+    LocalRuntimeQuestionSource
+  >();
   private readonly roomSerial = new Map<string, Promise<void>>();
   private readonly mediaIssues = new Map<string, number[]>();
   constructor(
@@ -491,10 +515,19 @@ export class AuthoritativeGameService {
     this.secret = options.secret ?? "local-development-secret";
     this.clock = options.clock ?? (() => new Date());
     this.newBoardNonce = options.boardNonce ?? randomUUID;
-    this.localFirestoreQuestionSource = options.localFirestoreQuestionSource;
+    if (options.localFirestoreQuestionSource)
+      this.replaceLocalQuestionSource(options.localFirestoreQuestionSource);
   }
   close(): void {
     this.store.close();
+  }
+  /**
+   * Updates the source used by future local rooms while retaining the immutable
+   * source bindings of rooms that are already active.
+   */
+  replaceLocalQuestionSource(source: LocalRuntimeQuestionSource): void {
+    this.localQuestionSourcesBySnapshot.set(source.snapshotId, source);
+    this.localFirestoreQuestionSource = source;
   }
   private now(): string {
     return this.clock().toISOString();
@@ -590,6 +623,7 @@ export class AuthoritativeGameService {
     )
       throw new Error("CATEGORY_GAME_COMBINATION_INVALID");
     this.requirePlayableQuestionScope(demo, categories, modality, gameKind);
+    const localSource = demo ? this.localFirestoreQuestionSource : undefined;
     const config: MatchConfig = {
       policyVersion: 1,
       questionSeconds: Math.max(
@@ -608,7 +642,7 @@ export class AuthoritativeGameService {
       modality,
       gameKind,
       ...(gameKind === "categories"
-        ? { categorySnapshot: trustedCategorySnapshot(categories) }
+        ? { categorySnapshot: trustedCategorySnapshot(categories, localSource?.inventory.categories) }
         : {}),
       difficulty: requested.difficulty ?? "mixed",
       mode: requested.mode ?? "classic",
@@ -639,9 +673,7 @@ export class AuthoritativeGameService {
         },
       ],
     };
-    if (demo && this.localFirestoreQuestionSource)
-      room.questionSourceSnapshot =
-        this.localFirestoreQuestionSource.snapshotId;
+    if (localSource) room.questionSourceSnapshot = localSource.snapshotId;
     this.store.save(room);
     this.store.event(room, room.audit[0], this.now());
     return {
@@ -720,9 +752,7 @@ export class AuthoritativeGameService {
     if (!room) throw new Error("ROOM_NOT_FOUND");
     if (
       (room.questionSourceSnapshot &&
-        (!this.localFirestoreQuestionSource ||
-          room.questionSourceSnapshot !==
-            this.localFirestoreQuestionSource.snapshotId)) ||
+        !this.localQuestionSourcesBySnapshot.has(room.questionSourceSnapshot)) ||
       (room.demo &&
         this.localFirestoreQuestionSource &&
         !room.questionSourceSnapshot)
@@ -749,7 +779,7 @@ export class AuthoritativeGameService {
       !value ||
       Object.keys(value).length !== 2 ||
       typeof value.mediaId !== "string" ||
-      !/^[A-Za-z0-9_-]{1,128}$/.test(value.mediaId) ||
+      !/^[A-Za-z0-9:_-]{1,128}$/.test(value.mediaId) ||
       typeof value.assetSha256 !== "string" ||
       !/^[a-f0-9]{64}$/.test(value.assetSha256)
     )
@@ -761,8 +791,9 @@ export class AuthoritativeGameService {
       "FIRST_ANSWER",
       "OPPONENT_CHANCE",
       "QUESTION_FAILED",
+      "PAUSED",
     ]);
-    const hostAllowed = capability.role === "host";
+    const hostAllowed = capability.role === "host" && visibleStates.has(room.game.lifecycle);
     const audienceAllowed =
       capability.role === "audience" &&
       capability.uid === "audience" &&
@@ -772,9 +803,14 @@ export class AuthoritativeGameService {
       throw new Error(
         capability.role === "player" ? "FORBIDDEN_ROLE" : "MEDIA_NOT_VISIBLE",
       );
-    const media = room.activeQuestion?.media;
+    const media = hasRevealedOccurrence(
+      room.activeQuestionOccurrence,
+      room.answerRevealedOccurrence,
+    )
+      ? room.activeQuestion?.answerMedia ?? room.activeQuestion?.media
+      : room.activeQuestion?.media;
     if (
-      room.activeQuestion?.modality !== "image" ||
+      !["image", "video"].includes(room.activeQuestion?.modality ?? "") ||
       !media ||
       media.mediaId !== value.mediaId ||
       media.assetSha256 !== value.assetSha256
@@ -863,38 +899,42 @@ export class AuthoritativeGameService {
       bearerToken,
       { mediaId: payload.mediaId, assetSha256: payload.assetSha256 },
     );
-    const manifestPath = join(
-      process.cwd(),
-      "content",
-      "question-media",
-      "v18-private-240",
-      "manifest.json",
-    );
+    const video = media.type === "video";
+    const rebuiltImage = !video && media.mediaId.startsWith("rebuild-v2-photo-");
+    const packageDirectory = video
+      ? "goal-quiz-2026"
+      : rebuiltImage
+        ? "guess-picture-rebuild-v2"
+        : "v18-private-240";
+    const manifestPath = join(process.cwd(), "content", "question-media", packageDirectory, video ? "media-registry.json" : "manifest.json");
     const manifest = JSON.parse(await readFile(manifestPath, "utf8")) as {
       assets?: Array<{
         mediaId?: string;
         assetSha256?: string;
         localFile?: string;
-        width?: number;
-        height?: number;
+        width?: number; height?: number;
       }>;
     };
     const entry = manifest.assets?.find(
       (item) =>
         item.mediaId === media.mediaId &&
-        item.assetSha256 === media.assetSha256,
+        (item.assetSha256 ?? (video ? (item as { sha256?: unknown }).sha256 : undefined)) === media.assetSha256,
     );
     if (
       !entry ||
       typeof entry.localFile !== "string" ||
-      !/^[a-z0-9/.-]+$/i.test(entry.localFile)
+      !(video
+        ? /^assets\/[a-f0-9]{64}\.mp4$/u
+        : rebuiltImage
+          ? /^images\/\d{3}-\d{3}\.jpg$/u
+          : /^originals\/[a-f0-9]{64}\.png$/u).test(entry.localFile)
     )
       throw new Error("MEDIA_ASSET_MISSING");
     const root = resolve(
       process.cwd(),
       "content",
       "question-media",
-      "v18-private-240",
+      packageDirectory,
     );
     const target = resolve(root, entry.localFile);
     if (
@@ -902,13 +942,19 @@ export class AuthoritativeGameService {
       relative(root, target) === ".."
     )
       throw new Error("MEDIA_PATH_INVALID");
+    if ((await lstat(target)).isSymbolicLink()) throw new Error("MEDIA_PATH_INVALID");
     const bytes = await readFile(target);
-    verifyPrivateQuestionMediaBytes(
-      bytes,
-      media.assetSha256,
-      entry.width,
-      entry.height,
-    );
+    if (video) {
+      if (bytes.length > 1_000_000 || bytes.subarray(4, 8).toString("ascii") !== "ftyp" || createHash("sha256").update(bytes).digest("hex") !== media.assetSha256)
+        throw new Error("MEDIA_ASSET_INVALID_VIDEO");
+      return { bytes, contentType: "video/mp4" };
+    }
+    if (rebuiltImage) {
+      if (bytes.length > 1_000_000 || !bytes.subarray(0, 3).equals(Buffer.from([0xff, 0xd8, 0xff])) || createHash("sha256").update(bytes).digest("hex") !== media.assetSha256)
+        throw new Error("MEDIA_ASSET_INVALID_JPEG");
+      return { bytes, contentType: "image/jpeg" };
+    }
+    verifyPrivateQuestionMediaBytes(bytes, media.assetSha256, entry.width, entry.height);
     return { bytes, contentType: "image/png" };
   }
   private async freshBoard(room: Room): Promise<GameBoard> {
@@ -1002,6 +1048,16 @@ export class AuthoritativeGameService {
   async startBoard(room: Room, nextRound = false): Promise<void> {
     if (nextRound) this.releaseRoundReservations(room);
     const board = await this.freshBoard(room);
+    // A board boundary is also a media/reveal boundary.  Keeping an old
+    // occurrence here would let a delayed reveal grant describe a question
+    // that no longer belongs to the active board.
+    room.activeQuestion = undefined;
+    room.activeQuestionOccurrence = undefined;
+    room.answerRevealedOccurrence = undefined;
+    room.buzzOpen = false;
+    room.deadlineAt = undefined;
+    room.pausedTimer = undefined;
+    room.buzzWinner = undefined;
     room.game = reduceGame(
       room.game,
       nextRound
@@ -1344,7 +1400,28 @@ export class AuthoritativeGameService {
     if (intent.type === "OPEN_QUESTION") {
       if (room.game.lifecycle !== "QUESTION_READING")
         throw new Error("QUESTION_NOT_READY");
-      if (!room.buzzOpen || !room.deadlineAt) this.openQuestionBuzzer(room);
+      if (
+        !room.buzzOpen &&
+        !room.deadlineAt &&
+        !hasRevealedOccurrence(
+          room.activeQuestionOccurrence,
+          room.answerRevealedOccurrence,
+        )
+      )
+        this.openQuestionBuzzer(room);
+      return;
+    }
+    if (intent.type === "REVEAL_ANSWER") {
+      const occurrence = String(payload.occurrence);
+      if (!room.activeQuestion || !room.activeQuestionOccurrence || occurrence !== room.activeQuestionOccurrence)
+        throw new Error("STALE_QUESTION_OCCURRENCE");
+      if (!["QUESTION_READING", "FIRST_ANSWER", "OPPONENT_CHANCE", "QUESTION_FAILED", "PAUSED"].includes(room.game.lifecycle))
+        throw new Error("REVEAL_ANSWER_NOT_ALLOWED");
+      room.answerRevealedOccurrence = occurrence;
+      room.buzzOpen = false;
+      room.deadlineAt = undefined;
+      room.pausedTimer = undefined;
+      room.buzzWinner = undefined;
       return;
     }
     if (intent.type === "HOST_SELECT_TEAM") {
@@ -1394,6 +1471,10 @@ export class AuthoritativeGameService {
       room.pausedTimer = undefined;
       if (
         pausedTimer &&
+        !hasRevealedOccurrence(
+          room.activeQuestionOccurrence,
+          room.answerRevealedOccurrence,
+        ) &&
         (room.game.lifecycle === "QUESTION_READING" ||
           room.game.lifecycle === "OPPONENT_CHANCE")
       ) {
@@ -1422,6 +1503,8 @@ export class AuthoritativeGameService {
         endedWithoutWinner: true,
       };
       room.activeQuestion = undefined;
+      room.activeQuestionOccurrence = undefined;
+      room.answerRevealedOccurrence = undefined;
       room.buzzOpen = false;
       room.deadlineAt = undefined;
       room.buzzWinner = undefined;
@@ -1441,6 +1524,8 @@ export class AuthoritativeGameService {
         await this.replaceFailedSurprise(room);
       room.game = reduceGame(room.game, { type: "RETURN_CELL" });
       room.activeQuestion = undefined;
+      room.activeQuestionOccurrence = undefined;
+      room.answerRevealedOccurrence = undefined;
       return;
     }
     if (intent.type === "SELECT_CELL") {
@@ -1474,6 +1559,7 @@ export class AuthoritativeGameService {
         | "RESUME"
         | "SELECT_CELL"
         | "SET_AUDIENCE_QUESTION_VISIBILITY"
+        | "REVEAL_ANSWER"
         | "END_WITHOUT_WINNER"
       >,
       () => GameEvent
@@ -1516,6 +1602,10 @@ export class AuthoritativeGameService {
     }
     if (
       intent.type === "JUDGE_INCORRECT" &&
+      !hasRevealedOccurrence(
+        room.activeQuestionOccurrence,
+        room.answerRevealedOccurrence,
+      ) &&
       room.game.lifecycle === "OPPONENT_CHANCE"
     ) {
       room.buzzOpen = true;
@@ -1524,7 +1614,14 @@ export class AuthoritativeGameService {
       ).toISOString();
       room.buzzWinner = undefined;
     }
-    if (intent.type === "RETRY_CELL") this.openQuestionBuzzer(room);
+    if (
+      intent.type === "RETRY_CELL" &&
+      !hasRevealedOccurrence(
+        room.activeQuestionOccurrence,
+        room.answerRevealedOccurrence,
+      )
+    )
+      this.openQuestionBuzzer(room);
   }
   /** Award and path evaluation are one authoritative consequence of a correct judgment. */
   private finalizeCorrectAnswer(room: Room): void {
@@ -1571,10 +1668,16 @@ export class AuthoritativeGameService {
     }
     room.game = reduceGame(room.game, { type: "LETTER_REVEALED" });
     if (questionMustBeSelectedNow) await this.assignQuestion(room);
-    this.openQuestionBuzzer(room);
+    if (
+      !hasRevealedOccurrence(
+        room.activeQuestionOccurrence,
+        room.answerRevealedOccurrence,
+      )
+    )
+      this.openQuestionBuzzer(room);
   }
   private async assignQuestion(room: Room): Promise<void> {
-    const questions = await this.questions(room.demo);
+    const questions = await this.questions(room.demo, room.questionSourceSnapshot);
     const cell = room.game.board?.cells.find(
       (value) => value.id === room.game.activeCellId,
     );
@@ -1599,6 +1702,8 @@ export class AuthoritativeGameService {
             cell.revealedLetter ?? cell.visibleValue ?? "",
           ));
     room.activeQuestion = selected.question as StoredQuestion;
+    room.activeQuestionOccurrence = `${room.boardSequence}:${cell.id}:${selected.question.id}`;
+    room.answerRevealedOccurrence = undefined;
     room.questionSelection = selected.selection;
   }
   private async replaceFailedCategory(room: Room): Promise<void> {
@@ -1712,15 +1817,31 @@ export class AuthoritativeGameService {
     };
   }
   questionInventory() {
-    return this.localFirestoreQuestionSource?.inventory;
+    const inventory = this.localFirestoreQuestionSource?.inventory;
+    if (!inventory) return undefined;
+    return {
+      source: inventory.source,
+      huroofAvailable: inventory.huroofAvailable,
+      recommendedHuroofCategoryIds: inventory.recommendedHuroofCategoryIds,
+      categories: inventory.categories.map((category) => ({
+        id: category.id,
+        labelAr: category.labelAr,
+        sourceOnly: category.sourceOnly,
+        questionCount: category.questionCount,
+        heldQuestionCount: category.heldQuestionCount,
+        huroofQuestionCount: category.huroofQuestionCount,
+        categoryGameEligible: category.categoryGameEligible,
+        availability: category.availability,
+      })),
+    };
   }
   private firestoreQuestions(snapshot?: string): StoredQuestion[] {
-    if (
-      !this.localFirestoreQuestionSource ||
-      snapshot !== this.localFirestoreQuestionSource.snapshotId
-    )
+    const source = snapshot
+      ? this.localQuestionSourcesBySnapshot.get(snapshot)
+      : undefined;
+    if (!source)
       throw new Error("QUESTION_SOURCE_SNAPSHOT_UNAVAILABLE");
-    return this.localFirestoreQuestionSource.questions as StoredQuestion[];
+    return source.questions as StoredQuestion[];
   }
   private async fileQuestions(demo: boolean): Promise<StoredQuestion[]> {
     const file = demo
@@ -2078,29 +2199,44 @@ export class AuthoritativeGameService {
             },
           }),
     };
+    const revealed = hasRevealedOccurrence(
+      room.activeQuestionOccurrence,
+      room.answerRevealedOccurrence,
+    );
+    const visibleMedia = revealed
+      ? room.activeQuestion?.answerMedia ?? room.activeQuestion?.media
+      : room.activeQuestion?.media;
+    const sharedAnswerVisible =
+      capability.role !== "player" &&
+      (capability.role === "host" || room.config.showQuestionOnAudience !== false) &&
+      (revealed ||
+        room.game.lifecycle === "QUESTION_FAILED");
     if (questionVisible && room.activeQuestion)
       projection.question = {
+        ...(room.activeQuestionOccurrence ? { occurrence: room.activeQuestionOccurrence } : {}),
         headerAr: room.activeQuestion.headerAr,
         promptAr: room.activeQuestion.promptAr,
         ...(capability.role !== "player" &&
         (capability.role === "host" ||
           room.config.showQuestionOnAudience !== false) &&
-        room.activeQuestion.media
-          ? { media: room.activeQuestion.media }
+        visibleMedia
+          ? { media: visibleMedia }
           : {}),
-      };
-    if (room.game.lifecycle === "QUESTION_FAILED" && room.activeQuestion)
-      projection.question = {
-        ...(projection.question as object),
-        revealedAnswer: room.activeQuestion.canonicalAnswer,
+        ...(sharedAnswerVisible
+          ? { revealedAnswer: room.activeQuestion.canonicalAnswer }
+          : {}),
       };
     if (isHost) {
       if (room.activeQuestion)
         projection.question = {
+          ...(room.activeQuestionOccurrence ? { occurrence: room.activeQuestionOccurrence } : {}),
           headerAr: room.activeQuestion.headerAr,
           promptAr: room.activeQuestion.promptAr,
-          ...(questionVisible && room.activeQuestion.media
-            ? { media: room.activeQuestion.media }
+          ...(questionVisible && visibleMedia
+            ? { media: visibleMedia }
+            : {}),
+          ...(sharedAnswerVisible
+            ? { revealedAnswer: room.activeQuestion.canonicalAnswer }
             : {}),
           primaryAnswer: room.activeQuestion.canonicalAnswer,
           acceptedAnswers: room.activeQuestion.acceptedAnswers,

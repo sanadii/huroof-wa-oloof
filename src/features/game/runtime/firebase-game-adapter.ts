@@ -14,6 +14,18 @@ export const acceptsFreshHostPresence = (
   requestGeneration === currentGeneration &&
   currentTime - startedAt <= PRESENCE_SNAPSHOT_FRESHNESS_MS;
 
+/** Callable media is intentionally a small authenticated data URL, never a Storage URL. */
+export function authenticatedMediaDataUrlToBlob(url: string): Blob {
+  const match = /^data:(image\/(?:png|jpeg)|video\/mp4);base64,([A-Za-z0-9+/]*={0,2})$/u.exec(url);
+  if (!match || match[2].length === 0 || match[2].length % 4 !== 0) throw new Error('MEDIA_INVALID_DATA_URL');
+  let bytes: Uint8Array;
+  try {
+    const decoded = atob(match[2]);
+    bytes = Uint8Array.from(decoded, (character) => character.charCodeAt(0));
+  } catch { throw new Error('MEDIA_INVALID_DATA_URL'); }
+  return new Blob([bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer], { type: match[1] });
+}
+
 function configuredClient() {
   const client = getOptionalFirebaseClient();
   if (!client) throw new Error('Firebase runtime is not configured; fixture mode remains active.');
@@ -63,7 +75,10 @@ export class FirebaseGameAdapter implements GameRuntimeAdapter {
 
   async getCurrentQuestionMedia(request: { roomId: string; mediaId: string; assetSha256: string }) {
     await signInAnonymouslyIfNeeded();
-    return (await httpsCallable<typeof request, { mediaId: string; assetSha256: string; url: string; expiresAt: string }>(configuredClient().functions, 'getCurrentQuestionMedia')(request)).data;
+    const grant = (await httpsCallable<typeof request, { mediaId: string; assetSha256: string; url: string; expiresAt: string }>(configuredClient().functions, 'getCurrentQuestionMedia')(request)).data;
+    if (grant.mediaId !== request.mediaId || grant.assetSha256 !== request.assetSha256 || !grant.url.startsWith('data:')) throw new Error('MEDIA_BINDING_MISMATCH');
+    const blob = authenticatedMediaDataUrlToBlob(grant.url);
+    return { ...grant, url: URL.createObjectURL(blob) };
   }
 
   subscribeProjection(roomId: string, role: ClientRole, uid: string, onProjection: (value: ProjectionEnvelope) => void, onError?: (error: Error) => void) {

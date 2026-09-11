@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { DatabaseSync } from "node:sqlite";
@@ -227,10 +227,31 @@ const load = (x: Awaited<ReturnType<typeof fixture>>) =>
 test("deterministic SQLite fixture holds staged, unsupported and malformed records while preserving valid test questions", async () => {
   const x = await fixture();
   try {
+    const db = new DatabaseSync(x.dbPath);
+    db.prepare("INSERT INTO local_admin_drafts(id,data,updated_at) VALUES (?,?,?)").run(
+      "held-only-category",
+      JSON.stringify({
+        id: "held-only-category",
+        stagingState: "unsupported_mode:charades",
+        importSource: {
+          ...source(
+            "held-only-category",
+            "tahadani-held-only",
+            "فئة مؤجلة",
+            "إجابة خاصة",
+            null,
+            null,
+          ),
+          mode: "charades",
+        },
+      }),
+      new Date().toISOString(),
+    );
+    db.close();
     const imported = await load(x);
     assert.equal(imported.inventory.source, "local_sqlite_import");
-    assert.equal(imported.inventory.boundedReadCount, 62);
-    assert.equal(imported.inventory.heldQuestionCount, 3);
+    assert.equal(imported.inventory.boundedReadCount, 63);
+    assert.equal(imported.inventory.heldQuestionCount, 4);
     assert.equal(
       imported.inventory.heldByReason?.[
         "staging_state:identity_collision_preserved_existing"
@@ -241,7 +262,7 @@ test("deterministic SQLite fixture holds staged, unsupported and malformed recor
       imported.inventory.heldByReason?.[
         "staging_state:unsupported_mode:charades"
       ],
-      1,
+      2,
     );
     assert.equal(
       imported.inventory.heldByReason?.malformed_supported_record,
@@ -267,43 +288,103 @@ test("deterministic SQLite fixture holds staged, unsupported and malformed recor
       (q) => q.canonicalAnswer === "جواب مشترك",
     );
     assert.equal(a?.answerConceptId, b?.answerConceptId);
-    assert.deepEqual(imported.inventory.recommendedHuroofCategoryIds, [
-      "tahadani-006",
-    ]);
+    // One concept per letter covers the board but cannot satisfy its three-concept reserve.
+    assert.deepEqual(imported.inventory.recommendedHuroofCategoryIds, []);
+    assert.deepEqual(
+      imported.inventory.categories.find(
+        (category) => category.id === "tahadani-held-only",
+      ),
+      {
+        id: "tahadani-held-only",
+        labelAr: "فئة مؤجلة",
+        sourceOnly: true,
+        questionCount: 0,
+        heldQuestionCount: 1,
+        classicQuestionCount: 0,
+        huroofQuestionCount: 0,
+        categoryGameEligible: false,
+        availability: "held_only",
+      },
+    );
+    const service = new AuthoritativeGameService({
+      dbPath: x.dbPath,
+      secret: "test",
+      localFirestoreQuestionSource: imported,
+    });
+    try {
+      const publicInventory = JSON.stringify(service.questionInventory());
+      assert.equal(publicInventory.includes("إجابة خاصة"), false);
+      assert.equal(publicInventory.includes("snapshotId"), false);
+      assert.equal(publicInventory.includes("bundleSha256"), false);
+      assert.equal(publicInventory.includes("heldByReason"), false);
+      assert.equal(publicInventory.includes(x.dbPath), false);
+    } finally {
+      service.close();
+    }
   } finally {
     await rm(x.dir, { recursive: true, force: true });
   }
 });
-test("both game kinds pin a snapshot and fail closed when fixture questions change", async () => {
+test("held-only SQLite imports still expose a category inventory without becoming playable", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "huroof-held-only-source-"));
+  const dbPath = join(dir, "source.sqlite");
+  const drafts = join(dir, "drafts.jsonl");
+  const approved = join(dir, "approved.jsonl");
+  try {
+    const db = new DatabaseSync(dbPath);
+    db.exec(
+      "CREATE TABLE local_admin_drafts (id TEXT PRIMARY KEY, data TEXT NOT NULL, updated_at TEXT NOT NULL)",
+    );
+    db.prepare("INSERT INTO local_admin_drafts(id,data,updated_at) VALUES (?,?,?)").run(
+      "held-only",
+      JSON.stringify({
+        id: "held-only",
+        stagingState: "unsupported_mode:charades",
+        importSource: {
+          ...source(
+            "held-only",
+            "tahadani-held-only",
+            "فئة مؤجلة",
+            "إجابة لا تُنشر",
+            null,
+            null,
+          ),
+          mode: "charades",
+        },
+      }),
+      new Date().toISOString(),
+    );
+    db.close();
+    await writeFile(drafts, "");
+    await writeFile(approved, "");
+    const imported = await loadLocalSqliteImportQuestionSource({
+      dbPath,
+      fileDraftsPath: drafts,
+      fileApprovedPath: approved,
+    });
+    assert.equal(imported.questions.length, 0);
+    assert.equal(imported.inventory.huroofAvailable, false);
+    assert.deepEqual(imported.inventory.categories.map((category) => ({
+      id: category.id,
+      labelAr: category.labelAr,
+      questionCount: category.questionCount,
+      heldQuestionCount: category.heldQuestionCount,
+      availability: category.availability,
+    })), [{
+      id: "tahadani-held-only",
+      labelAr: "فئة مؤجلة",
+      questionCount: 0,
+      heldQuestionCount: 1,
+      availability: "held_only",
+    }]);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+test("a refreshed import updates new rooms while active rooms keep their pinned source", async () => {
   const x = await fixture();
   try {
     const initial = await load(x);
-    const service = new AuthoritativeGameService({
-      dbPath: x.dbPath,
-      secret: "test",
-      localFirestoreQuestionSource: initial,
-    });
-    const huroof = service.create("host", true, {
-      categories: initial.inventory.recommendedHuroofCategoryIds,
-      gameKind: "huroof",
-      modality: "classic",
-      questionSeconds: 20,
-      opponentSeconds: 10,
-      teams: { horizontal: "أ", vertical: "ب" },
-      difficulty: "mixed",
-      mode: "classic",
-    });
-    const category = service.create("host", true, {
-      categories: ["tahadani-006", "tahadani-007"],
-      gameKind: "categories",
-      modality: "classic",
-      questionSeconds: 20,
-      opponentSeconds: 10,
-      teams: { horizontal: "أ", vertical: "ب" },
-      difficulty: "mixed",
-      mode: "classic",
-    });
-    service.close();
     const db = new DatabaseSync(x.dbPath);
     db.prepare("UPDATE local_admin_drafts SET data=? WHERE id=?").run(
       JSON.stringify({
@@ -322,23 +403,145 @@ test("both game kinds pin a snapshot and fail closed when fixture questions chan
     db.close();
     const changed = await load(x);
     assert.notEqual(changed.snapshotId, initial.snapshotId);
-    const restored = new AuthoritativeGameService({
+    const service = new AuthoritativeGameService({
       dbPath: x.dbPath,
       secret: "test",
-      localFirestoreQuestionSource: changed,
+      localFirestoreQuestionSource: initial,
     });
     try {
-      assert.throws(
-        () => restored.metadata(huroof.roomId, huroof.token),
-        /QUESTION_SOURCE_SNAPSHOT_UNAVAILABLE/,
+      const oldRoom = service.create("host", true, {
+        categories: initial.inventory.recommendedHuroofCategoryIds,
+        gameKind: "huroof",
+        modality: "classic",
+        questionSeconds: 20,
+        opponentSeconds: 10,
+        teams: { horizontal: "أ", vertical: "ب" },
+        difficulty: "mixed",
+        mode: "classic",
+      });
+      service.replaceLocalQuestionSource(changed);
+      assert.equal(service.questionInventory()?.categories.length, changed.inventory.categories.length);
+      assert.doesNotThrow(() => service.metadata(oldRoom.roomId, oldRoom.token));
+      const snapshots = service as unknown as {
+        questionsSync: (
+          demo: boolean,
+          snapshot?: string,
+        ) => Array<{ canonicalAnswer: string }>;
+      };
+      assert.equal(
+        snapshots.questionsSync(true, initial.snapshotId).some(
+          (question) => question.canonicalAnswer === "اجواب",
+        ),
+        true,
       );
-      assert.throws(
-        () => restored.metadata(category.roomId, category.token),
-        /QUESTION_SOURCE_SNAPSHOT_UNAVAILABLE/,
+      assert.equal(
+        snapshots.questionsSync(true, initial.snapshotId).some(
+          (question) => question.canonicalAnswer === "إجابة تغيرت",
+        ),
+        false,
+      );
+      const newRoom = service.create("host", true, {
+        categories: changed.inventory.recommendedHuroofCategoryIds,
+        gameKind: "huroof",
+        modality: "classic",
+        questionSeconds: 20,
+        opponentSeconds: 10,
+        teams: { horizontal: "أ", vertical: "ب" },
+        difficulty: "mixed",
+        mode: "classic",
+      });
+      assert.equal(
+        service.store.load(newRoom.roomId)?.questionSourceSnapshot,
+        changed.snapshotId,
       );
     } finally {
-      restored.close();
+      service.close();
     }
+  } finally {
+    await rm(x.dir, { recursive: true, force: true });
+  }
+});
+
+test("a pinned SQLite inventory supplies imported category labels and mixed video/image-capable category rooms", async () => {
+  const x = await fixture();
+  try {
+    const db = new DatabaseSync(x.dbPath);
+    const insert = db.prepare("INSERT INTO local_admin_drafts(id,data,updated_at) VALUES (?,?,?)");
+    const promptSha256 = "761991311fd4d5ee4d9f27c703d867b6d9259b175ff7c3f0f55b91ad4b251d69";
+    const answerSha256 = "18ff5ba7aa3ab152ac8b20f2210a9753e2e107a4c9e4db23667816ddffdda159";
+    for (let index = 0; index < 14; index++) {
+      const id = `goal-${index}`;
+      insert.run(id, JSON.stringify({
+        id,
+        modality: "video",
+        stagingState: "unsupported_mode:video",
+        media: {
+          promptMediaId: "goal-quiz-2026:001:blur",
+          promptSha256,
+          answerMediaId: "goal-quiz-2026:001:clean",
+          answerSha256,
+        },
+        importSource: source(id, "goals-2026", "من سجل الهدف؟", `لاعب ${index}`, null, false),
+      }), new Date().toISOString());
+    }
+    db.close();
+    const imported = await load(x);
+    assert.equal(imported.inventory.categories.find((item) => item.id === "goals-2026")?.labelAr, "من سجل الهدف؟");
+    assert.equal(imported.questions.filter((item) => item.categoryId === "goals-2026" && item.modality === "video").length, 14);
+    const service = new AuthoritativeGameService({ dbPath: x.dbPath, secret: "test", localFirestoreQuestionSource: imported });
+    try {
+      const host = service.create("host", true, { gameKind: "categories", categories: ["goals-2026", "tahadani-007"] });
+      assert.deepEqual(service.store.load(host.roomId)?.config.categorySnapshot, [
+        { id: "goals-2026", labelAr: "من سجل الهدف؟" },
+        { id: "tahadani-007", labelAr: "عالم الحيوان" },
+      ]);
+      let revision = host.revision;
+      for (const type of ["START_MATCH", "ROUND_READY"] as const) {
+        const result = await service.intent(host.roomId, host.token, { type, intentId: `${type}-${revision}`, expectedRevision: revision, payload: {} });
+        revision = result.revision;
+      }
+      const goalCell = service.metadata(host.roomId, host.token).projection.board!.find((cell) => cell.categoryId === "goals-2026")!;
+      const opened = await service.intent(host.roomId, host.token, { type: "SELECT_CELL", intentId: `open-${revision}`, expectedRevision: revision, payload: { cellId: goalCell.id } });
+      assert.equal(opened.projection.projection.question?.headerAr, "من سجل الهدف؟");
+      assert.equal(service.store.load(host.roomId)?.activeQuestion?.modality, "video");
+    } finally { service.close(); }
+  } finally { await rm(x.dir, { recursive: true, force: true }); }
+});
+
+test("Huroof readiness and recommendations exclude image questions with letters", async () => {
+  const x = await fixture();
+  try {
+    const manifest = JSON.parse(
+      await readFile("content/question-media/v18-private-240/manifest.json", "utf8"),
+    ) as { assets: Array<{ mediaId: string; assetSha256: string }> };
+    const image = manifest.assets[0]!;
+    const db = new DatabaseSync(x.dbPath);
+    const update = db.prepare("UPDATE local_admin_drafts SET data=? WHERE id=?");
+    for (const [index, letter] of arabicLetters.slice(16).entries()) {
+      const id = `letter-${index + 16}`;
+      update.run(
+        JSON.stringify({
+          id: `sqlite-${index + 16}`,
+          media: image,
+          importSource: source(id, "tahadani-006", "معلومات عامة", `${letter}صورة`, letter, true),
+        }),
+        `sqlite-${index + 16}`,
+      );
+    }
+    db.close();
+    const imported = await load(x);
+    const category = imported.inventory.categories.find((item) => item.id === "tahadani-006");
+    assert.equal(category?.huroofQuestionCount, 17); // 16 letter cells plus the fixture's duplicate legacy ا.
+    assert.equal(
+      new Set(
+        imported.questions
+          .filter((question) => question.modality === "classic" && question.targetLetter)
+          .map((question) => question.targetLetter),
+      ).size,
+      16,
+    );
+    assert.equal(imported.inventory.huroofAvailable, false);
+    assert.deepEqual(imported.inventory.recommendedHuroofCategoryIds, []);
   } finally {
     await rm(x.dir, { recursive: true, force: true });
   }

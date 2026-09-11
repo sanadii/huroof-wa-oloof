@@ -13,9 +13,9 @@ function AuthShell({ children }: { children: ReactNode }) {
 function statusCopy(status: ReturnType<typeof useFirebaseAuth>['status']) {
   return ({
     loading: 'جارٍ استعادة حالة تسجيل الدخول…',
-    unavailable: 'تسجيل الدخول غير متاح في هذه النسخة لأن إعداد Firebase العام غير مكتمل.',
-    signedOut: 'يمكنك المتابعة كضيف أو تسجيل الدخول لحفظ هوية جلسة Firebase.',
-    anonymous: 'أنت في جلسة ضيف. ربط Google يحافظ على معرّف جلسة الغرفة نفسه.',
+    unavailable: 'تسجيل الدخول غير متاح في هذه النسخة حالياً.',
+    signedOut: 'يمكنك المتابعة كضيف أو تسجيل الدخول بحساب Google.',
+    anonymous: 'أنت تلعب كضيف. يمكنك تسجيل الدخول بحساب Google مع الاحتفاظ بجلسة الغرفة الحالية.',
     google: 'تم تسجيل الدخول عبر Google.',
     error: 'تحتاج محاولة تسجيل الدخول إلى انتباهك.',
   })[status];

@@ -1,4 +1,16 @@
 import { categoryCatalog, type CategoryCover } from "./category-catalog";
+import { normalizeCategoryFilterText } from "./category-filters";
+import tahadaniImages from "./tahadani-image-catalog.public.json";
+
+const importedCovers = new Map(
+  tahadaniImages.covers.map((cover) => [normalizeCategoryFilterText(cover.name), cover]),
+);
+// Equivalent topic names in the local inventory and the source image library.
+const coverAliases = new Map([
+  ["كرة القدم الكويتية", "الكرة الكويتية"],
+  ["طب وجسم الإنسان", "طب"],
+  ["جغرافيا العالم", "جغرافيا"],
+].map(([label, name]) => [normalizeCategoryFilterText(label), normalizeCategoryFilterText(name)]));
 
 export type LocalQuestionInventory = {
   source: "local_firestore_import" | "local_sqlite_import";
@@ -8,7 +20,11 @@ export type LocalQuestionInventory = {
     id: string;
     labelAr: string;
     sourceOnly: boolean;
+    questionCount: number;
+    heldQuestionCount: number;
+    huroofQuestionCount: number;
     categoryGameEligible: boolean;
+    availability: "ready" | "insufficient_questions" | "held_only";
   }>;
 };
 
@@ -36,17 +52,23 @@ export function inventoryCategoryCovers(
   const existing = new Map(
     categoryCatalog.map((category) => [category.id, category]),
   );
-  return inventory.categories.map(
-    (category) =>
-      existing.get(category.id) ?? {
-        id: category.id,
-        displayNameAr: category.labelAr,
-        questionReadiness: "drafting",
-        cover: {
-          web320: "assets/categories/320/category-006.webp",
-          altAr: `صورة افتراضية لفئة ${category.labelAr}`,
-          publishable: true,
-        },
+  return inventory.categories.map((category) => {
+    const knownCategory = existing.get(category.id);
+    if (knownCategory) return knownCategory;
+    const name = normalizeCategoryFilterText(category.labelAr);
+    const importedCover = importedCovers.get(coverAliases.get(name) ?? name);
+    return {
+      id: category.id,
+      displayNameAr: category.labelAr,
+      questionReadiness: "drafting",
+      cover: {
+        web320: importedCover?.web320 ?? "assets/categories/320/category-006.webp",
+        altAr: importedCover
+          ? `غلاف فئة ${category.labelAr}`
+          : `صورة افتراضية لفئة ${category.labelAr}`,
+        // Imported legacy artwork retains its unverified rights status.
+        publishable: importedCover === undefined,
       },
-  );
+    };
+  });
 }

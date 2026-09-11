@@ -25,20 +25,62 @@ const AdminUsersRoute = lazy(() => import('../features/admin/AdminRoutes').then(
 const LegacyQuestionRedirect = lazy(() => import('../features/admin/AdminRoutes').then(({ LegacyQuestionRedirect }) => ({ default: LegacyQuestionRedirect })));
 const LocalImportReviewRoute = lazy(() => import('../routes/LocalImportReviewRoute').then(({ LocalImportReviewRoute }) => ({ default: LocalImportReviewRoute })));
 
-function RouteLoading() {
-  return <main aria-busy="true" aria-live="polite" id="main-content"><p>جارٍ تحميل الصفحة…</p></main>;
+type RouteStatusSurfaceProps = {
+  action?: ReactNode;
+  busy?: boolean;
+  message: ReactNode;
+  messageRole?: "alert" | "status";
+  title: string;
+};
+
+function RouteStatusSurface({
+  action,
+  busy = false,
+  message,
+  messageRole = "status",
+  title,
+}: RouteStatusSurfaceProps) {
+  const titleId = `route-status-${messageRole}-title`;
+  return (
+    <main
+      aria-busy={busy || undefined}
+      aria-live={busy ? "polite" : undefined}
+      className="app-page spatial-shell"
+      id="main-content"
+    >
+      <section className="setup-page spatial-setup" aria-labelledby={titleId}>
+        <div>
+          <p className="eyebrow">تحدي الخلية</p>
+          <h1 id={titleId}>{title}</h1>
+          <p className="form-message" role={messageRole}>{message}</p>
+          {action}
+        </div>
+      </section>
+    </main>
+  );
+}
+
+export function RouteLoading() {
+  return <RouteStatusSurface busy message="يُرجى الانتظار بينما نجهّز الصفحة." title="جارٍ تحميل الصفحة…" />;
 }
 
 export function StaticPreviewUnavailableRoute() {
-  return <main className="app-page spatial-shell" id="main-content"><section className="setup-page spatial-setup" aria-labelledby="static-preview-title"><p className="eyebrow">معاينة منشورة</p><h1 id="static-preview-title">هذه الخدمة غير متاحة في المعاينة</h1><p className="form-message" role="status">{staticPreviewNotice}</p></section></main>;
+  return <RouteStatusSurface message={staticPreviewNotice} title="هذه الخدمة غير متاحة في المعاينة" />;
 }
 
-class RouteChunkBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
+export class RouteChunkBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
   state = { failed: false };
   static getDerivedStateFromError() { return { failed: true }; }
   render() {
     if (!this.state.failed) return this.props.children;
-    return <main id="main-content" role="alert"><h1>تعذر تحميل الصفحة</h1><p>تحقق من الاتصال ثم أعد المحاولة.</p><button className="button button--primary" onClick={() => window.location.reload()} type="button">إعادة المحاولة</button></main>;
+    return (
+      <RouteStatusSurface
+        action={<button className="button button--primary" onClick={() => window.location.reload()} type="button">إعادة المحاولة</button>}
+        message="تحقق من الاتصال ثم أعد المحاولة."
+        messageRole="alert"
+        title="تعذر تحميل الصفحة"
+      />
+    );
   }
 }
 
