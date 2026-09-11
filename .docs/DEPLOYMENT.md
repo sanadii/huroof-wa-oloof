@@ -1,5 +1,18 @@
 # Deployment and rollback plan
 
+## Blaze activation and App Check preparation — 2026-09-11
+
+User confirmed Blaze setup; fresh Cloud Billing API check verifies billingEnabled=true. The previous billing blocker is resolved. App Check Enterprise now has a SCORE key restricted to huroof-wa-oloof.vercel.app, one-hour token TTL and 0.5 minimum score. Exact key/provider read-back passed. No debug bypass, all-domain key, IAM/rules/data change or question approval was applied.
+
+Provider source commit `debcf883`: explicit Enterprise/v3 selection, invalid-value rejection, required live key, fixture/emulator preservation and initialization before gameplay services. Six source/test paths reviewed; 3 provider tests, 3 production-preflight tests, typecheck, lint and build pass. Root reproduced provider tests; Gate PASS. Actual browser attestation is still pending a live client deployment.
+
+Initial nine-callable backend package passed Gate (10 runtime/lock files, manifest SHA2562750ff7b504838a1508dda5a5ee8d0bbfe0a83e53634c2df8dc60cfdc2ccbfad). Firebase enabled its required build/run APIs but deployment failed before creating Functions: me-central2 upload URL returned403 LOCATION_POLICY_VIOLATED, with Google directing regional access requests to sales. A repeat diagnostic confirmed Dammam403 and Doha/me-central1200. No room Functions were deployed by the failed attempt.
+
+Root requested a user decision before switching game request processing to Doha while retaining the existing Dammam database. No region change or runtime switch has been applied. Production remains the previously verified 52/83-category static preview. The active question release is still absent; genuine content review/publication and live host/player checks remain required after infrastructure setup.
+
+Evidence: output/firebase-activation-20260911/ (appcheck-prestate/configured receipts, backend/provider Gate reports, region-access-check.json). Rollback before live client use restores only the task-created provider/key state with concurrency checks. Do not delete source questions, change billing, weaken rules or synthesize approval receipts. API enablement may remain; never disable shared services without checking use.
+
+
 ## Hide unavailable categories and question-count report — 2026-09-11
 
 User requests categories with insufficient questions omitted from selection and a Markdown generation backlog with counts for all categories. This supersedes the earlier disabled-card presentation, not the complete underlying inventory. Local/preview Huroof uses existing positive letter-question coverage; category mode uses existing distinct-concept eligibility. Approved Firebase catalogs use their per-mode playable flags. Filtering precedes search/topics/counts and prunes stale selections. Existing design, static-preview restriction and server-side final validation remain.
