@@ -1,7 +1,7 @@
 import { httpsCallable } from 'firebase/functions';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { getOptionalFirebaseClient, signInAnonymouslyIfNeeded } from '../../../lib/firebase/client.js';
-import type { ClientRole, CreateRoomRequest, GameIntent, GameRuntimeAdapter, HostPresenceSnapshot, JoinRoomRequest, ProjectionEnvelope } from './contracts.js';
+import { isApprovedReleaseCatalog, type ApprovedReleaseCatalog, type ClientRole, type CreateRoomRequest, type GameIntent, type GameRuntimeAdapter, type HostPresenceSnapshot, type JoinRoomRequest, type ProjectionEnvelope } from './contracts.js';
 
 const PRESENCE_SNAPSHOT_FRESHNESS_MS = 30_000;
 
@@ -49,6 +49,13 @@ export class FirebaseGameAdapter implements GameRuntimeAdapter {
     await signInAnonymouslyIfNeeded();
     const result = await httpsCallable<CreateRoomRequest, { roomId: string; roomCode: string; revision: number }>(configuredClient().functions, 'createRoom')(request);
     return result.data;
+  }
+
+  async getApprovedReleaseCatalog(): Promise<ApprovedReleaseCatalog> {
+    await signInAnonymouslyIfNeeded();
+    const data = (await httpsCallable<Record<string, never>, unknown>(configuredClient().functions, 'getApprovedReleaseCatalog')({})).data;
+    if (!isApprovedReleaseCatalog(data)) throw new Error('APPROVED_RELEASE_CATALOG_INVALID');
+    return data;
   }
 
   async joinRoom(request: JoinRoomRequest) {

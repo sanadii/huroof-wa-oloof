@@ -2,12 +2,54 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { deriveMatch, initialGameState } from '../../src/features/game/domain/lifecycle.js';
 import { generateBoard, revealSurprise } from '../../src/features/game/domain/board.js';
-import { prepareLetterReveal, selectQuestionForActiveCell, validateQuestionScope } from './index.js';
+import { approvedReleaseCatalogProjection, expectedReleaseMatches, prepareLetterReveal, selectQuestionForActiveCell, validateQuestionScope } from './index.js';
 import { createMatchQuestionSelection, selectCharadesQuestion } from '../../src/features/game/runtime/question-selector.js';
-import { intentHash, intentReceiptId, isRoomClosed, preflightContentPreparation, projectRoom, reduceIntent, roomGameKind, validIntent, type CanonicalMember, type CanonicalRoom } from './game.js';
+import { intentHash, intentReceiptId, isRoomClosed, preflightContentPreparation, projectRoom, reduceIntent, roomGameKind, validIntent, type CanonicalMember, type CanonicalQuestion, type CanonicalRoom } from './game.js';
 
 const room = (): CanonicalRoom => ({ schemaVersion: 2, roomCode: 'A1B2C3D4', revision: 2, game: { ...initialGameState(), lifecycle: 'QUESTION_READING' }, config: { demo: true, questionSeconds: 20, opponentSeconds: 10, teams: { horizontal: 'أفقي', vertical: 'عمودي' }, releaseId: 'demo-drafts', releaseRootSha256: 'hash', releaseDemoFixture: true }, timer: { deadlineMs: 2_000, buzzOpen: true }, questionCursor: 0 });
 const player: CanonicalMember = { uid: 'p1', role: 'player', displayName: 'P', ready: false, active: true, team: 'horizontal' };
+const readyReleaseQuestions: CanonicalQuestion[] = Array.from({ length: 25 }, (_, letter) => Array.from({ length: 3 }, (_, copy) => ({ id: `ready-${letter}-${copy}`, categoryId: 'category-a', modality: 'classic' as const, targetLetter: `ح${letter}`, answerConceptId: `concept-${letter}-${copy}`, headerAr: 'عنوان', promptAr: 'سؤال', canonicalAnswer: 'جواب', acceptedAnswers: ['جواب'] }))).flat();
+
+test('approved release catalog projection exposes only immutable identity, category labels, and board capability', () => {
+  const value = approvedReleaseCatalogProjection(
+    { releaseId: 'release-approved' },
+    { immutable: true, approvedCount: 7, documentRootSha256: 'a'.repeat(64), canonicalAnswer: 'private', sources: ['private'] },
+    [
+      { id: 'category-b', data: { id: 'category-b', labelAr: 'فئة ب', media: { objectName: 'private' } } },
+      { id: 'category-a', data: { id: 'category-a', labelAr: 'فئة أ', promptAr: 'private' } },
+    ],
+    readyReleaseQuestions,
+  );
+  assert.deepEqual(value, {
+    releaseId: 'release-approved', releaseRootSha256: 'a'.repeat(64), demoFixture: false,
+    categories: [{ id: 'category-a', labelAr: 'فئة أ', playable: { huroof: true, categories: false, charades: false } }, { id: 'category-b', labelAr: 'فئة ب', playable: { huroof: false, categories: false, charades: false } }],
+    boardCapabilities: { huroof: true, categories: false, charades: false },
+  });
+  assert.doesNotMatch(JSON.stringify(value), /private|answer|source|media|prompt/i);
+  assert.equal(expectedReleaseMatches({ releaseId: 'release-approved', releaseRootSha256: 'a'.repeat(64) }, 'release-approved', 'a'.repeat(64)), true);
+  assert.equal(expectedReleaseMatches({ releaseId: 'release-approved', releaseRootSha256: 'b'.repeat(64) }, 'release-approved', 'a'.repeat(64)), false);
+  assert.throws(() => approvedReleaseCatalogProjection({ releaseId: 'release-too-large' }, { immutable: true, approvedCount: 25_001, documentRootSha256: 'a'.repeat(64) }, [{ id: 'category-a', data: { id: 'category-a', labelAr: 'فئة أ' } }], readyReleaseQuestions), /Production requires/);
+  assert.throws(() => approvedReleaseCatalogProjection({ releaseId: 'release-demo' }, { immutable: true, demoFixture: true, approvedCount: 1, documentRootSha256: 'a'.repeat(64) }, [{ id: 'category-a', data: { id: 'category-a', labelAr: 'فئة أ' } }], readyReleaseQuestions), /Production requires/);
+  assert.equal(approvedReleaseCatalogProjection({ releaseId: 'release-demo' }, { immutable: true, demoFixture: true, approvedCount: 1, documentRootSha256: 'a'.repeat(64) }, [{ id: 'category-a', data: { id: 'category-a', labelAr: 'فئة أ' } }], readyReleaseQuestions, { allowDemoFixture: true }).demoFixture, true);
+  assert.throws(() => approvedReleaseCatalogProjection({ releaseId: 'release-empty' }, { immutable: true, approvedCount: 1, documentRootSha256: 'a'.repeat(64) }, [], readyReleaseQuestions), /no eligible categories/);
+  assert.throws(() => approvedReleaseCatalogProjection({ releaseId: 'release-mismatch' }, { immutable: true, approvedCount: 1, documentRootSha256: 'a'.repeat(64) }, [{ id: 'category-a', data: { id: 'other-category', labelAr: 'فئة أ' } }], readyReleaseQuestions), /invalid category catalog/);
+  const underfilled = approvedReleaseCatalogProjection({ releaseId: 'release-underfilled' }, { immutable: true, approvedCount: 1, documentRootSha256: 'a'.repeat(64) }, [{ id: 'category-a', data: { id: 'category-a', labelAr: 'فئة أ' } }], readyReleaseQuestions.slice(0, 2));
+  assert.equal(underfilled.boardCapabilities.huroof, false);
+  const charadesOnly = approvedReleaseCatalogProjection(
+    { releaseId: 'release-charades' }, { immutable: true, approvedCount: 1, documentRootSha256: 'a'.repeat(64) },
+    [{ id: 'category-a', data: { id: 'category-a', labelAr: 'فئة أ' } }],
+    [{ id: 'charades-1', categoryId: 'category-a', modality: 'charades', answerConceptId: 'mime-1', headerAr: 'مثّل', promptAr: 'مثّل', canonicalAnswer: 'جواب', acceptedAnswers: ['جواب'] }],
+  );
+  assert.deepEqual(charadesOnly.boardCapabilities, { huroof: false, categories: false, charades: true });
+  const sharedConcepts: CanonicalQuestion[] = ['category-a', 'category-b'].flatMap((categoryId) => Array.from({ length: 14 }, (_, index) => ({
+    id: `${categoryId}-${index}`, categoryId, modality: 'classic' as const, targetLetter: 'ا', answerConceptId: `shared-${index}`, headerAr: 'عنوان', promptAr: 'سؤال', canonicalAnswer: 'جواب', acceptedAnswers: ['جواب'],
+  })));
+  const sharedCatalog = approvedReleaseCatalogProjection(
+    { releaseId: 'release-shared' }, { immutable: true, approvedCount: sharedConcepts.length, documentRootSha256: 'a'.repeat(64) },
+    [{ id: 'category-a', data: { id: 'category-a', labelAr: 'فئة أ' } }, { id: 'category-b', data: { id: 'category-b', labelAr: 'فئة ب' } }], sharedConcepts,
+  );
+  assert.equal(sharedCatalog.boardCapabilities.categories, false);
+});
 
 test('closed rooms are terminal for shared join and intent guards', () => {
   const closed = { ...room(), closedAt: new Date().toISOString() } as CanonicalRoom;
@@ -155,7 +197,7 @@ test('safe live team moves preserve game state and readiness, while answer and s
 test('Firebase projections preserve match settings for a same-settings rematch', () => {
   const canonical = { ...room(), config: { ...room().config, categories: ['tahadani-006', 'tahadani-007'], modality: 'image' as const, difficulty: 'hard', mode: 'custom' as const } };
   const value = projectRoom('r1', canonical, [{ ...player, role: 'host' }], 'host', 'p1', 1_000).projection as { room: { matchSettings: unknown } };
-  assert.deepEqual(value.room.matchSettings, { demo: true, gameKind: 'huroof', questionSeconds: 20, opponentSeconds: 10, teams: { horizontal: 'أفقي', vertical: 'عمودي' }, categories: ['tahadani-006', 'tahadani-007'], modality: 'image', difficulty: 'hard', mode: 'custom', showQuestionOnAudience: true });
+  assert.deepEqual(value.room.matchSettings, { demo: true, gameKind: 'huroof', questionSeconds: 20, opponentSeconds: 10, teams: { horizontal: 'أفقي', vertical: 'عمودي' }, categories: ['tahadani-006', 'tahadani-007'], modality: 'image', difficulty: 'hard', mode: 'custom', showQuestionOnAudience: true, expectedRelease: { releaseId: 'demo-drafts', releaseRootSha256: 'hash' } });
 });
 test('only first eligible player buzz wins and player sees self winner only', () => {
   const first = reduceIntent(room(), player, { type: 'BUZZ', intentId: 'a', expectedRevision: 2, payload: {} }, 1_000); assert.equal(first.room.game.lifecycle, 'FIRST_ANSWER'); assert.equal(first.room.buzzWinner?.uid, 'p1'); assert.equal(first.room.buzzWinner?.method, 'player'); assert.throws(() => reduceIntent(first.room, { ...player, uid: 'p2', team: 'vertical' }, { type: 'BUZZ', intentId: 'b', expectedRevision: 3, payload: {} }, 1_000)); const winner = projectRoom('r', first.room, [player], 'player', 'p1', 1_000); const host = projectRoom('r', first.room, [player], 'host', 'p1', 1_000); assert.match(JSON.stringify(winner), /isBuzzWinner/); assert.match(JSON.stringify(host), /displayName/);

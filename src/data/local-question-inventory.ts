@@ -67,10 +67,17 @@ export async function fetchLocalQuestionInventory(): Promise<
 export function inventoryCategoryCovers(
   inventory: LocalQuestionInventory,
 ): CategoryCover[] {
+  return catalogCategoryCovers(inventory.categories);
+}
+
+/** Presentation-only category cards shared by local inventory and approved release metadata. */
+export function catalogCategoryCovers(
+  categories: Array<{ id: string; labelAr: string }>,
+): CategoryCover[] {
   const existing = new Map(
     categoryCatalog.map((category) => [category.id, category]),
   );
-  return inventory.categories.map((category) => {
+  return categories.map((category) => {
     const knownCategory = existing.get(category.id);
     if (knownCategory) return knownCategory;
     const name = normalizeCategoryFilterText(category.labelAr);

@@ -17,3 +17,16 @@ test('unsubscribing before the Firebase adapter chunk resolves never opens a pro
   await Promise.resolve();
   assert.equal(subscribed, false);
 });
+
+test('approved release catalog discovery forwards through the deferred Firebase boundary', async () => {
+  const expected = {
+    releaseId: 'release-approved', releaseRootSha256: 'a'.repeat(64), demoFixture: false,
+    categories: [{ id: 'category-a', labelAr: 'فئة أ', playable: { huroof: true, categories: false, charades: false } }], boardCapabilities: { huroof: true, categories: false, charades: false },
+  };
+  const adapter = new DeferredFirebaseGameAdapter(async () => ({
+    kind: 'firebase', createRoom: async () => ({ roomId: '', roomCode: '', revision: 0 }),
+    getApprovedReleaseCatalog: async () => expected,
+    joinRoom: async () => ({ roomId: '', revision: 0 }), submitGameIntent: async () => ({ revision: 0, replayed: false }), subscribeProjection: () => () => undefined,
+  }));
+  assert.deepEqual(await adapter.getApprovedReleaseCatalog(), expected);
+});

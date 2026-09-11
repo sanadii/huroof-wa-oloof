@@ -25,6 +25,7 @@ import {
 } from "../data/category-catalog";
 import {
   fetchLocalQuestionInventory,
+  catalogCategoryCovers,
   inventoryCategoryCovers,
   staticPreviewQuestionInventory,
   type LocalQuestionInventory,
@@ -45,6 +46,7 @@ import {
 import { connectionLabel, stateLabel } from "../features/ui/game-state";
 import type {
   HostPresenceSnapshot,
+  ApprovedReleaseCatalog,
   IntentType,
   PlayerPresenceState,
   ProjectionEnvelope,
@@ -251,6 +253,10 @@ export const readableError = (error: unknown) => {
     )
   )
     return "لا تكفي الأسئلة في الفئات المختارة لتجهيز لوحة المباراة. اختر «استخدام كل الفئات» أو أضف «معلومات عامة».";
+  if (message === "SELECTED_SCOPE_NOT_PLAYABLE")
+    return "الفئات المختارة لا تكفي للوحة المطلوبة في الحزمة المعتمدة. غيّر الاختيار ثم حاول مرة أخرى.";
+  if (message === "ACTIVE_RELEASE_CHANGED")
+    return "تغيّرت الحزمة المعتمدة. حدّث الإعدادات للتحقق من الفهرس الجديد.";
   return message || "تعذر إتمام العملية.";
 };
 type LocalIntentResponse = {
@@ -495,6 +501,10 @@ export function HostNewRoute() {
   const [localQuestionInventoryError, setLocalQuestionInventoryError] =
     useState("");
   const [inventoryAttempt, setInventoryAttempt] = useState(0);
+  const [approvedReleaseCatalog, setApprovedReleaseCatalog] = useState<ApprovedReleaseCatalog>();
+  const [approvedReleaseCatalogError, setApprovedReleaseCatalogError] = useState("");
+  const [approvedReleaseCatalogAttempt, setApprovedReleaseCatalogAttempt] = useState(0);
+  const firebaseRuntime = gameRuntime.kind === "firebase";
   const modeControls = useRef<Array<HTMLButtonElement | null>>([]);
   const kindControls = useRef<Array<HTMLButtonElement | null>>([]);
   const categoryFilterControl = useRef<HTMLInputElement | null>(null);
@@ -522,12 +532,34 @@ export function HostNewRoute() {
       active = false;
     };
   }, [inventoryAttempt, staticPreview]);
+  useEffect(() => {
+    if (staticPreview || !firebaseRuntime) return;
+    let active = true;
+    void (gameRuntime.getApprovedReleaseCatalog?.() ?? Promise.reject(new Error("APPROVED_RELEASE_CATALOG_UNAVAILABLE")))
+      .then((catalog) => {
+        if (!active) return;
+        setApprovedReleaseCatalog(catalog);
+        setApprovedReleaseCatalogError("");
+      })
+      .catch(() => {
+        if (!active) return;
+        setApprovedReleaseCatalog(undefined);
+        setApprovedReleaseCatalogError("لا توجد حزمة أسئلة معتمدة ونشطة لإنشاء غرفة مباشرة. راجع النشر أو جرّب لاحقاً.");
+      });
+    return () => { active = false; };
+  }, [approvedReleaseCatalogAttempt, firebaseRuntime, staticPreview]);
   const availableCategoryCatalog = useMemo(() => {
     if (localQuestionInventoryError) return [];
+    if (firebaseRuntime)
+      return approvedReleaseCatalog ? catalogCategoryCovers(approvedReleaseCatalog.categories) : [];
     const inventory = localQuestionInventory ?? (staticPreview ? staticPreviewQuestionInventory : undefined);
     return inventory ? inventoryCategoryCovers(inventory) : legacyAvailableCategoryCatalog;
-  }, [localQuestionInventory, localQuestionInventoryError, staticPreview]);
+  }, [approvedReleaseCatalog, firebaseRuntime, localQuestionInventory, localQuestionInventoryError, staticPreview]);
   const activeQuestionInventory = localQuestionInventory ?? (staticPreview ? staticPreviewQuestionInventory : undefined);
+  const firebaseSelectedModeUnavailable = Boolean(
+    firebaseRuntime && approvedReleaseCatalog && !approvedReleaseCatalog.boardCapabilities[form.gameKind],
+  );
+  const firebaseSelectedModeMessage = "الأسئلة المعتمدة الحالية لا تكفي لهذا النمط. اختر نمطاً متاحاً أو حدّث الحزمة.";
   const localCategoryById = useMemo(
     () =>
       new Map(
@@ -539,6 +571,10 @@ export function HostNewRoute() {
     [activeQuestionInventory],
   );
   const categorySelectionAllowed = (id: string) => {
+    if (firebaseRuntime) {
+      const category = approvedReleaseCatalog?.categories.find((candidate) => candidate.id === id);
+      return form.gameKind !== "categories" || category?.playable.categories === true;
+    }
     if (!activeQuestionInventory) return true;
     const category = localCategoryById.get(id);
     if (!category) return false;
@@ -563,6 +599,14 @@ export function HostNewRoute() {
         : { ...current, categories };
     });
   }, [activeQuestionInventory, form.gameKind, localCategoryById]);
+  useEffect(() => {
+    if (!firebaseRuntime || !approvedReleaseCatalog) return;
+    const eligible = new Set(approvedReleaseCatalog.categories.map((category) => category.id));
+    setForm((current) => {
+      const categories = current.categories.filter((id) => eligible.has(id));
+      return categories.length === current.categories.length ? current : { ...current, categories };
+    });
+  }, [approvedReleaseCatalog, firebaseRuntime]);
   const availableCategoryTopics = useMemo(
     () =>
       categoryTopics.flatMap((topic) => {
@@ -718,6 +762,15 @@ export function HostNewRoute() {
       setError(staticPreviewNotice);
       return;
     }
+    if (firebaseRuntime && !approvedReleaseCatalog) {
+      setError(approvedReleaseCatalogError || "جارٍ التحقق من الحزمة المعتمدة قبل إنشاء الغرفة.");
+      return;
+    }
+    const releaseCatalog = approvedReleaseCatalog;
+    if (firebaseRuntime && !releaseCatalog!.boardCapabilities[form.gameKind]) {
+      setError("لا توجد تغطية معتمدة كافية لنوع اللوح المحدد. اختر نوعاً آخر أو انتظر نشر حزمة مكتملة.");
+      return;
+    }
     if (localQuestionInventory && !form.demo) {
       setError(
         "أسئلة قاعدة البيانات المحلية مسودات للتجربة فقط؛ فعّل وضع التجربة أو استخدم المصدر المعتمد.",
@@ -734,7 +787,7 @@ export function HostNewRoute() {
       );
       return;
     }
-    if (form.gameKind === "categories" && form.categories.length < 2) {
+    if (form.gameKind === "categories" && selectedCategories.length < 2) {
       setError(
         "لإنشاء لعبة الفئات، اختر فئتين مختلفتين على الأقل من الفئات المختارة.",
       );
@@ -745,15 +798,16 @@ export function HostNewRoute() {
     try {
       const request = {
         displayName: "المضيف",
-        demo: form.demo,
+        demo: firebaseRuntime ? releaseCatalog?.demoFixture === true : form.demo,
+        ...(firebaseRuntime && releaseCatalog ? { expectedRelease: { releaseId: releaseCatalog.releaseId, releaseRootSha256: releaseCatalog.releaseRootSha256 } } : {}),
         gameKind: form.gameKind,
         mode: form.mode,
         modality: "classic" as const,
         questionSeconds: form.questionSeconds,
         opponentSeconds: form.opponentSeconds,
         teams: { horizontal: form.horizontal, vertical: form.vertical },
-        categories: form.categories.length
-          ? form.categories
+        categories: selectedCategories.length
+          ? selectedCategories.map((category) => category.id)
           : form.gameKind === "huroof" &&
               localQuestionInventory?.recommendedHuroofCategoryIds?.length
             ? localQuestionInventory.recommendedHuroofCategoryIds
@@ -784,6 +838,12 @@ export function HostNewRoute() {
       navigate(`/room/${body.roomCode}/lobby`);
     } catch (reason) {
       setError(readableError(reason));
+      if (
+        firebaseRuntime &&
+        reason instanceof Error &&
+        reason.message.replace(/^Error:\s*/, "") === "ACTIVE_RELEASE_CHANGED"
+      )
+        setApprovedReleaseCatalogAttempt((attempt) => attempt + 1);
     } finally {
       setBusy(false);
     }
@@ -1137,14 +1197,27 @@ export function HostNewRoute() {
               {querySeed.current.notice}
             </p>
           )}
-          <label className="demo-control">
+          {firebaseRuntime ? (
+            <p className="field-note" role="status">
+              {approvedReleaseCatalog
+                ? firebaseSelectedModeUnavailable
+                  ? firebaseSelectedModeMessage
+                  : approvedReleaseCatalog.demoFixture
+                  ? "هذه حزمة تجريبية للمحاكي فقط."
+                  : "سيُنشأ اللعب المباشر من الحزمة المعتمدة النشطة."
+                : approvedReleaseCatalogError || "جارٍ التحقق من الحزمة المعتمدة…"}
+              {approvedReleaseCatalogError ? (
+                <button className="button button--quiet" onClick={() => setApprovedReleaseCatalogAttempt((attempt) => attempt + 1)} type="button">أعد المحاولة</button>
+              ) : null}
+            </p>
+          ) : <label className="demo-control">
             <input
               checked={form.demo}
               onChange={(event) => update("demo", event.target.checked)}
               type="checkbox"
             />{" "}
             استخدم مسودات تجريبية صريحة؛ يمكن للمضيف تشغيل الفريقين دون لاعبين.
-          </label>
+          </label>}
         </form>
         <aside className="setup-summary">
           <p className="eyebrow">ملخص مباشر</p>
@@ -1195,17 +1268,21 @@ export function HostNewRoute() {
             className="button button--primary"
             data-testid="create-room"
             disabled={
-              busy || !form.demo || Boolean(localQuestionInventoryError) || staticPreview
+              busy || Boolean(localQuestionInventoryError) || staticPreview || (firebaseRuntime ? !approvedReleaseCatalog || !approvedReleaseCatalog.boardCapabilities[form.gameKind] : !form.demo)
             }
             form="match-setup-form"
-            title={staticPreview ? staticPreviewNotice : !form.demo ? "لا يوجد مخزون معتمد كافٍ" : undefined}
+            title={staticPreview ? staticPreviewNotice : firebaseRuntime && !approvedReleaseCatalog ? approvedReleaseCatalogError || "جارٍ التحقق من الحزمة المعتمدة" : !form.demo ? "لا يوجد مخزون معتمد كافٍ" : undefined}
             type="submit"
           >
-            {staticPreview ? "إنشاء الغرفة غير متاح في المعاينة" : busy ? "جارٍ الإنشاء…" : "أنشئ الغرفة التجريبية"}
+            {staticPreview ? "إنشاء الغرفة غير متاح في المعاينة" : busy ? "جارٍ الإنشاء…" : firebaseRuntime ? "أنشئ الغرفة المباشرة" : "أنشئ الغرفة التجريبية"}
           </button>
           <p aria-live="polite" className="form-message">
             {error ||
-              (!form.demo
+              (firebaseRuntime && !approvedReleaseCatalog
+                ? approvedReleaseCatalogError || "جارٍ التحقق من الحزمة المعتمدة…"
+                : firebaseSelectedModeUnavailable
+                  ? firebaseSelectedModeMessage
+                : !firebaseRuntime && !form.demo
                 ? "لا يوجد مخزون معتمد كافٍ لإنشاء مباراة عادية."
                 : "")}
           </p>

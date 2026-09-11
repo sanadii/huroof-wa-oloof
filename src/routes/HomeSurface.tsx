@@ -5,11 +5,13 @@ import { AuthAccountControl } from "../features/auth/AuthAccountControl";
 import { gameRuntime } from "../features/game/runtime";
 import { availableCategoryCatalog } from "../data/category-catalog";
 import {
+  catalogCategoryCovers,
   fetchLocalQuestionInventory,
   inventoryCategoryCovers,
   staticPreviewQuestionInventory,
   type LocalQuestionInventory,
 } from "../data/local-question-inventory";
+import type { ApprovedReleaseCatalog } from "../features/game/runtime/contracts";
 import { categoryReadinessLabel } from "../features/game/setup-options";
 
 type HomeSurfaceProps = {
@@ -23,6 +25,9 @@ function CategoryChooser({ staticPreview }: { staticPreview: boolean }) {
   const [showAll, setShowAll] = useState(false);
   const [inventory, setInventory] = useState<LocalQuestionInventory>();
   const [inventoryError, setInventoryError] = useState("");
+  const [approvedCatalog, setApprovedCatalog] = useState<ApprovedReleaseCatalog>();
+  const [approvedCatalogError, setApprovedCatalogError] = useState("");
+  const [approvedCatalogAttempt, setApprovedCatalogAttempt] = useState(0);
   useEffect(() => {
     if (staticPreview || gameRuntime.kind !== "local") return;
     let active = true;
@@ -39,14 +44,24 @@ function CategoryChooser({ staticPreview }: { staticPreview: boolean }) {
       active = false;
     };
   }, [staticPreview]);
+  useEffect(() => {
+    if (staticPreview || gameRuntime.kind !== "firebase") return;
+    let active = true;
+    void (gameRuntime.getApprovedReleaseCatalog?.() ?? Promise.reject(new Error("APPROVED_RELEASE_CATALOG_UNAVAILABLE")))
+      .then((catalog) => { if (active) { setApprovedCatalog(catalog); setApprovedCatalogError(""); } })
+      .catch(() => { if (active) { setApprovedCatalog(undefined); setApprovedCatalogError("لا تتوفر حزمة معتمدة نشطة للعب المباشر حالياً."); } });
+    return () => { active = false; };
+  }, [approvedCatalogAttempt, staticPreview]);
   const activeInventory = inventory ?? (staticPreview ? staticPreviewQuestionInventory : undefined);
   const inventoryById = useMemo(
     () => new Map(activeInventory?.categories.map((category) => [category.id, category]) ?? []),
     [activeInventory],
   );
   const catalogue = useMemo(
-    () => activeInventory ? inventoryCategoryCovers(activeInventory) : availableCategoryCatalog,
-    [activeInventory],
+    () => gameRuntime.kind === "firebase"
+      ? approvedCatalog ? catalogCategoryCovers(approvedCatalog.categories) : []
+      : activeInventory ? inventoryCategoryCovers(activeInventory) : availableCategoryCatalog,
+    [activeInventory, approvedCatalog],
   );
   const categories = useMemo(() => {
     const normalized = query.trim().toLocaleLowerCase("ar");
@@ -74,8 +89,15 @@ function CategoryChooser({ staticPreview }: { staticPreview: boolean }) {
             <li key={category.id}>
               {(() => {
                 const localCategory = inventoryById.get(category.id);
-                const selectable = !localCategory || localCategory.categoryGameEligible;
-                const status = localCategory
+                const approvedCategory = approvedCatalog?.categories.find((candidate) => candidate.id === category.id);
+                const selectable = gameRuntime.kind === "firebase"
+                  ? approvedCategory?.playable.categories === true
+                  : !localCategory || localCategory.categoryGameEligible;
+                const status = gameRuntime.kind === "firebase"
+                  ? approvedCategory?.playable.categories
+                    ? "جاهزة للعبة الفئات"
+                    : "لا تكفي للعبة الفئات في الحزمة المعتمدة"
+                  : localCategory
                   ? localCategory.availability === "held_only"
                     ? "قيد المراجعة — غير متاحة للعب"
                     : localCategory.categoryGameEligible
@@ -105,6 +127,7 @@ function CategoryChooser({ staticPreview }: { staticPreview: boolean }) {
         </button>
       ) : null}
       {inventoryError ? <p className="spatial-home__empty" role="status">{inventoryError}</p> : null}
+      {gameRuntime.kind === "firebase" && !approvedCatalog ? <p className="spatial-home__empty" role="status">{approvedCatalogError || "جارٍ التحقق من فهرس الحزمة المعتمدة…"} {approvedCatalogError ? <button className="spatial-home__show-more" onClick={() => setApprovedCatalogAttempt((attempt) => attempt + 1)} type="button">أعد المحاولة</button> : null}</p> : null}
     </section>
   );
 }
