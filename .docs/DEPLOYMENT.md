@@ -1,5 +1,18 @@
 # Deployment and rollback plan
 
+## Live rooms and full-question review authorization — 2026-09-11
+
+User explicitly requests live rooms/gameplay and approval of all questions. This authorizes completing the existing T-14.4–6/T17.3 production sequence, with actual approval provenance and validation; it does not establish that every record is correct or erase unsupported/missing-media findings. No invented reviewer identities, signatures or factual-review receipts. Preserve existing intake/history and the current 88-category preview while prerequisites remain incomplete.
+
+Fresh read-only evidence: `output/live-game-release-20260911/preflight.json` at 14:21 UTC confirms billing disabled, zero Functions and absent active release. Anonymous Auth is enabled and the public Vercel domain is authorized. App Check HTTP 200 default config responses alone do not prove a registered usable provider/site key; that remains to be verified. The user was asked to enable Blaze in their account; independent preparation continues.
+
+Implementation now adds authenticated/App Check metadata-only approved catalog discovery, selector-derived per-mode readiness, immutable release identity pinning and authoritative selected-scope validation at creation. Firebase setup uses the approved release instead of forcing demo. Root verified all 38 compiled Functions tests (including private media fixtures) and five Firebase setup tests; Forge app/Functions builds, typecheck, seven adapter tests and 23 local setup tests pass. Final source Gate PASS for the exact twelve code/test paths; root reproduced six Firebase UI tests after the final homepage fix and the final static build. Source manifest SHA256 d97c53f0dcaca941238f46485f87f54ba9c9842b34ae3d62b79ab3920b88684d. Source implementation commit: `419b28f0` on `codex/app-update-2026-09-07`. No backend activation, active pointer or approval writes have been made. Production remains the verified static preview; code readiness is not live service readiness.
+
+Content audit: 12,752 SQLite rows remain draft; 20,084 reconciled source revisions represent 14,024 candidate IDs, not that many distinct approved questions. Recovered 15 missing exact-original photos; prepared package v2 has 1,741 hash/MIME-verified assets, four unresolved remote photo entries and eight overlapping unresolved source references. Nine rebuilt-question records separately lack supplied images. Private package remains prepared-only; no status was changed to approved. Actual authenticated review/attestations and an immutable active release remain required. Evidence: output/live-game-release-20260911/IMPLEMENTATION-EVIDENCE.md and CONTENT-READINESS.md.
+
+App Check Enterprise preparation plan was reviewed, but no service/key/provider mutation was applied. It must be paired with the correct client provider and actual attestation checks before activation. Billing, provider setup, approved release publication and real multi-client gameplay verification remain open. Existing T-14.4–6 acceptance and rollback govern the next actions.
+
+
 ## Full category catalog correction — 2026-09-11
 
 Authorized follow-up: production shows only eight fixture categories; user requests all available categories implemented, pushed and deployed. Read-only local inventory confirms 88 categories, 83 locally eligible. Scope is a metadata-only public catalog and consistent homepage/setup discovery; no question payload, database mutation, backend activation or redesign. Preserve existing preview restrictions and distinguish local content availability from live playability.

@@ -1,5 +1,16 @@
 # Implementation plan — current state
 
+## T-14.5 follow-up — approved production room setup (2026-09-11)
+
+User authorizes live rooms/gameplay and all-question review. This executes existing T-14.4–6 without claiming missing review/billing prerequisites complete. Database review and fresh preflight identify a demo-only frontend gate and absent release-bound catalog discovery. Production remains the 88-category static preview until full release acceptance.
+
+- Owner: Forge implementation; root integration/status; Gate security/release review. Scope: authenticated/App-Check read-only release readiness/catalog callable, matching Firebase adapter contract and non-demo HostNewRoute path. Preserve local/fixture and static-preview behavior. No public Firestore release reads, approval writes, schema/rules weakening or question/media discovery payload.
+- Sequence: inspect release schema/runtime validation; implement minimal metadata projection from the active immutable approved release; wire loading/error/empty states and Firebase demo:false creation; cover absent release and stale discovery; keep final createRoom transaction authoritative. Reuse existing visual layout and status controls.
+- Acceptance: Firebase host selects approved release categories and submits demo:false when ready; absent/invalid/demo release prevents creation with actionable status; discovery excludes answers/question bodies/sources/media paths; local draft runtime and 88-category preview remain intact. Catalog visibility is not approval.
+- Checks: focused Functions/helper and adapter/UI tests, app/Functions typecheck/build, preview regression, Gate payload/auth review; emulator check where available. Production additionally requires billing, actual reviewed release, AppCheck configuration and real multi-client smoke before runtime switch.
+- Rollback: revert only this delta or retain static preview; no schema/data migration or room/history deletion. Dependencies: T-14.4 authentic review/immutable release and T-14.5 infrastructure before activation. Status: source implementation Done — root accepted after final Gate PASS; live activation and all-question approval remain blocked on the documented external prerequisites. Evidence: output/live-game-release-20260911/IMPLEMENTATION-EVIDENCE.md and gate/FINAL-GATE-REPORT.md.
+
+
 ## Design integration follow-up — 2026-09-11
 
 Scope: the approved C rollout (0006/0007), amended by the September 9 **تحدي الخلية** identity and category-only background, plus the user's September 11 homepage refinement and board-choice placement request. This supplements completed T-01–07; it does not reopen production or content-import milestones.
