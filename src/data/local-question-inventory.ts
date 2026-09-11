@@ -1,5 +1,6 @@
 import { categoryCatalog, type CategoryCover } from "./category-catalog";
 import { normalizeCategoryFilterText } from "./category-filters";
+import publicCategoryInventory from "./category-inventory.public.json";
 import tahadaniImages from "./tahadani-image-catalog.public.json";
 
 const importedCovers = new Map(
@@ -26,6 +27,23 @@ export type LocalQuestionInventory = {
     categoryGameEligible: boolean;
     availability: "ready" | "insufficient_questions" | "held_only";
   }>;
+};
+
+type PublicCategoryInventory = Omit<LocalQuestionInventory, "source"> & {
+  schemaVersion: number;
+};
+
+const staticPreviewInventory = publicCategoryInventory as PublicCategoryInventory;
+
+/**
+ * Checked-in, metadata-only inventory used when static hosting intentionally has
+ * no local service. It describes preview content and availability only; it does
+ * not make a claim about a production gameplay release.
+ */
+export const staticPreviewQuestionInventory: LocalQuestionInventory = {
+  source: "local_sqlite_import",
+  huroofAvailable: staticPreviewInventory.huroofAvailable,
+  categories: staticPreviewInventory.categories,
 };
 
 /** Metadata-only local setup projection; questions and answers remain server-side. */

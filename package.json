@@ -7,6 +7,7 @@
     "import:categories": "tsx scripts/import-tahadani-categories.ts",
     "build:category-assets": "tsx scripts/build-category-assets.ts",
     "build:public-source-category-ids": "tsx scripts/build-public-source-category-ids.ts",
+    "refresh:public-category-inventory": "tsx scripts/refresh-public-category-inventory.ts",
     "generate:pilot": "tsx scripts/generate-pilot-drafts.ts",
     "import:questions:v3": "tsx scripts/import-question-candidates-v3.ts",
     "import:master:bind-target": "tsx scripts/master-import.ts bind-target",

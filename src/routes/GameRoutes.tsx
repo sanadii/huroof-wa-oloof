@@ -26,6 +26,7 @@ import {
 import {
   fetchLocalQuestionInventory,
   inventoryCategoryCovers,
+  staticPreviewQuestionInventory,
   type LocalQuestionInventory,
 } from "../data/local-question-inventory";
 import {
@@ -523,36 +524,37 @@ export function HostNewRoute() {
   }, [inventoryAttempt, staticPreview]);
   const availableCategoryCatalog = useMemo(() => {
     if (localQuestionInventoryError) return [];
-    if (!localQuestionInventory) return legacyAvailableCategoryCatalog;
-    return inventoryCategoryCovers(localQuestionInventory);
-  }, [localQuestionInventory, localQuestionInventoryError]);
+    const inventory = localQuestionInventory ?? (staticPreview ? staticPreviewQuestionInventory : undefined);
+    return inventory ? inventoryCategoryCovers(inventory) : legacyAvailableCategoryCatalog;
+  }, [localQuestionInventory, localQuestionInventoryError, staticPreview]);
+  const activeQuestionInventory = localQuestionInventory ?? (staticPreview ? staticPreviewQuestionInventory : undefined);
   const localCategoryById = useMemo(
     () =>
       new Map(
-        localQuestionInventory?.categories.map((category) => [
+        activeQuestionInventory?.categories.map((category) => [
           category.id,
           category,
         ]) ?? [],
       ),
-    [localQuestionInventory],
+    [activeQuestionInventory],
   );
   const categorySelectionAllowed = (id: string) => {
-    if (!localQuestionInventory) return true;
+    if (!activeQuestionInventory) return true;
     const category = localCategoryById.get(id);
     if (!category) return false;
     return form.gameKind === "categories"
       ? category.categoryGameEligible
-      : localQuestionInventory.huroofAvailable && category.huroofQuestionCount > 0;
+      : activeQuestionInventory.huroofAvailable && category.huroofQuestionCount > 0;
   };
   useEffect(() => {
-    if (!localQuestionInventory) return;
+    if (!activeQuestionInventory) return;
     setForm((current) => {
       const categories = current.categories.filter((id) => {
         const category = localCategoryById.get(id);
         return current.gameKind === "categories"
           ? Boolean(category?.categoryGameEligible)
           : Boolean(
-              localQuestionInventory.huroofAvailable &&
+              activeQuestionInventory.huroofAvailable &&
                 category?.huroofQuestionCount,
             );
       });
@@ -560,7 +562,7 @@ export function HostNewRoute() {
         ? current
         : { ...current, categories };
     });
-  }, [form.gameKind, localCategoryById, localQuestionInventory]);
+  }, [activeQuestionInventory, form.gameKind, localCategoryById]);
   const availableCategoryTopics = useMemo(
     () =>
       categoryTopics.flatMap((topic) => {
@@ -930,6 +932,11 @@ export function HostNewRoute() {
             {localQuestionInventory ? (
               <p className="field-note" role="status">
                 أسئلة مستوردة للتجربة المحلية وليست إصداراً معتمداً.
+              </p>
+            ) : null}
+            {staticPreview ? (
+              <p className="field-note" role="status">
+                يعرض هذا الفهرس محتوى معاينة الواجهة فقط، ولا يثبت توفره للعب المنشور.
               </p>
             ) : null}
             {localQuestionInventoryError ? (

@@ -90,6 +90,29 @@ it('disables room creation before transport in an explicit static preview', asyn
   expect(fetchMock).not.toHaveBeenCalled();
 });
 
+it('uses all public preview categories across board modes and preserves a deep-linked category beyond the legacy eight', async () => {
+  vi.stubEnv('VITE_STATIC_PREVIEW', 'true');
+  const fetchMock = vi.spyOn(globalThis, 'fetch');
+  const user = userEvent.setup();
+  render(
+    <ThemeProvider>
+      <MemoryRouter initialEntries={['/host/new?kind=categories&category=huroof-100']}>
+        <HostNewRoute />
+      </MemoryRouter>
+    </ThemeProvider>,
+  );
+
+  expect(await screen.findByRole('option', { name: 'كل الموضوعات (88)' })).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'جغرافيا العالم — محددة' })).toBeVisible();
+  expect(screen.getByText('يعرض هذا الفهرس محتوى معاينة الواجهة فقط، ولا يثبت توفره للعب المنشور.')).toBeVisible();
+  await user.click(screen.getByRole('radio', { name: 'الحروف' }));
+  expect(screen.getByRole('button', { name: 'جغرافيا العالم — محددة' })).toBeVisible();
+  await user.type(screen.getByRole('searchbox', { name: 'تصفية الفئات' }), 'دول / ولا كلمة');
+  const held = screen.getByRole('button', { name: 'دول / ولا كلمة — غير متاحة للعب بعد' });
+  expect(held).toBeDisabled();
+  expect(fetchMock).not.toHaveBeenCalled();
+});
+
 it('replaces a missing category cover with the default image', () => {
   render(<ThemeProvider><MemoryRouter><HostNewRoute /></MemoryRouter></ThemeProvider>);
   fireEvent.error(screen.getByRole('img', { name: 'غلاف فئة معلومات عامة' }));

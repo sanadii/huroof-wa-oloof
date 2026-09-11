@@ -1,0 +1,886 @@
+{
+  "schemaVersion": 1,
+  "huroofAvailable": true,
+  "categories": [
+    {
+      "id": "goals-2026",
+      "labelAr": "من سجل الهدف؟",
+      "sourceOnly": true,
+      "questionCount": 99,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 0,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "huroof-063",
+      "labelAr": "كرة السلة وNBA",
+      "sourceOnly": true,
+      "questionCount": 300,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 0,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "huroof-064",
+      "labelAr": "دوري أبطال أوروبا",
+      "sourceOnly": true,
+      "questionCount": 300,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 0,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "huroof-065",
+      "labelAr": "الدوري الإنجليزي",
+      "sourceOnly": true,
+      "questionCount": 300,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 0,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "huroof-066",
+      "labelAr": "الدوري الإسباني",
+      "sourceOnly": true,
+      "questionCount": 300,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 0,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "huroof-067",
+      "labelAr": "الدوري السعودي",
+      "sourceOnly": true,
+      "questionCount": 300,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 0,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "huroof-068",
+      "labelAr": "منتخب الكويت",
+      "sourceOnly": true,
+      "questionCount": 60,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 38,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "huroof-069",
+      "labelAr": "كرة القدم الكويتية",
+      "sourceOnly": true,
+      "questionCount": 60,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 15,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "huroof-070",
+      "labelAr": "الألعاب الأولمبية",
+      "sourceOnly": true,
+      "questionCount": 300,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 0,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "huroof-071",
+      "labelAr": "WWE",
+      "sourceOnly": true,
+      "questionCount": 300,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 0,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "huroof-072",
+      "labelAr": "الملاكمة",
+      "sourceOnly": true,
+      "questionCount": 300,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 0,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "huroof-073",
+      "labelAr": "ألعاب الفيديو",
+      "sourceOnly": true,
+      "questionCount": 300,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 0,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "huroof-076",
+      "labelAr": "Fortnite",
+      "sourceOnly": true,
+      "questionCount": 60,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 54,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "huroof-088",
+      "labelAr": "مسلسلات خليجية",
+      "sourceOnly": true,
+      "questionCount": 60,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 56,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "huroof-089",
+      "labelAr": "مسلسلات كويتية",
+      "sourceOnly": true,
+      "questionCount": 60,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 57,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "huroof-090",
+      "labelAr": "مشاهير الكويت",
+      "sourceOnly": true,
+      "questionCount": 60,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 54,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "huroof-091",
+      "labelAr": "مشاهير العرب",
+      "sourceOnly": true,
+      "questionCount": 60,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 58,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "huroof-092",
+      "labelAr": "أغاني خليجية",
+      "sourceOnly": true,
+      "questionCount": 30,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 30,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "huroof-093",
+      "labelAr": "أغاني كويتية",
+      "sourceOnly": true,
+      "questionCount": 30,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 29,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "huroof-094",
+      "labelAr": "السيرة النبوية",
+      "sourceOnly": true,
+      "questionCount": 60,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 54,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "huroof-095",
+      "labelAr": "الصحابة",
+      "sourceOnly": true,
+      "questionCount": 60,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 55,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "huroof-096",
+      "labelAr": "الحضارة الإسلامية",
+      "sourceOnly": true,
+      "questionCount": 60,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 32,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "huroof-097",
+      "labelAr": "علوم",
+      "sourceOnly": true,
+      "questionCount": 300,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 0,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "huroof-098",
+      "labelAr": "فضاء وفلك",
+      "sourceOnly": true,
+      "questionCount": 300,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 0,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "huroof-099",
+      "labelAr": "طب وجسم الإنسان",
+      "sourceOnly": true,
+      "questionCount": 300,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 0,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "huroof-100",
+      "labelAr": "جغرافيا العالم",
+      "sourceOnly": true,
+      "questionCount": 330,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 20,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "tahadani-001",
+      "labelAr": "من أنا - دول",
+      "sourceOnly": true,
+      "questionCount": 300,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 0,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "tahadani-002",
+      "labelAr": "من أنا - لاعبين كرة قدم",
+      "sourceOnly": true,
+      "questionCount": 300,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 0,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "tahadani-003",
+      "labelAr": "من أنا - حيوانات",
+      "sourceOnly": true,
+      "questionCount": 300,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 0,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "tahadani-004",
+      "labelAr": "من أنا - مسلسلات عربية",
+      "sourceOnly": true,
+      "questionCount": 60,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 46,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "tahadani-005",
+      "labelAr": "من أنا - ممثلين",
+      "sourceOnly": true,
+      "questionCount": 300,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 0,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "tahadani-006",
+      "labelAr": "في المعلومات العامة",
+      "sourceOnly": false,
+      "questionCount": 494,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 194,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "tahadani-007",
+      "labelAr": "في عالم الحيوان",
+      "sourceOnly": false,
+      "questionCount": 55,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 37,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "tahadani-008",
+      "labelAr": "في التكنولوجيا والعلوم",
+      "sourceOnly": false,
+      "questionCount": 43,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 28,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "tahadani-009",
+      "labelAr": "تاريخ",
+      "sourceOnly": true,
+      "questionCount": 300,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 0,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "tahadani-010",
+      "labelAr": "منو المشهور",
+      "sourceOnly": true,
+      "questionCount": 300,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 0,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "tahadani-011",
+      "labelAr": "خمن الصورة",
+      "sourceOnly": true,
+      "questionCount": 111,
+      "heldQuestionCount": 69,
+      "huroofQuestionCount": 0,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "tahadani-012",
+      "labelAr": "شنو هذا",
+      "sourceOnly": true,
+      "questionCount": 60,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 0,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "tahadani-013",
+      "labelAr": "لغز لفظي",
+      "sourceOnly": false,
+      "questionCount": 73,
+      "heldQuestionCount": 60,
+      "huroofQuestionCount": 25,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "tahadani-014",
+      "labelAr": "الجزء المفقود",
+      "sourceOnly": true,
+      "questionCount": 60,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 0,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "tahadani-015",
+      "labelAr": "أمثال وغطاوي",
+      "sourceOnly": true,
+      "questionCount": 60,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 43,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "tahadani-016",
+      "labelAr": "حيوانات - ولا كلمة",
+      "sourceOnly": true,
+      "questionCount": 0,
+      "heldQuestionCount": 60,
+      "huroofQuestionCount": 0,
+      "categoryGameEligible": false,
+      "availability": "held_only"
+    },
+    {
+      "id": "tahadani-017",
+      "labelAr": "أغاني عربية - ولا كلمة",
+      "sourceOnly": true,
+      "questionCount": 0,
+      "heldQuestionCount": 60,
+      "huroofQuestionCount": 0,
+      "categoryGameEligible": false,
+      "availability": "held_only"
+    },
+    {
+      "id": "tahadani-018",
+      "labelAr": "مشاهير عرب - ولا كلمة",
+      "sourceOnly": true,
+      "questionCount": 0,
+      "heldQuestionCount": 60,
+      "huroofQuestionCount": 0,
+      "categoryGameEligible": false,
+      "availability": "held_only"
+    },
+    {
+      "id": "tahadani-019",
+      "labelAr": "كرتون - ولا كلمة",
+      "sourceOnly": true,
+      "questionCount": 0,
+      "heldQuestionCount": 60,
+      "huroofQuestionCount": 0,
+      "categoryGameEligible": false,
+      "availability": "held_only"
+    },
+    {
+      "id": "tahadani-020",
+      "labelAr": "دول - ولا كلمة",
+      "sourceOnly": true,
+      "questionCount": 0,
+      "heldQuestionCount": 60,
+      "huroofQuestionCount": 0,
+      "categoryGameEligible": false,
+      "availability": "held_only"
+    },
+    {
+      "id": "tahadani-021",
+      "labelAr": "ريال مدريد",
+      "sourceOnly": true,
+      "questionCount": 60,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 57,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "tahadani-022",
+      "labelAr": "برشلونة",
+      "sourceOnly": true,
+      "questionCount": 60,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 59,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "tahadani-023",
+      "labelAr": "كأس العالم",
+      "sourceOnly": true,
+      "questionCount": 60,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 52,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "tahadani-024",
+      "labelAr": "ميسي وكرستيانو",
+      "sourceOnly": true,
+      "questionCount": 60,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 53,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "tahadani-025",
+      "labelAr": "من هو اللاعب",
+      "sourceOnly": true,
+      "questionCount": 300,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 0,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "tahadani-026",
+      "labelAr": "طاش ما طاش",
+      "sourceOnly": true,
+      "questionCount": 30,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 21,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "tahadani-027",
+      "labelAr": "باب الحارة",
+      "sourceOnly": true,
+      "questionCount": 60,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 58,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "tahadani-028",
+      "labelAr": "أفلام كلاسيك",
+      "sourceOnly": true,
+      "questionCount": 300,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 0,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "tahadani-029",
+      "labelAr": "أفلام رعب",
+      "sourceOnly": true,
+      "questionCount": 300,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 0,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "tahadani-030",
+      "labelAr": "Game Of Thrones",
+      "sourceOnly": true,
+      "questionCount": 300,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 0,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "tahadani-031",
+      "labelAr": "الزمن الجميل",
+      "sourceOnly": true,
+      "questionCount": 60,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 47,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "tahadani-032",
+      "labelAr": "أم كلثوم",
+      "sourceOnly": true,
+      "questionCount": 60,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 53,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "tahadani-033",
+      "labelAr": "نشيد وطني",
+      "sourceOnly": true,
+      "questionCount": 60,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 50,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "tahadani-034",
+      "labelAr": "أغاني أجنبية",
+      "sourceOnly": true,
+      "questionCount": 60,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 60,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "tahadani-035",
+      "labelAr": "عبدالكريم عبدالقادر",
+      "sourceOnly": true,
+      "questionCount": 30,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 23,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "tahadani-036",
+      "labelAr": "One Piece",
+      "sourceOnly": true,
+      "questionCount": 60,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 58,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "tahadani-037",
+      "labelAr": "Attack on Titan",
+      "sourceOnly": true,
+      "questionCount": 60,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 55,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "tahadani-038",
+      "labelAr": "Naruto",
+      "sourceOnly": true,
+      "questionCount": 60,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 60,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "tahadani-039",
+      "labelAr": "المحقق كونان",
+      "sourceOnly": true,
+      "questionCount": 60,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 58,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "tahadani-040",
+      "labelAr": "PUBG",
+      "sourceOnly": true,
+      "questionCount": 60,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 49,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "tahadani-041",
+      "labelAr": "Call Of Duty",
+      "sourceOnly": true,
+      "questionCount": 60,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 57,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "tahadani-042",
+      "labelAr": "Minecraft",
+      "sourceOnly": true,
+      "questionCount": 60,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 26,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "tahadani-043",
+      "labelAr": "ألعاب الطفولة",
+      "sourceOnly": true,
+      "questionCount": 60,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 23,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "tahadani-044",
+      "labelAr": "أعلام",
+      "sourceOnly": true,
+      "questionCount": 300,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 0,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "tahadani-045",
+      "labelAr": "في الجغرافيا",
+      "sourceOnly": false,
+      "questionCount": 303,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 10,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "tahadani-046",
+      "labelAr": "في الجغرافيا",
+      "sourceOnly": false,
+      "questionCount": 309,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 8,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "tahadani-047",
+      "labelAr": "في العملات",
+      "sourceOnly": false,
+      "questionCount": 309,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 9,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "tahadani-048",
+      "labelAr": "UFC والفنون القتالية",
+      "sourceOnly": true,
+      "questionCount": 60,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 51,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "tahadani-049",
+      "labelAr": "تنس",
+      "sourceOnly": true,
+      "questionCount": 300,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 0,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "tahadani-050",
+      "labelAr": "Formula One",
+      "sourceOnly": true,
+      "questionCount": 300,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 0,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "tahadani-051",
+      "labelAr": "في عالم السيارات",
+      "sourceOnly": false,
+      "questionCount": 67,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 56,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "tahadani-052",
+      "labelAr": "منوعات كرة قدم",
+      "sourceOnly": true,
+      "questionCount": 60,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 40,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "tahadani-053",
+      "labelAr": "منوعات شعرية",
+      "sourceOnly": true,
+      "questionCount": 60,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 29,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "tahadani-054",
+      "labelAr": "كرة قدم عالمية",
+      "sourceOnly": true,
+      "questionCount": 60,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 48,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "tahadani-055",
+      "labelAr": "الكرة الإيطالية",
+      "sourceOnly": true,
+      "questionCount": 60,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 57,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "tahadani-056",
+      "labelAr": "قصص الأنبياء",
+      "sourceOnly": true,
+      "questionCount": 60,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 40,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "tahadani-057",
+      "labelAr": "القرآن الكريم",
+      "sourceOnly": true,
+      "questionCount": 60,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 40,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "tahadani-058",
+      "labelAr": "مطاعم الكويت",
+      "sourceOnly": true,
+      "questionCount": 30,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 14,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "tahadani-059",
+      "labelAr": "من أنا جغرافيا",
+      "sourceOnly": true,
+      "questionCount": 300,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 0,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "tahadani-060",
+      "labelAr": "مسيرة لاعب",
+      "sourceOnly": true,
+      "questionCount": 60,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 60,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "tahadani-061",
+      "labelAr": "LineUp",
+      "sourceOnly": true,
+      "questionCount": 60,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 0,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    },
+    {
+      "id": "tahadani-062",
+      "labelAr": "كأس العالم 2026",
+      "sourceOnly": true,
+      "questionCount": 60,
+      "heldQuestionCount": 0,
+      "huroofQuestionCount": 31,
+      "categoryGameEligible": true,
+      "availability": "ready"
+    }
+  ]
+}

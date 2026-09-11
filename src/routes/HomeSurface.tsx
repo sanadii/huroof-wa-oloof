@@ -7,6 +7,7 @@ import { availableCategoryCatalog } from "../data/category-catalog";
 import {
   fetchLocalQuestionInventory,
   inventoryCategoryCovers,
+  staticPreviewQuestionInventory,
   type LocalQuestionInventory,
 } from "../data/local-question-inventory";
 import { categoryReadinessLabel } from "../features/game/setup-options";
@@ -38,13 +39,14 @@ function CategoryChooser({ staticPreview }: { staticPreview: boolean }) {
       active = false;
     };
   }, [staticPreview]);
+  const activeInventory = inventory ?? (staticPreview ? staticPreviewQuestionInventory : undefined);
   const inventoryById = useMemo(
-    () => new Map(inventory?.categories.map((category) => [category.id, category]) ?? []),
-    [inventory],
+    () => new Map(activeInventory?.categories.map((category) => [category.id, category]) ?? []),
+    [activeInventory],
   );
   const catalogue = useMemo(
-    () => inventory ? inventoryCategoryCovers(inventory) : availableCategoryCatalog,
-    [inventory],
+    () => activeInventory ? inventoryCategoryCovers(activeInventory) : availableCategoryCatalog,
+    [activeInventory],
   );
   const categories = useMemo(() => {
     const normalized = query.trim().toLocaleLowerCase("ar");
@@ -77,7 +79,9 @@ function CategoryChooser({ staticPreview }: { staticPreview: boolean }) {
                   ? localCategory.availability === "held_only"
                     ? "قيد المراجعة — غير متاحة للعب"
                     : localCategory.categoryGameEligible
-                      ? "جاهزة للعبة الفئات"
+                      ? staticPreview
+                        ? "محتوى محلي مدرج في معاينة الواجهة فقط"
+                        : "جاهزة للعبة الفئات"
                       : "لا تكفي للعبة الفئات بعد"
                   : categoryReadinessLabel(category.questionReadiness);
                 const content = <><strong>{category.displayNameAr}</strong><span>{status}</span></>;
