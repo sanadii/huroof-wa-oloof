@@ -162,3 +162,20 @@ Vercel Preview READY: https://huroof-wa-oloof-ql23s3kp6-sanad-general.vercel.app
 Verification: clean Git and stripped195-file Vercel source builds/typechecks pass;31focusedUI checks; independent Gate2/2; Node22.23.2 Functions compile; production-only audit0. Root browser verified both setup kinds and direct room/admin/import-review guards with zero API/callable requests. Protected live HTTP homepage/deep-link/mainJS200; deployed mainJS SHA2565742314062cd74a219647d177116979d73de237789af923be473d4d603bbfb20 matches the browser-tested candidate. Vercel adds its standard preview feedback script to HTML. Existing large-vendor-chunk warning remains. Full online gameplay remains blocked by the activation sequence above; this publication does not change draft approvals or enable a backend.
 
 Local evidence: output/release-20260909/packaging-report.md and gate-release-package.md. Local database-backed app remains available on127.0.0.1:8787. Next authorized action: after user billing setup, recheck Firebase billing and complete App Check, immutable catalog binding and genuine reviewed-release preparation before deployment/activation.
+
+
+## T-14.5 live game activation verified — 2026-09-11
+
+Done for owner-authorized text gameplay. Production https://huroof-wa-oloof.vercel.app now uses Firebase, with static preview disabled, Doha callables and Node 22. Final Vercel deployment: dpl_8qRaEaE7o4npCPRMbQCWL9AfCQsL (huroof-wa-oloof-ecl46u3p9-sanad-general.vercel.app). Code pushed and remote-verified: 9afe7fdbcbe90cbdc8bdd66f4da55192b0d05f0e, branch codex/app-update-2026-09-07.
+
+Activated owner-release-3b46a28072ec92a4ed3be4941bf7a818: 10,686 technical-valid owner-approved text revisions across 67 categories; 10,821 release documents independently read back, active pointer verified. All 18,698 source revisions retain owner approval and immutable original provenance. Technical exclusions remain excluded; this does not claim specialist factual review or activation of unsupported media.
+
+Root cause included preview runtime and disabled firebaseappcheck.googleapis.com. API now enabled; real browser attestation succeeds. Auth, App Check enforcement, exact domain restriction and score threshold 0.5 remain intact. Intermediate HTTP400 ceased after propagation/rebuild; no separate cause is asserted. Eight sensitive Vercel values are intentionally hidden in env pull; the final build successfully uses persisted production settings without CLI build-env overrides.
+
+Actual production browser evidence: category room LQU8YWLJ created with huroof-068/069/088, started, round prepared, question loaded, and independent Chrome player joined/connected. Final clean deployment: letters room KECE6Q4K created, started, round prepared and selected letter question loaded. These are smoke-test rooms, not a full completed-match endurance test. Catalog displays 67 available categories. Temporary diagnostic wrapper was removed before final deployment.
+
+Checks: publisher 5 tests, Functions build and 28 game tests, client build and 10 focused UI/provider checks; final restored provider 3 tests and app typecheck passed. Database and release Gate accepted the scoped changes; final 810-file client manifest verified. Firebase catalog function update succeeded; CLI subsequently reported an artifact-retention-policy warning, with no retention policy changed.
+
+Detailed local evidence: output/owner-live-release-20260911/verify-result.json, gate-owner-final-report.txt, gate-backend-report.txt, gate-clean-client-report.txt, final-upload-manifest.json and final-production-inspect.txt. Final upload manifest SHA256: 38e47f8b67d34ef59beaaf80cd2737828a04ed24ba3cc1ca947538b4a13f29b8.
+
+Rollback remains conditional owner-release pointer rollback-none with operation reference; preserve immutable content/audits. Prior Vercel deployment may be promoted if required, but prior static builds do not provide gameplay. Next work is only separately requested content/media or full-match acceptance expansion; room creation is no longer blocked.
