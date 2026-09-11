@@ -48,7 +48,7 @@ it('replaces legacy setup cards with the metadata-only local DB inventory', asyn
   expect(screen.queryByRole('button', { name: /معلومات عامة/ })).not.toBeInTheDocument();
 });
 
-it('shows held-only local categories with a disabled Arabic availability state', async () => {
+it('hides local categories that cannot play the selected board', async () => {
   vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(JSON.stringify({
     source: 'local_sqlite_import',
     huroofAvailable: true,
@@ -58,11 +58,30 @@ it('shows held-only local categories with a disabled Arabic availability state',
     ],
   })));
   render(<ThemeProvider><MemoryRouter><HostNewRoute /></MemoryRouter></ThemeProvider>);
-  const held = await screen.findByRole('button', { name: 'فئة مؤجلة — غير متاحة للعب بعد' });
-  expect(held).toBeDisabled();
-  expect(held).toHaveTextContent('أسئلة هذه الفئة قيد المراجعة وليست متاحة للعب بعد.');
+  await screen.findByRole('button', { name: 'فئة جاهزة — أضف إلى الاختيار' });
+  expect(screen.queryByText('فئة مؤجلة')).not.toBeInTheDocument();
   await userEvent.click(screen.getByRole('radio', { name: 'الفئات' }));
   expect(screen.getByRole('button', { name: 'فئة جاهزة — أضف إلى الاختيار' })).toBeEnabled();
+  expect(screen.queryByText('فئة مؤجلة')).not.toBeInTheDocument();
+});
+
+it('filters local categories per board and prunes a deep-linked Huroof-ineligible selection', async () => {
+  vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(JSON.stringify({
+    source: 'local_sqlite_import', huroofAvailable: true,
+    categories: [
+      { id: 'huroof-ready', labelAr: 'تغطية الحروف', sourceOnly: true, questionCount: 1, heldQuestionCount: 0, huroofQuestionCount: 1, availability: 'ready', categoryGameEligible: true },
+      { id: 'categories-only', labelAr: 'فئات فقط', sourceOnly: true, questionCount: 300, heldQuestionCount: 0, huroofQuestionCount: 0, availability: 'ready', categoryGameEligible: true },
+    ],
+  })));
+  const user = userEvent.setup();
+  render(<ThemeProvider><MemoryRouter initialEntries={['/host/new?category=categories-only']}><HostNewRoute /></MemoryRouter></ThemeProvider>);
+
+  expect(await screen.findByRole('button', { name: 'تغطية الحروف — أضف إلى الاختيار' })).toBeVisible();
+  expect(screen.queryByText('فئات فقط')).not.toBeInTheDocument();
+  expect(screen.queryByRole('complementary', { name: 'الفئات المختارة' })).not.toBeInTheDocument();
+
+  await user.click(screen.getByRole('radio', { name: 'الفئات' }));
+  expect(screen.getByRole('button', { name: 'فئات فقط — أضف إلى الاختيار' })).toBeVisible();
 });
 
 it('does not silently show fixture categories after a DB inventory error and can retry', async () => {
@@ -70,7 +89,7 @@ it('does not silently show fixture categories after a DB inventory error and can
     .mockResolvedValueOnce(new Response(JSON.stringify({ error: 'LOCAL_DB_ORIGIN_REQUIRED' }), { status: 400 }))
     .mockResolvedValueOnce(new Response(JSON.stringify({
       source: 'local_firestore_import', huroofAvailable: true,
-      categories: [{ id: 'huroof-068', labelAr: 'منتخب الكويت', sourceOnly: true, categoryGameEligible: true }],
+      categories: [{ id: 'huroof-068', labelAr: 'منتخب الكويت', sourceOnly: true, huroofQuestionCount: 14, categoryGameEligible: true }],
     })));
   render(<ThemeProvider><MemoryRouter><HostNewRoute /></MemoryRouter></ThemeProvider>);
   await screen.findByRole('alert');
@@ -102,14 +121,15 @@ it('uses all public preview categories across board modes and preserves a deep-l
     </ThemeProvider>,
   );
 
-  expect(await screen.findByRole('option', { name: 'كل الموضوعات (88)' })).toBeInTheDocument();
+  expect(await screen.findByRole('option', { name: /كل الموضوعات \(\d+\)/ })).toBeInTheDocument();
   expect(screen.getByRole('button', { name: 'جغرافيا العالم — محددة' })).toBeVisible();
   expect(screen.getByText('يعرض هذا الفهرس محتوى معاينة الواجهة فقط، ولا يثبت توفره للعب المنشور.')).toBeVisible();
   await user.click(screen.getByRole('radio', { name: 'الحروف' }));
   expect(screen.getByRole('button', { name: 'جغرافيا العالم — محددة' })).toBeVisible();
-  await user.type(screen.getByRole('searchbox', { name: 'تصفية الفئات' }), 'دول / ولا كلمة');
-  const held = screen.getByRole('button', { name: 'دول / ولا كلمة — غير متاحة للعب بعد' });
-  expect(held).toBeDisabled();
+  await user.type(screen.getByRole('searchbox', { name: 'تصفية الفئات' }), 'كرة السلة وNBA');
+  expect(screen.queryByText('كرة السلة وNBA')).not.toBeInTheDocument();
+  await user.click(screen.getByRole('radio', { name: 'الفئات' }));
+  expect(screen.getByRole('button', { name: 'كرة السلة وNBA — أضف إلى الاختيار' })).toBeVisible();
   expect(fetchMock).not.toHaveBeenCalled();
 });
 

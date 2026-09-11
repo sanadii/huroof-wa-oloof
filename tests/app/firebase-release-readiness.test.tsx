@@ -75,7 +75,7 @@ it('uses the approved Firebase catalog on home instead of the local eight-catego
   expect(screen.queryByText('معلومات عامة')).not.toBeInTheDocument();
 });
 
-it('marks a Firebase category whose exact category selector is not playable unavailable on home', async () => {
+it('hides Firebase categories whose exact category selector is not playable on home', async () => {
   runtime.getApprovedReleaseCatalog.mockResolvedValue({
     ...approvedCatalog,
     categories: [
@@ -86,5 +86,24 @@ it('marks a Firebase category whose exact category selector is not playable unav
   render(<ThemeProvider><MemoryRouter><HomeSurface joinForm={<div />} joinMessage={null} /></MemoryRouter></ThemeProvider>);
   expect(await screen.findByRole('link', { name: /فئة أ/ })).toHaveAttribute('href', '/host/new?kind=categories&category=category-a');
   expect(screen.queryByRole('link', { name: /فئة ب/ })).not.toBeInTheDocument();
-  expect(screen.getByText('لا تكفي للعبة الفئات في الحزمة المعتمدة').closest('[aria-disabled="true"]')).not.toBeNull();
+  expect(screen.queryByText('فئة ب')).not.toBeInTheDocument();
+});
+
+it('filters Firebase categories by the selected board and prunes a mismatched deep link', async () => {
+  runtime.getApprovedReleaseCatalog.mockResolvedValue({
+    ...approvedCatalog,
+    categories: [
+      approvedCatalog.categories[0],
+      { ...approvedCatalog.categories[1], playable: { huroof: false, categories: true, charades: false } },
+    ],
+  });
+  const user = userEvent.setup();
+  render(<ThemeProvider><MemoryRouter initialEntries={['/host/new?category=category-b']}><HostNewRoute /></MemoryRouter></ThemeProvider>);
+
+  expect(await screen.findByRole('button', { name: 'فئة أ — أضف إلى الاختيار' })).toBeVisible();
+  expect(screen.queryByText('فئة ب')).not.toBeInTheDocument();
+  expect(screen.queryByRole('complementary', { name: 'الفئات المختارة' })).not.toBeInTheDocument();
+
+  await user.click(screen.getByRole('radio', { name: 'الفئات' }));
+  expect(screen.getByRole('button', { name: 'فئة ب — أضف إلى الاختيار' })).toBeVisible();
 });

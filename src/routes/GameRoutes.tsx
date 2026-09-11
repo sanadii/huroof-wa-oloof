@@ -35,6 +35,10 @@ import {
   filterCategories,
   type CategoryTopicId,
 } from "../data/category-filters";
+import {
+  approvedCategoryPlayable,
+  localCategoryPlayable,
+} from "../data/category-playability";
 import { GameBoard, type BoardCell } from "../features/board/game-board";
 import { generateBoard } from "../features/game/domain/board";
 import {
@@ -548,18 +552,7 @@ export function HostNewRoute() {
       });
     return () => { active = false; };
   }, [approvedReleaseCatalogAttempt, firebaseRuntime, staticPreview]);
-  const availableCategoryCatalog = useMemo(() => {
-    if (localQuestionInventoryError) return [];
-    if (firebaseRuntime)
-      return approvedReleaseCatalog ? catalogCategoryCovers(approvedReleaseCatalog.categories) : [];
-    const inventory = localQuestionInventory ?? (staticPreview ? staticPreviewQuestionInventory : undefined);
-    return inventory ? inventoryCategoryCovers(inventory) : legacyAvailableCategoryCatalog;
-  }, [approvedReleaseCatalog, firebaseRuntime, localQuestionInventory, localQuestionInventoryError, staticPreview]);
   const activeQuestionInventory = localQuestionInventory ?? (staticPreview ? staticPreviewQuestionInventory : undefined);
-  const firebaseSelectedModeUnavailable = Boolean(
-    firebaseRuntime && approvedReleaseCatalog && !approvedReleaseCatalog.boardCapabilities[form.gameKind],
-  );
-  const firebaseSelectedModeMessage = "الأسئلة المعتمدة الحالية لا تكفي لهذا النمط. اختر نمطاً متاحاً أو حدّث الحزمة.";
   const localCategoryById = useMemo(
     () =>
       new Map(
@@ -570,43 +563,43 @@ export function HostNewRoute() {
       ),
     [activeQuestionInventory],
   );
-  const categorySelectionAllowed = (id: string) => {
-    if (firebaseRuntime) {
-      const category = approvedReleaseCatalog?.categories.find((candidate) => candidate.id === id);
-      return form.gameKind !== "categories" || category?.playable.categories === true;
-    }
+  const categorySelectionAllowed = useCallback((id: string) => {
+    if (firebaseRuntime)
+      return approvedCategoryPlayable(
+        approvedReleaseCatalog?.categories.find((category) => category.id === id),
+        form.gameKind,
+      );
     if (!activeQuestionInventory) return true;
-    const category = localCategoryById.get(id);
-    if (!category) return false;
-    return form.gameKind === "categories"
-      ? category.categoryGameEligible
-      : activeQuestionInventory.huroofAvailable && category.huroofQuestionCount > 0;
-  };
+    return localCategoryPlayable(
+      localCategoryById.get(id),
+      form.gameKind,
+      activeQuestionInventory.huroofAvailable,
+    );
+  }, [activeQuestionInventory, approvedReleaseCatalog, firebaseRuntime, form.gameKind, localCategoryById]);
+  const categoryCatalogue = useMemo(() => {
+    if (localQuestionInventoryError) return [];
+    if (firebaseRuntime)
+      return approvedReleaseCatalog ? catalogCategoryCovers(approvedReleaseCatalog.categories) : [];
+    const inventory = localQuestionInventory ?? (staticPreview ? staticPreviewQuestionInventory : undefined);
+    return inventory ? inventoryCategoryCovers(inventory) : legacyAvailableCategoryCatalog;
+  }, [approvedReleaseCatalog, firebaseRuntime, localQuestionInventory, localQuestionInventoryError, staticPreview]);
+  const availableCategoryCatalog = useMemo(
+    () => categoryCatalogue.filter((category) => categorySelectionAllowed(category.id)),
+    [categoryCatalogue, categorySelectionAllowed],
+  );
+  const firebaseSelectedModeUnavailable = Boolean(
+    firebaseRuntime && approvedReleaseCatalog && !approvedReleaseCatalog.boardCapabilities[form.gameKind],
+  );
+  const firebaseSelectedModeMessage = "الأسئلة المعتمدة الحالية لا تكفي لهذا النمط. اختر نمطاً متاحاً أو حدّث الحزمة.";
   useEffect(() => {
-    if (!activeQuestionInventory) return;
+    if (!activeQuestionInventory && (!firebaseRuntime || !approvedReleaseCatalog)) return;
     setForm((current) => {
-      const categories = current.categories.filter((id) => {
-        const category = localCategoryById.get(id);
-        return current.gameKind === "categories"
-          ? Boolean(category?.categoryGameEligible)
-          : Boolean(
-              activeQuestionInventory.huroofAvailable &&
-                category?.huroofQuestionCount,
-            );
-      });
+      const categories = current.categories.filter((id) => categorySelectionAllowed(id));
       return categories.length === current.categories.length
         ? current
         : { ...current, categories };
     });
-  }, [activeQuestionInventory, form.gameKind, localCategoryById]);
-  useEffect(() => {
-    if (!firebaseRuntime || !approvedReleaseCatalog) return;
-    const eligible = new Set(approvedReleaseCatalog.categories.map((category) => category.id));
-    setForm((current) => {
-      const categories = current.categories.filter((id) => eligible.has(id));
-      return categories.length === current.categories.length ? current : { ...current, categories };
-    });
-  }, [approvedReleaseCatalog, firebaseRuntime]);
+  }, [activeQuestionInventory, approvedReleaseCatalog, categorySelectionAllowed, firebaseRuntime]);
   const availableCategoryTopics = useMemo(
     () =>
       categoryTopics.flatMap((topic) => {
@@ -1097,21 +1090,11 @@ export function HostNewRoute() {
               {visibleCategories.map((category) =>
                 (() => {
                   const isFallbackCover = unavailableCovers.has(category.id);
-                  const localCategory = localCategoryById.get(category.id);
-                  const selectable = categorySelectionAllowed(category.id);
-                  const unavailableMessage = !selectable
-                    ? localCategory?.availability === "held_only"
-                      ? "أسئلة هذه الفئة قيد المراجعة وليست متاحة للعب بعد."
-                      : form.gameKind === "categories"
-                        ? "لا تكفي أسئلة هذه الفئة للعبة الفئات بعد."
-                        : "لا توجد تغطية حروف كافية لاستخدام هذه الفئة الآن."
-                    : "";
                   return (
                     <button
-                      aria-label={`${category.displayNameAr}${!selectable ? " — غير متاحة للعب بعد" : form.categories.includes(category.id) ? " — محددة" : " — أضف إلى الاختيار"}`}
+                      aria-label={`${category.displayNameAr}${form.categories.includes(category.id) ? " — محددة" : " — أضف إلى الاختيار"}`}
                       aria-pressed={form.categories.includes(category.id)}
                       className={`category-choice ${form.categories.includes(category.id) ? "is-selected" : ""}`}
-                      disabled={!selectable}
                       key={category.id}
                       onClick={() => toggleCategory(category.id)}
                       type="button"
@@ -1137,7 +1120,6 @@ export function HostNewRoute() {
                       <span className="category-choice__title">
                         {category.displayNameAr}
                       </span>
-                      {unavailableMessage ? <small>{unavailableMessage}</small> : null}
                     </button>
                   );
                 })(),

@@ -12,6 +12,10 @@ import {
   type LocalQuestionInventory,
 } from "../data/local-question-inventory";
 import type { ApprovedReleaseCatalog } from "../features/game/runtime/contracts";
+import {
+  approvedCategoryPlayable,
+  localCategoryPlayable,
+} from "../data/category-playability";
 import { categoryReadinessLabel } from "../features/game/setup-options";
 
 type HomeSurfaceProps = {
@@ -57,11 +61,27 @@ function CategoryChooser({ staticPreview }: { staticPreview: boolean }) {
     () => new Map(activeInventory?.categories.map((category) => [category.id, category]) ?? []),
     [activeInventory],
   );
-  const catalogue = useMemo(
+  const categoryCatalogue = useMemo(
     () => gameRuntime.kind === "firebase"
       ? approvedCatalog ? catalogCategoryCovers(approvedCatalog.categories) : []
       : activeInventory ? inventoryCategoryCovers(activeInventory) : availableCategoryCatalog,
     [activeInventory, approvedCatalog],
+  );
+  const catalogue = useMemo(
+    () => categoryCatalogue.filter((category) => {
+      if (gameRuntime.kind === "firebase")
+        return approvedCategoryPlayable(
+          approvedCatalog?.categories.find((candidate) => candidate.id === category.id),
+          "categories",
+        );
+      if (!activeInventory) return true;
+      return localCategoryPlayable(
+        inventoryById.get(category.id),
+        "categories",
+        activeInventory.huroofAvailable,
+      );
+    }),
+    [activeInventory, approvedCatalog, categoryCatalogue, inventoryById],
   );
   const categories = useMemo(() => {
     const normalized = query.trim().toLocaleLowerCase("ar");
@@ -87,36 +107,14 @@ function CategoryChooser({ staticPreview }: { staticPreview: boolean }) {
         <ul className="spatial-home__categories">
           {categories.slice(0, showAll || query ? categories.length : 8).map((category) => (
             <li key={category.id}>
-              {(() => {
-                const localCategory = inventoryById.get(category.id);
-                const approvedCategory = approvedCatalog?.categories.find((candidate) => candidate.id === category.id);
-                const selectable = gameRuntime.kind === "firebase"
-                  ? approvedCategory?.playable.categories === true
-                  : !localCategory || localCategory.categoryGameEligible;
-                const status = gameRuntime.kind === "firebase"
-                  ? approvedCategory?.playable.categories
-                    ? "جاهزة للعبة الفئات"
-                    : "لا تكفي للعبة الفئات في الحزمة المعتمدة"
-                  : localCategory
-                  ? localCategory.availability === "held_only"
-                    ? "قيد المراجعة — غير متاحة للعب"
-                    : localCategory.categoryGameEligible
-                      ? staticPreview
-                        ? "محتوى محلي مدرج في معاينة الواجهة فقط"
-                        : "جاهزة للعبة الفئات"
-                      : "لا تكفي للعبة الفئات بعد"
-                  : categoryReadinessLabel(category.questionReadiness);
-                const content = <><strong>{category.displayNameAr}</strong><span>{status}</span></>;
-                return selectable ? (
-                  <Link to={`/host/new?kind=categories&category=${encodeURIComponent(category.id)}`}>
-                    {content}
-                  </Link>
-                ) : (
-                  <span aria-disabled="true" className="spatial-home__category-unavailable">
-                    {content}
-                  </span>
-                );
-              })()}
+              <Link to={`/host/new?kind=categories&category=${encodeURIComponent(category.id)}`}>
+                <strong>{category.displayNameAr}</strong>
+                <span>{!activeInventory && gameRuntime.kind !== "firebase"
+                  ? categoryReadinessLabel(category.questionReadiness)
+                  : staticPreview
+                    ? "محتوى محلي مدرج في معاينة الواجهة فقط"
+                    : "جاهزة للعبة الفئات"}</span>
+              </Link>
             </li>
           ))}
         </ul>

@@ -14,7 +14,7 @@ afterEach(() => {
   vi.unstubAllEnvs();
 });
 
-it("uses the complete local category inventory and leaves held-only categories unavailable", async () => {
+it("uses only local categories eligible for the category board", async () => {
   vi.spyOn(globalThis, "fetch").mockResolvedValue(
     new Response(
       JSON.stringify({
@@ -57,7 +57,7 @@ it("uses the complete local category inventory and leaves held-only categories u
     "/host/new?kind=categories&category=tahadani-ready",
   );
   expect(screen.queryByRole("link", { name: /فئة مؤجلة/ })).not.toBeInTheDocument();
-  expect(screen.getByText("قيد المراجعة — غير متاحة للعب")).toBeVisible();
+  expect(screen.queryByText("فئة مؤجلة")).not.toBeInTheDocument();
 });
 
 it("shows the full checked-in metadata inventory in a static preview without requesting the local API", async () => {
@@ -72,20 +72,13 @@ it("shows the full checked-in metadata inventory in a static preview without req
     </ThemeProvider>,
   );
 
-  expect(
-    screen.getByText(
-      (_, element) =>
-        element?.tagName === "P" &&
-        element.textContent === "تعكس حالة الجاهزية السجل المتاح حالياً. 88 فئة في الفهرس.",
-    ),
-  ).toBeVisible();
+  expect(screen.getByText(/تعكس حالة الجاهزية السجل المتاح حالياً\. \d+ فئة في الفهرس\./)).toBeVisible();
   expect(screen.getAllByText("محتوى محلي مدرج في معاينة الواجهة فقط")).toHaveLength(8);
-  await user.click(screen.getByRole("button", { name: "عرض كل الفئات (88)" }));
+  await user.click(screen.getByRole("button", { name: /عرض كل الفئات/ }));
   expect(screen.getByRole("link", { name: /جغرافيا العالم/ })).toHaveAttribute(
     "href",
     "/host/new?kind=categories&category=huroof-100",
   );
   expect(screen.queryByRole("link", { name: /دول \/ ولا كلمة/ })).not.toBeInTheDocument();
-  expect(screen.getAllByText("قيد المراجعة — غير متاحة للعب")).toHaveLength(5);
   expect(fetchMock).not.toHaveBeenCalled();
 });
