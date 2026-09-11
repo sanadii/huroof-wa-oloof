@@ -548,7 +548,7 @@ export function HostNewRoute() {
       .catch(() => {
         if (!active) return;
         setApprovedReleaseCatalog(undefined);
-        setApprovedReleaseCatalogError("لا توجد حزمة أسئلة معتمدة ونشطة لإنشاء غرفة مباشرة. راجع النشر أو جرّب لاحقاً.");
+        setApprovedReleaseCatalogError("تعذر الاتصال بخدمة اللعبة أو التحقق من إعدادات الاتصال. أعد المحاولة لاحقاً.");
       });
     return () => { active = false; };
   }, [approvedReleaseCatalogAttempt, firebaseRuntime, staticPreview]);
