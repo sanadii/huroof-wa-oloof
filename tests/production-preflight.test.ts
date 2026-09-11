@@ -23,6 +23,17 @@ test("production preflight accepts an explicit non-emulator Node 22 release buil
   assert.doesNotThrow(() => assertProductionPreflight(valid, "22.16.0"));
 });
 
+test("production preflight rejects the former Dammam Functions region", () => {
+  assert.throws(
+    () =>
+      assertProductionPreflight(
+        { ...valid, VITE_FIREBASE_FUNCTIONS_REGION: "me-central2" },
+        "22.16.0",
+      ),
+    /VITE_FIREBASE_FUNCTIONS_REGION must be me-central1/,
+  );
+});
+
 test("production preflight rejects fixture, emulator, missing release, and wrong Node inputs", () => {
   assert.throws(
     () =>

@@ -2,7 +2,7 @@ import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 export const productionProjectId = "huroof-a3ee7";
-export const productionFunctionsRegion = "me-central2";
+export const productionFunctionsRegion = "me-central1";
 
 type Environment = Record<string, string | undefined>;
 

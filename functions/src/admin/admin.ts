@@ -9,7 +9,7 @@ import { projectRoom, type CanonicalMember, type CanonicalRoom } from "../game.j
 if (!getApps().length) initializeApp();
 const db = getFirestore();
 const auth = getAuth();
-const region = process.env.FUNCTIONS_REGION || "me-central2";
+const region = process.env.FUNCTIONS_REGION || "me-central1";
 const callable = { region, enforceAppCheck: process.env.FUNCTIONS_EMULATOR !== "true" } as const;
 const roles = ["super_admin", "content_admin", "reviewer", "game_ops", "viewer"] as const;
 type Role = (typeof roles)[number];

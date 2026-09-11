@@ -99,7 +99,7 @@ export function getOptionalFirebaseClient(): FirebaseClientServices | null {
   const app = firebaseApp();
   if (appCheckProvider)
     attachAppCheckOnce(app, appCheckProvider, import.meta.env.VITE_FIREBASE_APP_CHECK_SITE_KEY!);
-  const services = { app, auth: getAuth(app), firestore: getFirestore(app), functions: getFunctions(app, import.meta.env.VITE_FIREBASE_FUNCTIONS_REGION || 'me-central2') };
+  const services = { app, auth: getAuth(app), firestore: getFirestore(app), functions: getFunctions(app, import.meta.env.VITE_FIREBASE_FUNCTIONS_REGION || 'me-central1') };
   attachAuthEmulatorOnce(app, services.auth);
   if (emulator && !gameEmulatorAttachedAppNames.has(app.name)) {
     connectFirestoreEmulator(services.firestore, '127.0.0.1', emulatorPort('VITE_FIREBASE_FIRESTORE_EMULATOR_PORT', 8080));

@@ -58,7 +58,7 @@ import {
 if (!getApps().length) initializeApp();
 const database = getFirestore();
 database.settings({ ignoreUndefinedProperties: true });
-const region = process.env.FUNCTIONS_REGION || "me-central2";
+const region = process.env.FUNCTIONS_REGION || "me-central1";
 const callable = {
   region,
   enforceAppCheck: process.env.FUNCTIONS_EMULATOR !== "true",
