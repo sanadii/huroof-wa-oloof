@@ -33,6 +33,11 @@ export function assertProductionPreflight(
     failures.push(
       `VITE_FIREBASE_FUNCTIONS_REGION must be ${productionFunctionsRegion}.`,
     );
+  const appCheckProvider = environment.VITE_FIREBASE_APP_CHECK_PROVIDER ?? "recaptcha-v3";
+  if (appCheckProvider !== "recaptcha-v3" && appCheckProvider !== "recaptcha-enterprise")
+    failures.push(
+      "VITE_FIREBASE_APP_CHECK_PROVIDER must be recaptcha-v3 or recaptcha-enterprise.",
+    );
   for (const name of [
     "VITE_FIREBASE_API_KEY",
     "VITE_FIREBASE_AUTH_DOMAIN",

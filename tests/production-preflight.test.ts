@@ -40,3 +40,20 @@ test("production preflight rejects fixture, emulator, missing release, and wrong
     /Node 22.*VITE_GAME_RUNTIME.*VITE_USE_FIREBASE_EMULATORS.*VITE_FIREBASE_PROJECT_ID.*FIREBASE_ACTIVE_RELEASE_ID.*FIRESTORE_EMULATOR_HOST/s,
   );
 });
+
+test("production preflight accepts the Enterprise provider and rejects an unknown one", () => {
+  assert.doesNotThrow(() =>
+    assertProductionPreflight(
+      { ...valid, VITE_FIREBASE_APP_CHECK_PROVIDER: "recaptcha-enterprise" },
+      "22.16.0",
+    ),
+  );
+  assert.throws(
+    () =>
+      assertProductionPreflight(
+        { ...valid, VITE_FIREBASE_APP_CHECK_PROVIDER: "recaptcha-unknown" },
+        "22.16.0",
+      ),
+    /VITE_FIREBASE_APP_CHECK_PROVIDER/,
+  );
+});
