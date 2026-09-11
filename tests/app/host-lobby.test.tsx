@@ -1,5 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { createRef } from 'react';
+import { MemoryRouter } from 'react-router-dom';
 import { expect, it, vi } from 'vitest';
 import { applyLocalIntentResponse, audienceQuestionBandVisible, canManageTeamsInState, CorrectionDialog, createGameIntentId, HostActions, HostJoinDialog, HostJoinInlineQr, HostLobbyControls, HostPauseAction, HostVisibilityControls, isReadOnlyFixtureRoom, playerJoinUrl, shouldShowHostAnswers } from '../../src/routes/GameRoutes';
 
@@ -308,21 +309,46 @@ it('opens the question and buzzer from cell selection without manual host action
   expect(container.querySelector('.control-grid .host-controls__pause')).toBeNull();
 });
 
-it('makes terminal failure a single safe replacement decision and makes exhaustion a truthful end-only hold', () => {
+it('makes an unanswered question continue to the next board cell and confirms full-match termination', () => {
   const action = vi.fn();
   const teams = { horizontal: 'الأحمر', vertical: 'الأخضر' };
+  const confirm = vi.spyOn(window, 'confirm').mockReturnValue(false);
   const { rerender } = render(<HostActions action={action} playerCount={2} state="QUESTION_FAILED" teams={teams} />);
 
-  expect(screen.getByRole('status')).toHaveTextContent('لن تعيد السؤال المكشوف');
-  fireEvent.click(screen.getByRole('button', { name: 'متابعة واستبدال الخلية' }));
+  expect(screen.getByRole('status')).toHaveTextContent('اختر حرفًا آخر من اللوحة');
+  fireEvent.click(screen.getByRole('button', { name: 'استبدل الخلية واختر حرفًا آخر' }));
   expect(action).toHaveBeenCalledWith('RETRY_CELL');
   expect(screen.queryByRole('button', { name: 'أعد الخلية' })).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: 'إنهاء المباراة كاملةً بلا فائز' }));
+  expect(confirm).toHaveBeenCalledWith('سيؤدي هذا إلى إنهاء المباراة كاملةً بلا فائز. هل تريد المتابعة؟');
+  expect(action).toHaveBeenCalledTimes(1);
 
   rerender(<HostActions action={action} contentHold={{ reason: 'CONTENT_EXHAUSTED', operation: 'SELECT_CELL' }} playerCount={2} state="CELL_SELECTION" teams={teams} />);
   expect(screen.getByRole('status')).toHaveTextContent('لا تتغير ملكية الخلية');
   expect(screen.queryByRole('button', { name: 'اختر حرفًا من اللوحة' })).not.toBeInTheDocument();
-  fireEvent.click(screen.getByRole('button', { name: 'إنهاء المباراة بلا فائز' }));
+  confirm.mockReturnValue(true);
+  fireEvent.click(screen.getByRole('button', { name: 'إنهاء المباراة كاملةً بلا فائز' }));
   expect(action).toHaveBeenLastCalledWith('END_WITHOUT_WINNER');
+  confirm.mockRestore();
+});
+
+it('gives a completed host a same-settings new-match path', () => {
+  const teams = { horizontal: 'الأحمر', vertical: 'الأخضر' };
+  render(
+    <MemoryRouter>
+      <HostActions
+        action={vi.fn()}
+        endedWithoutWinner
+        newMatchHref="/host/new?kind=categories&mode=fast&category=tahadani-006"
+        playerCount={2}
+        state="MATCH_COMPLETE"
+        teams={teams}
+      />
+    </MemoryRouter>,
+  );
+
+  expect(screen.getByRole('status')).toHaveTextContent('انتهت المباراة بلا فائز');
+  expect(screen.getByRole('link', { name: 'مباراة جديدة بالإعدادات نفسها' })).toHaveAttribute('href', '/host/new?kind=categories&mode=fast&category=tahadani-006');
 });
 
 it('uses category-specific selection wording without changing the Huroof host prompt', () => {

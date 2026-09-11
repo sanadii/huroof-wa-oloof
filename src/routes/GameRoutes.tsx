@@ -414,6 +414,24 @@ export function resultRouteState(
   };
 }
 
+/** Keeps a completed host's next-match link on the setup route with its chosen scope. */
+export function sameSettingsNewMatchHref(
+  settings: SafeProjection["room"]["matchSettings"] | undefined,
+) {
+  if (!settings) return "/host/new";
+  const search = setupQueryString({
+    categories: settings.categories,
+    demo: settings.demo,
+    gameKind: settings.gameKind ?? "huroof",
+    horizontal: settings.teams.horizontal,
+    mode: settings.mode,
+    opponentSeconds: settings.opponentSeconds,
+    questionSeconds: settings.questionSeconds,
+    vertical: settings.teams.vertical,
+  });
+  return `/host/new?${search}`;
+}
+
 export function activeLobbyDestination(
   roomCode: string | undefined,
   surface: "lobby" | "host" | "play" | "display" | "results",
@@ -1993,6 +2011,8 @@ export function HostActions({
   entitledTeam,
   contentHold,
   gameKind = "huroof",
+  endedWithoutWinner,
+  newMatchHref = "/host/new",
 }: {
   state: string;
   action: (type: IntentType, payload?: Record<string, unknown>) => void;
@@ -2001,14 +2021,35 @@ export function HostActions({
   entitledTeam?: "horizontal" | "vertical";
   contentHold?: SafeProjection["contentHold"];
   gameKind?: "huroof" | "categories";
+  endedWithoutWinner?: boolean;
+  newMatchHref?: string;
 }) {
   const manualSelection =
     state === "QUESTION_READING" || state === "OPPONENT_CHANCE";
   const hostOnly = playerCount === 0;
+  const selectionLabel = gameKind === "categories" ? "فئة" : "حرفًا";
+  const confirmEndWithoutWinner = () =>
+    window.confirm(
+      "سيؤدي هذا إلى إنهاء المباراة كاملةً بلا فائز. هل تريد المتابعة؟",
+    );
   const primary: Partial<Record<string, [IntentType, string]>> = {
     ROUND_SETUP: ["ROUND_READY", "جهّز الجولة"],
     ROUND_COMPLETE: ["START_NEXT_ROUND", "جولة جديدة"],
   };
+  if (state === "MATCH_COMPLETE") {
+    return (
+      <section className="control-grid" role="status">
+        <p>
+          {endedWithoutWinner
+            ? "انتهت المباراة بلا فائز."
+            : "اكتملت المباراة."}
+        </p>
+        <Link className="button button--primary" to={newMatchHref}>
+          مباراة جديدة بالإعدادات نفسها
+        </Link>
+      </section>
+    );
+  }
   if (contentHold) {
     return (
       <div className="control-grid control-grid--content-hold" role="status">
@@ -2018,9 +2059,11 @@ export function HostActions({
         </p>
         <button
           className="button button--primary"
-          onClick={() => action("END_WITHOUT_WINNER")}
+          onClick={() => {
+            if (confirmEndWithoutWinner()) action("END_WITHOUT_WINNER");
+          }}
         >
-          إنهاء المباراة بلا فائز
+          إنهاء المباراة كاملةً بلا فائز
         </button>
       </div>
     );
@@ -2037,13 +2080,11 @@ export function HostActions({
             const cell = document.querySelector<HTMLButtonElement>(
               ".host-board .game-board__button:not(:disabled)",
             );
-            cell?.scrollIntoView({ block: "center", behavior: "instant" });
+            cell?.scrollIntoView?.({ block: "center", behavior: "instant" });
             cell?.focus({ preventScroll: true });
           }}
         >
-          {gameKind === "categories"
-            ? "اختر فئة من اللوحة"
-            : "اختر حرفًا من اللوحة"}
+          {`اختر ${selectionLabel} من اللوحة`}
         </button>
       )}
       {state === "FIRST_ANSWER" && (
@@ -2062,20 +2103,22 @@ export function HostActions({
       {state === "QUESTION_FAILED" && (
         <>
           <p className="host-failure-summary" role="status">
-            لم تُمنح الخلية لأي فريق. ستستبدل المتابعة محتواها بسؤال جديد ولن
-            تعيد السؤال المكشوف.
+            لم تُمنح الخلية لأي فريق. استبدلها ثم اختر {selectionLabel} آخر من
+            اللوحة؛ لن يعود السؤال المكشوف.
           </p>
           <button
             className="button button--primary"
             onClick={() => action("RETRY_CELL")}
           >
-            متابعة واستبدال الخلية
+            {`استبدل الخلية واختر ${selectionLabel} آخر`}
           </button>
           <button
             className="button"
-            onClick={() => action("END_WITHOUT_WINNER")}
+            onClick={() => {
+              if (confirmEndWithoutWinner()) action("END_WITHOUT_WINNER");
+            }}
           >
-            إنهاء بلا فائز
+            إنهاء المباراة كاملةً بلا فائز
           </button>
         </>
       )}
@@ -2823,6 +2866,7 @@ function RoomRouteInstance({
   const expandedBoardTriggerRef = useRef<HTMLButtonElement>(null);
   const buzzSubmittingRef = useRef(false);
   const automaticHostTransitionRef = useRef<string | undefined>(undefined);
+  const priorHostStateRef = useRef<string | undefined>(undefined);
   const restoreExpandedBoardFocus = () => {
     setExpandedBoardOpen(false);
     window.requestAnimationFrame(() =>
@@ -2867,6 +2911,24 @@ function RoomRouteInstance({
     buzzSubmittingRef.current = false;
     setBuzzSubmitting(false);
   }, [envelope?.revision, projection?.self?.canBuzz]);
+  useEffect(() => {
+    const priorState = priorHostStateRef.current;
+    priorHostStateRef.current = projection?.room.state;
+    if (
+      priorState !== "QUESTION_FAILED" ||
+      projection?.room.state !== "CELL_SELECTION" ||
+      envelope?.role !== "host" ||
+      projection.contentHold
+    )
+      return;
+    window.requestAnimationFrame(() => {
+      const cell = document.querySelector<HTMLButtonElement>(
+        ".host-board .game-board__button:not(:disabled)",
+      );
+      cell?.scrollIntoView?.({ block: "center", behavior: "instant" });
+      cell?.focus({ preventScroll: true });
+    });
+  }, [envelope?.role, projection?.contentHold, projection?.room.state]);
   const activeDestination = activeLobbyDestination(
     roomCode,
     surface,
@@ -3088,6 +3150,7 @@ function RoomRouteInstance({
   const correctionPending = state === "CORRECTION";
   const correctionDialogVisible = correctionDialogOpen || correctionPending;
   const resultState = resultRouteState(roomCode, role, state);
+  const newMatchHref = sameSettingsNewMatchHref(projection.room.matchSettings);
   const canStartMatch = canDispatchLobbyStart(state, projection.room.canStart);
   const team = projection.self?.team;
   const cells = projection.board ?? previewBoardCells;
@@ -3650,7 +3713,7 @@ function RoomRouteInstance({
                   <li>إجابة صحيحة وتثبيت ملكيتها (+1 نقطة)</li>
                   <li>اكتمال المسار (+1 جولة)</li>
                 </ol>
-                <Link className="button button--primary" to="/host/new">
+                <Link className="button button--primary" to={host ? newMatchHref : "/host/new"}>
                   مباراة جديدة
                 </Link>
               </>
@@ -3736,7 +3799,13 @@ function RoomRouteInstance({
                 <h2>{projection.question?.headerAr || "سؤال الجولة"}</h2>
                 <span aria-hidden="true" className="question-band__line" />
               </div>
-              {state === "CELL_SELECTION" ? (
+              {state === "MATCH_COMPLETE" ? (
+                <p className="host-question-band__finished" role="status">
+                  {incompleteEnd
+                    ? "انتهت المباراة بلا فائز. أنشئ مباراة جديدة للعب من البداية."
+                    : "اكتملت المباراة. أنشئ مباراة جديدة للعب من البداية."}
+                </p>
+              ) : state === "CELL_SELECTION" ? (
                 <p>بانتظار اختيار الخلية</p>
               ) : (
                 <>
@@ -3879,7 +3948,9 @@ function RoomRouteInstance({
                   }
                   state={state}
                   contentHold={projection.contentHold}
+                  endedWithoutWinner={projection.endedWithoutWinner}
                   gameKind={projection.room.matchSettings?.gameKind}
+                  newMatchHref={newMatchHref}
                   teams={
                     projection.room.teams ?? {
                       horizontal: "الأحمر",

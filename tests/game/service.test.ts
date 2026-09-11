@@ -300,6 +300,41 @@ test('pause preserves an open authoritative timer and resume expires only after 
   } finally { service.close(); await rm(dir, { recursive: true, force: true }); }
 });
 
+test('an unanswered question can reveal its answer, return to selection, and open a different unused cell', async () => {
+  const dir = await mkdtemp(join(tmpdir(), 'huroof-unanswered-continue-'));
+  const dbPath = join(dir, 'rooms.sqlite');
+  let now = new Date('2026-09-11T00:00:00.000Z');
+  const service = new AuthoritativeGameService({ dbPath, secret: 'test', clock: () => now });
+  try {
+    const room = await readyRoom(service);
+    await room.hostIntent('START_MATCH');
+    await room.hostIntent('ROUND_READY');
+    const firstCell = service.metadata(room.host.roomId, room.host.token).projection.board!.find((cell) => cell.kind === 'letter')!;
+    await room.hostIntent('SELECT_CELL', { cellId: firstCell.id });
+    const unanswered = service.store.load(room.host.roomId)!;
+    const firstQuestionId = unanswered.activeQuestion!.id;
+    const firstOccurrence = unanswered.activeQuestionOccurrence!;
+
+    now = new Date(now.getTime() + 11_000);
+    assert.deepEqual(await service.tick(), [room.host.roomId]);
+    const failed = service.metadata(room.host.roomId, room.host.token).projection;
+    assert.equal(failed.room.state, 'QUESTION_FAILED');
+    assert.equal(failed.buzzOpen, undefined);
+
+    const revealed = await room.hostIntent('REVEAL_ANSWER', { occurrence: firstOccurrence });
+    assert.ok((revealed.projection.projection.question as { revealedAnswer?: string }).revealedAnswer);
+    const continued = await room.hostIntent('RETRY_CELL');
+    assert.equal(continued.projection.projection.room.state, 'CELL_SELECTION');
+    assert.equal(service.store.load(room.host.roomId)?.activeQuestion, undefined);
+
+    const nextCell = continued.projection.projection.board!.find((cell) => cell.id !== firstCell.id && !cell.owner)!;
+    const nextQuestion = await room.hostIntent('SELECT_CELL', { cellId: nextCell.id });
+    assert.equal(nextQuestion.projection.projection.room.state, 'QUESTION_READING');
+    assert.equal(service.store.load(room.host.roomId)?.game.activeCellId, nextCell.id);
+    assert.notEqual(service.store.load(room.host.roomId)?.activeQuestion?.id, firstQuestionId);
+  } finally { service.close(); await rm(dir, { recursive: true, force: true }); }
+});
+
 test('demo projections permanently mark drafts and keep answer-bearing fields host-only', async () => withService(async (service) => {
   const room = await readyRoom(service); await room.hostIntent('START_MATCH'); await room.hostIntent('ROUND_READY'); await room.hostIntent('SELECT_CELL', { cellId: 'cell-0-0' });
   const hostProjection = service.metadata(room.host.roomId, room.host.token); const playerProjection = service.metadata(room.host.roomId, room.one.token); const audienceProjection = service.metadata(room.host.roomId, service.createAudienceCapability(room.host.roomId));

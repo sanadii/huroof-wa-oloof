@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { Link, MemoryRouter, Route, Routes, useLocation } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ThemeProvider } from "../../src/app/ThemeProvider";
@@ -117,9 +117,11 @@ describe("RoomRoute held and incomplete game surfaces", () => {
     fireEvent.click(screen.getByTestId("correction-trigger"));
     expect(await screen.findByText(/سجل التدقيق متاح للقراءة فقط/)).toBeVisible();
     expect(screen.queryByRole("button", { name: "معاينة التصحيح" })).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "إنهاء المباراة بلا فائز" }));
+    const confirm = vi.spyOn(window, "confirm").mockReturnValue(true);
+    fireEvent.click(screen.getByRole("button", { name: "إنهاء المباراة كاملةً بلا فائز" }));
     await waitFor(() => expect(runtime.submitGameIntent).toHaveBeenCalledTimes(1));
     expect(runtime.submitGameIntent.mock.calls[0][1]).toMatchObject({ type: "END_WITHOUT_WINNER" });
+    confirm.mockRestore();
   });
 
   it("opens a modal enlarged category board, then restores trigger focus after Escape", async () => {
@@ -143,12 +145,51 @@ describe("RoomRoute held and incomplete game surfaces", () => {
 
     expect(await screen.findByRole("heading", { name: "انتهت المباراة بلا فائز" })).toBeVisible();
     expect(screen.getByText(/احتُفظ بالنقاط وسجل الجولات دون إعلان فائز/)).toBeVisible();
-    expect(screen.getByRole("link", { name: "مباراة جديدة" })).toHaveAttribute("href", "/host/new");
+    expect(screen.getByRole("link", { name: "مباراة جديدة" })).toHaveAttribute("href", "/host/new?kind=categories&mode=classic&category=tahadani-006&category=tahadani-007");
     fireEvent.click(screen.getByTestId("rematch-same-settings"));
     await waitFor(() => expect(runtime.createRoom).toHaveBeenCalledWith(expect.objectContaining({
       gameKind: "categories",
       categories: ["tahadani-006", "tahadani-007"],
     })));
+  });
+
+  it("keeps a completed host out of the waiting-question surface and offers its configured new-match setup", async () => {
+    projection = hostProjection({ state: "MATCH_COMPLETE", endedWithoutWinner: true });
+    renderHost();
+
+    expect(await screen.findByText("انتهت المباراة بلا فائز. أنشئ مباراة جديدة للعب من البداية.")).toBeVisible();
+    expect(screen.queryByText("بانتظار السؤال")).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "مباراة جديدة بالإعدادات نفسها" })).toHaveAttribute("href", "/host/new?kind=categories&mode=classic&category=tahadani-006&category=tahadani-007");
+  });
+
+  it("focuses the next available board cell after a failed question returns to selection", async () => {
+    const failed = hostProjection({ state: "QUESTION_FAILED" });
+    let publish!: (value: ProjectionEnvelope<SafeProjection>) => void;
+    runtime.subscribeProjection.mockImplementation((_roomId: string, _role: string, _uid: string, onProjection: (value: ProjectionEnvelope<SafeProjection>) => void) => {
+      publish = onProjection;
+      onProjection(failed);
+      return () => undefined;
+    });
+    renderHost();
+
+    act(() => {
+      publish({
+        ...failed,
+        revision: failed.revision + 1,
+        projection: {
+          ...failed.projection,
+          room: { ...failed.projection.room, state: "CELL_SELECTION" },
+        },
+      });
+    });
+    const nextCell = await waitFor(() => {
+      const cell = document.querySelector<HTMLButtonElement>(
+        ".host-board .game-board__button:not(:disabled)",
+      );
+      expect(cell).not.toBeNull();
+      return cell!;
+    });
+    await waitFor(() => expect(nextCell).toHaveFocus());
   });
   it("ignores a delayed completed-room projection while a same-route rematch lobby loads", async () => {
     const callbacks = new Map<string, (value: ProjectionEnvelope<SafeProjection>) => void>();
