@@ -179,3 +179,10 @@ Checks: publisher 5 tests, Functions build and 28 game tests, client build and 1
 Detailed local evidence: output/owner-live-release-20260911/verify-result.json, gate-owner-final-report.txt, gate-backend-report.txt, gate-clean-client-report.txt, final-upload-manifest.json and final-production-inspect.txt. Final upload manifest SHA256: 38e47f8b67d34ef59beaaf80cd2737828a04ed24ba3cc1ca947538b4a13f29b8.
 
 Rollback remains conditional owner-release pointer rollback-none with operation reference; preserve immutable content/audits. Prior Vercel deployment may be promoted if required, but prior static builds do not provide gameplay. Next work is only separately requested content/media or full-match acceptance expansion; room creation is no longer blocked.
+
+
+### Unanswered-question recovery follow-up — 2026-09-11
+
+Done: failed questions now offer an explicit next-letter/category action and restore board focus; ending the entire match requires an in-page confirmation with safe cancellation focus. Completed host screens explain the ending and offer a same-settings new game. No backend/state/scoring/rules changes. The reported Chrome room was already endedWithoutWinner; it is not silently reopened.
+
+Production verification: Chrome room F3LG7S8N unanswered timeout -> recovery -> different letter question loaded, zero points awarded; confirmation cancellation preserved the match. In-app room B32H8Y2L also verified the final in-page confirmation and cancellation. Original host tabs refreshed. Code pushed through 424327cba8dbe58b8d5511b8a772485dda127e69; Vercel dpl_6K44t8o26vvEaxXeRB8AKic1cDxr promoted. 28 focused UI checks, timeout service regression, 10 domain tests, typecheck/lint and independent release Gate passed. Two unrelated full-service tests lack private media fixture manifests in the release snapshot. Details: [repair evidence](../output/unanswered-game-fix-20260911/RESULT.md).
