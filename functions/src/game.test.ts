@@ -51,6 +51,19 @@ test('approved release catalog projection exposes only immutable identity, categ
   assert.equal(sharedCatalog.boardCapabilities.categories, false);
 });
 
+test('Huroof catalog retains contributors to a playable shared board without claiming a subset is sufficient', () => {
+  const questions = readyReleaseQuestions.map((question, index) => ({ ...question, modality: 'classic' as const, answerConceptId: question.answerConceptId!, categoryId: Math.floor(index / 3) % 2 ? 'category-b' : 'category-a' }));
+  const catalog = approvedReleaseCatalogProjection(
+    { releaseId: 'release-shared-letters' },
+    { immutable: true, approvedCount: questions.length, documentRootSha256: 'b'.repeat(64) },
+    ['category-a', 'category-b', 'empty'].map(id => ({ id, data: { id, labelAr: id } })), questions,
+  );
+  assert.equal(catalog.boardCapabilities.huroof, true);
+  assert.deepEqual(catalog.categories.map(category => category.playable.huroof), [true, true, false]);
+  assert.throws(() => createMatchQuestionSelection(questions, { categories: ['category-a'], modality: 'classic', seed: 1, reservePerLetter: 3 }));
+  assert.doesNotThrow(() => createMatchQuestionSelection(questions, { categories: ['category-a', 'category-b'], modality: 'classic', seed: 1, reservePerLetter: 3 }));
+});
+
 test('closed rooms are terminal for shared join and intent guards', () => {
   const closed = { ...room(), closedAt: new Date().toISOString() } as CanonicalRoom;
   assert.equal(isRoomClosed(closed), true);

@@ -323,10 +323,16 @@ export function approvedReleaseCatalogProjection(
       return true;
     } catch { return false; }
   };
+  const sharedHuroofPoolPlayable = playable(categories.map((category) => category.id), "huroof");
   const categoriesWithReadiness = categories.map((category) => ({
     ...category,
     playable: {
-      huroof: playable([category.id], "huroof"),
+      // Categories contribute letters to a shared board; they need not each
+      // contain every board letter. Room creation still validates the exact
+      // selected combination with the authoritative selector.
+      huroof: sharedHuroofPoolPlayable && runtime.some((question) =>
+        question.categoryId === category.id && question.modality === "classic" &&
+        typeof question.targetLetter === "string" && question.targetLetter.length > 0),
       categories: categories.some((other) => other.id !== category.id && playable([category.id, other.id], "categories")),
       charades: playable([category.id], "charades"),
     },
@@ -337,7 +343,7 @@ export function approvedReleaseCatalogProjection(
     demoFixture,
     categories: categoriesWithReadiness,
     boardCapabilities: {
-      huroof: playable(categories.map((category) => category.id), "huroof") || categoriesWithReadiness.some((category) => category.playable.huroof),
+      huroof: sharedHuroofPoolPlayable,
       categories: categoriesWithReadiness.some((category) => category.playable.categories),
       charades: categoriesWithReadiness.some((category) => category.playable.charades),
     },
