@@ -1,4 +1,21 @@
+## Doha deployment verified — 2026-09-11 15:56 UTC
+
+All nine authorized room callables are ACTIVE in me-central1 on Node.js 22. Fresh Google API readback returned exactly those nine functions and no admin endpoints. Each callable rejected an empty unauthenticated request with HTTP 401 UNAUTHENTICATED. Firestore remains me-central2. These are infrastructure and negative-boundary checks, not authenticated gameplay acceptance.
+
+Source commit 089ee2d9 changes six region defaults/preflight/test paths. Backend tests: 38/38; production preflight: 4/4; provider tests: 3/3; typecheck and Functions build passed. Gate accepted the exact compiled package, including the derived package-only gcp-build empty-string setting for Google's documented prebuilt deployment. Final package manifest SHA256: 251515399da413d82600dd1af9980d24bd34ec68f6dfbe1075661efd664d735d.
+
+runtime/activeRelease still returns 404. No question approvals, database writes, rules changes or live browser runtime switch were performed. Vercel remains the previously verified static preview. Remaining work: genuine reviewed release publication, live App Check attestation, and host/player gameplay acceptance. Do not report room creation as operational yet. Evidence: output/firebase-activation-20260911/live-verification.json and BUILDPACK-GATE-REPORT.md. Rollback: retain fixture runtime; revert the six source paths if required, and separately review any removal of the newly deployed endpoints before doing so.
+
 # Deployment and rollback plan
+
+## Doha room-service deployment authorization — 2026-09-11
+
+User replied “OK” to processing room requests in Doha (me-central1) while retaining Firestore in Dammam (me-central2), including the stated cross-region latency/cost implications. Regional decision is resolved; no further region approval is required for this scope.
+
+Scope remains only the nine reviewed room callables. Client/preflight now target Doha and reject the former Dammam Functions region. A manual endpoint check passed with the environment override, but Firebase CLI discovery did not retain that shell variable and retried Dammam. Therefore the backend defaults are being made explicitly Doha before repackaging. No deployed endpoints were created by either failed Dammam attempt. Database/rules/Auth/release approval remain unchanged.
+
+Status: rebuilding and verifying explicit Doha package; deployment and live endpoint checks pending. Production stays static preview until genuine reviewed release and authenticated App Check gameplay acceptance. Evidence continues under output/firebase-activation-20260911/.
+
 
 ## Blaze activation and App Check preparation — 2026-09-11
 
