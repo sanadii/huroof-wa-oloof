@@ -12,6 +12,7 @@ import {
   CATEGORY_IDS,
   createProductionOwnerCategorySupplementApi,
   MEDIA_RELEASE_ID,
+  reactivateOwnerCategorySupplement,
   rollbackOwnerCategorySupplement,
   verifyOwnerCategorySupplement,
   type CapturedBase,
@@ -715,6 +716,83 @@ class PersistentSupplementCloud implements CategorySupplementApi {
       sourceDocument(receipt.path, receipt.data),
     );
   }
+  async reactivate(
+    plan: CategorySupplementPlan,
+    rollbackReceipt: ReleaseDocument,
+    reactivationReceipt: ReleaseDocument,
+  ) {
+    const expected = activePointer(plan);
+    const required = [
+      releaseRoot(plan),
+      {
+        path: verificationPath(plan),
+        data: {
+          releaseId: plan.releaseId,
+          baseReleaseId: MEDIA_RELEASE_ID,
+          documentRootSha256: plan.documentRootSha256,
+          ownerApprovalPath: plan.ownerApproval.path,
+          verificationKind: "owner_category_exact_readback",
+          immutable: true,
+        },
+      },
+      {
+        path: activationPath(plan),
+        data: {
+          releaseId: plan.releaseId,
+          baseReleaseId: MEDIA_RELEASE_ID,
+          activePointer: expected,
+          ownerApprovalPath: plan.ownerApproval.path,
+          immutable: true,
+        },
+      },
+      ...plan.approvalDocuments,
+      rollbackReceipt,
+    ];
+    if (
+      required.some(
+        (document) =>
+          !equal(
+            this.documents.get(document.path)?.fields,
+            sourceDocument(document.path, document.data).fields,
+          ),
+      )
+    )
+      throw new Error(
+        "Reactivation authority, activation, or rollback evidence drifted.",
+      );
+    const current = this.documents.get("runtime/activeRelease");
+    const prior = this.documents.get(reactivationReceipt.path);
+    if (prior) {
+      if (
+        equal(
+          current?.fields,
+          sourceDocument("runtime/activeRelease", expected).fields,
+        ) &&
+        equal(
+          prior.fields,
+          sourceDocument(reactivationReceipt.path, reactivationReceipt.data)
+            .fields,
+        )
+      )
+        return;
+      throw new Error("Reactivation retry conflicts with active pointer.");
+    }
+    if (
+      !equal(
+        current?.fields,
+        sourceDocument("runtime/activeRelease", plan.base.pointer).fields,
+      )
+    )
+      throw new Error("Reactivation pointer changed.");
+    this.documents.set(
+      reactivationReceipt.path,
+      sourceDocument(reactivationReceipt.path, reactivationReceipt.data),
+    );
+    this.documents.set(
+      "runtime/activeRelease",
+      sourceDocument("runtime/activeRelease", expected),
+    );
+  }
 }
 
 test("persistent cloud retries partial creates, verifies exact authority, and rolls back with the M04 pointer", async () => {
@@ -793,6 +871,100 @@ test("mismatched child aborts before the completion root, verification receipt, 
       sourceDocument("runtime/activeRelease", plan.base.pointer).fields,
     ),
     true,
+  );
+});
+
+test("guarded reactivation requires exact retained authority, activation, rollback, and M04 pointer evidence", async () => {
+  const plan = syntheticPlan();
+  const rolledBack = async () => {
+    const cloud = new PersistentSupplementCloud(plan.base);
+    await applyOwnerCategorySupplement(plan, cloud, async () => plan);
+    await rollbackOwnerCategorySupplement(plan, cloud, "m05-rollback-evidence");
+    return cloud;
+  };
+  const cloud = await rolledBack();
+  await reactivateOwnerCategorySupplement(
+    plan,
+    cloud,
+    "m05-rollback-evidence",
+    "m05-runtime-recovery",
+  );
+  await reactivateOwnerCategorySupplement(
+    plan,
+    cloud,
+    "m05-rollback-evidence",
+    "m05-runtime-recovery",
+  );
+  assert.deepEqual(await verifyOwnerCategorySupplement(plan, cloud), {
+    releaseId: plan.releaseId,
+    active: true,
+  });
+
+  const stale = await rolledBack();
+  stale.documents.set(
+    "runtime/activeRelease",
+    sourceDocument("runtime/activeRelease", {
+      ...plan.base.pointer,
+      releaseId: "stale",
+    }),
+  );
+  await assert.rejects(
+    reactivateOwnerCategorySupplement(
+      plan,
+      stale,
+      "m05-rollback-evidence",
+      "stale",
+    ),
+    /Captured M04 base/i,
+  );
+
+  const alteredRollback = await rolledBack();
+  const rollbackPath = [...alteredRollback.documents.keys()].find((path) =>
+    path.startsWith("rollbackReceipts/"),
+  )!;
+  alteredRollback.documents.set(
+    rollbackPath,
+    sourceDocument(rollbackPath, { immutable: false }),
+  );
+  await assert.rejects(
+    reactivateOwnerCategorySupplement(
+      plan,
+      alteredRollback,
+      "m05-rollback-evidence",
+      "altered-rollback",
+    ),
+    /rollback evidence/i,
+  );
+
+  const alteredAuthority = await rolledBack();
+  const authority = plan.approvalDocuments.at(-1)!;
+  alteredAuthority.documents.set(
+    authority.path,
+    sourceDocument(authority.path, { ...authority.data, immutable: false }),
+  );
+  await assert.rejects(
+    reactivateOwnerCategorySupplement(
+      plan,
+      alteredAuthority,
+      "m05-rollback-evidence",
+      "altered-authority",
+    ),
+    /owner authority/i,
+  );
+
+  const alteredActivation = await rolledBack();
+  alteredActivation.documents.set(
+    activationPath(plan),
+    sourceDocument(activationPath(plan), { immutable: false }),
+  );
+  await assert.rejects(
+    reactivateOwnerCategorySupplement(
+      plan,
+      alteredActivation,
+      "m05-rollback-evidence",
+      "altered-activation",
+    ),
+    /original activation/i,
   );
 });
 

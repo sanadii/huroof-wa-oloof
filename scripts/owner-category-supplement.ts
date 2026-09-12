@@ -156,6 +156,11 @@ export type CategorySupplementApi = {
     plan: CategorySupplementPlan,
     receipt: ReleaseDocument,
   ): Promise<void>;
+  reactivate(
+    plan: CategorySupplementPlan,
+    rollbackReceipt: ReleaseDocument,
+    reactivationReceipt: ReleaseDocument,
+  ): Promise<void>;
 };
 
 function sourceRows(sqlite: string, hashes: SourceHashManifest) {
@@ -645,6 +650,50 @@ function activation(plan: CategorySupplementPlan) {
     },
   };
 }
+function rollbackReceipt(
+  plan: CategorySupplementPlan,
+  operationReference: string,
+) {
+  return {
+    path:
+      "rollbackReceipts/" +
+      plan.releaseId +
+      "-" +
+      sha(operationReference).slice(0, 32),
+    data: {
+      releaseId: plan.releaseId,
+      expectedActivePointer: pointer(root(plan).data),
+      restorePointer: plan.base.pointer,
+      operationReference,
+      immutable: true,
+    },
+  };
+}
+function reactivationReceipt(
+  plan: CategorySupplementPlan,
+  rollback: ReleaseDocument,
+  operationReference: string,
+) {
+  return {
+    path:
+      "reactivationReceipts/" +
+      plan.releaseId +
+      "-" +
+      sha(operationReference).slice(0, 32),
+    data: {
+      releaseId: plan.releaseId,
+      baseReleaseId: MEDIA_RELEASE_ID,
+      originalActivationPath: activation(plan).path,
+      originalActivationSha256: hash(activation(plan).data),
+      rollbackReceiptPath: rollback.path,
+      rollbackReceiptSha256: hash(rollback.data),
+      expectedM04Pointer: plan.base.pointer,
+      activePointer: pointer(root(plan).data),
+      operationReference,
+      immutable: true,
+    },
+  };
+}
 async function pending(
   api: CategorySupplementApi,
   documents: ReleaseDocument[],
@@ -809,6 +858,33 @@ async function verifyRoot(
       "Supplement completion root differs from the prepared payload.",
     );
 }
+async function verifyRetainedSupplement(
+  plan: CategorySupplementPlan,
+  api: CategorySupplementApi,
+) {
+  await verifyRoot(plan, api);
+  const verificationDocument = (await api.read([verification(plan).path]))[0];
+  if (
+    !verificationDocument ||
+    !same(
+      decodeSourceDocument(verificationDocument).data,
+      verification(plan).data,
+    )
+  )
+    throw new Error(
+      "Supplement verification receipt differs from the prepared payload.",
+    );
+  const originalActivation = (await api.read([activation(plan).path]))[0];
+  if (
+    !originalActivation ||
+    !same(decodeSourceDocument(originalActivation).data, activation(plan).data)
+  )
+    throw new Error(
+      "Supplement original activation receipt differs from the prepared payload.",
+    );
+  await verifyApproval(plan, api);
+  await verifyPreparedChildren(plan, api);
+}
 export async function verifyOwnerCategorySupplement(
   plan: CategorySupplementPlan,
   api: CategorySupplementApi,
@@ -857,21 +933,36 @@ export async function rollbackOwnerCategorySupplement(
 ) {
   if (!/^[A-Za-z0-9._:-]{3,160}$/u.test(operationReference))
     throw new Error("Rollback operation reference is invalid.");
-  const receipt = {
-    path:
-      "rollbackReceipts/" +
-      plan.releaseId +
-      "-" +
-      sha(operationReference).slice(0, 32),
-    data: {
-      releaseId: plan.releaseId,
-      expectedActivePointer: pointer(root(plan).data),
-      restorePointer: plan.base.pointer,
-      operationReference,
-      immutable: true,
-    },
-  };
-  await api.rollback(plan, receipt);
+  await api.rollback(plan, rollbackReceipt(plan, operationReference));
+}
+export async function reactivateOwnerCategorySupplement(
+  plan: CategorySupplementPlan,
+  api: CategorySupplementApi,
+  rollbackOperationReference: string,
+  operationReference: string,
+) {
+  if (
+    !/^[A-Za-z0-9._:-]{3,160}$/u.test(rollbackOperationReference) ||
+    !/^[A-Za-z0-9._:-]{3,160}$/u.test(operationReference)
+  )
+    throw new Error("Reactivation operation reference is invalid.");
+  const target = await api.target();
+  if (
+    target.projectId !== "huroof-a3ee7" ||
+    target.databaseId !== "(default)" ||
+    target.locationId !== "me-central2" ||
+    target.type !== "FIRESTORE_NATIVE"
+  )
+    throw new Error("Supplement target is not pinned production Firestore.");
+  await verifyBase(plan, api);
+  const rollback = rollbackReceipt(plan, rollbackOperationReference);
+  await verifyRetainedSupplement(plan, api);
+  await api.reactivate(
+    plan,
+    rollback,
+    reactivationReceipt(plan, rollback, operationReference),
+  );
+  await verifyOwnerCategorySupplement(plan, api);
 }
 
 type Transport = { fetch?: typeof fetch; accessToken?: () => Promise<string> };
@@ -1195,6 +1286,109 @@ export async function createProductionOwnerCategorySupplementApi(
       body: JSON.stringify({ transaction: begin.transaction, writes }),
     });
   };
+  const reactivate = async (
+    plan: CategorySupplementPlan,
+    rollbackDocument: ReleaseDocument,
+    reactivationDocument: ReleaseDocument,
+  ) => {
+    const expected = pointer(root(plan).data);
+    const begin = (await (
+      await request(base + ":beginTransaction", { method: "POST", body: "{}" })
+    ).json()) as { transaction?: string };
+    if (!begin.transaction)
+      throw new Error("Reactivation transaction unavailable.");
+    const guardPaths = [
+      "runtime/activeRelease",
+      root(plan).path,
+      verification(plan).path,
+      activation(plan).path,
+      ...plan.approvalDocuments.map((document) => document.path),
+      rollbackDocument.path,
+      reactivationDocument.path,
+    ];
+    const response = await request(base + ":batchGet", {
+      method: "POST",
+      body: JSON.stringify({
+        transaction: begin.transaction,
+        documents: guardPaths.map(firestoreName),
+      }),
+    });
+    const found = new Map(
+      rows(await response.text())
+        .filter((row) => row.found)
+        .map((row) => [pathOf(row.found!.name), row.found!]),
+    );
+    const [old, releaseRoot, verified, originalActivation, ...rest] =
+      guardPaths.map((path) => found.get(path));
+    const prior = rest.at(-1);
+    const rollback = rest.at(-2);
+    const authority = rest.slice(0, -2);
+    if (
+      !old ||
+      !releaseRoot ||
+      !verified ||
+      !originalActivation ||
+      !rollback ||
+      authority.some(
+        (document, index) =>
+          !document ||
+          !same(
+            decodeSourceDocument(document).data,
+            plan.approvalDocuments[index]!.data,
+          ),
+      ) ||
+      !same(decodeSourceDocument(releaseRoot).data, root(plan).data) ||
+      !same(decodeSourceDocument(verified).data, verification(plan).data) ||
+      !same(
+        decodeSourceDocument(originalActivation).data,
+        activation(plan).data,
+      ) ||
+      !same(decodeSourceDocument(rollback).data, rollbackDocument.data)
+    )
+      throw new Error(
+        "Reactivation authority, activation, or rollback evidence drifted.",
+      );
+    if (prior) {
+      if (
+        same(decodeSourceDocument(old).data, expected) &&
+        same(decodeSourceDocument(prior).data, reactivationDocument.data)
+      )
+        return;
+      throw new Error("Reactivation retry conflicts with active pointer.");
+    }
+    if (!same(decodeSourceDocument(old).data, plan.base.pointer))
+      throw new Error("Reactivation pointer changed.");
+    const writes = [
+      {
+        update: {
+          name: firestoreName("runtime/activeRelease"),
+          fields: Object.fromEntries(
+            Object.entries(expected).map(([key, value]) => [
+              key,
+              encode(value),
+            ]),
+          ),
+        },
+        currentDocument: { updateTime: old.updateTime },
+      },
+      {
+        update: {
+          name: firestoreName(reactivationDocument.path),
+          fields: Object.fromEntries(
+            Object.entries(reactivationDocument.data).map(([key, value]) => [
+              key,
+              encode(value),
+            ]),
+          ),
+        },
+        currentDocument: { exists: false },
+      },
+    ];
+    await request(base + ":commit", {
+      method: "POST",
+      body: JSON.stringify({ transaction: begin.transaction, writes }),
+    });
+  };
   return {
     target: async () => {
       const value = (await (
@@ -1215,6 +1409,7 @@ export async function createProductionOwnerCategorySupplementApi(
     listCollection,
     activate: activationRequest,
     rollback,
+    reactivate,
   };
 }
 
@@ -1235,7 +1430,7 @@ async function main() {
     !(operation === "prepare" ? flags.out : flags.plan)
   )
     throw new Error(
-      "Usage: owner-category-supplement <prepare|apply|verify|rollback> --base-snapshot PATH --sqlite PATH --source-hashes PATH --out PATH | --plan PATH [--operation-reference REF]",
+      "Usage: owner-category-supplement <prepare|apply|verify|rollback|reactivate> --base-snapshot PATH --sqlite PATH --source-hashes PATH --out PATH | --plan PATH [--operation-reference REF] [--rollback-operation-reference REF]",
     );
   const input = {
     base: JSON.parse(
@@ -1302,6 +1497,30 @@ async function main() {
     console.log(
       JSON.stringify(
         { operation, restoredReleaseId: MEDIA_RELEASE_ID },
+        null,
+        2,
+      ),
+    );
+    return;
+  }
+  if (
+    operation === "reactivate" &&
+    flags["rollback-operation-reference"] &&
+    flags["operation-reference"]
+  ) {
+    await reactivateOwnerCategorySupplement(
+      built,
+      api,
+      flags["rollback-operation-reference"],
+      flags["operation-reference"],
+    );
+    console.log(
+      JSON.stringify(
+        {
+          operation,
+          releaseId: built.releaseId,
+          reactivatedFrom: MEDIA_RELEASE_ID,
+        },
         null,
         2,
       ),

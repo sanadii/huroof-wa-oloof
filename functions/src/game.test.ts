@@ -1,14 +1,54 @@
 import assert from 'node:assert/strict';
+import { existsSync } from 'node:fs';
+import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import { deriveMatch, initialGameState } from '../../src/features/game/domain/lifecycle.js';
 import { generateBoard, revealSurprise } from '../../src/features/game/domain/board.js';
-import { approvedReleaseCatalogProjection, expectedReleaseMatches, prepareLetterReveal, selectQuestionForActiveCell, validateQuestionScope } from './index.js';
+import { approvedReleaseCatalogProjection, canonicalQuestionQuery, expectedReleaseMatches, prepareLetterReveal, questionRows, RELEASE_READER_OPTIONS, RUNTIME_QUESTION_FIELDS, selectQuestionForActiveCell, validateQuestionScope } from './index.js';
 import { createMatchQuestionSelection, selectCharadesQuestion } from '../../src/features/game/runtime/question-selector.js';
 import { intentHash, intentReceiptId, isRoomClosed, preflightContentPreparation, projectRoom, reduceIntent, roomGameKind, validIntent, type CanonicalMember, type CanonicalQuestion, type CanonicalRoom } from './game.js';
 
 const room = (): CanonicalRoom => ({ schemaVersion: 2, roomCode: 'A1B2C3D4', revision: 2, game: { ...initialGameState(), lifecycle: 'QUESTION_READING' }, config: { demo: true, questionSeconds: 20, opponentSeconds: 10, teams: { horizontal: 'أفقي', vertical: 'عمودي' }, releaseId: 'demo-drafts', releaseRootSha256: 'hash', releaseDemoFixture: true }, timer: { deadlineMs: 2_000, buzzOpen: true }, questionCursor: 0 });
 const player: CanonicalMember = { uid: 'p1', role: 'player', displayName: 'P', ready: false, active: true, team: 'horizontal' };
 const readyReleaseQuestions: CanonicalQuestion[] = Array.from({ length: 25 }, (_, letter) => Array.from({ length: 3 }, (_, copy) => ({ id: `ready-${letter}-${copy}`, categoryId: 'category-a', modality: 'classic' as const, targetLetter: `ح${letter}`, answerConceptId: `concept-${letter}-${copy}`, headerAr: 'عنوان', promptAr: 'سؤال', canonicalAnswer: 'جواب', acceptedAnswers: ['جواب'] }))).flat();
+
+const m05PlanPath = 'D:/projects/huroof_wa_oloof/output/media-live-20260911/owner-category-supplement-plan.json';
+const privateM05Fixture = process.env.RUN_PRIVATE_OWNER_CATEGORY_SUPPLEMENT_TESTS === '1' && existsSync(m05PlanPath);
+
+test('canonical release question query projects only runtime fields and keeps the bound', () => {
+  const calls: Array<unknown> = [];
+  const query = {
+    select(...fields: string[]) { calls.push(['select', fields]); return this; },
+    orderBy(field: unknown) { calls.push(['orderBy', field]); return this; },
+    limit(value: number) { calls.push(['limit', value]); return this; },
+  };
+  assert.equal(canonicalQuestionQuery(query, 15_338), query);
+  assert.deepEqual(calls[0], ['select', [...RUNTIME_QUESTION_FIELDS]]);
+  assert.deepEqual(calls.at(-1), ['limit', 15_339]);
+  assert.equal((RUNTIME_QUESTION_FIELDS as readonly string[]).includes('sourceProvenance'), false);
+  assert.equal(RUNTIME_QUESTION_FIELDS.includes('media'), true);
+  assert.equal(RUNTIME_QUESTION_FIELDS.includes('answerMedia'), true);
+  assert.equal(RUNTIME_QUESTION_FIELDS.includes('sources'), true);
+  assert.deepEqual(RELEASE_READER_OPTIONS, { memory: '512MiB', cpu: 1, concurrency: 1, maxInstances: 20, timeoutSeconds: 60 });
+});
+
+test('actual M05 release projection retains runtime media and host sources without owner provenance', { skip: privateM05Fixture ? false : 'set RUN_PRIVATE_OWNER_CATEGORY_SUPPLEMENT_TESTS=1 with the private M05 plan' }, async () => {
+  const plan = JSON.parse(await readFile(m05PlanPath, 'utf8')) as { releaseId: string; documents: Array<{ path: string; data: Record<string, unknown> }> };
+  const root = plan.documents.find((document) => document.path === `releases/${plan.releaseId}`)!;
+  const projection = new Set<string>(RUNTIME_QUESTION_FIELDS);
+  const questions = questionRows(plan.documents.filter((document) => document.path.includes('/questions/')).map((document) => ({
+    id: String(document.data.id),
+    data: () => Object.fromEntries(Object.entries(document.data).filter(([field]) => projection.has(field))),
+  })));
+  const categories = plan.documents.filter((document) => document.path.includes('/catalogCategories/')).map((document) => ({
+    id: String(document.data.id), data: { id: document.data.id, labelAr: document.data.labelAr },
+  }));
+  const catalog = approvedReleaseCatalogProjection({ releaseId: plan.releaseId }, root.data, categories, questions);
+  assert.equal(questions.length, 15_338);
+  assert.equal(catalog.categories.length, 83);
+  assert.ok(questions.some((question) => question.media?.mediaId));
+  assert.ok(questions.every((question) => !Object.hasOwn(question, 'sourceProvenance')));
+});
 
 test('approved release catalog projection exposes only immutable identity, category labels, and board capability', () => {
   const value = approvedReleaseCatalogProjection(

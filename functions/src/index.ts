@@ -63,6 +63,18 @@ const callable = {
   region,
   enforceAppCheck: process.env.FUNCTIONS_EMULATOR !== "true",
 } as const;
+/**
+ * These callables materialize a bounded full release. Projection excludes
+ * owner provenance and one request per instance bounds concurrent heaps.
+ */
+export const RELEASE_READER_OPTIONS = {
+  memory: "512MiB",
+  cpu: 1,
+  concurrency: 1,
+  maxInstances: 20,
+  timeoutSeconds: 60,
+} as const;
+const releaseReaderCallable = { ...callable, ...RELEASE_READER_OPTIONS } as const;
 type ApprovedReleaseCatalog = {
   releaseId: string;
   releaseRootSha256: string;
@@ -73,6 +85,12 @@ type ApprovedReleaseCatalog = {
 // The current approved bank is about 20k variants. Fail closed above this
 // documented ceiling instead of issuing an unbounded readiness read.
 const MAX_RELEASE_READINESS_QUESTIONS = 25_000;
+export const RUNTIME_QUESTION_FIELDS = [
+  "id", "categoryId", "modality", "targetLetter", "answerConceptId",
+  "headerAr", "promptAr", "canonicalAnswer", "acceptedAnswers", "media",
+  "answerMedia", "sources", "review", "moderation",
+] as const;
+export const RUNTIME_CATEGORY_FIELDS = ["id", "labelAr", "displayNameAr"] as const;
 const RELEASE_READINESS_CACHE_MS = 5 * 60_000;
 const releaseReadinessCache = new Map<string, { expiresAt: number; value: Promise<ApprovedReleaseCatalog> }>();
 const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -350,8 +368,25 @@ export function approvedReleaseCatalogProjection(
   };
 }
 
+type CanonicalQueryBuilder = {
+  select(...fields: string[]): CanonicalQueryBuilder;
+  orderBy(field: FirebaseFirestore.FieldPath): CanonicalQueryBuilder;
+  limit(value: number): CanonicalQueryBuilder;
+};
+/** The only release-question Firestore shape accepted by runtime callables. */
+export function canonicalQuestionQuery<T extends CanonicalQueryBuilder>(query: T, approvedCount: number): T {
+  return query.select(...RUNTIME_QUESTION_FIELDS).orderBy(FieldPath.documentId()).limit(approvedCount + 1) as T;
+}
+function releaseQuestionQuery(releaseId: string, approvedCount: number) {
+  return canonicalQuestionQuery(database.collection(`releases/${releaseId}/questions`), approvedCount);
+}
+function releaseCategoryQuery(releaseId: string) {
+  return database.collection(`releases/${releaseId}/catalogCategories`)
+    .select(...RUNTIME_CATEGORY_FIELDS).orderBy(FieldPath.documentId()).limit(129);
+}
+
 /** Authenticated/App Check metadata discovery; final room creation revalidates in its transaction. */
-export const getApprovedReleaseCatalog = onCall(callable, async (request) => {
+export const getApprovedReleaseCatalog = onCall(releaseReaderCallable, async (request) => {
   uid(request);
   const pointer = await database.doc("runtime/activeRelease").get();
   if (!pointer.exists) throw new HttpsError("failed-precondition", "No active immutable release.");
@@ -372,8 +407,8 @@ export const getApprovedReleaseCatalog = onCall(callable, async (request) => {
 
   const value = (async () => {
     const [categories, questions] = await Promise.all([
-      database.collection(`releases/${releaseId}/catalogCategories`).orderBy(FieldPath.documentId()).limit(129).get(),
-      database.collection(`releases/${releaseId}/questions`).orderBy(FieldPath.documentId()).limit(approvedCount + 1).get(),
+      releaseCategoryQuery(releaseId).get(),
+      releaseQuestionQuery(releaseId, approvedCount).get(),
     ]);
     if (categories.size > 128 || questions.size !== approvedCount)
       throw new HttpsError("failed-precondition", "Active release exceeds its immutable readiness bounds.");
@@ -414,7 +449,7 @@ async function releaseQuestions(
   if (!root.exists || root.data()?.immutable !== true || root.data()?.documentRootSha256 !== room.config.releaseRootSha256)
     throw new HttpsError("failed-precondition", "Pinned release identity is invalid.");
   const approvedCount = approvedQuestionCount(root.data()?.approvedCount, "Pinned release has an invalid question count.");
-  const snapshot = await tx.get(database.collection(`releases/${room.config.releaseId}/questions`).orderBy(FieldPath.documentId()).limit(approvedCount + 1));
+  const snapshot = await tx.get(releaseQuestionQuery(room.config.releaseId, approvedCount));
   if (snapshot.size !== approvedCount)
     throw new HttpsError("failed-precondition", "Pinned release question set is incomplete or exceeds its immutable bound.");
   return questionRows(snapshot.docs);
@@ -423,7 +458,7 @@ async function releaseQuestionsForNewRoom(
   tx: FirebaseFirestore.Transaction,
   release: { releaseId: string; releaseRootSha256: string; approvedCount: number },
 ): Promise<CanonicalQuestion[]> {
-  const snapshot = await tx.get(database.collection(`releases/${release.releaseId}/questions`).orderBy(FieldPath.documentId()).limit(release.approvedCount + 1));
+  const snapshot = await tx.get(releaseQuestionQuery(release.releaseId, release.approvedCount));
   if (snapshot.size !== release.approvedCount)
     throw new HttpsError("failed-precondition", "Active release question set is incomplete or exceeds its immutable bound.");
   return questionRows(snapshot.docs);
@@ -436,7 +471,7 @@ function assertPlayableScope(questions: CanonicalQuestion[], scope: ReturnType<t
     else createMatchQuestionSelection(runtime, { categories: scope.categories, modality: scope.modality, seed: 1, reservePerLetter: 3 });
   } catch { throw new HttpsError("failed-precondition", "SELECTED_SCOPE_NOT_PLAYABLE"); }
 }
-function questionRows(docs: Array<{ id: string; data(): FirebaseFirestore.DocumentData }>): CanonicalQuestion[] {
+export function questionRows(docs: Array<{ id: string; data(): FirebaseFirestore.DocumentData }>): CanonicalQuestion[] {
   const rows = docs.map((item) => ({ id: item.id, ...(item.data() as Partial<CanonicalQuestion>) }));
   if (
     docs.some((item) => item.data()?.id !== item.id) ||
@@ -757,7 +792,7 @@ function expiring(room: CanonicalRoom) {
     : { ...next, updatedAt: FieldValue.serverTimestamp() };
 }
 
-export const createRoom = onCall(callable, async (request) => {
+export const createRoom = onCall(releaseReaderCallable, async (request) => {
   const actor = uid(request);
   const requestData = request.data ?? {};
   const demo = requestData.demo === true;
@@ -1045,7 +1080,7 @@ export const getRoomPresence = onCall(callable, async (request) => {
   };
 });
 
-export const submitGameIntent = onCall(callable, async (request) => {
+export const submitGameIntent = onCall(releaseReaderCallable, async (request) => {
   const actor = uid(request);
   let id: string;
   const intent = request.data?.intent;
