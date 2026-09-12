@@ -29,7 +29,7 @@ test('canonical release question query projects only runtime fields and keeps th
   assert.equal(RUNTIME_QUESTION_FIELDS.includes('media'), true);
   assert.equal(RUNTIME_QUESTION_FIELDS.includes('answerMedia'), true);
   assert.equal(RUNTIME_QUESTION_FIELDS.includes('sources'), true);
-  assert.deepEqual(RELEASE_READER_OPTIONS, { memory: '512MiB', cpu: 1, concurrency: 1, maxInstances: 20, timeoutSeconds: 60 });
+  assert.deepEqual(RELEASE_READER_OPTIONS, { memory: '1GiB', cpu: 1, concurrency: 1, maxInstances: 20, timeoutSeconds: 60 });
 });
 
 test('actual M05 release projection retains runtime media and host sources without owner provenance', { skip: privateM05Fixture ? false : 'set RUN_PRIVATE_OWNER_CATEGORY_SUPPLEMENT_TESTS=1 with the private M05 plan' }, async () => {
@@ -68,7 +68,7 @@ test('approved release catalog projection exposes only immutable identity, categ
   assert.doesNotMatch(JSON.stringify(value), /private|answer|source|media|prompt/i);
   assert.equal(expectedReleaseMatches({ releaseId: 'release-approved', releaseRootSha256: 'a'.repeat(64) }, 'release-approved', 'a'.repeat(64)), true);
   assert.equal(expectedReleaseMatches({ releaseId: 'release-approved', releaseRootSha256: 'b'.repeat(64) }, 'release-approved', 'a'.repeat(64)), false);
-  assert.throws(() => approvedReleaseCatalogProjection({ releaseId: 'release-too-large' }, { immutable: true, approvedCount: 25_001, documentRootSha256: 'a'.repeat(64) }, [{ id: 'category-a', data: { id: 'category-a', labelAr: 'فئة أ' } }], readyReleaseQuestions), /Production requires/);
+  assert.throws(() => approvedReleaseCatalogProjection({ releaseId: 'release-too-large' }, { immutable: true, approvedCount: 30_001, documentRootSha256: 'a'.repeat(64) }, [{ id: 'category-a', data: { id: 'category-a', labelAr: 'فئة أ' } }], readyReleaseQuestions), /Production requires/);
   assert.throws(() => approvedReleaseCatalogProjection({ releaseId: 'release-demo' }, { immutable: true, demoFixture: true, approvedCount: 1, documentRootSha256: 'a'.repeat(64) }, [{ id: 'category-a', data: { id: 'category-a', labelAr: 'فئة أ' } }], readyReleaseQuestions), /Production requires/);
   assert.equal(approvedReleaseCatalogProjection({ releaseId: 'release-demo' }, { immutable: true, demoFixture: true, approvedCount: 1, documentRootSha256: 'a'.repeat(64) }, [{ id: 'category-a', data: { id: 'category-a', labelAr: 'فئة أ' } }], readyReleaseQuestions, { allowDemoFixture: true }).demoFixture, true);
   assert.throws(() => approvedReleaseCatalogProjection({ releaseId: 'release-empty' }, { immutable: true, approvedCount: 1, documentRootSha256: 'a'.repeat(64) }, [], readyReleaseQuestions), /no eligible categories/);

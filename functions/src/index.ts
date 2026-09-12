@@ -68,7 +68,7 @@ const callable = {
  * owner provenance and one request per instance bounds concurrent heaps.
  */
 export const RELEASE_READER_OPTIONS = {
-  memory: "512MiB",
+  memory: "1GiB",
   cpu: 1,
   concurrency: 1,
   maxInstances: 20,
@@ -84,7 +84,7 @@ type ApprovedReleaseCatalog = {
 };
 // The current approved bank is about 20k variants. Fail closed above this
 // documented ceiling instead of issuing an unbounded readiness read.
-const MAX_RELEASE_READINESS_QUESTIONS = 25_000;
+const MAX_RELEASE_READINESS_QUESTIONS = 30_000;
 export const RUNTIME_QUESTION_FIELDS = [
   "id", "categoryId", "modality", "targetLetter", "answerConceptId",
   "headerAr", "promptAr", "canonicalAnswer", "acceptedAnswers", "media",
