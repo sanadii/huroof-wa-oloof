@@ -1,5 +1,18 @@
 # Handover
 
+## Production media and combined categories — 2026-09-12
+
+The live production release now contains **25,763 questions across 96 supported categories**, including 291 image questions and 99 goal-video questions with 198 prompt/reveal clips. All 489 media bindings are preserved. The five uploaded acting-game categories remain hidden because their web flow is unavailable; unmatched source photos remain documented and held.
+
+The public site created and started two new games whose full boards covered all 15 added categories. Actual new text questions, image rendering, blurred/clear goal playback, unanswered-cell recovery and an older pinned image room passed. All 96 category allocations and Huroof exclusion of the 4,500 Category-only additions passed actual-payload checks. Independent database readback matched all 26,445 immutable release documents. Fresh server logs showed no runtime errors after activation.
+
+Only getApprovedReleaseCatalog, createRoom and submitGameIntent were deployed with the reviewed 1 GiB / CPU 1 / concurrency 1 configuration. Auth and App Check remain unchanged. GitHub implementation commits a8beedb1 and 45aab23c are pushed to codex/app-update-2026-09-07. The existing Ready Vercel production client consumes this updated backend and database; these changes required no client rebuild.
+
+Start here: [T17 completed milestone and evidence](T17-QUESTION-MEDIA.md#m07-final-live-acceptance--done), [category counts and held categories](../docs/CATEGORY-PLAYABILITY-2026-09-12.md), [implementation plan](IMPLEMENTATION-PLAN.md), [milestones](MILESTONES.md), [handover](HANDOVER.md).
+
+The combined publication was explicitly coordinated with “Link downloaded images to questions”; its Q4800/Q6000 imports and unrelated historical approvals were preserved. All implementation and production acceptance tasks in M07 are Done. Earlier dated pending statements below describe historical states.
+
+
 ## Inline lobby QR — September 11
 
 Implemented the user's request for the real QR image directly in the lobby, with enlargement/configuration on click. User selected deployed-public-site joining; the app uses its valid current origin or configured public origin. Shared URL-keyed generation prevents stale room/origin images. Loopback remains a truthful configuration state, not a phone-reachable QR. Changed GameRoutes, scoped lobby CSS and host-lobby tests. Host-lobby tests 20/20, typecheck, lint, visual scan, diff check and local build passed (existing chunk warning only). Browser harness decoded the rendered QR at 1440/390/320 to the exact sample public player URL, with no overflow. Root reviewed source and mobile screenshot: [public-origin harness](../output/playwright/lobby-inline-qr-public-origin-390.png). This is a mock public-origin render, not a live deployment or a phone scan. Current user room was untouched. Public deployment has not been performed by this follow-up.

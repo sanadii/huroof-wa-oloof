@@ -1,5 +1,10 @@
 # Implementation plan — current state
 
+## Production media and combined categories — 2026-09-12
+
+M07 is Done: production has **25,763 questions across 96 supported categories**, with image and goal-video playback verified. Five unsupported acting-game categories remain held. See the [completed T17 milestone](T17-QUESTION-MEDIA.md#m07-final-live-acceptance--done), [all category counts](../docs/CATEGORY-PLAYABILITY-2026-09-12.md), and [verified handover](HANDOVER.md#production-media-and-combined-categories--2026-09-12) for deployment, checks and limitations. Earlier dated status below remains historical.
+
+
 ## T-14.5 follow-up — approved production room setup (2026-09-11)
 
 User authorizes live rooms/gameplay and all-question review. This executes existing T-14.4–6 without claiming missing review/billing prerequisites complete. Database review and fresh preflight identify a demo-only frontend gate and absent release-bound catalog discovery. Production remains the 88-category static preview until full release acceptance.

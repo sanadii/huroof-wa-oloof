@@ -1,5 +1,10 @@
 # Milestones
 
+## Production media and combined categories — 2026-09-12
+
+M07 is Done: production has **25,763 questions across 96 supported categories**, with image and goal-video playback verified. Five unsupported acting-game categories remain held. See the [completed T17 milestone](T17-QUESTION-MEDIA.md#m07-final-live-acceptance--done), [all category counts](../docs/CATEGORY-PLAYABILITY-2026-09-12.md), and [verified handover](HANDOVER.md#production-media-and-combined-categories--2026-09-12) for deployment, checks and limitations. Earlier dated status below remains historical.
+
+
 ## M-7 — Host lobby management (authorized 2026-09-07)
 
 Entry: existing host/lobby runtimes and approved 0007 design. Task: [T-08](IMPLEMENTATION-PLAN.md#t-08--host-lobby-management-2026-09-07). Owner: Forge, root acceptance. State: Complete — root accepted local multiplayer and responsive evidence 2026-09-07. Exit: task acceptance/checks, local multiplayer and Firebase persistence evidence, integrated root review. Independent of pending production M-6; no deployment authorization.

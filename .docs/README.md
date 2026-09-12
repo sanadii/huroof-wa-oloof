@@ -1,5 +1,10 @@
 # تحدي الخلية — documentation index
 
+## Production media and combined categories — 2026-09-12
+
+M07 is Done: production has **25,763 questions across 96 supported categories**, with image and goal-video playback verified. Five unsupported acting-game categories remain held. See the [completed T17 milestone](T17-QUESTION-MEDIA.md#m07-final-live-acceptance--done), [all category counts](../docs/CATEGORY-PLAYABILITY-2026-09-12.md), and [verified handover](HANDOVER.md#production-media-and-combined-categories--2026-09-12) for deployment, checks and limitations. Earlier dated status below remains historical.
+
+
 Visual review accepted (2026-09-11): the user replied “OK continue, do it all” to the rendered integration review. [Current checklist](IMPLEMENTATION-PLAN.md#design-integration-follow-up--2026-09-11) tracks the final bounded loading/error and copy polish. This supersedes older pending-acceptance status below.
 
 Local v19 import (2026-09-11): all 600 questions from the user's `ALL_QUESTIONS.md` are saved as drafts across 20 categories. SQLite now holds 7,193 question rows; all 6,593 prior rows, including the photo-question set, were preserved. Read-back, integrity and duplicate-free rerun passed. [Import report and backup evidence](../output/v19-db-import-20260911/IMPORT-REPORT.md).
