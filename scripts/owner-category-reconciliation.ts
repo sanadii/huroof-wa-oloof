@@ -519,8 +519,7 @@ async function verifyApproval(
         await visit(childPath);
       }
   };
-  for (const document of await api.listCollection("contentOwnerApprovals"))
-    await visit(pathOf(document.name));
+  for (const approvalRoot of approvalRoots) await visit(approvalRoot);
   const expectedPaths = new Set(
     paths.filter((path) =>
       approvalRoots.some(

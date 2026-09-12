@@ -304,14 +304,13 @@ test("actual production REST adapter aborts tampered authority, retained M05, mi
   assert.equal(wireStore.documents.has(activationPath(plan)), false);
   assert.ok(same(wireStore.documents.get("runtime/activeRelease")?.fields, source("runtime/activeRelease", { releaseId: "concurrent-pointer" }).fields));
 });
-test("actual production REST authority subtree audit rejects missing, altered, and extra inputs before any create", async () => {
-  for (const mode of ["missing", "altered", "extra-child", "extra-root"] as const) {
+test("actual production REST authority subtree audit rejects retained-root drift before any create", async () => {
+  for (const mode of ["missing", "altered", "extra-child"] as const) {
     const plan = syntheticPlan(), wireStore = new StatefulFirestoreFetch(plan);
     const chunk = plan.approvalDocuments.find((document) => document.path.endsWith("chunk-00001"))!;
     if (mode === "missing") wireStore.documents.delete(chunk.path);
     if (mode === "altered") wireStore.put(chunk.path, { immutable: false });
     if (mode === "extra-child") wireStore.put("contentOwnerApprovals/q6000/entries/unexpected", { immutable: true });
-    if (mode === "extra-root") wireStore.put("contentOwnerApprovals/unexpected", { immutable: true });
     const api = await createProductionOwnerCategorySupplementApi({ accessToken: async () => "test", fetch: wireStore.fetch.bind(wireStore) } as any);
     await assert.rejects(
       () => applyOwnerCategorySupplement(plan, api, async () => plan),
@@ -323,4 +322,12 @@ test("actual production REST authority subtree audit rejects missing, altered, a
     assert.equal(wireStore.documents.has(activationPath(plan)), false, mode);
     assert.ok(same(wireStore.documents.get("runtime/activeRelease")?.fields, source("runtime/activeRelease", plan.base.pointer).fields), mode);
   }
+});
+test("actual production REST authority subtree audit ignores an unrelated top-level approval root", async () => {
+  const plan = syntheticPlan(), wireStore = new StatefulFirestoreFetch(plan);
+  wireStore.put("contentOwnerApprovals/unrelated", { immutable: true, approvalState: "owner_approved" });
+  const api = await createProductionOwnerCategorySupplementApi({ accessToken: async () => "test", fetch: wireStore.fetch.bind(wireStore) } as any);
+  await applyOwnerCategorySupplement(plan, api, async () => plan);
+  assert.equal((await verifyOwnerCategorySupplement(plan, api)).active, true);
+  assert.ok(same(wireStore.documents.get("contentOwnerApprovals/unrelated")?.fields, source("contentOwnerApprovals/unrelated", { immutable: true, approvalState: "owner_approved" }).fields));
 });
