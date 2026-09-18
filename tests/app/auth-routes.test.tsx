@@ -3,6 +3,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { afterEach, expect, it, vi } from 'vitest';
 import { FirebaseAuthProvider, useFirebaseAuth } from '../../src/features/auth/AuthProvider';
 import { AccountRoute, LoginRoute } from '../../src/routes/AuthRoutes';
+import { ThemeProvider } from '../../src/app/ThemeProvider';
 
 const authMocks = vi.hoisted(() => ({
   auth: null as { currentUser: unknown; authStateReady: () => Promise<void> } | null,
@@ -33,14 +34,14 @@ afterEach(() => {
 });
 
 it('renders unavailable login honestly without Firebase web configuration', () => {
-  render(<MemoryRouter><FirebaseAuthProvider><LoginRoute /></FirebaseAuthProvider></MemoryRouter>);
-  expect(screen.getByText(/إعداد Firebase العام غير مكتمل/)).toBeVisible();
+  render(<ThemeProvider><MemoryRouter><FirebaseAuthProvider><LoginRoute /></FirebaseAuthProvider></MemoryRouter></ThemeProvider>);
+  expect(screen.getByText('تسجيل الدخول غير متاح في هذه النسخة حالياً.')).toBeVisible();
   expect(screen.getByRole('button', { name: 'المتابعة مع Google' })).toBeDisabled();
 });
 
 it('waits for restoration then renders a signed-out login', async () => {
   authMocks.auth = signedOutAuth();
-  render(<MemoryRouter><FirebaseAuthProvider><LoginRoute /></FirebaseAuthProvider></MemoryRouter>);
+  render(<ThemeProvider><MemoryRouter><FirebaseAuthProvider><LoginRoute /></FirebaseAuthProvider></MemoryRouter></ThemeProvider>);
   expect(screen.getByText('جارٍ استعادة حالة تسجيل الدخول…')).toBeVisible();
   await screen.findByText(/يمكنك المتابعة كضيف/);
   expect(screen.getByRole('button', { name: 'المتابعة مع Google' })).toBeEnabled();
@@ -49,8 +50,8 @@ it('waits for restoration then renders a signed-out login', async () => {
 it('shows basic Google identity fields and logs out without creating a guest', async () => {
   const auth = { currentUser: googleUser, authStateReady: async () => undefined };
   authMocks.auth = auth;
-  render(<MemoryRouter><FirebaseAuthProvider><AccountRoute /></FirebaseAuthProvider></MemoryRouter>);
-  await screen.findByText('ليان');
+  render(<ThemeProvider><MemoryRouter><FirebaseAuthProvider><AccountRoute /></FirebaseAuthProvider></MemoryRouter></ThemeProvider>);
+  await screen.findByRole('heading', { name: 'ليان' });
   expect(screen.getByText('lian@example.test')).toHaveAttribute('dir', 'ltr');
   await act(async () => { await screen.getByRole('button', { name: 'تسجيل الخروج' }).click(); });
   expect(authMocks.signOut).toHaveBeenCalledWith(auth);
@@ -70,7 +71,7 @@ it('leaves the restoring state when Firebase cannot restore the session', async 
     currentUser: null,
     authStateReady: async () => { throw new Error('restore failed'); },
   };
-  render(<MemoryRouter><FirebaseAuthProvider><LoginRoute /><Probe /></FirebaseAuthProvider></MemoryRouter>);
+  render(<ThemeProvider><MemoryRouter><FirebaseAuthProvider><LoginRoute /><Probe /></FirebaseAuthProvider></MemoryRouter></ThemeProvider>);
   expect(await screen.findByText('error')).toBeVisible();
   expect(screen.getByText(/تعذر استعادة حالة تسجيل الدخول/)).toBeVisible();
 });

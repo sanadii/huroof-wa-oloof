@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { adminRoomDto } from './index.js';
-import { canonicalAdminHash, isArchivableQuestionStatus, questionReviewBinding, reviewMatchesQuestion, sameAdminAuthorization, validateAdminQuestionDraft, wouldLockOutLastSuperAdmin, wouldOrphanSuperAdmin } from './admin/admin.js';
+import { canonicalAdminHash, isArchivableQuestionStatus, isVerifiedAdminProvider, publishedQuestionMediaBinding, questionReviewBinding, reviewMatchesQuestion, sameAdminAuthorization, validateAdminQuestionDraft, wouldLockOutLastSuperAdmin, wouldOrphanSuperAdmin } from './admin/admin.js';
 
 test('game-ops room DTO remains answer-free even if a canonical room has active question data', () => {
   const dto = adminRoomDto('room_1', {
@@ -28,6 +28,23 @@ test('authorization parity rejects stale versions and role mismatches', () => {
   assert.equal(sameAdminAuthorization(['viewer'], ['viewer'], 4, 4), true);
   assert.equal(sameAdminAuthorization(['viewer'], ['viewer'], 4, 3), false);
   assert.equal(sameAdminAuthorization(['viewer'], ['super_admin'], 4, 4), false);
+});
+
+test('admin access accepts only verified Google or email/password identities', () => {
+  assert.equal(isVerifiedAdminProvider('google.com', true), true);
+  assert.equal(isVerifiedAdminProvider('password', true), true);
+  assert.equal(isVerifiedAdminProvider('password', false), false);
+  assert.equal(isVerifiedAdminProvider('anonymous', true), false);
+});
+
+test('published media preview binds only the stored question or answer media record', () => {
+  const hash = 'a'.repeat(64);
+  assert.deepEqual(publishedQuestionMediaBinding({ media: { mediaId: 'asset_1', assetSha256: hash, type: 'image', altAr: 'صورة' } }, 'question'), { mediaId: 'asset_1', assetSha256: hash, type: 'image', altAr: 'صورة' });
+  assert.deepEqual(publishedQuestionMediaBinding({ media: { mediaId: 'goal-quiz-2026:092:blur', assetSha256: hash, type: 'video' } }, 'question'), { mediaId: 'goal-quiz-2026:092:blur', assetSha256: hash, type: 'video', altAr: null });
+  assert.deepEqual(publishedQuestionMediaBinding({ answerMedia: { mediaId: 'asset_2', assetSha256: hash, type: 'video' } }, 'answer'), { mediaId: 'asset_2', assetSha256: hash, type: 'video', altAr: null });
+  assert.throws(() => publishedQuestionMediaBinding({ media: { mediaId: '../outside', assetSha256: hash } }, 'question'));
+  assert.throws(() => publishedQuestionMediaBinding({}, 'answer'));
+  assert.throws(() => publishedQuestionMediaBinding({}, 'objectName'));
 });
 
 test('question validator enforces modality reviewers and safe HTTPS sources', () => {

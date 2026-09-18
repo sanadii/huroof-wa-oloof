@@ -16,7 +16,7 @@ export class LocalRealtimeGameAdapter implements GameRuntimeAdapter {
     const response = await fetch(`/api/question-media/${encodeURIComponent(ticket.ticket)}`, { headers: { authorization: `Bearer ${this.token}` }, cache: 'no-store' });
     if (!response.ok) throw new Error(await response.text());
     const blob = await response.blob();
-    if (blob.type !== 'image/png') throw new Error('MEDIA_INVALID_TYPE');
+    if (!['image/png', 'image/jpeg', 'video/mp4'].includes(blob.type)) throw new Error('MEDIA_INVALID_TYPE');
     return { mediaId: request.mediaId, assetSha256: request.assetSha256, url: URL.createObjectURL(blob), expiresAt: ticket.expiresAt };
   }
   subscribeProjection(roomId: string, _role: ClientRole, _uid: string, onProjection: (value: ProjectionEnvelope) => void) { const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:'; const socket = new WebSocket(`${protocol}//${location.host}/ws?roomId=${encodeURIComponent(roomId)}&token=${encodeURIComponent(this.token)}`); socket.addEventListener('message', (event) => onProjection(JSON.parse(String(event.data)) as ProjectionEnvelope)); return () => socket.close(); }

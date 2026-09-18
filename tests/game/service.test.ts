@@ -50,6 +50,68 @@ test('current image media binds to the active question and excludes players, hid
   assert.throws(() => service.authorizeCurrentQuestionMedia(room.host.roomId, audience, { mediaId: lastMedia.mediaId, assetSha256: lastMedia.assetSha256 }), /MEDIA_NOT_VISIBLE/);
 }));
 
+test('shared answer reveal is occurrence-bound, exposes only the clear video after reveal, and never restarts a buzzer', async () => withService(async (service) => {
+  const room = await readyRoom(service);
+  await room.hostIntent('START_MATCH');
+  await room.hostIntent('ROUND_READY');
+  const cell = service.metadata(room.host.roomId, room.host.token).projection.board!.find((item) => item.kind === 'letter')!;
+  await room.hostIntent('SELECT_CELL', { cellId: cell.id });
+  const stored = service.store.load(room.host.roomId)!;
+  const prompt = { mediaId: 'goal-quiz-2026:001:blur', assetSha256: '761991311fd4d5ee4d9f27c703d867b6d9259b175ff7c3f0f55b91ad4b251d69', altAr: 'مقطع السؤال', type: 'video' as const, contentType: 'video/mp4' };
+  const answer = { mediaId: 'goal-quiz-2026:001:clean', assetSha256: '18ff5ba7aa3ab152ac8b20f2210a9753e2e107a4c9e4db23667816ddffdda159', altAr: 'مقطع الإجابة', type: 'video' as const, contentType: 'video/mp4' };
+  service.store.save({ ...stored, activeQuestion: { ...stored.activeQuestion!, modality: 'video', media: prompt, answerMedia: answer } });
+  const audience = service.createAudienceCapability(room.host.roomId);
+  const before = service.metadata(room.host.roomId, audience).projection.question as { occurrence?: string; media?: unknown };
+  assert.deepEqual(before.media, prompt);
+  assert.equal(JSON.stringify(service.metadata(room.host.roomId, room.one.token).projection).includes(answer.mediaId), false);
+  const scoreBefore = service.metadata(room.host.roomId, room.host.token).projection.questionScores;
+  await assert.rejects(() => service.intent(room.host.roomId, room.one.token, { type: 'REVEAL_ANSWER', intentId: 'player-reveal', expectedRevision: room.revision(), payload: { occurrence: before.occurrence } }), /FORBIDDEN_ROLE/);
+  await assert.rejects(() => service.intent(room.host.roomId, room.host.token, { type: 'REVEAL_ANSWER', intentId: 'stale-reveal', expectedRevision: room.revision(), payload: { occurrence: 'stale-occurrence' } }), /STALE_QUESTION_OCCURRENCE/);
+  const revealed = await room.hostIntent('REVEAL_ANSWER', { occurrence: before.occurrence });
+  assert.deepEqual((revealed.projection.projection.question as { media?: unknown }).media, answer);
+  assert.deepEqual((service.metadata(room.host.roomId, audience).projection.question as { media?: unknown }).media, answer);
+  assert.equal((revealed.projection.projection.question as { revealedAnswer?: string }).revealedAnswer, stored.activeQuestion?.canonicalAnswer);
+  assert.equal((service.metadata(room.host.roomId, audience).projection.question as { revealedAnswer?: string }).revealedAnswer, stored.activeQuestion?.canonicalAnswer);
+  assert.equal((service.metadata(room.host.roomId, room.one.token).projection.question as { revealedAnswer?: string }).revealedAnswer, undefined);
+  assert.equal(revealed.projection.projection.buzzOpen, undefined);
+  assert.deepEqual(revealed.projection.projection.questionScores, scoreBefore);
+  assert.throws(() => service.authorizeCurrentQuestionMedia(room.host.roomId, audience, { mediaId: prompt.mediaId, assetSha256: prompt.assetSha256 }), /MEDIA_BINDING_MISMATCH/);
+  const issued = service.issueCurrentQuestionMedia(room.host.roomId, audience, { mediaId: answer.mediaId, assetSha256: answer.assetSha256 });
+  assert.equal((await service.readCurrentQuestionMedia(issued.ticket, audience)).contentType, 'video/mp4');
+  const replay = await service.intent(room.host.roomId, room.host.token, { type: 'REVEAL_ANSWER', intentId: `REVEAL_ANSWER-${room.revision() - 1}`, expectedRevision: room.revision() - 1, payload: { occurrence: before.occurrence } });
+  assert.equal(replay.replayed, true);
+  const opened = await room.hostIntent('OPEN_QUESTION');
+  assert.equal(opened.projection.projection.buzzOpen, undefined);
+  assert.equal(service.store.load(room.host.roomId)?.deadlineAt, undefined);
+  await room.hostIntent('HOST_SELECT_TEAM', { team: 'horizontal' });
+  const incorrect = await room.hostIntent('JUDGE_INCORRECT');
+  assert.equal(incorrect.projection.projection.room.state, 'OPPONENT_CHANCE');
+  assert.equal(incorrect.projection.projection.buzzOpen, undefined);
+  await room.hostIntent('PAUSE');
+  const resumed = await room.hostIntent('RESUME');
+  assert.equal(resumed.projection.projection.room.state, 'OPPONENT_CHANCE');
+  assert.equal(resumed.projection.projection.buzzOpen, undefined);
+  const inactive = { ...service.store.load(room.host.roomId)!, game: { ...service.store.load(room.host.roomId)!.game, lifecycle: 'CELL_SELECTION' as const } };
+  service.store.save(inactive);
+  assert.throws(() => service.authorizeCurrentQuestionMedia(room.host.roomId, room.host.token, { mediaId: answer.mediaId, assetSha256: answer.assetSha256 }), /MEDIA_NOT_VISIBLE/);
+}));
+
+test('legacy local questions with no occurrence are unrevealed and keep clear video bindings private', async () => withService(async (service) => {
+  const room = await readyRoom(service);
+  await room.hostIntent('START_MATCH'); await room.hostIntent('ROUND_READY');
+  const cell = service.metadata(room.host.roomId, room.host.token).projection.board!.find((item) => item.kind === 'letter')!;
+  await room.hostIntent('SELECT_CELL', { cellId: cell.id });
+  const prompt = { mediaId: 'goal-quiz-2026:001:blur', assetSha256: '761991311fd4d5ee4d9f27c703d867b6d9259b175ff7c3f0f55b91ad4b251d69', altAr: 'مقطع السؤال', type: 'video' as const, contentType: 'video/mp4' };
+  const clear = { mediaId: 'goal-quiz-2026:001:clean', assetSha256: '18ff5ba7aa3ab152ac8b20f2210a9753e2e107a4c9e4db23667816ddffdda159', altAr: 'مقطع الإجابة', type: 'video' as const, contentType: 'video/mp4' };
+  const stored = service.store.load(room.host.roomId)!;
+  service.store.save({ ...stored, activeQuestionOccurrence: undefined, answerRevealedOccurrence: undefined, activeQuestion: { ...stored.activeQuestion!, modality: 'video', canonicalAnswer: 'إجابة سرية', media: prompt, answerMedia: clear } });
+  const audience = service.createAudienceCapability(room.host.roomId);
+  const projected = service.metadata(room.host.roomId, audience).projection.question as { revealedAnswer?: string; media?: unknown };
+  assert.equal(projected.revealedAnswer, undefined);
+  assert.deepEqual(projected.media, prompt);
+  assert.throws(() => service.authorizeCurrentQuestionMedia(room.host.roomId, audience, { mediaId: clear.mediaId, assetSha256: clear.assetSha256 }), /MEDIA_BINDING_MISMATCH/);
+}));
+
 test('host-only demo rooms start, while any partial player roster still requires ready teams', async () => withService(async (service) => {
   assert.throws(() => service.create('host', false), /NO_APPROVED_QUESTION_STOCK/);
   const soloDemo = service.create('host', true); const soloStart = await service.intent(soloDemo.roomId, soloDemo.token, { type: 'START_MATCH', intentId: 'solo-demo', expectedRevision: soloDemo.revision, payload: {} }); assert.equal(soloStart.projection.projection.room.state, 'ROUND_SETUP'); assert.equal(soloStart.projection.projection.room.readyCount, 0); assert.equal(soloStart.projection.projection.room.memberCount, 0);
@@ -238,6 +300,41 @@ test('pause preserves an open authoritative timer and resume expires only after 
   } finally { service.close(); await rm(dir, { recursive: true, force: true }); }
 });
 
+test('an unanswered question can reveal its answer, return to selection, and open a different unused cell', async () => {
+  const dir = await mkdtemp(join(tmpdir(), 'huroof-unanswered-continue-'));
+  const dbPath = join(dir, 'rooms.sqlite');
+  let now = new Date('2026-09-11T00:00:00.000Z');
+  const service = new AuthoritativeGameService({ dbPath, secret: 'test', clock: () => now });
+  try {
+    const room = await readyRoom(service);
+    await room.hostIntent('START_MATCH');
+    await room.hostIntent('ROUND_READY');
+    const firstCell = service.metadata(room.host.roomId, room.host.token).projection.board!.find((cell) => cell.kind === 'letter')!;
+    await room.hostIntent('SELECT_CELL', { cellId: firstCell.id });
+    const unanswered = service.store.load(room.host.roomId)!;
+    const firstQuestionId = unanswered.activeQuestion!.id;
+    const firstOccurrence = unanswered.activeQuestionOccurrence!;
+
+    now = new Date(now.getTime() + 11_000);
+    assert.deepEqual(await service.tick(), [room.host.roomId]);
+    const failed = service.metadata(room.host.roomId, room.host.token).projection;
+    assert.equal(failed.room.state, 'QUESTION_FAILED');
+    assert.equal(failed.buzzOpen, undefined);
+
+    const revealed = await room.hostIntent('REVEAL_ANSWER', { occurrence: firstOccurrence });
+    assert.ok((revealed.projection.projection.question as { revealedAnswer?: string }).revealedAnswer);
+    const continued = await room.hostIntent('RETRY_CELL');
+    assert.equal(continued.projection.projection.room.state, 'CELL_SELECTION');
+    assert.equal(service.store.load(room.host.roomId)?.activeQuestion, undefined);
+
+    const nextCell = continued.projection.projection.board!.find((cell) => cell.id !== firstCell.id && !cell.owner)!;
+    const nextQuestion = await room.hostIntent('SELECT_CELL', { cellId: nextCell.id });
+    assert.equal(nextQuestion.projection.projection.room.state, 'QUESTION_READING');
+    assert.equal(service.store.load(room.host.roomId)?.game.activeCellId, nextCell.id);
+    assert.notEqual(service.store.load(room.host.roomId)?.activeQuestion?.id, firstQuestionId);
+  } finally { service.close(); await rm(dir, { recursive: true, force: true }); }
+});
+
 test('demo projections permanently mark drafts and keep answer-bearing fields host-only', async () => withService(async (service) => {
   const room = await readyRoom(service); await room.hostIntent('START_MATCH'); await room.hostIntent('ROUND_READY'); await room.hostIntent('SELECT_CELL', { cellId: 'cell-0-0' });
   const hostProjection = service.metadata(room.host.roomId, room.host.token); const playerProjection = service.metadata(room.host.roomId, room.one.token); const audienceProjection = service.metadata(room.host.roomId, service.createAudienceCapability(room.host.roomId));
@@ -328,6 +425,8 @@ test('ordinary selection exhaustion persists a no-score hold, rejects gameplay, 
   const cell = service.metadata(room.roomId, room.token).projection.board!.find((value) => value.kind === 'letter')!;
   const held = await send('SELECT_CELL', { cellId: cell.id }); assert.equal(held.projection.projection.contentHold?.reason, 'CONTENT_EXHAUSTED'); assert.equal(held.projection.projection.contentHold?.cellId, cell.id); assert.deepEqual(held.projection.projection.questionScores, { horizontal: 0, vertical: 0 });
   await assert.rejects(() => service.intent(room.roomId, room.token, { type: 'ROUND_READY' as never, intentId: 'held-ready', expectedRevision: revision, payload: {} }), /CONTENT_HOLD_ACTIVE/);
+  await assert.rejects(() => service.intent(room.roomId, room.token, { type: 'END_WITHOUT_WINNER' as never, intentId: 'held-end-unpaused', expectedRevision: revision, payload: {} }), /END_WITHOUT_WINNER_NOT_ALLOWED/);
+  await send('PAUSE');
   const ended = await send('END_WITHOUT_WINNER'); assert.equal(ended.projection.projection.room.state, 'MATCH_COMPLETE'); assert.equal(ended.projection.projection.endedWithoutWinner, true); assert.equal(ended.projection.projection.matchWinner, undefined);
   const replacement = service.create('host', true); const fresh = await service.intent(replacement.roomId, replacement.token, { type: 'START_MATCH', intentId: 'fresh-start', expectedRevision: replacement.revision, payload: {} }); assert.equal(fresh.projection.projection.room.state, 'ROUND_SETUP');
 }));

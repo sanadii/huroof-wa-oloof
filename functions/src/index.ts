@@ -1,4 +1,4 @@
-import { randomBytes, randomUUID } from "node:crypto";
+import { createHash, randomBytes, randomUUID } from "node:crypto";
 import { getApps, initializeApp } from "firebase-admin/app";
 import { FieldPath, FieldValue, getFirestore } from "firebase-admin/firestore";
 import { getStorage } from "firebase-admin/storage";
@@ -23,7 +23,7 @@ import {
   type CanonicalQuestion,
   type CanonicalRoom,
 } from "./game.js";
-import { authorizeCurrentQuestionMedia, emulatorCurrentQuestionMediaUrl } from "./question-media.js";
+import { authorizeCurrentQuestionMedia, emulatorCurrentQuestionMediaUrl, expectedReleaseMediaObjectName } from "./question-media.js";
 import {
   exactPresenceRoomId,
   leaseState,
@@ -32,6 +32,7 @@ import {
 } from "./presence.js";
 export {
   adminGetSession, adminGetOverview, adminListQuestions, adminGetQuestion,
+  adminListPublishedQuestions, adminGetPublishedQuestion, adminGetPublishedQuestionMedia, adminListPublishedCategories, adminGetPublishedCategory,
   adminSaveQuestion, adminValidateQuestion, adminSubmitQuestionReview, adminArchiveQuestion,
   adminListReviews, adminGetReview, adminDecideReview, adminListCategories, adminGetCategory,
   adminUpdateCategory, adminListReleases, adminGetRelease, adminAuditRelease, adminStageRelease,
@@ -58,11 +59,46 @@ import {
 if (!getApps().length) initializeApp();
 const database = getFirestore();
 database.settings({ ignoreUndefinedProperties: true });
-const region = process.env.FUNCTIONS_REGION || "me-central2";
+const region = process.env.FUNCTIONS_REGION || "me-central1";
 const callable = {
   region,
   enforceAppCheck: process.env.FUNCTIONS_EMULATOR !== "true",
 } as const;
+/**
+ * These callables materialize a bounded full release. Projection excludes
+ * owner provenance and one request per instance bounds concurrent heaps.
+ */
+export const RELEASE_READER_OPTIONS = {
+  memory: "1GiB",
+  cpu: 1,
+  concurrency: 1,
+  maxInstances: 20,
+  timeoutSeconds: 60,
+} as const;
+const releaseReaderCallable = { ...callable, ...RELEASE_READER_OPTIONS } as const;
+type ApprovedReleaseCatalog = {
+  releaseId: string;
+  releaseRootSha256: string;
+  demoFixture: boolean;
+  categories: Array<{ id: string; labelAr: string; playable: { huroof: boolean; categories: boolean; charades: boolean } }>;
+  boardCapabilities: { huroof: boolean; categories: boolean; charades: boolean };
+};
+// A release can grow independently from a room.  Room creation and gameplay
+// only ever read the explicitly selected category scope (maximum ten
+// categories), while catalogue discovery reads immutable metadata only.
+// These are abuse/response-size bounds, not a global release-size ceiling.
+export const MAX_RELEASE_CATALOG_CATEGORIES = 600;
+export const MAX_ROOM_SCOPE_CATEGORIES = 10;
+export const MAX_SCOPED_RELEASE_QUESTIONS = 10_000;
+const MAX_APPROVED_RELEASE_QUESTIONS = 1_000_000;
+export const RUNTIME_QUESTION_FIELDS = [
+  "id", "categoryId", "modality", "targetLetter", "answerConceptId",
+  "headerAr", "promptAr", "canonicalAnswer", "acceptedAnswers", "media",
+  "answerMedia", "sources", "review", "moderation",
+] as const;
+export const RUNTIME_CATEGORY_FIELDS = ["id", "labelAr", "displayNameAr", "runtimeReadiness"] as const;
+const RELEASE_READINESS_CACHE_MS = 5 * 60_000;
+const releaseReadinessCache = new Map<string, { expiresAt: number; value: Promise<ApprovedReleaseCatalog> }>();
 const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 const mediaIssues = new Map<string, number[]>();
 const permitMediaIssue = (uid: string, roomId: string) => {
@@ -95,7 +131,16 @@ const number = (value: unknown, fallback: number) =>
       ? (value as number)
       : (() => {
           throw new HttpsError("invalid-argument", "Invalid timer.");
-        })();
+      })();
+export function expectedReleaseMatches(value: unknown, releaseId: string, releaseRootSha256: string) {
+  const expected = value && typeof value === "object" ? value as Record<string, unknown> : undefined;
+  return Boolean(expected && expected.releaseId === releaseId && expected.releaseRootSha256 === releaseRootSha256);
+}
+function approvedQuestionCount(value: unknown, message = "Production requires a non-empty approved release.") {
+  if (typeof value !== "number" || !Number.isSafeInteger(value) || value <= 0 || value > MAX_APPROVED_RELEASE_QUESTIONS)
+    throw new HttpsError("failed-precondition", message);
+  return value as number;
+}
 function teamNames(value: unknown) {
   const teams =
     value && typeof value === "object"
@@ -108,7 +153,7 @@ function teamNames(value: unknown) {
 }
 export function validateQuestionScope(value: unknown): {
   categories: string[];
-  modality: "classic" | "image" | "charades";
+  modality: "classic" | "image" | "video" | "charades";
   gameKind: "huroof" | "categories";
 } {
   const source =
@@ -131,14 +176,14 @@ export function validateQuestionScope(value: unknown): {
   const modality = source.modality;
   const gameKind = source.gameKind === undefined ? "huroof" : source.gameKind;
   if (
-    !categories.length ||
-    (modality !== "classic" && modality !== "image" && modality !== "charades") ||
+    !categories.length || categories.length > MAX_ROOM_SCOPE_CATEGORIES ||
+    (modality !== "classic" && modality !== "image" && modality !== "video" && modality !== "charades") ||
     (gameKind !== "huroof" && gameKind !== "categories") ||
     (gameKind === "categories" && (categories.length < 2 || categories.length > 10 || modality !== "classic"))
   )
     throw new HttpsError(
       "invalid-argument",
-      "A non-empty classic, image, or separate charades category scope is required.",
+      "A non-empty classic, image, video, or separate charades category scope is required.",
     );
   return { categories, modality, gameKind };
 }
@@ -209,6 +254,7 @@ function writes(
 async function activeRelease(
   tx: FirebaseFirestore.Transaction,
   demoRequested: boolean,
+  expectedRelease: unknown,
 ) {
   const pointer = await tx.get(database.doc("runtime/activeRelease"));
   if (!pointer.exists)
@@ -226,10 +272,13 @@ async function activeRelease(
       "Active release is not immutable.",
     );
   const demoFixture = root.data()?.demoFixture === true;
-  const approvedCount = root.data()?.approvedCount;
+  const approvedCount = approvedQuestionCount(root.data()?.approvedCount);
+  const releaseRootSha256 = root.data()?.documentRootSha256;
+  if (typeof releaseRootSha256 !== "string" || !/^[a-f0-9]{64}$/i.test(releaseRootSha256))
+    throw new HttpsError("failed-precondition", "Active release has an invalid identity.");
   if (
     !isDemoProject() &&
-    (demoFixture || !Number.isInteger(approvedCount) || approvedCount <= 0)
+    demoFixture
   )
     throw new HttpsError(
       "failed-precondition",
@@ -240,14 +289,191 @@ async function activeRelease(
       "failed-precondition",
       demoFixture
         ? "Demo fixture must be explicitly requested."
-        : "Approved release cannot be used as a demo fixture.",
+      : "Approved release cannot be used as a demo fixture.",
     );
+  if ((!isDemoProject() && !expectedReleaseMatches(expectedRelease, releaseId, releaseRootSha256)) || (expectedRelease !== undefined && !expectedReleaseMatches(expectedRelease, releaseId, releaseRootSha256)))
+    throw new HttpsError("failed-precondition", "ACTIVE_RELEASE_CHANGED");
   return {
     releaseId,
-    releaseRootSha256: String(root.data()?.documentRootSha256 ?? ""),
+    releaseRootSha256,
     demoFixture,
+    approvedCount,
   };
 }
+
+/**
+ * Public-to-an-authenticated-host release metadata only. Canonical questions,
+ * answers, sources, and media are intentionally absent from this boundary.
+ */
+export function approvedReleaseCatalogProjection(
+  pointerData: unknown,
+  rootData: unknown,
+  categoryRows: Array<{ id: string; data: unknown }>,
+  questions: CanonicalQuestion[] = [],
+  options: { allowDemoFixture?: boolean } = {},
+): ApprovedReleaseCatalog {
+  const pointer = pointerData && typeof pointerData === "object" ? pointerData as Record<string, unknown> : {};
+  const root = rootData && typeof rootData === "object" ? rootData as Record<string, unknown> : {};
+  const releaseId = pointer.releaseId;
+  if (typeof releaseId !== "string" || !/^[A-Za-z0-9_-]{1,128}$/.test(releaseId))
+    throw new HttpsError("failed-precondition", "Invalid active release.");
+  if (root.immutable !== true)
+    throw new HttpsError("failed-precondition", "Active release is not immutable.");
+  const demoFixture = root.demoFixture === true;
+  approvedQuestionCount(root.approvedCount);
+  if (demoFixture && !options.allowDemoFixture)
+    throw new HttpsError("failed-precondition", "Production requires a non-empty approved release.");
+  const releaseRootSha256 = root.documentRootSha256;
+  if (typeof releaseRootSha256 !== "string" || !/^[a-f0-9]{64}$/i.test(releaseRootSha256))
+    throw new HttpsError("failed-precondition", "Active release has an invalid identity.");
+  const categories = categoryRows.map(({ id, data }) => {
+    const row = data && typeof data === "object" ? data as Record<string, unknown> : {};
+    const rowId = row.id;
+    const labelAr = row.labelAr ?? row.displayNameAr;
+    if (rowId !== id || typeof rowId !== "string" || !/^[A-Za-z0-9_-]{1,128}$/.test(rowId) || typeof labelAr !== "string" || !labelAr.trim())
+      throw new HttpsError("failed-precondition", "Active release contains an invalid category catalog.");
+    return { id: rowId, labelAr: labelAr.trim() };
+  }).sort((left, right) => left.id.localeCompare(right.id));
+  if (!categories.length)
+    throw new HttpsError("failed-precondition", "Active release has no eligible categories.");
+  if (new Set(categories.map((category) => category.id)).size !== categories.length)
+    throw new HttpsError("failed-precondition", "Active release category catalog is duplicated.");
+  const rawCategoryById = new Map(categoryRows.map((row) => [row.id, row.data]));
+  const catalogReadiness = categories.map((category) => {
+    const row = rawCategoryById.get(category.id);
+    const raw = row && typeof row === "object" ? row as Record<string, unknown> : {};
+    const readiness = raw.runtimeReadiness;
+    if (!readiness || typeof readiness !== "object" || Array.isArray(readiness)) return undefined;
+    const value = readiness as Record<string, unknown>;
+    return value.huroof === true && value.categories === true && value.charades === true
+      ? { huroof: true, categories: true, charades: true }
+      : value.huroof === false && value.categories === false && value.charades === false
+        ? { huroof: false, categories: false, charades: false }
+        : typeof value.huroof === "boolean" && typeof value.categories === "boolean" && typeof value.charades === "boolean"
+          ? { huroof: value.huroof, categories: value.categories, charades: value.charades }
+          : undefined;
+  });
+  if (!questions.length) {
+    if (catalogReadiness.some((value) => !value))
+      throw new HttpsError("failed-precondition", "Active release is missing immutable scoped readiness metadata.");
+    const categoriesWithReadiness = categories.map((category, index) => ({ ...category, playable: catalogReadiness[index]! }));
+    return {
+      releaseId,
+      releaseRootSha256,
+      demoFixture,
+      categories: categoriesWithReadiness,
+      boardCapabilities: {
+        huroof: categoriesWithReadiness.some((category) => category.playable.huroof),
+        categories: categoriesWithReadiness.some((category) => category.playable.categories),
+        charades: categoriesWithReadiness.some((category) => category.playable.charades),
+      },
+    };
+  }
+  const runtime = runtimeQuestions(questions);
+  const playable = (categories: string[], mode: "huroof" | "categories" | "charades") => {
+    try {
+      if (mode === "huroof") createMatchQuestionSelection(runtime, { categories, modality: "classic", seed: 1, reservePerLetter: 3 });
+      else if (mode === "categories") createCategoryQuestionSelection(runtime, { categories, modality: "classic", seed: 1 });
+      else selectCharadesQuestion(runtime, { categories, cursor: 0 });
+      return true;
+    } catch { return false; }
+  };
+  const sharedHuroofPoolPlayable = playable(categories.map((category) => category.id), "huroof");
+  const categoriesWithReadiness = categories.map((category) => ({
+    ...category,
+    playable: {
+      // Categories contribute letters to a shared board; they need not each
+      // contain every board letter. Room creation still validates the exact
+      // selected combination with the authoritative selector.
+      huroof: sharedHuroofPoolPlayable && runtime.some((question) =>
+        question.categoryId === category.id && question.modality === "classic" &&
+        typeof question.targetLetter === "string" && question.targetLetter.length > 0),
+      categories: categories.some((other) => other.id !== category.id && playable([category.id, other.id], "categories")),
+      charades: playable([category.id], "charades"),
+    },
+  }));
+  return {
+    releaseId,
+    releaseRootSha256,
+    demoFixture,
+    categories: categoriesWithReadiness,
+    boardCapabilities: {
+      huroof: sharedHuroofPoolPlayable,
+      categories: categoriesWithReadiness.some((category) => category.playable.categories),
+      charades: categoriesWithReadiness.some((category) => category.playable.charades),
+    },
+  };
+}
+
+type CanonicalQueryBuilder = {
+  select(...fields: string[]): CanonicalQueryBuilder;
+  orderBy(field: FirebaseFirestore.FieldPath): CanonicalQueryBuilder;
+  limit(value: number): CanonicalQueryBuilder;
+};
+/** The only release-question Firestore shape accepted by runtime callables. */
+export function canonicalQuestionQuery<T extends CanonicalQueryBuilder>(query: T, approvedCount: number): T {
+  return query.select(...RUNTIME_QUESTION_FIELDS).orderBy(FieldPath.documentId()).limit(approvedCount + 1) as T;
+}
+type ScopedCanonicalQueryBuilder = CanonicalQueryBuilder & {
+  where(fieldPath: string, opStr: FirebaseFirestore.WhereFilterOp, value: unknown): ScopedCanonicalQueryBuilder;
+};
+/** A room may only retrieve its frozen category scope, never a whole release. */
+export function scopedCanonicalQuestionQuery<T extends ScopedCanonicalQueryBuilder>(query: T, categoryId: string, approvedCount: number): T {
+  return canonicalQuestionQuery(query.where("categoryId", "==", categoryId) as T, approvedCount);
+}
+function releaseCategoryQuestionQuery(releaseId: string, categoryId: string, approvedCount: number) {
+  return scopedCanonicalQuestionQuery(database.collection(`releases/${releaseId}/questions`), categoryId, approvedCount);
+}
+function releaseCategoryQuery(releaseId: string) {
+  return database.collection(`releases/${releaseId}/catalogCategories`)
+    .select(...RUNTIME_CATEGORY_FIELDS).orderBy(FieldPath.documentId()).limit(MAX_RELEASE_CATALOG_CATEGORIES + 1);
+}
+
+/** Authenticated/App Check metadata discovery; final room creation revalidates in its transaction. */
+export const getApprovedReleaseCatalog = onCall(releaseReaderCallable, async (request) => {
+  uid(request);
+  const pointer = await database.doc("runtime/activeRelease").get();
+  if (!pointer.exists) throw new HttpsError("failed-precondition", "No active immutable release.");
+  const releaseId = pointer.data()?.releaseId;
+  if (typeof releaseId !== "string" || !/^[A-Za-z0-9_-]{1,128}$/.test(releaseId))
+    throw new HttpsError("failed-precondition", "Invalid active release.");
+  const root = await database.doc(`releases/${releaseId}`).get();
+  if (!root.exists || root.data()?.immutable !== true) throw new HttpsError("failed-precondition", "Active release is not immutable.");
+  if (!isDemoProject() && root.data()?.demoFixture === true)
+    throw new HttpsError("failed-precondition", "Production requires a non-demo approved release.");
+  approvedQuestionCount(root.data()?.approvedCount);
+  const releaseRootSha256 = root.data()?.documentRootSha256;
+  if (typeof releaseRootSha256 !== "string" || !/^[a-f0-9]{64}$/i.test(releaseRootSha256))
+    throw new HttpsError("failed-precondition", "Active release has an invalid identity.");
+  const cacheKey = `${releaseId}:${releaseRootSha256}`;
+  const cached = releaseReadinessCache.get(cacheKey);
+  if (cached && cached.expiresAt > now()) return cached.value;
+
+  const value = (async () => {
+    const categories = await releaseCategoryQuery(releaseId).get();
+    const categoryCount = root.data()?.categoryCount;
+    if (
+      categories.size > MAX_RELEASE_CATALOG_CATEGORIES ||
+      (categoryCount !== undefined && (!Number.isSafeInteger(categoryCount) || categoryCount !== categories.size))
+    )
+      throw new HttpsError("failed-precondition", "Active release exceeds its immutable readiness bounds.");
+    return approvedReleaseCatalogProjection(
+      pointer.data(),
+      root.data(),
+      categories.docs.map((document) => ({ id: document.id, data: document.data() })),
+      [],
+      { allowDemoFixture: isDemoProject() },
+    );
+  })();
+  releaseReadinessCache.set(cacheKey, { expiresAt: now() + RELEASE_READINESS_CACHE_MS, value });
+  while (releaseReadinessCache.size > 8) releaseReadinessCache.delete(releaseReadinessCache.keys().next().value!);
+  try {
+    return await value;
+  } catch (failure) {
+    releaseReadinessCache.delete(cacheKey);
+    throw failure;
+  }
+});
 function memberTeam(members: CanonicalMember[], room: CanonicalRoom) {
   const players = members.filter(
     (member) => member.role === "player" && member.active,
@@ -260,25 +486,84 @@ function memberTeam(members: CanonicalMember[], room: CanonicalRoom) {
     ? ("horizontal" as const)
     : ("vertical" as const);
 }
+export function scopedCategories(categories: readonly string[]) {
+  const values = [...new Set(categories)].sort();
+  if (!values.length || values.length > MAX_ROOM_SCOPE_CATEGORIES || values.some((id) => !/^[A-Za-z0-9_-]{1,128}$/.test(id)))
+    throw new HttpsError("failed-precondition", "Pinned room has an invalid immutable category scope.");
+  return values;
+}
+export function scopedInventoryCount(categoryId: string, data: FirebaseFirestore.DocumentData | undefined) {
+  if (!data || data.immutable !== true || data.categoryId !== categoryId || !Number.isSafeInteger(data.approvedCount) || data.approvedCount <= 0)
+    throw new HttpsError("failed-precondition", `Pinned release inventory is invalid for category ${categoryId}.`);
+  return data.approvedCount as number;
+}
+/**
+ * Release roots can contain hundreds of categories.  A room has a frozen
+ * maximum-ten-category scope, so read the immutable inventory first and then
+ * read only the exact per-category question sets.  The +1 query limit catches
+ * stale/incomplete inventory without ever turning a room transaction into a
+ * full-release read.
+ */
+async function releaseScopedQuestions(
+  tx: FirebaseFirestore.Transaction,
+  releaseId: string,
+  categories: readonly string[],
+): Promise<CanonicalQuestion[]> {
+  const scope = scopedCategories(categories);
+  const inventory = await Promise.all(scope.map(async (categoryId) => {
+    const document = await tx.get(database.doc(`releases/${releaseId}/inventory/${categoryId}`));
+    return { categoryId, approvedCount: scopedInventoryCount(categoryId, document.data()) };
+  }));
+  const scopedCount = inventory.reduce((sum, entry) => sum + entry.approvedCount, 0);
+  if (!Number.isSafeInteger(scopedCount) || scopedCount > MAX_SCOPED_RELEASE_QUESTIONS)
+    throw new HttpsError("failed-precondition", "Selected category scope exceeds the bounded room question limit.");
+  const snapshots = await Promise.all(inventory.map(async ({ categoryId, approvedCount }) => {
+    const snapshot = await tx.get(releaseCategoryQuestionQuery(releaseId, categoryId, approvedCount));
+    if (snapshot.size !== approvedCount)
+      throw new HttpsError("failed-precondition", `Pinned release question scope is incomplete for category ${categoryId}.`);
+    const rows = questionRows(snapshot.docs);
+    if (rows.some((question) => question.categoryId !== categoryId))
+      throw new HttpsError("failed-precondition", `Pinned release question scope has a category mismatch for ${categoryId}.`);
+    return rows;
+  }));
+  return snapshots.flat();
+}
 async function releaseQuestions(
   tx: FirebaseFirestore.Transaction,
   room: CanonicalRoom,
 ): Promise<CanonicalQuestion[]> {
-  const snapshot = await tx.get(
-    database
-      .collection(`releases/${room.config.releaseId}/questions`)
-      .orderBy(FieldPath.documentId()),
-  );
-  const rows = snapshot.docs.map(
-    (item) => item.data() as Partial<CanonicalQuestion>,
-  );
+  const root = await tx.get(database.doc(`releases/${room.config.releaseId}`));
+  if (!root.exists || root.data()?.immutable !== true || root.data()?.documentRootSha256 !== room.config.releaseRootSha256)
+    throw new HttpsError("failed-precondition", "Pinned release identity is invalid.");
+  approvedQuestionCount(root.data()?.approvedCount, "Pinned release has an invalid question count.");
+  return releaseScopedQuestions(tx, room.config.releaseId, room.config.categories ?? []);
+}
+async function releaseQuestionsForNewRoom(
+  tx: FirebaseFirestore.Transaction,
+  release: { releaseId: string; releaseRootSha256: string; approvedCount: number },
+  categories: string[],
+): Promise<CanonicalQuestion[]> {
+  return releaseScopedQuestions(tx, release.releaseId, categories);
+}
+function assertPlayableScope(questions: CanonicalQuestion[], scope: ReturnType<typeof validateQuestionScope>) {
+  const runtime = runtimeQuestions(questions);
+  try {
+    if (scope.gameKind === "categories") createCategoryQuestionSelection(runtime, { categories: scope.categories, modality: "classic", seed: 1 });
+    else if (scope.modality === "charades") selectCharadesQuestion(runtime, { categories: scope.categories, cursor: 0 });
+    else createMatchQuestionSelection(runtime, { categories: scope.categories, modality: scope.modality, seed: 1, reservePerLetter: 3 });
+  } catch { throw new HttpsError("failed-precondition", "SELECTED_SCOPE_NOT_PLAYABLE"); }
+}
+export function questionRows(docs: Array<{ id: string; data(): FirebaseFirestore.DocumentData }>): CanonicalQuestion[] {
+  const rows = docs.map((item) => ({ id: item.id, ...(item.data() as Partial<CanonicalQuestion>) }));
   if (
+    docs.some((item) => item.data()?.id !== item.id) ||
     rows.some(
       (item) =>
         typeof item.id !== "string" ||
         typeof item.categoryId !== "string" ||
         (item.modality !== "classic" &&
           item.modality !== "image" &&
+          item.modality !== "video" &&
           item.modality !== "charades") ||
         typeof item.answerConceptId !== "string" ||
         !item.answerConceptId ||
@@ -313,14 +598,21 @@ const runtimeQuestions = (questions: CanonicalQuestion[]) =>
 /** Category labels are trusted only from Firestore and frozen into the room at create. */
 async function pinnedCategorySnapshot(
   tx: FirebaseFirestore.Transaction,
+  release: { releaseId: string; demoFixture: boolean },
   categories: string[],
 ) {
-  const docs = await Promise.all(
-    categories.map((id) => tx.get(database.doc(`categories/${id}`))),
+  let docs = await Promise.all(
+    categories.map((id) => tx.get(database.doc(`releases/${release.releaseId}/catalogCategories/${id}`))),
   );
+  // Older emulator fixtures predate release-owned catalogs. Approved releases
+  // cannot fall back to mutable catalog rows.
+  if (release.demoFixture && docs.some((doc) => !doc.exists))
+    docs = await Promise.all(
+      categories.map((id) => tx.get(database.doc(`catalogCategories/${id}`))),
+    );
   const snapshot = docs.map((doc, index) => {
     const data = doc.data();
-    const labelAr = data?.displayNameAr;
+    const labelAr = data?.labelAr ?? data?.displayNameAr;
     if (!doc.exists || typeof labelAr !== "string" || !labelAr.trim())
       throw new HttpsError("failed-precondition", `Category ${categories[index]} has no trusted Arabic label.`);
     return { id: categories[index], labelAr: labelAr.trim() };
@@ -507,7 +799,8 @@ async function pinnedQuestion(
     const letter =
       surpriseLetter ?? active.revealedLetter ?? active.visibleValue;
     if (!letter) throw new Error("No unused surprise letter.");
-    const result = selectMatchQuestion(runtime, selection, letter);
+    const promoted = promoteReservedQuestion(runtime, selection, active.id);
+    const result = promoted ?? selectMatchQuestion(runtime, selection, letter);
     const question = questions.find(
       (candidate) => candidate.id === result.question.id,
     );
@@ -527,7 +820,29 @@ async function pinnedQuestion(
     throw new HttpsError("failed-precondition", error instanceof Error ? error.message : "Pinned release has no playable question.");
   }
 }
-/** Continue reserves the replacement before its cell changes, so concurrent selection cannot steal it. */
+/** Retry reserves a fresh question without changing the active cell's scope; the callable promotes it immediately. */
+async function retryFailedCell(
+  tx: FirebaseFirestore.Transaction,
+  room: CanonicalRoom,
+): Promise<CanonicalRoom> {
+  const cell = room.game.board?.cells.find((item) => item.id === room.game.activeCellId);
+  if (!cell || !room.questionSelection)
+    throw new HttpsError("failed-precondition", "CONTENT_DEPLETED");
+  const questions = await releaseQuestions(tx, room);
+  const runtime = runtimeQuestions(questions);
+  const queueKey = roomGameKind(room) === "categories"
+    ? cell.categoryId
+    : cell.revealedLetter ?? cell.visibleValue;
+  if (!queueKey)
+    throw new HttpsError("failed-precondition", "CONTENT_DEPLETED");
+  try {
+    const selected = reserveQuestionForCell(runtime, room.questionSelection, queueKey, cell.id);
+    return { ...room, questionSelection: selected.selection };
+  } catch {
+    throw new HttpsError("failed-precondition", "CONTENT_DEPLETED");
+  }
+}
+/** Returning to the board reserves a replacement before its cell changes, so concurrent selection cannot steal it. */
 async function replaceFailedCell(
   tx: FirebaseFirestore.Transaction,
   room: CanonicalRoom,
@@ -582,7 +897,7 @@ function expiring(room: CanonicalRoom) {
     : { ...next, updatedAt: FieldValue.serverTimestamp() };
 }
 
-export const createRoom = onCall(callable, async (request) => {
+export const createRoom = onCall(releaseReaderCallable, async (request) => {
   const actor = uid(request);
   const requestData = request.data ?? {};
   const demo = requestData.demo === true;
@@ -607,9 +922,11 @@ export const createRoom = onCall(callable, async (request) => {
       : "classic";
   const candidates = Array.from({ length: 12 }, code);
   return database.runTransaction(async (tx) => {
-    const release = await activeRelease(tx, demo);
+    const release = await activeRelease(tx, demo, requestData.expectedRelease);
+    const questions = await releaseQuestionsForNewRoom(tx, release, scope.categories);
+    assertPlayableScope(questions, scope);
     const categorySnapshot = scope.gameKind === "categories"
-      ? await pinnedCategorySnapshot(tx, scope.categories)
+      ? await pinnedCategorySnapshot(tx, release, scope.categories)
       : undefined;
     let roomCode: string | undefined;
     for (const candidate of candidates)
@@ -868,7 +1185,7 @@ export const getRoomPresence = onCall(callable, async (request) => {
   };
 });
 
-export const submitGameIntent = onCall(callable, async (request) => {
+export const submitGameIntent = onCall(releaseReaderCallable, async (request) => {
   const actor = uid(request);
   let id: string;
   const intent = request.data?.intent;
@@ -923,11 +1240,12 @@ export const submitGameIntent = onCall(callable, async (request) => {
     } catch (reason) {
       return error(reason);
     }
-    try { if (
-      (intent.type === "RETRY_CELL" || intent.type === "RETURN_CELL") &&
-      room.game.lifecycle === "QUESTION_FAILED" &&
-      !charades
-    )
+    try {
+    if (intent.type === "RETRY_CELL" && room.game.lifecycle === "QUESTION_FAILED" && !charades) {
+      room = await retryFailedCell(tx, room);
+      ({ question } = await pinnedQuestion(tx, room));
+    }
+    if (intent.type === "RETURN_CELL" && room.game.lifecycle === "QUESTION_FAILED" && !charades)
       room = await replaceFailedCell(tx, room);
     if (intent.type === "LETTER_REVEALED") {
       const active = room.game.board?.cells.find(
@@ -962,18 +1280,10 @@ export const submitGameIntent = onCall(callable, async (request) => {
         );
     }
     try {
-      // A terminal retry prepares an eligible replacement above, then deliberately
-      // clears disclosed state and returns to the board instead of reopening the old cell.
-      const lifecycleIntent =
-        !charades &&
-        (intent.type === "RETRY_CELL" || intent.type === "RETURN_CELL") &&
-        room.game.lifecycle === "QUESTION_FAILED"
-          ? { ...intent, type: "RETURN_CELL" as const }
-          : intent;
       result = reduceIntent(
         room,
         member,
-        lifecycleIntent,
+        intent,
         now(),
         question,
         members,
@@ -1066,7 +1376,7 @@ export const syncRoomDeadline = onCall(callable, async (request) => {
   });
 });
 
-/** A 60s V4 bearer URL is issued only after current room/member/media binding checks. */
+/** Authenticated callable byte delivery; no Storage URL is exposed to a browser. */
 export const getCurrentQuestionMedia = onCall(callable, async (request) => {
   const actor = uid(request);
   const data = request.data;
@@ -1087,16 +1397,21 @@ export const getCurrentQuestionMedia = onCall(callable, async (request) => {
   if (typeof releaseId !== 'string') throw new HttpsError('failed-precondition', 'Invalid pinned release.');
   const releaseMedia = await database.doc(`releases/${releaseId}/media/${binding.mediaId}`).get();
   const item = releaseMedia.data();
-  const expectedObjectName = `question-media/v18/${binding.assetSha256}.png`;
-  if (!releaseMedia.exists || item?.mediaId !== binding.mediaId || item?.assetSha256 !== binding.assetSha256 || item?.objectName !== expectedObjectName || item?.immutable !== true || typeof item?.generation !== 'string' || !/^[1-9][0-9]*$/.test(item.generation)) throw new HttpsError('failed-precondition', 'Immutable media binding is unavailable.');
+  const video = binding.type === 'video' || room?.activeQuestion?.modality === 'video';
+  const rebuiltJpeg = !video && binding.contentType === 'image/jpeg' && /^rebuild-v2-photo-\d{3}-\d{3}$/.test(binding.mediaId);
+  const contentType = video ? 'video/mp4' : rebuiltJpeg ? 'image/jpeg' : 'image/png';
+  const expectedObjectName = expectedReleaseMediaObjectName(binding.mediaId, binding.assetSha256, video, rebuiltJpeg);
+  if (!releaseMedia.exists || item?.mediaId !== binding.mediaId || item?.assetSha256 !== binding.assetSha256 || item?.objectName !== expectedObjectName || item?.contentType !== contentType || item?.immutable !== true || typeof item?.generation !== 'string' || !/^[1-9][0-9]*$/.test(item.generation)) throw new HttpsError('failed-precondition', 'Immutable media binding is unavailable.');
   if (process.env.FUNCTIONS_EMULATOR === 'true') {
     const url = await emulatorCurrentQuestionMediaUrl(binding);
     return { mediaId: binding.mediaId, assetSha256: binding.assetSha256, url, expiresAt: new Date(Date.now() + 60_000).toISOString() };
   }
   const file = getStorage().bucket().file(item.objectName, { generation: item.generation });
-  const [metadata] = await file.getMetadata();
-  if (metadata.generation !== item.generation || metadata.metadata?.assetSha256 !== binding.assetSha256) throw new HttpsError('failed-precondition', 'Immutable media generation mismatch.');
-  const expiresAtMs = Date.now() + 60_000;
-  const [url] = await file.getSignedUrl({ action: 'read', version: 'v4', expires: expiresAtMs });
-  return { mediaId: binding.mediaId, assetSha256: binding.assetSha256, url, expiresAt: new Date(expiresAtMs).toISOString() };
+  const [metadataResponse, downloaded] = await Promise.all([file.getMetadata(), file.download()]);
+  const metadata = metadataResponse[0], bytes = downloaded[0];
+  if (metadata.generation !== item.generation || metadata.metadata?.assetSha256 !== binding.assetSha256 || metadata.contentType !== contentType || bytes.length > 1_000_000 || createHash('sha256').update(bytes).digest('hex') !== binding.assetSha256) throw new HttpsError('failed-precondition', 'Immutable media generation mismatch.');
+  if (video && bytes.subarray(4, 8).toString('ascii') !== 'ftyp') throw new HttpsError('failed-precondition', 'Immutable media format mismatch.');
+  if (rebuiltJpeg && !bytes.subarray(0, 3).equals(Buffer.from([0xff, 0xd8, 0xff]))) throw new HttpsError('failed-precondition', 'Immutable media format mismatch.');
+  if (!video && !rebuiltJpeg && !bytes.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))) throw new HttpsError('failed-precondition', 'Immutable media format mismatch.');
+  return { mediaId: binding.mediaId, assetSha256: binding.assetSha256, url: `data:${contentType};base64,${bytes.toString('base64')}`, expiresAt: new Date(Date.now() + 60_000).toISOString() };
 });

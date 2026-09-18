@@ -1,7 +1,7 @@
 import { httpsCallable } from 'firebase/functions';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { getOptionalFirebaseClient, signInAnonymouslyIfNeeded } from '../../../lib/firebase/client.js';
-import type { ClientRole, CreateRoomRequest, GameIntent, GameRuntimeAdapter, HostPresenceSnapshot, JoinRoomRequest, ProjectionEnvelope } from './contracts.js';
+import { isApprovedReleaseCatalog, type ApprovedReleaseCatalog, type ClientRole, type CreateRoomRequest, type GameIntent, type GameRuntimeAdapter, type HostPresenceSnapshot, type JoinRoomRequest, type ProjectionEnvelope } from './contracts.js';
 
 const PRESENCE_SNAPSHOT_FRESHNESS_MS = 30_000;
 
@@ -13,6 +13,18 @@ export const acceptsFreshHostPresence = (
 ) =>
   requestGeneration === currentGeneration &&
   currentTime - startedAt <= PRESENCE_SNAPSHOT_FRESHNESS_MS;
+
+/** Callable media is intentionally a small authenticated data URL, never a Storage URL. */
+export function authenticatedMediaDataUrlToBlob(url: string): Blob {
+  const match = /^data:(image\/(?:png|jpeg)|video\/mp4);base64,([A-Za-z0-9+/]*={0,2})$/u.exec(url);
+  if (!match || match[2].length === 0 || match[2].length % 4 !== 0) throw new Error('MEDIA_INVALID_DATA_URL');
+  let bytes: Uint8Array;
+  try {
+    const decoded = atob(match[2]);
+    bytes = Uint8Array.from(decoded, (character) => character.charCodeAt(0));
+  } catch { throw new Error('MEDIA_INVALID_DATA_URL'); }
+  return new Blob([bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer], { type: match[1] });
+}
 
 function configuredClient() {
   const client = getOptionalFirebaseClient();
@@ -39,6 +51,13 @@ export class FirebaseGameAdapter implements GameRuntimeAdapter {
     return result.data;
   }
 
+  async getApprovedReleaseCatalog(): Promise<ApprovedReleaseCatalog> {
+    await signInAnonymouslyIfNeeded();
+    const data = (await httpsCallable<Record<string, never>, unknown>(configuredClient().functions, 'getApprovedReleaseCatalog')({})).data;
+    if (!isApprovedReleaseCatalog(data)) throw new Error('APPROVED_RELEASE_CATALOG_INVALID');
+    return data;
+  }
+
   async joinRoom(request: JoinRoomRequest) {
     await signInAnonymouslyIfNeeded();
     const result = await httpsCallable<JoinRoomRequest, { roomId: string; revision: number }>(configuredClient().functions, 'joinRoom')(request);
@@ -63,7 +82,10 @@ export class FirebaseGameAdapter implements GameRuntimeAdapter {
 
   async getCurrentQuestionMedia(request: { roomId: string; mediaId: string; assetSha256: string }) {
     await signInAnonymouslyIfNeeded();
-    return (await httpsCallable<typeof request, { mediaId: string; assetSha256: string; url: string; expiresAt: string }>(configuredClient().functions, 'getCurrentQuestionMedia')(request)).data;
+    const grant = (await httpsCallable<typeof request, { mediaId: string; assetSha256: string; url: string; expiresAt: string }>(configuredClient().functions, 'getCurrentQuestionMedia')(request)).data;
+    if (grant.mediaId !== request.mediaId || grant.assetSha256 !== request.assetSha256 || !grant.url.startsWith('data:')) throw new Error('MEDIA_BINDING_MISMATCH');
+    const blob = authenticatedMediaDataUrlToBlob(grant.url);
+    return { ...grant, url: URL.createObjectURL(blob) };
   }
 
   subscribeProjection(roomId: string, role: ClientRole, uid: string, onProjection: (value: ProjectionEnvelope) => void, onError?: (error: Error) => void) {

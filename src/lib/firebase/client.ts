@@ -2,13 +2,37 @@ import { type FirebaseApp, getApp, getApps, initializeApp } from 'firebase/app';
 import { type Auth, connectAuthEmulator, getAuth, signInAnonymously } from 'firebase/auth';
 import { type Firestore, connectFirestoreEmulator, getFirestore } from 'firebase/firestore';
 import { type Functions, connectFunctionsEmulator, getFunctions } from 'firebase/functions';
-import { ReCaptchaV3Provider, initializeAppCheck } from 'firebase/app-check';
+import { ReCaptchaEnterpriseProvider, ReCaptchaV3Provider, initializeAppCheck } from 'firebase/app-check';
 
 export interface FirebaseClientServices { app: FirebaseApp; auth: Auth; firestore: Firestore; functions: Functions; }
 const authEmulatorAttachedAppNames = new Set<string>();
 const gameEmulatorAttachedAppNames = new Set<string>();
 const appCheckAttachedAppNames = new Set<string>();
 let anonymousSignIn: ReturnType<typeof signInAnonymously> | undefined;
+
+type AppCheckProviderKind = 'recaptcha-v3' | 'recaptcha-enterprise';
+
+/**
+ * Resolves App Check only for the live Firebase runtime. Fixture and emulator
+ * modes intentionally bypass browser attestation so their existing local flows
+ * remain independent from a reCAPTCHA key.
+ */
+export function resolveAppCheckProvider(
+  runtime: string | undefined,
+  emulator: boolean,
+  configuredProvider: string | undefined,
+  siteKey: string | undefined,
+): AppCheckProviderKind | null {
+  if (runtime !== 'firebase' || emulator) return null;
+  if (!siteKey?.trim())
+    throw new Error('Firebase production runtime is fail-closed until VITE_FIREBASE_APP_CHECK_SITE_KEY is configured.');
+
+  const provider = configuredProvider ?? 'recaptcha-v3';
+  if (provider === 'recaptcha-v3' || provider === 'recaptcha-enterprise') return provider;
+  throw new Error(
+    'VITE_FIREBASE_APP_CHECK_PROVIDER must be either recaptcha-v3 or recaptcha-enterprise.',
+  );
+}
 
 function emulatorPort(name: 'VITE_FIREBASE_AUTH_EMULATOR_PORT' | 'VITE_FIREBASE_FIRESTORE_EMULATOR_PORT' | 'VITE_FIREBASE_FUNCTIONS_EMULATOR_PORT' | 'VITE_FIREBASE_STORAGE_EMULATOR_PORT', fallback: number) {
   const value = import.meta.env[name];
@@ -40,6 +64,19 @@ function attachAuthEmulatorOnce(app: FirebaseApp, auth: Auth) {
   authEmulatorAttachedAppNames.add(app.name);
 }
 
+function attachAppCheckOnce(app: FirebaseApp, providerKind: AppCheckProviderKind, siteKey: string) {
+  if (appCheckAttachedAppNames.has(app.name)) return;
+  // A registered debug token is local-only; production always uses attestation.
+  if (import.meta.env.DEV && ['localhost', '127.0.0.1'].includes(window.location.hostname) && import.meta.env.VITE_FIREBASE_APP_CHECK_DEBUG_TOKEN) {
+    (self as typeof self & { FIREBASE_APPCHECK_DEBUG_TOKEN?: string }).FIREBASE_APPCHECK_DEBUG_TOKEN = import.meta.env.VITE_FIREBASE_APP_CHECK_DEBUG_TOKEN;
+  }
+  const provider = providerKind === 'recaptcha-enterprise'
+    ? new ReCaptchaEnterpriseProvider(siteKey)
+    : new ReCaptchaV3Provider(siteKey);
+  initializeAppCheck(app, { provider, isTokenAutoRefreshEnabled: true });
+  appCheckAttachedAppNames.add(app.name);
+}
+
 /**
  * Returns the shared Firebase Auth instance whenever public Firebase Web config
  * is complete. Authentication intentionally does not depend on game runtime or
@@ -56,23 +93,39 @@ export function getOptionalFirebaseAuth(): Auth | null {
 /** Returns null rather than throwing when fixture mode has no Firebase configuration. */
 export function getOptionalFirebaseClient(): FirebaseClientServices | null {
   if (envRuntimeIsFixture() || !configuredFirebase()) return null;
+  return configuredClient();
+}
+
+function configuredClient(): FirebaseClientServices {
   const emulator = import.meta.env.VITE_USE_FIREBASE_EMULATORS === 'true';
-  if (!emulator && !import.meta.env.VITE_FIREBASE_APP_CHECK_SITE_KEY) throw new Error('Firebase production runtime is fail-closed until VITE_FIREBASE_APP_CHECK_SITE_KEY is configured.');
+  const appCheckProvider = resolveAppCheckProvider(
+    'firebase',
+    emulator,
+    import.meta.env.VITE_FIREBASE_APP_CHECK_PROVIDER,
+    import.meta.env.VITE_FIREBASE_APP_CHECK_SITE_KEY,
+  );
   const app = firebaseApp();
-  const services = { app, auth: getAuth(app), firestore: getFirestore(app), functions: getFunctions(app, import.meta.env.VITE_FIREBASE_FUNCTIONS_REGION || 'me-central2') };
+  if (appCheckProvider)
+    attachAppCheckOnce(app, appCheckProvider, import.meta.env.VITE_FIREBASE_APP_CHECK_SITE_KEY!);
+  const services = { app, auth: getAuth(app), firestore: getFirestore(app), functions: getFunctions(app, import.meta.env.VITE_FIREBASE_FUNCTIONS_REGION || 'me-central1') };
   attachAuthEmulatorOnce(app, services.auth);
   if (emulator && !gameEmulatorAttachedAppNames.has(app.name)) {
     connectFirestoreEmulator(services.firestore, '127.0.0.1', emulatorPort('VITE_FIREBASE_FIRESTORE_EMULATOR_PORT', 8080));
     connectFunctionsEmulator(services.functions, '127.0.0.1', emulatorPort('VITE_FIREBASE_FUNCTIONS_EMULATOR_PORT', 5001));
     gameEmulatorAttachedAppNames.add(app.name);
   }
-  if (!emulator && !appCheckAttachedAppNames.has(app.name)) { initializeAppCheck(app, { provider: new ReCaptchaV3Provider(import.meta.env.VITE_FIREBASE_APP_CHECK_SITE_KEY), isTokenAutoRefreshEnabled: true }); appCheckAttachedAppNames.add(app.name); }
   return services;
 }
 
-/** Administration is never available in fixture mode and never falls back to anonymous auth. */
+/**
+ * Administration is never anonymous, but it may use the configured Firebase
+ * project while the game itself runs in local/fixture mode.  This keeps local
+ * gameplay isolated without making the administrative studio impossible to
+ * review during development.
+ */
 export function getOptionalFirebaseAdminClient(): FirebaseClientServices | null {
-  return getOptionalFirebaseClient();
+  if (!configuredFirebase()) return null;
+  return configuredClient();
 }
 
 function envRuntimeIsFixture() { return import.meta.env.VITE_GAME_RUNTIME !== 'firebase'; }

@@ -1,4 +1,4 @@
-import type { ClientRole, CreateRoomRequest, GameIntent, GameRuntimeAdapter, HostPresenceSnapshot, JoinRoomRequest, ProjectionEnvelope, SafeProjection } from './contracts.js';
+import type { ApprovedReleaseCatalog, ClientRole, CreateRoomRequest, GameIntent, GameRuntimeAdapter, HostPresenceSnapshot, JoinRoomRequest, ProjectionEnvelope, SafeProjection } from './contracts.js';
 
 /** Loads Firebase only when a Firebase-configured route first needs it. */
 export class DeferredFirebaseGameAdapter implements GameRuntimeAdapter {
@@ -13,6 +13,7 @@ export class DeferredFirebaseGameAdapter implements GameRuntimeAdapter {
   }
 
   createRoom(request: CreateRoomRequest) { return this.adapter().then((adapter) => adapter.createRoom(request)); }
+  getApprovedReleaseCatalog(): Promise<ApprovedReleaseCatalog> { return this.adapter().then((adapter) => adapter.getApprovedReleaseCatalog?.() ?? Promise.reject(new Error('APPROVED_RELEASE_CATALOG_UNAVAILABLE'))); }
   joinRoom(request: JoinRoomRequest) { return this.adapter().then((adapter) => adapter.joinRoom(request)); }
   joinAudience(roomCode: string) { return this.adapter().then((adapter) => adapter.joinAudience?.(roomCode) ?? Promise.reject(new Error('انضمام الجمهور غير متاح حالياً.'))); }
   syncDeadline(roomId: string) { return this.adapter().then((adapter) => adapter.syncDeadline?.(roomId) ?? Promise.resolve({ revision: 0, expired: false })); }

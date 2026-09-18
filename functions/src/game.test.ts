@@ -1,13 +1,145 @@
 import assert from 'node:assert/strict';
+import { existsSync } from 'node:fs';
+import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import { deriveMatch, initialGameState } from '../../src/features/game/domain/lifecycle.js';
-import { generateBoard, revealSurprise } from '../../src/features/game/domain/board.js';
-import { prepareLetterReveal, selectQuestionForActiveCell, validateQuestionScope } from './index.js';
-import { createMatchQuestionSelection, selectCharadesQuestion } from '../../src/features/game/runtime/question-selector.js';
-import { intentHash, intentReceiptId, isRoomClosed, preflightContentPreparation, projectRoom, reduceIntent, roomGameKind, validIntent, type CanonicalMember, type CanonicalRoom } from './game.js';
+import { generateBoard, generateCategoryBoard, revealSurprise } from '../../src/features/game/domain/board.js';
+import { approvedReleaseCatalogProjection, canonicalQuestionQuery, expectedReleaseMatches, MAX_ROOM_SCOPE_CATEGORIES, MAX_SCOPED_RELEASE_QUESTIONS, prepareLetterReveal, questionRows, RELEASE_READER_OPTIONS, RUNTIME_QUESTION_FIELDS, scopedCanonicalQuestionQuery, scopedCategories, scopedInventoryCount, selectQuestionForActiveCell, validateQuestionScope } from './index.js';
+import { createCategoryQuestionSelection, createMatchQuestionSelection, promoteReservedQuestion, reserveQuestionForCell, selectCategoryQuestion, selectCharadesQuestion, selectMatchQuestion, type RuntimeQuestionV32 } from '../../src/features/game/runtime/question-selector.js';
+import { intentHash, intentReceiptId, isRoomClosed, preflightContentPreparation, projectRoom, reduceIntent, roomGameKind, validIntent, type CanonicalMember, type CanonicalQuestion, type CanonicalRoom } from './game.js';
 
 const room = (): CanonicalRoom => ({ schemaVersion: 2, roomCode: 'A1B2C3D4', revision: 2, game: { ...initialGameState(), lifecycle: 'QUESTION_READING' }, config: { demo: true, questionSeconds: 20, opponentSeconds: 10, teams: { horizontal: 'أفقي', vertical: 'عمودي' }, releaseId: 'demo-drafts', releaseRootSha256: 'hash', releaseDemoFixture: true }, timer: { deadlineMs: 2_000, buzzOpen: true }, questionCursor: 0 });
 const player: CanonicalMember = { uid: 'p1', role: 'player', displayName: 'P', ready: false, active: true, team: 'horizontal' };
+const readyReleaseQuestions: CanonicalQuestion[] = Array.from({ length: 25 }, (_, letter) => Array.from({ length: 3 }, (_, copy) => ({ id: `ready-${letter}-${copy}`, categoryId: 'category-a', modality: 'classic' as const, targetLetter: `ح${letter}`, answerConceptId: `concept-${letter}-${copy}`, headerAr: 'عنوان', promptAr: 'سؤال', canonicalAnswer: 'جواب', acceptedAnswers: ['جواب'] }))).flat();
+
+const m05PlanPath = 'D:/projects/huroof_wa_oloof/output/media-live-20260911/owner-category-supplement-plan.json';
+const privateM05Fixture = process.env.RUN_PRIVATE_OWNER_CATEGORY_SUPPLEMENT_TESTS === '1' && existsSync(m05PlanPath);
+
+test('canonical release question query projects only runtime fields and keeps the bound', () => {
+  const calls: Array<unknown> = [];
+  const query = {
+    select(...fields: string[]) { calls.push(['select', fields]); return this; },
+    orderBy(field: unknown) { calls.push(['orderBy', field]); return this; },
+    limit(value: number) { calls.push(['limit', value]); return this; },
+  };
+  assert.equal(canonicalQuestionQuery(query, 15_338), query);
+  assert.deepEqual(calls[0], ['select', [...RUNTIME_QUESTION_FIELDS]]);
+  assert.deepEqual(calls.at(-1), ['limit', 15_339]);
+  assert.equal((RUNTIME_QUESTION_FIELDS as readonly string[]).includes('sourceProvenance'), false);
+  assert.equal(RUNTIME_QUESTION_FIELDS.includes('media'), true);
+  assert.equal(RUNTIME_QUESTION_FIELDS.includes('answerMedia'), true);
+  assert.equal(RUNTIME_QUESTION_FIELDS.includes('sources'), true);
+  assert.deepEqual(RELEASE_READER_OPTIONS, { memory: '1GiB', cpu: 1, concurrency: 1, maxInstances: 20, timeoutSeconds: 60 });
+});
+
+test('room question reads are category-scoped and immutable inventory bounds the selected set', () => {
+  const calls: Array<unknown> = [];
+  const query = {
+    where(field: string, op: string, value: unknown) { calls.push(['where', field, op, value]); return this; },
+    select(...fields: string[]) { calls.push(['select', fields]); return this; },
+    orderBy(field: unknown) { calls.push(['orderBy', field]); return this; },
+    limit(value: number) { calls.push(['limit', value]); return this; },
+  };
+  assert.equal(scopedCanonicalQuestionQuery(query, 'category-a', 300), query);
+  assert.deepEqual(calls[0], ['where', 'categoryId', '==', 'category-a']);
+  assert.deepEqual(calls[1], ['select', [...RUNTIME_QUESTION_FIELDS]]);
+  assert.deepEqual(calls.at(-1), ['limit', 301]);
+  assert.deepEqual(scopedCategories(['category-b', 'category-a', 'category-a']), ['category-a', 'category-b']);
+  assert.throws(() => scopedCategories(Array.from({ length: MAX_ROOM_SCOPE_CATEGORIES + 1 }, (_, index) => `category-${index}`)), /scope/i);
+  assert.equal(scopedInventoryCount('category-a', { immutable: true, categoryId: 'category-a', approvedCount: 300 }), 300);
+  assert.throws(() => scopedInventoryCount('category-a', { immutable: true, categoryId: 'category-b', approvedCount: 300 }), /inventory/i);
+  assert.ok(MAX_SCOPED_RELEASE_QUESTIONS >= 3_000);
+});
+
+test('actual M05 release projection retains runtime media and host sources without owner provenance', { skip: privateM05Fixture ? false : 'set RUN_PRIVATE_OWNER_CATEGORY_SUPPLEMENT_TESTS=1 with the private M05 plan' }, async () => {
+  const plan = JSON.parse(await readFile(m05PlanPath, 'utf8')) as { releaseId: string; documents: Array<{ path: string; data: Record<string, unknown> }> };
+  const root = plan.documents.find((document) => document.path === `releases/${plan.releaseId}`)!;
+  const projection = new Set<string>(RUNTIME_QUESTION_FIELDS);
+  const questions = questionRows(plan.documents.filter((document) => document.path.includes('/questions/')).map((document) => ({
+    id: String(document.data.id),
+    data: () => Object.fromEntries(Object.entries(document.data).filter(([field]) => projection.has(field))),
+  })));
+  const categories = plan.documents.filter((document) => document.path.includes('/catalogCategories/')).map((document) => ({
+    id: String(document.data.id), data: { id: document.data.id, labelAr: document.data.labelAr },
+  }));
+  const catalog = approvedReleaseCatalogProjection({ releaseId: plan.releaseId }, root.data, categories, questions);
+  assert.equal(questions.length, 15_338);
+  assert.equal(catalog.categories.length, 83);
+  assert.ok(questions.some((question) => question.media?.mediaId));
+  assert.ok(questions.every((question) => !Object.hasOwn(question, 'sourceProvenance')));
+});
+
+test('approved release catalog projection exposes only immutable identity, category labels, and board capability', () => {
+  const value = approvedReleaseCatalogProjection(
+    { releaseId: 'release-approved' },
+    { immutable: true, approvedCount: 7, documentRootSha256: 'a'.repeat(64), canonicalAnswer: 'private', sources: ['private'] },
+    [
+      { id: 'category-b', data: { id: 'category-b', labelAr: 'فئة ب', media: { objectName: 'private' } } },
+      { id: 'category-a', data: { id: 'category-a', labelAr: 'فئة أ', promptAr: 'private' } },
+    ],
+    readyReleaseQuestions,
+  );
+  assert.deepEqual(value, {
+    releaseId: 'release-approved', releaseRootSha256: 'a'.repeat(64), demoFixture: false,
+    categories: [{ id: 'category-a', labelAr: 'فئة أ', playable: { huroof: true, categories: false, charades: false } }, { id: 'category-b', labelAr: 'فئة ب', playable: { huroof: false, categories: false, charades: false } }],
+    boardCapabilities: { huroof: true, categories: false, charades: false },
+  });
+  assert.doesNotMatch(JSON.stringify(value), /private|answer|source|media|prompt/i);
+  assert.equal(expectedReleaseMatches({ releaseId: 'release-approved', releaseRootSha256: 'a'.repeat(64) }, 'release-approved', 'a'.repeat(64)), true);
+  assert.equal(expectedReleaseMatches({ releaseId: 'release-approved', releaseRootSha256: 'b'.repeat(64) }, 'release-approved', 'a'.repeat(64)), false);
+  assert.throws(() => approvedReleaseCatalogProjection({ releaseId: 'release-too-large' }, { immutable: true, approvedCount: 1_000_001, documentRootSha256: 'a'.repeat(64) }, [{ id: 'category-a', data: { id: 'category-a', labelAr: 'فئة أ' } }], readyReleaseQuestions), /Production requires/);
+  assert.throws(() => approvedReleaseCatalogProjection({ releaseId: 'release-demo' }, { immutable: true, demoFixture: true, approvedCount: 1, documentRootSha256: 'a'.repeat(64) }, [{ id: 'category-a', data: { id: 'category-a', labelAr: 'فئة أ' } }], readyReleaseQuestions), /Production requires/);
+  assert.equal(approvedReleaseCatalogProjection({ releaseId: 'release-demo' }, { immutable: true, demoFixture: true, approvedCount: 1, documentRootSha256: 'a'.repeat(64) }, [{ id: 'category-a', data: { id: 'category-a', labelAr: 'فئة أ' } }], readyReleaseQuestions, { allowDemoFixture: true }).demoFixture, true);
+  assert.throws(() => approvedReleaseCatalogProjection({ releaseId: 'release-empty' }, { immutable: true, approvedCount: 1, documentRootSha256: 'a'.repeat(64) }, [], readyReleaseQuestions), /no eligible categories/);
+  assert.throws(() => approvedReleaseCatalogProjection({ releaseId: 'release-mismatch' }, { immutable: true, approvedCount: 1, documentRootSha256: 'a'.repeat(64) }, [{ id: 'category-a', data: { id: 'other-category', labelAr: 'فئة أ' } }], readyReleaseQuestions), /invalid category catalog/);
+  const underfilled = approvedReleaseCatalogProjection({ releaseId: 'release-underfilled' }, { immutable: true, approvedCount: 1, documentRootSha256: 'a'.repeat(64) }, [{ id: 'category-a', data: { id: 'category-a', labelAr: 'فئة أ' } }], readyReleaseQuestions.slice(0, 2));
+  assert.equal(underfilled.boardCapabilities.huroof, false);
+  const charadesOnly = approvedReleaseCatalogProjection(
+    { releaseId: 'release-charades' }, { immutable: true, approvedCount: 1, documentRootSha256: 'a'.repeat(64) },
+    [{ id: 'category-a', data: { id: 'category-a', labelAr: 'فئة أ' } }],
+    [{ id: 'charades-1', categoryId: 'category-a', modality: 'charades', answerConceptId: 'mime-1', headerAr: 'مثّل', promptAr: 'مثّل', canonicalAnswer: 'جواب', acceptedAnswers: ['جواب'] }],
+  );
+  assert.deepEqual(charadesOnly.boardCapabilities, { huroof: false, categories: false, charades: true });
+  const sharedConcepts: CanonicalQuestion[] = ['category-a', 'category-b'].flatMap((categoryId) => Array.from({ length: 14 }, (_, index) => ({
+    id: `${categoryId}-${index}`, categoryId, modality: 'classic' as const, targetLetter: 'ا', answerConceptId: `shared-${index}`, headerAr: 'عنوان', promptAr: 'سؤال', canonicalAnswer: 'جواب', acceptedAnswers: ['جواب'],
+  })));
+  const sharedCatalog = approvedReleaseCatalogProjection(
+    { releaseId: 'release-shared' }, { immutable: true, approvedCount: sharedConcepts.length, documentRootSha256: 'a'.repeat(64) },
+    [{ id: 'category-a', data: { id: 'category-a', labelAr: 'فئة أ' } }, { id: 'category-b', data: { id: 'category-b', labelAr: 'فئة ب' } }], sharedConcepts,
+  );
+  assert.equal(sharedCatalog.boardCapabilities.categories, false);
+});
+
+test('catalog discovery uses immutable readiness metadata without receiving runtime questions', () => {
+  const catalog = approvedReleaseCatalogProjection(
+    { releaseId: 'scoped-release' },
+    { immutable: true, approvedCount: 42_485, categoryCount: 2, documentRootSha256: 'c'.repeat(64) },
+    [
+      { id: 'category-a', data: { id: 'category-a', labelAr: 'فئة أ', runtimeReadiness: { huroof: true, categories: true, charades: false } } },
+      { id: 'category-b', data: { id: 'category-b', labelAr: 'فئة ب', runtimeReadiness: { huroof: false, categories: true, charades: true } } },
+    ],
+  );
+  assert.equal(catalog.categories.length, 2);
+  assert.deepEqual(catalog.boardCapabilities, { huroof: true, categories: true, charades: true });
+  assert.throws(() => approvedReleaseCatalogProjection(
+    { releaseId: 'missing-scoped-readiness' },
+    { immutable: true, approvedCount: 42_485, documentRootSha256: 'd'.repeat(64) },
+    [{ id: 'category-a', data: { id: 'category-a', labelAr: 'فئة أ' } }],
+  ), /scoped readiness/i);
+});
+
+test('Huroof catalog retains contributors to a playable shared board without claiming a subset is sufficient', () => {
+  const questions = readyReleaseQuestions.map((question, index) => ({ ...question, modality: 'classic' as const, answerConceptId: question.answerConceptId!, categoryId: Math.floor(index / 3) % 2 ? 'category-b' : 'category-a' }));
+  const catalog = approvedReleaseCatalogProjection(
+    { releaseId: 'release-shared-letters' },
+    { immutable: true, approvedCount: questions.length, documentRootSha256: 'b'.repeat(64) },
+    ['category-a', 'category-b', 'empty'].map(id => ({ id, data: { id, labelAr: id } })), questions,
+  );
+  assert.equal(catalog.boardCapabilities.huroof, true);
+  assert.deepEqual(catalog.categories.map(category => category.playable.huroof), [true, true, false]);
+  assert.throws(() => createMatchQuestionSelection(questions, { categories: ['category-a'], modality: 'classic', seed: 1, reservePerLetter: 3 }));
+  assert.doesNotThrow(() => createMatchQuestionSelection(questions, { categories: ['category-a', 'category-b'], modality: 'classic', seed: 1, reservePerLetter: 3 }));
+});
 
 test('closed rooms are terminal for shared join and intent guards', () => {
   const closed = { ...room(), closedAt: new Date().toISOString() } as CanonicalRoom;
@@ -54,13 +186,47 @@ test('policy version defaults only legacy Huroof rooms and malformed envelopes f
   assert.equal(validIntent({ ...valid, expectedRevision: Number.MAX_SAFE_INTEGER + 1 }), false);
   assert.equal(validIntent({ ...valid, extra: true }), false);
 });
-test('content hold is projected and host end leaves the original match intact without a fabricated winner', () => {
+test('shared reveal requires the active occurrence and freezes a video question without scoring', () => {
+  const host: CanonicalMember = { ...player, uid: 'host', role: 'host', team: undefined };
+  const videoRoom = { ...room(), activeQuestionOccurrence: '2:cell-0-0:video-q', activeQuestion: { id: 'video-q', modality: 'video' as const, headerAr: 'عنوان', promptAr: 'سؤال', canonicalAnswer: 'جواب', acceptedAnswers: ['جواب'], media: { mediaId: 'goal-quiz-2026:001:blur', assetSha256: 'a'.repeat(64), altAr: 'مقطع', type: 'video' as const }, answerMedia: { mediaId: 'goal-quiz-2026:001:clean', assetSha256: 'b'.repeat(64), altAr: 'الإجابة', type: 'video' as const } } };
+  const reveal = { type: 'REVEAL_ANSWER' as const, intentId: 'reveal-video', expectedRevision: 2, payload: { occurrence: videoRoom.activeQuestionOccurrence } };
+  assert.equal(validIntent(reveal), true);
+  assert.equal(validIntent({ ...reveal, payload: { occurrence: 'bad/path' } }), false);
+  assert.throws(() => reduceIntent(videoRoom, host, { ...reveal, payload: { occurrence: 'old' } }, 1_000, undefined, [host]), /stale-question-occurrence/);
+  const revealed = reduceIntent(videoRoom, host, reveal, 1_000, undefined, [host]);
+  assert.equal(revealed.room.answerRevealedOccurrence, videoRoom.activeQuestionOccurrence);
+  assert.equal(revealed.room.timer, undefined);
+  assert.equal(revealed.room.game.questionScores.horizontal, videoRoom.game.questionScores.horizontal);
+  const audience = projectRoom('media-room', revealed.room, [host], 'audience', undefined, 1_000).projection as { question?: { occurrence?: string; media?: { mediaId: string }; revealedAnswer?: string } };
+  assert.equal(audience.question?.occurrence, videoRoom.activeQuestionOccurrence);
+  assert.equal(audience.question?.media?.mediaId, 'goal-quiz-2026:001:blur');
+  assert.equal(audience.question?.revealedAnswer, undefined);
+  const hidden = projectRoom('media-room', { ...revealed.room, config: { ...revealed.room.config, showQuestionOnAudience: false } }, [host], 'audience', undefined, 1_000).projection as typeof audience;
+  assert.equal(hidden.question?.media?.mediaId, 'goal-quiz-2026:001:blur');
+  assert.equal(hidden.question?.revealedAnswer, undefined);
+  const classic = projectRoom('classic-room', { ...room(), activeQuestionOccurrence: '2:cell-0-0:classic-q', activeQuestion: { id: 'classic-q', modality: 'classic', headerAr: 'عنوان', promptAr: 'سؤال', canonicalAnswer: 'جواب', acceptedAnswers: ['جواب'] } }, [host], 'host', host.uid, 1_000).projection as { question?: { occurrence?: string } };
+  assert.equal(classic.question?.occurrence, '2:cell-0-0:classic-q');
+});
+test('legacy Firebase questions without an occurrence never treat absent fields as a reveal', () => {
+  const host: CanonicalMember = { ...player, uid: 'host', role: 'host', team: undefined };
+  for (const modality of ['image', 'video'] as const) {
+    const legacy = { ...room(), activeQuestion: { id: `${modality}-legacy`, modality, headerAr: 'عنوان', promptAr: 'سؤال', canonicalAnswer: `سر-${modality}`, acceptedAnswers: [`سر-${modality}`], media: { mediaId: modality === 'video' ? 'goal-quiz-2026:001:blur' : 'v18-011-001', assetSha256: 'a'.repeat(64), altAr: 'وسيط', type: modality }, ...(modality === 'video' ? { answerMedia: { mediaId: 'goal-quiz-2026:001:clean', assetSha256: 'b'.repeat(64), altAr: 'إجابة', type: 'video' as const } } : {}) } };
+    const audience = projectRoom('legacy', legacy, [host], 'audience', undefined, 1_000).projection as { question?: { revealedAnswer?: string; media?: { mediaId?: string } } };
+    assert.equal(audience.question?.revealedAnswer, undefined);
+    assert.equal(audience.question?.media?.mediaId, legacy.activeQuestion.media?.mediaId);
+  }
+});
+test('content hold can be paused before an explicit end leaves the original match intact without a fabricated winner', () => {
   const host: CanonicalMember = { ...player, uid: 'host', role: 'host', team: undefined };
   const held = { ...room(), game: { ...room().game, contentHold: { reason: 'CONTENT_EXHAUSTED' as const, operation: 'SELECT_CELL' as const, cellId: 'cell-0-0', heldAtRevision: 3 } } };
   assert.throws(() => reduceIntent(held, host, { type: 'ROUND_READY', intentId: 'held-ready', expectedRevision: 2, payload: {} }, 1_000, undefined, [host]), /content-hold-active/);
-  const ended = reduceIntent(held, host, { type: 'END_WITHOUT_WINNER', intentId: 'end-held', expectedRevision: 2, payload: {} }, 1_000, undefined, [host]);
+  assert.throws(() => reduceIntent(held, host, { type: 'END_WITHOUT_WINNER', intentId: 'end-unpaused', expectedRevision: 2, payload: {} }, 1_000, undefined, [host]), /end-without-winner-not-allowed/);
+  assert.throws(() => reduceIntent({ ...held, game: { ...held.game, contentHold: undefined, lifecycle: 'QUESTION_FAILED' } }, host, { type: 'END_WITHOUT_WINNER', intentId: 'end-failed', expectedRevision: 2, payload: {} }, 1_000, undefined, [host]), /end-without-winner-not-allowed/);
+  const paused = reduceIntent(held, host, { type: 'PAUSE', intentId: 'pause-held', expectedRevision: 2, payload: {} }, 1_000, undefined, [host]);
+  assert.equal(paused.room.game.lifecycle, 'PAUSED');
+  const ended = reduceIntent(paused.room, host, { type: 'END_WITHOUT_WINNER', intentId: 'end-held', expectedRevision: 3, payload: {} }, 1_000, undefined, [host]);
   assert.equal(ended.room.game.lifecycle, 'MATCH_COMPLETE'); assert.equal(ended.room.game.endedWithoutWinner, true); assert.equal(deriveMatch(ended.room.game).matchWinner, undefined);
-  assert.throws(() => reduceIntent(ended.room, host, { type: 'ROUND_READY', intentId: 'held-resume', expectedRevision: 3, payload: {} }, 1_000, undefined, [host]), /Illegal transition/);
+  assert.throws(() => reduceIntent(ended.room, host, { type: 'ROUND_READY', intentId: 'held-resume', expectedRevision: 4, payload: {} }, 1_000, undefined, [host]), /Illegal transition/);
 });
 test('audience-question visibility defaults on, validates strictly, and remains host-only', () => {
   const host: CanonicalMember = { ...player, uid: 'host', role: 'host', team: undefined };
@@ -128,7 +294,7 @@ test('safe live team moves preserve game state and readiness, while answer and s
 test('Firebase projections preserve match settings for a same-settings rematch', () => {
   const canonical = { ...room(), config: { ...room().config, categories: ['tahadani-006', 'tahadani-007'], modality: 'image' as const, difficulty: 'hard', mode: 'custom' as const } };
   const value = projectRoom('r1', canonical, [{ ...player, role: 'host' }], 'host', 'p1', 1_000).projection as { room: { matchSettings: unknown } };
-  assert.deepEqual(value.room.matchSettings, { demo: true, gameKind: 'huroof', questionSeconds: 20, opponentSeconds: 10, teams: { horizontal: 'أفقي', vertical: 'عمودي' }, categories: ['tahadani-006', 'tahadani-007'], modality: 'image', difficulty: 'hard', mode: 'custom', showQuestionOnAudience: true });
+  assert.deepEqual(value.room.matchSettings, { demo: true, gameKind: 'huroof', questionSeconds: 20, opponentSeconds: 10, teams: { horizontal: 'أفقي', vertical: 'عمودي' }, categories: ['tahadani-006', 'tahadani-007'], modality: 'image', difficulty: 'hard', mode: 'custom', showQuestionOnAudience: true, expectedRelease: { releaseId: 'demo-drafts', releaseRootSha256: 'hash' } });
 });
 test('only first eligible player buzz wins and player sees self winner only', () => {
   const first = reduceIntent(room(), player, { type: 'BUZZ', intentId: 'a', expectedRevision: 2, payload: {} }, 1_000); assert.equal(first.room.game.lifecycle, 'FIRST_ANSWER'); assert.equal(first.room.buzzWinner?.uid, 'p1'); assert.equal(first.room.buzzWinner?.method, 'player'); assert.throws(() => reduceIntent(first.room, { ...player, uid: 'p2', team: 'vertical' }, { type: 'BUZZ', intentId: 'b', expectedRevision: 3, payload: {} }, 1_000)); const winner = projectRoom('r', first.room, [player], 'player', 'p1', 1_000); const host = projectRoom('r', first.room, [player], 'host', 'p1', 1_000); assert.match(JSON.stringify(winner), /isBuzzWinner/); assert.match(JSON.stringify(host), /displayName/);
@@ -136,7 +302,7 @@ test('only first eligible player buzz wins and player sees self winner only', ()
 test('zero-player host mode starts and host selection is public without a UID', () => {
   const host: CanonicalMember = { uid: 'host', role: 'host', displayName: 'مضيف', ready: true, active: true }; const letters = [...'ابتثجحخدذرزسشصضطظعغفقكلمنهوي'].slice(0, 25); const lobby = { ...room(), game: initialGameState() };
   const started = reduceIntent(lobby, host, { type: 'START_MATCH', intentId: 'start', expectedRevision: 2, payload: {} }, 1_000, undefined, [host], letters); assert.equal(started.room.game.lifecycle, 'ROUND_SETUP'); const startedSummary = (projectRoom('r', started.room, [host], 'host', host.uid, 1_000).projection as { room: { readyCount: number; memberCount: number } }).room; assert.equal(startedSummary.readyCount, 0); assert.equal(startedSummary.memberCount, 0);
-  const selected = reduceIntent(room(), host, { type: 'HOST_SELECT_TEAM', intentId: 'host-horizontal', expectedRevision: 2, payload: { team: 'horizontal' } }, 1_000, undefined, [host]); assert.equal(selected.room.game.lifecycle, 'FIRST_ANSWER'); assert.equal(selected.room.game.answeringTeam, 'horizontal'); assert.deepEqual(selected.room.buzzWinner, { displayName: 'أفقي', team: 'horizontal', method: 'host' }); assert.equal(selected.room.timer, undefined);
+  const selected = reduceIntent(room(), host, { type: 'HOST_SELECT_TEAM', intentId: 'host-horizontal', expectedRevision: 2, payload: { team: 'horizontal' } }, 1_000, undefined, [host]); assert.equal(selected.room.game.lifecycle, 'FIRST_ANSWER'); assert.equal(selected.room.game.answeringTeam, 'horizontal'); assert.deepEqual(selected.room.buzzWinner, { displayName: 'أفقي', team: 'horizontal', method: 'host' }); assert.deepEqual(selected.room.timer, { deadlineMs: 21_000, buzzOpen: false });
   const audience = projectRoom('r', selected.room, [host], 'audience', undefined, 1_000); const playerView = projectRoom('r', selected.room, [{ ...player, active: true }], 'player', player.uid, 1_000); assert.match(JSON.stringify(audience), /"method":"host"/); assert.equal(JSON.stringify(playerView).includes('buzzWinner'), false);
   const opponent = { ...room(), game: { ...room().game, lifecycle: 'OPPONENT_CHANCE' as const, entitledTeam: 'vertical' as const } }; assert.throws(() => reduceIntent(opponent, host, { type: 'HOST_SELECT_TEAM', intentId: 'wrong', expectedRevision: 2, payload: { team: 'horizontal' } }, 1_000, undefined, [host])); assert.equal(reduceIntent(opponent, host, { type: 'HOST_SELECT_TEAM', intentId: 'right', expectedRevision: 2, payload: { team: 'vertical' } }, 1_000, undefined, [host]).room.game.answeringTeam, 'vertical');
 });
@@ -148,13 +314,82 @@ test('late, audience, and wrong-team buzzes are rejected', () => {
 });
 test('receipt ids are collision-resistant and request hash detects semantic reuse', () => { const prefix = 'a'.repeat(119); assert.notEqual(intentReceiptId('p', `${prefix}a`), intentReceiptId('p', `${prefix}b`)); assert.notEqual(intentHash({ type: 'BUZZ', intentId: 'same', expectedRevision: 1, payload: {} }), intentHash({ type: 'BUZZ', intentId: 'same', expectedRevision: 2, payload: {} })); });
 test('OPEN_QUESTION remains compatible without resetting an already-open buzzer', () => { const host: CanonicalMember = { ...player, uid: 'h', role: 'host', team: undefined }; const result = reduceIntent(room(), host, { type: 'OPEN_QUESTION', intentId: 'open', expectedRevision: 2, payload: {} }, 1_000); assert.equal(result.room.game.lifecycle, 'QUESTION_READING'); assert.deepEqual(result.room.timer, { deadlineMs: 2_000, buzzOpen: true }); });
-test('non-charades retry and return clear disclosed state before returning to cell selection', () => { const host: CanonicalMember = { ...player, uid: 'h', role: 'host', team: undefined }; for (const type of ['RETRY_CELL', 'RETURN_CELL'] as const) { const failed = { ...room(), game: { ...room().game, lifecycle: 'QUESTION_FAILED' as const, activeCellId: 'cell-0-0' }, activeQuestion: { id: 'disclosed', headerAr: 'عنوان', promptAr: 'سؤال', canonicalAnswer: 'جواب', acceptedAnswers: ['جواب'] }, timer: { deadlineMs: 21_000, buzzOpen: true }, buzzWinner: { uid: 'p1', displayName: 'لاعب', team: 'horizontal' as const, method: 'player' as const } }; const result = reduceIntent(failed, host, { type, intentId: `continue-${type}`, expectedRevision: 2, payload: {} }, 1_000); assert.equal(result.room.game.lifecycle, 'CELL_SELECTION'); assert.equal(result.room.game.activeCellId, undefined); assert.equal(result.room.activeQuestion, undefined); assert.equal(result.room.timer, undefined); assert.equal(result.room.buzzWinner, undefined); } });
-test('selecting a regular or surprise cell atomically reveals its question and opens one timer', () => {
+test('non-charades retry reopens the same cell with a fresh question while return clears disclosed state for the board', () => {
+  const host: CanonicalMember = { ...player, uid: 'h', role: 'host', team: undefined };
+  const board = generateBoard(4, [...'ابتثجحخدذرزسشصضطظعغفقكلمنهوي']);
+  const active = board.cells.find((cell) => cell.kind === 'letter')!;
+  const failed = {
+    ...room(),
+    game: { ...room().game, board, lifecycle: 'QUESTION_FAILED' as const, activeCellId: active.id },
+    activeQuestion: { id: 'disclosed', targetLetter: active.visibleValue, headerAr: 'عنوان', promptAr: 'سؤال', canonicalAnswer: 'جواب', acceptedAnswers: ['جواب'] },
+    activeQuestionOccurrence: `2:${active.id}:disclosed`,
+    timer: { deadlineMs: 21_000, buzzOpen: true },
+    buzzWinner: { uid: 'p1', displayName: 'لاعب', team: 'horizontal' as const, method: 'player' as const },
+  };
+  const fresh = { id: 'fresh', targetLetter: active.visibleValue, headerAr: 'عنوان جديد', promptAr: 'سؤال جديد', canonicalAnswer: 'جواب جديد', acceptedAnswers: ['جواب جديد'] };
+  const retried = reduceIntent(failed, host, { type: 'RETRY_CELL', intentId: 'retry', expectedRevision: 2, payload: {} }, 1_000, fresh);
+  assert.equal(retried.room.game.lifecycle, 'QUESTION_READING');
+  assert.equal(retried.room.game.activeCellId, active.id);
+  assert.equal(retried.room.activeQuestion?.id, fresh.id);
+  assert.notEqual(retried.room.activeQuestionOccurrence, failed.activeQuestionOccurrence);
+  assert.equal(retried.room.answerRevealedOccurrence, undefined);
+  assert.equal(retried.room.timer, undefined);
+  assert.equal(retried.room.buzzWinner, undefined);
+
+  const returned = reduceIntent(failed, host, { type: 'RETURN_CELL', intentId: 'return', expectedRevision: 2, payload: {} }, 1_000);
+  assert.equal(returned.room.game.lifecycle, 'CELL_SELECTION');
+  assert.equal(returned.room.game.activeCellId, undefined);
+  assert.equal(returned.room.activeQuestion, undefined);
+  assert.equal(returned.room.timer, undefined);
+  assert.equal(returned.room.buzzWinner, undefined);
+});
+test('category retry retains the active category cell while replacing its disclosed question', () => {
+  const host: CanonicalMember = { ...player, uid: 'h', role: 'host', team: undefined };
+  const categorySnapshot = [{ id: 'category-a', labelAr: 'فئة أ' }, { id: 'category-b', labelAr: 'فئة ب' }];
+  const board = generateCategoryBoard(4, categorySnapshot);
+  const active = board.cells[0]!;
+  const failed = {
+    ...room(),
+    config: { ...room().config, policyVersion: 1 as const, gameKind: 'categories' as const, categories: categorySnapshot.map((category) => category.id), categorySnapshot },
+    game: { ...room().game, board, lifecycle: 'QUESTION_FAILED' as const, activeCellId: active.id },
+    activeQuestion: { id: 'disclosed-category', categoryId: active.categoryId, headerAr: 'عنوان', promptAr: 'سؤال', canonicalAnswer: 'جواب', acceptedAnswers: ['جواب'] },
+    activeQuestionOccurrence: `2:${active.id}:disclosed-category`,
+  };
+  const fresh = { id: 'fresh-category', categoryId: active.categoryId, headerAr: 'عنوان جديد', promptAr: 'سؤال جديد', canonicalAnswer: 'جواب جديد', acceptedAnswers: ['جواب جديد'] };
+  const retried = reduceIntent(failed, host, { type: 'RETRY_CELL', intentId: 'retry-category', expectedRevision: 2, payload: {} }, 1_000, fresh);
+  assert.equal(retried.room.game.lifecycle, 'QUESTION_READING');
+  assert.equal(retried.room.game.activeCellId, active.id);
+  assert.equal(retried.room.game.board?.cells.find((cell) => cell.id === active.id)?.categoryId, active.categoryId);
+  assert.equal(retried.room.activeQuestion?.id, fresh.id);
+  assert.equal(retried.room.activeQuestion?.categoryId, active.categoryId);
+  assert.notEqual(retried.room.activeQuestionOccurrence, failed.activeQuestionOccurrence);
+});
+test('same-cell retry reserves a fresh immutable question from the existing category or letter queue', () => {
+  const categoryQuestions = ['category-a', 'category-b'].flatMap((categoryId) => Array.from({ length: 14 }, (_, index) => ({ id: `${categoryId}-${index}`, categoryId, modality: 'classic' as const, answerConceptId: `${categoryId}-concept-${index}`, headerAr: 'عنوان', promptAr: 'سؤال', canonicalAnswer: 'جواب', acceptedAnswers: ['جواب'] })));
+  const categorySelection = createCategoryQuestionSelection(categoryQuestions, { categories: ['category-a', 'category-b'], modality: 'classic', seed: 1 });
+  const disclosedCategory = selectCategoryQuestion(categoryQuestions, categorySelection, 'category-a');
+  const reservedCategory = reserveQuestionForCell(categoryQuestions, disclosedCategory.selection, 'category-a', 'cell-0-0');
+  const retriedCategory = promoteReservedQuestion(categoryQuestions, reservedCategory.selection, 'cell-0-0')!;
+  assert.equal(retriedCategory.question.categoryId, 'category-a');
+  assert.notEqual(retriedCategory.question.id, disclosedCategory.question.id);
+  assert.equal(new Set(retriedCategory.selection.consumedQuestionIds).size, 2);
+
+  const letterQuestions: RuntimeQuestionV32[] = readyReleaseQuestions.map((question) => ({ ...question, categoryId: question.categoryId!, targetLetter: question.targetLetter!, answerConceptId: question.answerConceptId!, modality: 'classic' }));
+  const letter = letterQuestions[0]!.targetLetter!;
+  const letterSelection = createMatchQuestionSelection(letterQuestions, { categories: ['category-a'], modality: 'classic', seed: 1, reservePerLetter: 3 });
+  const disclosedLetter = selectMatchQuestion(letterQuestions, letterSelection, letter);
+  const reservedLetter = reserveQuestionForCell(letterQuestions, disclosedLetter.selection, letter, 'cell-0-0');
+  const retriedLetter = promoteReservedQuestion(letterQuestions, reservedLetter.selection, 'cell-0-0')!;
+  assert.equal(retriedLetter.question.targetLetter, letter);
+  assert.notEqual(retriedLetter.question.id, disclosedLetter.question.id);
+  assert.equal(new Set(retriedLetter.selection.consumedQuestionIds).size, 2);
+});
+test('selecting a regular or surprise cell atomically reveals its question without starting a timer', () => {
   const letters = [...'ابتثجحخدذرزسشصضطظعغفقكلمنهوي']; const board = generateBoard(4, letters); const regular = board.cells.find((cell) => cell.kind === 'letter')!; const surprise = board.cells.find((cell) => cell.kind === 'surprise')!; const host: CanonicalMember = { ...player, uid: 'host', role: 'host', team: undefined }; const stale = { id: 'stale', targetLetter: 'ا', headerAr: 'قديم', promptAr: 'سؤال قديم', canonicalAnswer: 'جواب قديم', acceptedAnswers: ['جواب قديم'] }; const question = { id: 'fresh', targetLetter: regular.visibleValue, headerAr: 'عنوان جديد', promptAr: 'سؤال جديد', canonicalAnswer: 'جواب جديد', acceptedAnswers: ['جواب جديد'] }; const selecting = { ...room(), game: { ...room().game, lifecycle: 'CELL_SELECTION' as const, board }, activeQuestion: stale };
   const selected = reduceIntent(selecting, host, { type: 'SELECT_CELL', intentId: 'regular', expectedRevision: 2, payload: { cellId: regular.id } }, 1_000, question, [host]);
-  assert.equal(selected.room.game.lifecycle, 'QUESTION_READING'); assert.equal(selected.room.activeQuestion?.id, question.id); assert.equal(selected.room.questionCursor, 1); assert.deepEqual(selected.room.timer, { deadlineMs: 21_000, buzzOpen: true }); const hostProjection = projectRoom('r', selected.room, [host], 'host', host.uid, 1_000).projection as { question?: { headerAr?: string; promptAr?: string; primaryAnswer?: string } }; assert.deepEqual(hostProjection.question, { headerAr: question.headerAr, promptAr: question.promptAr, primaryAnswer: question.canonicalAnswer, acceptedAnswers: question.acceptedAnswers, sources: [] });
+  assert.equal(selected.room.game.lifecycle, 'QUESTION_READING'); assert.equal(selected.room.activeQuestion?.id, question.id); assert.equal(selected.room.questionCursor, 1); assert.equal(selected.room.timer, undefined); const hostProjection = projectRoom('r', selected.room, [host], 'host', host.uid, 1_000).projection as { question?: { occurrence?: string; headerAr?: string; promptAr?: string; primaryAnswer?: string } }; assert.deepEqual(hostProjection.question, { occurrence: selected.room.activeQuestionOccurrence, headerAr: question.headerAr, promptAr: question.promptAr, primaryAnswer: question.canonicalAnswer, acceptedAnswers: question.acceptedAnswers, sources: [] });
   for (const role of ['player', 'audience'] as const) { const publicProjection = projectRoom('r', selected.room, [player], role, role === 'player' ? player.uid : undefined, 1_000).projection as { question?: { headerAr?: string } }; assert.equal(publicProjection.question?.headerAr, question.headerAr); assert.equal(JSON.stringify(publicProjection).includes('جواب جديد'), false); }
-  const surpriseLetter = letters.find((letter) => !board.cells.some((cell) => cell.kind === 'letter' && cell.visibleValue === letter))!; const surpriseQuestion = { ...question, id: 'surprise', targetLetter: surpriseLetter }; const surpriseSelection = reduceIntent(selecting, host, { type: 'SELECT_CELL', intentId: 'surprise', expectedRevision: 2, payload: { cellId: surprise.id } }, 1_000, surpriseQuestion, [host], undefined, surpriseLetter); assert.equal(surpriseSelection.room.game.lifecycle, 'QUESTION_READING'); assert.equal(surpriseSelection.room.activeQuestion?.id, surpriseQuestion.id); assert.equal(surpriseSelection.room.game.board?.cells.find((cell) => cell.id === surprise.id)?.revealedLetter, surpriseLetter); assert.equal(surpriseSelection.room.questionCursor, 1); assert.deepEqual(surpriseSelection.room.timer, { deadlineMs: 21_000, buzzOpen: true });
+  const surpriseLetter = letters.find((letter) => !board.cells.some((cell) => cell.kind === 'letter' && cell.visibleValue === letter))!; const surpriseQuestion = { ...question, id: 'surprise', targetLetter: surpriseLetter }; const surpriseSelection = reduceIntent(selecting, host, { type: 'SELECT_CELL', intentId: 'surprise', expectedRevision: 2, payload: { cellId: surprise.id } }, 1_000, surpriseQuestion, [host], undefined, surpriseLetter); assert.equal(surpriseSelection.room.game.lifecycle, 'QUESTION_READING'); assert.equal(surpriseSelection.room.activeQuestion?.id, surpriseQuestion.id); assert.equal(surpriseSelection.room.game.board?.cells.find((cell) => cell.id === surprise.id)?.revealedLetter, surpriseLetter); assert.equal(surpriseSelection.room.questionCursor, 1); assert.equal(surpriseSelection.room.timer, undefined);
 });
 test('pinned question selection uses the active cell revealed/visible letter', () => { const board = generateBoard(1, [...'ابتثجحخدذرزسشصضطظعغفقكلمنهوي']); const active = board.cells.find((cell) => cell.kind === 'letter')!; const canonical = { ...room(), game: { ...room().game, board, activeCellId: active.id } }; const matching = { id: 'match', targetLetter: active.visibleValue, headerAr: 'عنوان', promptAr: 'سؤال', canonicalAnswer: 'جواب', acceptedAnswers: ['جواب'] }; const other = { ...matching, id: 'other', targetLetter: '؟' }; assert.equal(selectQuestionForActiveCell(canonical, [other, matching]).id, 'match'); });
 test('a classic correct judgment awards and checks the path in one authoritative intent', () => {
@@ -174,7 +409,7 @@ test('surprise reveal atomically selects an unused pinned-release letter and que
   const questions = letters.map((targetLetter, index) => ({ id: `q-${index}`, targetLetter, headerAr: 'عنوان', promptAr: 'سؤال', canonicalAnswer: 'جواب', acceptedAnswers: ['جواب'] }));
   const reveal = prepareLetterReveal(canonical, questions); assert.ok(reveal.surpriseLetter); assert.notEqual(reveal.surpriseLetter, priorLetter); assert.equal(reveal.question.targetLetter, reveal.surpriseLetter);
   const host: CanonicalMember = { ...player, uid: 'host', role: 'host', team: undefined }; const result = reduceIntent(canonical, host, { type: 'LETTER_REVEALED', intentId: 'reveal', expectedRevision: 2, payload: {} }, 1_000, reveal.question, [host], undefined, reveal.surpriseLetter);
-  const nextActive = result.room.game.board!.cells.find((cell) => cell.id === active.id)!; assert.equal(nextActive.revealedLetter, reveal.surpriseLetter); assert.deepEqual(result.room.timer, { deadlineMs: 21_000, buzzOpen: true });
+  const nextActive = result.room.game.board!.cells.find((cell) => cell.id === active.id)!; assert.equal(nextActive.revealedLetter, reveal.surpriseLetter); assert.equal(result.room.timer, undefined);
   const revealedOrVisibleLetters = result.room.game.board!.cells.flatMap((cell) => cell.kind === 'letter' ? [cell.visibleValue] : cell.revealedLetter ? [cell.revealedLetter] : []); assert.equal(new Set(revealedOrVisibleLetters).size, revealedOrVisibleLetters.length);
   const surpriseDigits = result.room.game.board!.cells.filter((cell) => cell.kind === 'surprise').map((cell) => cell.visibleValue); assert.equal(new Set(surpriseDigits).size, surpriseDigits.length);
 });

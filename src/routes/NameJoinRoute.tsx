@@ -1,6 +1,6 @@
 import { FormEvent, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { ThemeToggle } from '../design-system/ThemeToggle';
+import { InternalHeader } from '../design-system/InternalHeader';
 import { gameRuntime } from '../features/game/runtime';
 import { normalizeRoomCode, validateJoinDisplayName } from './EntryRoute';
 import {
@@ -19,7 +19,7 @@ export function NameJoinRoute() {
   const nameControl = useRef<HTMLInputElement>(null);
   const staticPreview = isStaticPreviewBuild();
 
-  useEffect(() => { document.title = 'اسم اللاعب | تحدي الخلية'; }, []);
+  useEffect(() => { document.title = 'اسم اللاعب | الخلية'; }, []);
 
   async function joinRoom(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -70,10 +70,7 @@ export function NameJoinRoute() {
 
   return (
     <main className="name-join-page" id="main-content">
-      <header className="name-join-page__header">
-        <Link className="name-join-page__wordmark" to="/">تحدي الخلية</Link>
-        <ThemeToggle />
-      </header>
+      <InternalHeader />
       <section className="name-join-card" aria-labelledby="name-join-title">
         <p className="name-join-card__code">رمز الغرفة <bdi dir="ltr">{roomCode || '—'}</bdi></p>
         <h1 id="name-join-title">ما اسمك؟</h1>

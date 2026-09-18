@@ -2,7 +2,7 @@ import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 export const productionProjectId = "huroof-a3ee7";
-export const productionFunctionsRegion = "me-central2";
+export const productionFunctionsRegion = "me-central1";
 
 type Environment = Record<string, string | undefined>;
 
@@ -32,6 +32,11 @@ export function assertProductionPreflight(
   if (environment.VITE_FIREBASE_FUNCTIONS_REGION !== productionFunctionsRegion)
     failures.push(
       `VITE_FIREBASE_FUNCTIONS_REGION must be ${productionFunctionsRegion}.`,
+    );
+  const appCheckProvider = environment.VITE_FIREBASE_APP_CHECK_PROVIDER ?? "recaptcha-v3";
+  if (appCheckProvider !== "recaptcha-v3" && appCheckProvider !== "recaptcha-enterprise")
+    failures.push(
+      "VITE_FIREBASE_APP_CHECK_PROVIDER must be recaptcha-v3 or recaptcha-enterprise.",
     );
   for (const name of [
     "VITE_FIREBASE_API_KEY",

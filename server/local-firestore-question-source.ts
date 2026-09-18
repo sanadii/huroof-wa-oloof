@@ -80,6 +80,8 @@ export type ImportedQuestion = RuntimeQuestionV32 & {
   status: "draft_test_import";
   sourceContentHash: string;
   difficulty: string;
+  media?: { mediaId: string; assetSha256: string; altAr: string; type?: "image" | "video"; contentType?: string };
+  answerMedia?: { mediaId: string; assetSha256: string; altAr: string; type?: "image" | "video"; contentType?: string };
 };
 export type LocalQuestionInventory = {
   source: "local_firestore_import" | "local_sqlite_import";
@@ -97,9 +99,11 @@ export type LocalQuestionInventory = {
     labelAr: string;
     sourceOnly: boolean;
     questionCount: number;
+    heldQuestionCount: number;
     classicQuestionCount: number;
     huroofQuestionCount: number;
     categoryGameEligible: boolean;
+    availability: "ready" | "insufficient_questions" | "held_only";
   }>;
 };
 export type LocalFirestoreQuestionSource = {
@@ -314,7 +318,7 @@ export async function createFirebaseCliQuestionReader(): Promise<FirestoreQuesti
 function huroofAvailable(questions: ImportedQuestion[]): boolean {
   const queues = new Map<string, Set<string>>();
   for (const question of questions)
-    if (question.targetLetter)
+    if (question.modality === "classic" && question.targetLetter)
       queues.set(
         question.targetLetter,
         new Set([
@@ -445,7 +449,7 @@ export async function loadLocalFirestoreQuestionSource(
       })),
     }),
   );
-  const categories = sourceCategoryRegistry.categories
+  const categories: LocalQuestionInventory["categories"] = sourceCategoryRegistry.categories
     .map((category) => {
       const records = questions.filter(
         (question) => question.categoryId === category.sourceCategoryId,
@@ -458,11 +462,15 @@ export async function loadLocalFirestoreQuestionSource(
         labelAr: category.sourceTitleAr,
         sourceOnly: category.runtimeCategoryId === null,
         questionCount: records.length,
+        heldQuestionCount: 0,
         classicQuestionCount: records.length,
         huroofQuestionCount: records.filter((question) =>
-          Boolean(question.targetLetter),
+          question.modality === "classic" && Boolean(question.targetLetter),
         ).length,
         categoryGameEligible: concepts.size >= 14,
+        availability: (concepts.size >= 14
+          ? "ready"
+          : "insufficient_questions") as "ready" | "insufficient_questions",
       };
     })
     .filter((category) => category.questionCount > 0);

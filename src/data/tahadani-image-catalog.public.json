@@ -1,0 +1,1535 @@
+{
+  "schemaVersion": 1,
+  "covers": [
+    {
+      "name": "Blacklist",
+      "web320": "assets/categories/tahadani/320/cover-a1c0dc2d694a49c4ca25.webp",
+      "web640": "assets/categories/tahadani/640/cover-a1c0dc2d694a49c4ca25.webp"
+    },
+    {
+      "name": "Bleach",
+      "web320": "assets/categories/tahadani/320/cover-cf9d038b13b60554f576.webp",
+      "web640": "assets/categories/tahadani/640/cover-cf9d038b13b60554f576.webp"
+    },
+    {
+      "name": "Boku No Hero",
+      "web320": "assets/categories/tahadani/320/cover-ca9dc4decaee23496493.webp",
+      "web640": "assets/categories/tahadani/640/cover-ca9dc4decaee23496493.webp"
+    },
+    {
+      "name": "Bollywood",
+      "web320": "assets/categories/tahadani/320/cover-0bfbdf32517a803d99ca.webp",
+      "web640": "assets/categories/tahadani/640/cover-0bfbdf32517a803d99ca.webp"
+    },
+    {
+      "name": "Breaking Bad",
+      "web320": "assets/categories/tahadani/320/cover-22b2b1f95e6a79a3140d.webp",
+      "web640": "assets/categories/tahadani/640/cover-22b2b1f95e6a79a3140d.webp"
+    },
+    {
+      "name": "Call Of Duty",
+      "web320": "assets/categories/tahadani/320/cover-94496c5a57a0019a3cce.webp",
+      "web640": "assets/categories/tahadani/640/cover-94496c5a57a0019a3cce.webp"
+    },
+    {
+      "name": "Counter Strike",
+      "web320": "assets/categories/tahadani/320/cover-82502c9d1f028625d777.webp",
+      "web640": "assets/categories/tahadani/640/cover-82502c9d1f028625d777.webp"
+    },
+    {
+      "name": "Dark",
+      "web320": "assets/categories/tahadani/320/cover-2c68e84d00ab8c214b7f.webp",
+      "web640": "assets/categories/tahadani/640/cover-2c68e84d00ab8c214b7f.webp"
+    },
+    {
+      "name": "Death Note",
+      "web320": "assets/categories/tahadani/320/cover-70c8fbaf83a65561a2dc.webp",
+      "web640": "assets/categories/tahadani/640/cover-70c8fbaf83a65561a2dc.webp"
+    },
+    {
+      "name": "Demon Slayer",
+      "web320": "assets/categories/tahadani/320/cover-f9f7e2bdea876b961ce7.webp",
+      "web640": "assets/categories/tahadani/640/cover-f9f7e2bdea876b961ce7.webp"
+    },
+    {
+      "name": "Disney",
+      "web320": "assets/categories/tahadani/320/cover-e66d104521bdfcfadf3e.webp",
+      "web640": "assets/categories/tahadani/640/cover-e66d104521bdfcfadf3e.webp"
+    },
+    {
+      "name": "FUT 24",
+      "web320": "assets/categories/tahadani/320/cover-1d4835645ac134586fc5.webp",
+      "web640": "assets/categories/tahadani/640/cover-1d4835645ac134586fc5.webp"
+    },
+    {
+      "name": "FUT 25",
+      "web320": "assets/categories/tahadani/320/cover-7947a3d5f303bf285930.webp",
+      "web640": "assets/categories/tahadani/640/cover-7947a3d5f303bf285930.webp"
+    },
+    {
+      "name": "FUT26",
+      "web320": "assets/categories/tahadani/320/cover-2dc391ea38cef6571829.webp",
+      "web640": "assets/categories/tahadani/640/cover-2dc391ea38cef6571829.webp"
+    },
+    {
+      "name": "Formula One",
+      "web320": "assets/categories/tahadani/320/cover-834b0c032abe05dad2a9.webp",
+      "web640": "assets/categories/tahadani/640/cover-834b0c032abe05dad2a9.webp"
+    },
+    {
+      "name": "Fortnite",
+      "web320": "assets/categories/tahadani/320/cover-a7ea4f34a30abbff3974.webp",
+      "web640": "assets/categories/tahadani/640/cover-a7ea4f34a30abbff3974.webp"
+    },
+    {
+      "name": "Friends",
+      "web320": "assets/categories/tahadani/320/cover-0c419b4a62fc61cb5986.webp",
+      "web640": "assets/categories/tahadani/640/cover-0c419b4a62fc61cb5986.webp"
+    },
+    {
+      "name": "From",
+      "web320": "assets/categories/tahadani/320/cover-2a19ba5c906b2dac4808.webp",
+      "web640": "assets/categories/tahadani/640/cover-2a19ba5c906b2dac4808.webp"
+    },
+    {
+      "name": "Fullmetal Alchemist",
+      "web320": "assets/categories/tahadani/320/cover-df890d7f401b00054647.webp",
+      "web640": "assets/categories/tahadani/640/cover-df890d7f401b00054647.webp"
+    },
+    {
+      "name": "GTA",
+      "web320": "assets/categories/tahadani/320/cover-82b3b38a2c70a7f6e433.webp",
+      "web640": "assets/categories/tahadani/640/cover-82b3b38a2c70a7f6e433.webp"
+    },
+    {
+      "name": "Game Of Thrones",
+      "web320": "assets/categories/tahadani/320/cover-56081b28257fa1403891.webp",
+      "web640": "assets/categories/tahadani/640/cover-56081b28257fa1403891.webp"
+    },
+    {
+      "name": "Ghibli Style",
+      "web320": "assets/categories/tahadani/320/cover-c461fa9d991014d0ba11.webp",
+      "web640": "assets/categories/tahadani/640/cover-c461fa9d991014d0ba11.webp"
+    },
+    {
+      "name": "Gilmore Girls",
+      "web320": "assets/categories/tahadani/320/cover-5abe681d3bdab0822c85.webp",
+      "web640": "assets/categories/tahadani/640/cover-5abe681d3bdab0822c85.webp"
+    },
+    {
+      "name": "God of War",
+      "web320": "assets/categories/tahadani/320/cover-105f3b8d188a5b025991.webp",
+      "web640": "assets/categories/tahadani/640/cover-105f3b8d188a5b025991.webp"
+    },
+    {
+      "name": "Grey's Anatomy",
+      "web320": "assets/categories/tahadani/320/cover-624d973a6558f60c6e47.webp",
+      "web640": "assets/categories/tahadani/640/cover-624d973a6558f60c6e47.webp"
+    },
+    {
+      "name": "Hajime No Ippo",
+      "web320": "assets/categories/tahadani/320/cover-a79f7d2924ac3665c2ba.webp",
+      "web640": "assets/categories/tahadani/640/cover-a79f7d2924ac3665c2ba.webp"
+    },
+    {
+      "name": "Harry Potter",
+      "web320": "assets/categories/tahadani/320/cover-cace073e9054e89621f4.webp",
+      "web640": "assets/categories/tahadani/640/cover-cace073e9054e89621f4.webp"
+    },
+    {
+      "name": "Hunter X Hunter",
+      "web320": "assets/categories/tahadani/320/cover-dced67911d5f085e613f.webp",
+      "web640": "assets/categories/tahadani/640/cover-dced67911d5f085e613f.webp"
+    },
+    {
+      "name": "Jujutsu Kaisen",
+      "web320": "assets/categories/tahadani/320/cover-c4673b49b6f93160750d.webp",
+      "web640": "assets/categories/tahadani/640/cover-c4673b49b6f93160750d.webp"
+    },
+    {
+      "name": "La Casa De Papel",
+      "web320": "assets/categories/tahadani/320/cover-f3922aec94770b034c5f.webp",
+      "web640": "assets/categories/tahadani/640/cover-f3922aec94770b034c5f.webp"
+    },
+    {
+      "name": "League of Legends",
+      "web320": "assets/categories/tahadani/320/cover-4026e40fe2e9e31f794e.webp",
+      "web640": "assets/categories/tahadani/640/cover-4026e40fe2e9e31f794e.webp"
+    },
+    {
+      "name": "LineUp",
+      "web320": "assets/categories/tahadani/320/cover-c9bae84c1216ab6f0628.webp",
+      "web640": "assets/categories/tahadani/640/cover-c9bae84c1216ab6f0628.webp"
+    },
+    {
+      "name": "Lost",
+      "web320": "assets/categories/tahadani/320/cover-8a3e43d6fd0572ac5cd6.webp",
+      "web640": "assets/categories/tahadani/640/cover-8a3e43d6fd0572ac5cd6.webp"
+    },
+    {
+      "name": "Marvel & DC",
+      "web320": "assets/categories/tahadani/320/cover-f28207510e33774cde34.webp",
+      "web640": "assets/categories/tahadani/640/cover-f28207510e33774cde34.webp"
+    },
+    {
+      "name": "Minecraft",
+      "web320": "assets/categories/tahadani/320/cover-17613b1e3cce14f5f0eb.webp",
+      "web640": "assets/categories/tahadani/640/cover-17613b1e3cce14f5f0eb.webp"
+    },
+    {
+      "name": "NBA",
+      "web320": "assets/categories/tahadani/320/cover-8d7aba04569e79e923c2.webp",
+      "web640": "assets/categories/tahadani/640/cover-8d7aba04569e79e923c2.webp"
+    },
+    {
+      "name": "Overwatch",
+      "web320": "assets/categories/tahadani/320/cover-34e704eb60e2ae35686d.webp",
+      "web640": "assets/categories/tahadani/640/cover-34e704eb60e2ae35686d.webp"
+    },
+    {
+      "name": "Peaky Blinders",
+      "web320": "assets/categories/tahadani/320/cover-98d94e555d7e77df5a5e.webp",
+      "web640": "assets/categories/tahadani/640/cover-98d94e555d7e77df5a5e.webp"
+    },
+    {
+      "name": "Pokémon",
+      "web320": "assets/categories/tahadani/320/cover-377df1156b628d134563.webp",
+      "web640": "assets/categories/tahadani/640/cover-377df1156b628d134563.webp"
+    },
+    {
+      "name": "Prison Break",
+      "web320": "assets/categories/tahadani/320/cover-29c16a008c5e40b2e480.webp",
+      "web640": "assets/categories/tahadani/640/cover-29c16a008c5e40b2e480.webp"
+    },
+    {
+      "name": "Rainbow Six Siege",
+      "web320": "assets/categories/tahadani/320/cover-fb6bb5810e87306dbfd5.webp",
+      "web640": "assets/categories/tahadani/640/cover-fb6bb5810e87306dbfd5.webp"
+    },
+    {
+      "name": "Red Dead Redemption",
+      "web320": "assets/categories/tahadani/320/cover-ecb3331c13db36d533ff.webp",
+      "web640": "assets/categories/tahadani/640/cover-ecb3331c13db36d533ff.webp"
+    },
+    {
+      "name": "Rocket League",
+      "web320": "assets/categories/tahadani/320/cover-d5cda9fd13b22163ed91.webp",
+      "web640": "assets/categories/tahadani/640/cover-d5cda9fd13b22163ed91.webp"
+    },
+    {
+      "name": "SACBA",
+      "web320": "assets/categories/tahadani/320/cover-a367c27bad77c70f7cbf.webp",
+      "web640": "assets/categories/tahadani/640/cover-a367c27bad77c70f7cbf.webp"
+    },
+    {
+      "name": "Solo Leveling",
+      "web320": "assets/categories/tahadani/320/cover-18b1c81d794e8bf73067.webp",
+      "web640": "assets/categories/tahadani/640/cover-18b1c81d794e8bf73067.webp"
+    },
+    {
+      "name": "Souls Games",
+      "web320": "assets/categories/tahadani/320/cover-16d7f96af1fbce524957.webp",
+      "web640": "assets/categories/tahadani/640/cover-16d7f96af1fbce524957.webp"
+    },
+    {
+      "name": "Spacetoon",
+      "web320": "assets/categories/tahadani/320/cover-3bc20683c875754eca56.webp",
+      "web640": "assets/categories/tahadani/640/cover-3bc20683c875754eca56.webp"
+    },
+    {
+      "name": "Stranger Things",
+      "web320": "assets/categories/tahadani/320/cover-7b2b136f388b6ed7dd33.webp",
+      "web640": "assets/categories/tahadani/640/cover-7b2b136f388b6ed7dd33.webp"
+    },
+    {
+      "name": "The Big Bang Theory",
+      "web320": "assets/categories/tahadani/320/cover-63f98f7582e204292638.webp",
+      "web640": "assets/categories/tahadani/640/cover-63f98f7582e204292638.webp"
+    },
+    {
+      "name": "The Office",
+      "web320": "assets/categories/tahadani/320/cover-49f097f32b28ae58cf68.webp",
+      "web640": "assets/categories/tahadani/640/cover-49f097f32b28ae58cf68.webp"
+    },
+    {
+      "name": "The Walking Dead",
+      "web320": "assets/categories/tahadani/320/cover-06224b5f4827081f5557.webp",
+      "web640": "assets/categories/tahadani/640/cover-06224b5f4827081f5557.webp"
+    },
+    {
+      "name": "Toy Story",
+      "web320": "assets/categories/tahadani/320/cover-a75429f78e2c9ca38bd8.webp",
+      "web640": "assets/categories/tahadani/640/cover-a75429f78e2c9ca38bd8.webp"
+    },
+    {
+      "name": "UFC",
+      "web320": "assets/categories/tahadani/320/cover-0c1df57b75819ed4984c.webp",
+      "web640": "assets/categories/tahadani/640/cover-0c1df57b75819ed4984c.webp"
+    },
+    {
+      "name": "Valorant",
+      "web320": "assets/categories/tahadani/320/cover-e31b840c51643913c0fc.webp",
+      "web640": "assets/categories/tahadani/640/cover-e31b840c51643913c0fc.webp"
+    },
+    {
+      "name": "Vikings",
+      "web320": "assets/categories/tahadani/320/cover-060270a1fd89af713c25.webp",
+      "web640": "assets/categories/tahadani/640/cover-060270a1fd89af713c25.webp"
+    },
+    {
+      "name": "WOW",
+      "web320": "assets/categories/tahadani/320/cover-b0945bafe289317049f5.webp",
+      "web640": "assets/categories/tahadani/640/cover-b0945bafe289317049f5.webp"
+    },
+    {
+      "name": "أحذية نسائية",
+      "web320": "assets/categories/tahadani/320/cover-c7b5873c8258a8497868.webp",
+      "web640": "assets/categories/tahadani/640/cover-c7b5873c8258a8497868.webp"
+    },
+    {
+      "name": "أدب",
+      "web320": "assets/categories/tahadani/320/cover-fc9a95ab284c3b688304.webp",
+      "web640": "assets/categories/tahadani/640/cover-fc9a95ab284c3b688304.webp"
+    },
+    {
+      "name": "أزياء الفن الاجنبي",
+      "web320": "assets/categories/tahadani/320/cover-6b7ac075ed9856561f3d.webp",
+      "web640": "assets/categories/tahadani/640/cover-6b7ac075ed9856561f3d.webp"
+    },
+    {
+      "name": "أزياء الفن الخليجي",
+      "web320": "assets/categories/tahadani/320/cover-35a4e522a27d50dd780c.webp",
+      "web640": "assets/categories/tahadani/640/cover-35a4e522a27d50dd780c.webp"
+    },
+    {
+      "name": "أزياء شخصية أنمي",
+      "web320": "assets/categories/tahadani/320/cover-17d24931590b201aa30e.webp",
+      "web640": "assets/categories/tahadani/640/cover-17d24931590b201aa30e.webp"
+    },
+    {
+      "name": "أزياء شخصية إلكترونية",
+      "web320": "assets/categories/tahadani/320/cover-c2e19d9da8f8611672fa.webp",
+      "web640": "assets/categories/tahadani/640/cover-c2e19d9da8f8611672fa.webp"
+    },
+    {
+      "name": "أسود وأبيض",
+      "web320": "assets/categories/tahadani/320/cover-ff0fceafd6d2d487e396.webp",
+      "web640": "assets/categories/tahadani/640/cover-ff0fceafd6d2d487e396.webp"
+    },
+    {
+      "name": "أعلام",
+      "web320": "assets/categories/tahadani/320/cover-f0ae92ac58f955eaf813.webp",
+      "web640": "assets/categories/tahadani/640/cover-f0ae92ac58f955eaf813.webp"
+    },
+    {
+      "name": "أعمال حياة الفهد",
+      "web320": "assets/categories/tahadani/320/cover-115025efc751baa44f82.webp",
+      "web640": "assets/categories/tahadani/640/cover-115025efc751baa44f82.webp"
+    },
+    {
+      "name": "أعمال سعاد عبدالله",
+      "web320": "assets/categories/tahadani/320/cover-d6e4a1e81dad4e9726b3.webp",
+      "web640": "assets/categories/tahadani/640/cover-d6e4a1e81dad4e9726b3.webp"
+    },
+    {
+      "name": "أعمال عبدالحسين عبدالرضا",
+      "web320": "assets/categories/tahadani/320/cover-5e5adb74842cf71d5c82.webp",
+      "web640": "assets/categories/tahadani/640/cover-5e5adb74842cf71d5c82.webp"
+    },
+    {
+      "name": "أعمال هدى حسين",
+      "web320": "assets/categories/tahadani/320/cover-cbf30149ab37d8fd2d88.webp",
+      "web640": "assets/categories/tahadani/640/cover-cbf30149ab37d8fd2d88.webp"
+    },
+    {
+      "name": "أغاني أجنبية",
+      "web320": "assets/categories/tahadani/320/cover-18f417ac46f334d3acc8.webp",
+      "web640": "assets/categories/tahadani/640/cover-18f417ac46f334d3acc8.webp"
+    },
+    {
+      "name": "أفلام رعب",
+      "web320": "assets/categories/tahadani/320/cover-3030dd494b7d7225acb3.webp",
+      "web640": "assets/categories/tahadani/640/cover-3030dd494b7d7225acb3.webp"
+    },
+    {
+      "name": "أفلام كلاسيك",
+      "web320": "assets/categories/tahadani/320/cover-a1c256bd215ed5aeef54.webp",
+      "web640": "assets/categories/tahadani/640/cover-a1c256bd215ed5aeef54.webp"
+    },
+    {
+      "name": "ألعاب إلكترونية",
+      "web320": "assets/categories/tahadani/320/cover-ae00acfb08eeede0e59c.webp",
+      "web640": "assets/categories/tahadani/640/cover-ae00acfb08eeede0e59c.webp"
+    },
+    {
+      "name": "ألعاب الطفولة",
+      "web320": "assets/categories/tahadani/320/cover-b8e9b004109ffa28163a.webp",
+      "web640": "assets/categories/tahadani/640/cover-b8e9b004109ffa28163a.webp"
+    },
+    {
+      "name": "ألغاز",
+      "web320": "assets/categories/tahadani/320/cover-ea16f8ed819f52ab48d1.webp",
+      "web640": "assets/categories/tahadani/640/cover-ea16f8ed819f52ab48d1.webp"
+    },
+    {
+      "name": "أم كلثوم",
+      "web320": "assets/categories/tahadani/320/cover-9ad64d7897dad304f1b4.webp",
+      "web640": "assets/categories/tahadani/640/cover-9ad64d7897dad304f1b4.webp"
+    },
+    {
+      "name": "أمثال شعبية",
+      "web320": "assets/categories/tahadani/320/cover-cc7519452e61013e679a.webp",
+      "web640": "assets/categories/tahadani/640/cover-cc7519452e61013e679a.webp"
+    },
+    {
+      "name": "أميمة في دار الأيتام",
+      "web320": "assets/categories/tahadani/320/cover-c8e6b1df0dd646b7fa53.webp",
+      "web640": "assets/categories/tahadani/640/cover-c8e6b1df0dd646b7fa53.webp"
+    },
+    {
+      "name": "أنمي دراغون بول",
+      "web320": "assets/categories/tahadani/320/cover-667e25a48610eba5bfb0.webp",
+      "web640": "assets/categories/tahadani/640/cover-667e25a48610eba5bfb0.webp"
+    },
+    {
+      "name": "أنمي عام",
+      "web320": "assets/categories/tahadani/320/cover-aa3083499589c4f63a88.webp",
+      "web640": "assets/categories/tahadani/640/cover-aa3083499589c4f63a88.webp"
+    },
+    {
+      "name": "أنمي ناروتو",
+      "web320": "assets/categories/tahadani/320/cover-1d62a58a0dead9b132e3.webp",
+      "web640": "assets/categories/tahadani/640/cover-1d62a58a0dead9b132e3.webp"
+    },
+    {
+      "name": "أنمي هجوم العمالقة",
+      "web320": "assets/categories/tahadani/320/cover-593dc0b4169ca1ddb284.webp",
+      "web640": "assets/categories/tahadani/640/cover-593dc0b4169ca1ddb284.webp"
+    },
+    {
+      "name": "أنمي ون بيس",
+      "web320": "assets/categories/tahadani/320/cover-c4db5abc18a056e6ef06.webp",
+      "web640": "assets/categories/tahadani/640/cover-c4db5abc18a056e6ef06.webp"
+    },
+    {
+      "name": "إي أو لأ، جغرافيا",
+      "web320": "assets/categories/tahadani/320/cover-7e8445c590bfdbe9ed07.webp",
+      "web640": "assets/categories/tahadani/640/cover-7e8445c590bfdbe9ed07.webp"
+    },
+    {
+      "name": "إي أو لأ، رياضية",
+      "web320": "assets/categories/tahadani/320/cover-09fb8e7a6d352d70186d.webp",
+      "web640": "assets/categories/tahadani/640/cover-09fb8e7a6d352d70186d.webp"
+    },
+    {
+      "name": "إي أو لأ، عامة",
+      "web320": "assets/categories/tahadani/320/cover-52ea3568f76d28d9faa7.webp",
+      "web640": "assets/categories/tahadani/640/cover-52ea3568f76d28d9faa7.webp"
+    },
+    {
+      "name": "إي أو لأ، فن اجنبي",
+      "web320": "assets/categories/tahadani/320/cover-479ffaf9959b07bb8d03.webp",
+      "web640": "assets/categories/tahadani/640/cover-479ffaf9959b07bb8d03.webp"
+    },
+    {
+      "name": "إي أو لأ، فن عربي",
+      "web320": "assets/categories/tahadani/320/cover-f87e0c8285c45ddd5300.webp",
+      "web640": "assets/categories/tahadani/640/cover-f87e0c8285c45ddd5300.webp"
+    },
+    {
+      "name": "احتفالية لاعب",
+      "web320": "assets/categories/tahadani/320/cover-4b8177a16314d7243f99.webp",
+      "web640": "assets/categories/tahadani/640/cover-4b8177a16314d7243f99.webp"
+    },
+    {
+      "name": "اختصارات انجليزية",
+      "web320": "assets/categories/tahadani/320/cover-b0fa8185ae3fbb89fe59.webp",
+      "web640": "assets/categories/tahadani/640/cover-b0fa8185ae3fbb89fe59.webp"
+    },
+    {
+      "name": "اختيارات",
+      "web320": "assets/categories/tahadani/320/cover-da09f2d86b7cb64639f0.webp",
+      "web640": "assets/categories/tahadani/640/cover-da09f2d86b7cb64639f0.webp"
+    },
+    {
+      "name": "اسم اللاعب الاول",
+      "web320": "assets/categories/tahadani/320/cover-16483a1293ebac941b80.webp",
+      "web640": "assets/categories/tahadani/640/cover-16483a1293ebac941b80.webp"
+    },
+    {
+      "name": "اعلانات و ميمز",
+      "web320": "assets/categories/tahadani/320/cover-285088a87a3378551b51.webp",
+      "web640": "assets/categories/tahadani/640/cover-285088a87a3378551b51.webp"
+    },
+    {
+      "name": "اكسسوارات نسائية",
+      "web320": "assets/categories/tahadani/320/cover-e76d7ec0dd22c28d49ef.webp",
+      "web640": "assets/categories/tahadani/640/cover-e76d7ec0dd22c28d49ef.webp"
+    },
+    {
+      "name": "اكمل الفراغ",
+      "web320": "assets/categories/tahadani/320/cover-0178ca37a4917e45ad2a.webp",
+      "web640": "assets/categories/tahadani/640/cover-0178ca37a4917e45ad2a.webp"
+    },
+    {
+      "name": "الأخضر و المونديال",
+      "web320": "assets/categories/tahadani/320/cover-b53e7e04816b1f3f3169.webp",
+      "web640": "assets/categories/tahadani/640/cover-b53e7e04816b1f3f3169.webp"
+    },
+    {
+      "name": "الأردن",
+      "web320": "assets/categories/tahadani/320/cover-e8dba9910383ed137fab.webp",
+      "web640": "assets/categories/tahadani/640/cover-e8dba9910383ed137fab.webp"
+    },
+    {
+      "name": "الجواب بكلمتين",
+      "web320": "assets/categories/tahadani/320/cover-22e1acf43ff6cd81981c.webp",
+      "web640": "assets/categories/tahadani/640/cover-22e1acf43ff6cd81981c.webp"
+    },
+    {
+      "name": "الدراما السورية",
+      "web320": "assets/categories/tahadani/320/cover-373d3c9c253defa655bb.webp",
+      "web640": "assets/categories/tahadani/640/cover-373d3c9c253defa655bb.webp"
+    },
+    {
+      "name": "الذاكرة",
+      "web320": "assets/categories/tahadani/320/cover-2508640af5ae0ad6e2eb.webp",
+      "web640": "assets/categories/tahadani/640/cover-2508640af5ae0ad6e2eb.webp"
+    },
+    {
+      "name": "الزمن الجميل",
+      "web320": "assets/categories/tahadani/320/cover-a3f9b74674d65e8aa4b3.webp",
+      "web640": "assets/categories/tahadani/640/cover-a3f9b74674d65e8aa4b3.webp"
+    },
+    {
+      "name": "السعودية",
+      "web320": "assets/categories/tahadani/320/cover-1385a5ab5c9d1be30515.webp",
+      "web640": "assets/categories/tahadani/640/cover-1385a5ab5c9d1be30515.webp"
+    },
+    {
+      "name": "الفن التركي",
+      "web320": "assets/categories/tahadani/320/cover-12b37c76b66cd93b3e0a.webp",
+      "web640": "assets/categories/tahadani/640/cover-12b37c76b66cd93b3e0a.webp"
+    },
+    {
+      "name": "الفن الخليجي",
+      "web320": "assets/categories/tahadani/320/cover-6cc2ea0504bd5c81b1e9.webp",
+      "web640": "assets/categories/tahadani/640/cover-6cc2ea0504bd5c81b1e9.webp"
+    },
+    {
+      "name": "الفن السعودي",
+      "web320": "assets/categories/tahadani/320/cover-479bda85c33d30a088d0.webp",
+      "web640": "assets/categories/tahadani/640/cover-479bda85c33d30a088d0.webp"
+    },
+    {
+      "name": "الفن العالمي",
+      "web320": "assets/categories/tahadani/320/cover-9e9f7dee51e542692d51.webp",
+      "web640": "assets/categories/tahadani/640/cover-9e9f7dee51e542692d51.webp"
+    },
+    {
+      "name": "الفن الكوري",
+      "web320": "assets/categories/tahadani/320/cover-9d4726afaf7890439ba2.webp",
+      "web640": "assets/categories/tahadani/640/cover-9d4726afaf7890439ba2.webp"
+    },
+    {
+      "name": "الفن المصري",
+      "web320": "assets/categories/tahadani/320/cover-58fb52e2d2ed28164e05.webp",
+      "web640": "assets/categories/tahadani/640/cover-58fb52e2d2ed28164e05.webp"
+    },
+    {
+      "name": "القرآن الكريم",
+      "web320": "assets/categories/tahadani/320/cover-1382bcd0bfccd4b19012.webp",
+      "web640": "assets/categories/tahadani/640/cover-1382bcd0bfccd4b19012.webp"
+    },
+    {
+      "name": "الكرة الأردنية",
+      "web320": "assets/categories/tahadani/320/cover-408d3894461523cfc7fc.webp",
+      "web640": "assets/categories/tahadani/640/cover-408d3894461523cfc7fc.webp"
+    },
+    {
+      "name": "الكرة الألمانية",
+      "web320": "assets/categories/tahadani/320/cover-4aa68d65c960d9c0a148.webp",
+      "web640": "assets/categories/tahadani/640/cover-4aa68d65c960d9c0a148.webp"
+    },
+    {
+      "name": "الكرة الاسبانية",
+      "web320": "assets/categories/tahadani/320/cover-d9555f2bb7fbe37461b1.webp",
+      "web640": "assets/categories/tahadani/640/cover-d9555f2bb7fbe37461b1.webp"
+    },
+    {
+      "name": "الكرة الانجليزية",
+      "web320": "assets/categories/tahadani/320/cover-013be15a0b173483f727.webp",
+      "web640": "assets/categories/tahadani/640/cover-013be15a0b173483f727.webp"
+    },
+    {
+      "name": "الكرة الايطالية",
+      "web320": "assets/categories/tahadani/320/cover-07a561b70730239d2fb8.webp",
+      "web640": "assets/categories/tahadani/640/cover-07a561b70730239d2fb8.webp"
+    },
+    {
+      "name": "الكرة السعودية",
+      "web320": "assets/categories/tahadani/320/cover-7af67aae96df7010a2f6.webp",
+      "web640": "assets/categories/tahadani/640/cover-7af67aae96df7010a2f6.webp"
+    },
+    {
+      "name": "الكرة القطرية",
+      "web320": "assets/categories/tahadani/320/cover-be64fa3a8b2655c56b66.webp",
+      "web640": "assets/categories/tahadani/640/cover-be64fa3a8b2655c56b66.webp"
+    },
+    {
+      "name": "الكرة الكويتية",
+      "web320": "assets/categories/tahadani/320/cover-8e688165a0ff52cdc698.webp",
+      "web640": "assets/categories/tahadani/640/cover-8e688165a0ff52cdc698.webp"
+    },
+    {
+      "name": "الكرة المصرية",
+      "web320": "assets/categories/tahadani/320/cover-93ad26b9a3784e956909.webp",
+      "web640": "assets/categories/tahadani/640/cover-93ad26b9a3784e956909.webp"
+    },
+    {
+      "name": "الكويت",
+      "web320": "assets/categories/tahadani/320/cover-23a25bbfa096525d998e.webp",
+      "web640": "assets/categories/tahadani/640/cover-23a25bbfa096525d998e.webp"
+    },
+    {
+      "name": "المؤسس عثمان",
+      "web320": "assets/categories/tahadani/320/cover-7d6f32449420dbfc55a4.webp",
+      "web640": "assets/categories/tahadani/640/cover-7d6f32449420dbfc55a4.webp"
+    },
+    {
+      "name": "المحقق كونان",
+      "web320": "assets/categories/tahadani/320/cover-a6701bdc098a53b1ff63.webp",
+      "web640": "assets/categories/tahadani/640/cover-a6701bdc098a53b1ff63.webp"
+    },
+    {
+      "name": "المرسى",
+      "web320": "assets/categories/tahadani/320/cover-f5abd40b8c0f7b642a91.webp",
+      "web640": "assets/categories/tahadani/640/cover-f5abd40b8c0f7b642a91.webp"
+    },
+    {
+      "name": "المصارعة الحرة",
+      "web320": "assets/categories/tahadani/320/cover-9c44db40e1548f0f9fa5.webp",
+      "web640": "assets/categories/tahadani/640/cover-9c44db40e1548f0f9fa5.webp"
+    },
+    {
+      "name": "النادي العربي",
+      "web320": "assets/categories/tahadani/320/cover-4f028fceac10febfb16c.webp",
+      "web640": "assets/categories/tahadani/640/cover-4f028fceac10febfb16c.webp"
+    },
+    {
+      "name": "النادي المشترك",
+      "web320": "assets/categories/tahadani/320/cover-56958b561d87aac197fe.webp",
+      "web640": "assets/categories/tahadani/640/cover-56958b561d87aac197fe.webp"
+    },
+    {
+      "name": "النتيجة النهائية",
+      "web320": "assets/categories/tahadani/320/cover-3fb19d82b317951c9eca.webp",
+      "web640": "assets/categories/tahadani/640/cover-3fb19d82b317951c9eca.webp"
+    },
+    {
+      "name": "الولايات المتحدة الامريكية",
+      "web320": "assets/categories/tahadani/320/cover-00ef57b79e487126fef4.webp",
+      "web640": "assets/categories/tahadani/640/cover-00ef57b79e487126fef4.webp"
+    },
+    {
+      "name": "امهات",
+      "web320": "assets/categories/tahadani/320/cover-69b35ee1e1c2f4c05221.webp",
+      "web640": "assets/categories/tahadani/640/cover-69b35ee1e1c2f4c05221.webp"
+    },
+    {
+      "name": "اهداف الكرة الكويتية",
+      "web320": "assets/categories/tahadani/320/cover-bde740bb2e42d6033dd6.webp",
+      "web640": "assets/categories/tahadani/640/cover-bde740bb2e42d6033dd6.webp"
+    },
+    {
+      "name": "ايموجي رياضية",
+      "web320": "assets/categories/tahadani/320/cover-ae8773fa5c96e4bd1b21.webp",
+      "web640": "assets/categories/tahadani/640/cover-ae8773fa5c96e4bd1b21.webp"
+    },
+    {
+      "name": "ايموجي",
+      "web320": "assets/categories/tahadani/320/cover-4c3b59845ba2fd73e692.webp",
+      "web640": "assets/categories/tahadani/640/cover-4c3b59845ba2fd73e692.webp"
+    },
+    {
+      "name": "اين الكرة؟",
+      "web320": "assets/categories/tahadani/320/cover-bf7de0762fd4172db3dd.webp",
+      "web640": "assets/categories/tahadani/640/cover-bf7de0762fd4172db3dd.webp"
+    },
+    {
+      "name": "اين اللاعب الان",
+      "web320": "assets/categories/tahadani/320/cover-3ca01f7aaf01fdc72a4a.webp",
+      "web640": "assets/categories/tahadani/640/cover-3ca01f7aaf01fdc72a4a.webp"
+    },
+    {
+      "name": "باب الحارة",
+      "web320": "assets/categories/tahadani/320/cover-63c10279e0aade756c84.webp",
+      "web640": "assets/categories/tahadani/640/cover-63c10279e0aade756c84.webp"
+    },
+    {
+      "name": "برشلونة",
+      "web320": "assets/categories/tahadani/320/cover-3c824a5b4907f52cb5e3.webp",
+      "web640": "assets/categories/tahadani/640/cover-3c824a5b4907f52cb5e3.webp"
+    },
+    {
+      "name": "بوسترات العاب",
+      "web320": "assets/categories/tahadani/320/cover-f50916b0ae75f02035f9.webp",
+      "web640": "assets/categories/tahadani/640/cover-f50916b0ae75f02035f9.webp"
+    },
+    {
+      "name": "بوسترات فن خليجي",
+      "web320": "assets/categories/tahadani/320/cover-0cd0366e14ecd403a012.webp",
+      "web640": "assets/categories/tahadani/640/cover-0cd0366e14ecd403a012.webp"
+    },
+    {
+      "name": "بوسترات فن عالمي",
+      "web320": "assets/categories/tahadani/320/cover-b16922e817d40c1295ae.webp",
+      "web640": "assets/categories/tahadani/640/cover-b16922e817d40c1295ae.webp"
+    },
+    {
+      "name": "بوسترات فن مصري",
+      "web320": "assets/categories/tahadani/320/cover-81f8fd0a8eee8de90e30.webp",
+      "web640": "assets/categories/tahadani/640/cover-81f8fd0a8eee8de90e30.webp"
+    },
+    {
+      "name": "تاريخ",
+      "web320": "assets/categories/tahadani/320/cover-ed4e811ec0cb3ee16ccd.webp",
+      "web640": "assets/categories/tahadani/640/cover-ed4e811ec0cb3ee16ccd.webp"
+    },
+    {
+      "name": "تسريحة لاعب",
+      "web320": "assets/categories/tahadani/320/cover-f9bdeb4e5413d2f76a60.webp",
+      "web640": "assets/categories/tahadani/640/cover-f9bdeb4e5413d2f76a60.webp"
+    },
+    {
+      "name": "تكنولوجيا",
+      "web320": "assets/categories/tahadani/320/cover-e5e64a79314d046fe288.webp",
+      "web640": "assets/categories/tahadani/640/cover-e5e64a79314d046fe288.webp"
+    },
+    {
+      "name": "تنس",
+      "web320": "assets/categories/tahadani/320/cover-7d039b94d3aacfc0ac3f.webp",
+      "web640": "assets/categories/tahadani/640/cover-7d039b94d3aacfc0ac3f.webp"
+    },
+    {
+      "name": "تيشيرت رياضي",
+      "web320": "assets/categories/tahadani/320/cover-7186e5d9acf1eccebd9f.webp",
+      "web640": "assets/categories/tahadani/640/cover-7186e5d9acf1eccebd9f.webp"
+    },
+    {
+      "name": "جزء عم",
+      "web320": "assets/categories/tahadani/320/cover-f973343f8db584414b19.webp",
+      "web640": "assets/categories/tahadani/640/cover-f973343f8db584414b19.webp"
+    },
+    {
+      "name": "جغرافيا",
+      "web320": "assets/categories/tahadani/320/cover-ccbad42a9337573f0e50.webp",
+      "web640": "assets/categories/tahadani/640/cover-ccbad42a9337573f0e50.webp"
+    },
+    {
+      "name": "جنوب المملكة",
+      "web320": "assets/categories/tahadani/320/cover-e2743c2e6b159775ef4e.webp",
+      "web640": "assets/categories/tahadani/640/cover-e2743c2e6b159775ef4e.webp"
+    },
+    {
+      "name": "جوائز وألقاب رياضية",
+      "web320": "assets/categories/tahadani/320/cover-c146c9e4c3b8772d6cfa.webp",
+      "web640": "assets/categories/tahadani/640/cover-c146c9e4c3b8772d6cfa.webp"
+    },
+    {
+      "name": "جوازات دول",
+      "web320": "assets/categories/tahadani/320/cover-b979b4885f165b6966ec.webp",
+      "web640": "assets/categories/tahadani/640/cover-b979b4885f165b6966ec.webp"
+    },
+    {
+      "name": "جيبلي رياضية",
+      "web320": "assets/categories/tahadani/320/cover-3f5b931899a95bb0338a.webp",
+      "web640": "assets/categories/tahadani/640/cover-3f5b931899a95bb0338a.webp"
+    },
+    {
+      "name": "جيل الطيبين",
+      "web320": "assets/categories/tahadani/320/cover-e8ff609716bbf5280975.webp",
+      "web640": "assets/categories/tahadani/640/cover-e8ff609716bbf5280975.webp"
+    },
+    {
+      "name": "حروف انجليزية",
+      "web320": "assets/categories/tahadani/320/cover-6d8f570d0817e1f1419e.webp",
+      "web640": "assets/categories/tahadani/640/cover-6d8f570d0817e1f1419e.webp"
+    },
+    {
+      "name": "حروف كروية",
+      "web320": "assets/categories/tahadani/320/cover-84bcb68c532950f1aa77.webp",
+      "web640": "assets/categories/tahadani/640/cover-84bcb68c532950f1aa77.webp"
+    },
+    {
+      "name": "حروف مبعثرة",
+      "web320": "assets/categories/tahadani/320/cover-b112d5ac178ded49c13e.webp",
+      "web640": "assets/categories/tahadani/640/cover-b112d5ac178ded49c13e.webp"
+    },
+    {
+      "name": "حروف",
+      "web320": "assets/categories/tahadani/320/cover-ab2431b5b0000b31a0cd.webp",
+      "web640": "assets/categories/tahadani/640/cover-ab2431b5b0000b31a0cd.webp"
+    },
+    {
+      "name": "حقائب نسائية",
+      "web320": "assets/categories/tahadani/320/cover-c4be2c537cba48179e48.webp",
+      "web640": "assets/categories/tahadani/640/cover-c4be2c537cba48179e48.webp"
+    },
+    {
+      "name": "حلويات رمضانية",
+      "web320": "assets/categories/tahadani/320/cover-805c753ea97b6c069fbd.webp",
+      "web640": "assets/categories/tahadani/640/cover-805c753ea97b6c069fbd.webp"
+    },
+    {
+      "name": "خرائط",
+      "web320": "assets/categories/tahadani/320/cover-39133f04e6e3d633f63c.webp",
+      "web640": "assets/categories/tahadani/640/cover-39133f04e6e3d633f63c.webp"
+    },
+    {
+      "name": "دوري الأبطال ٢٥-٢٦",
+      "web320": "assets/categories/tahadani/320/cover-29c09054e34dc173d02e.webp",
+      "web640": "assets/categories/tahadani/640/cover-29c09054e34dc173d02e.webp"
+    },
+    {
+      "name": "دول و عواصم",
+      "web320": "assets/categories/tahadani/320/cover-59ef1da2f4b5d7d701fa.webp",
+      "web640": "assets/categories/tahadani/640/cover-59ef1da2f4b5d7d701fa.webp"
+    },
+    {
+      "name": "دين",
+      "web320": "assets/categories/tahadani/320/cover-18e6b377589e8f420163.webp",
+      "web640": "assets/categories/tahadani/640/cover-18e6b377589e8f420163.webp"
+    },
+    {
+      "name": "رتب رياضية",
+      "web320": "assets/categories/tahadani/320/cover-f8cb6104966168196ddd.webp",
+      "web640": "assets/categories/tahadani/640/cover-f8cb6104966168196ddd.webp"
+    },
+    {
+      "name": "رتّب",
+      "web320": "assets/categories/tahadani/320/cover-7c5e209b1dc9310525bc.webp",
+      "web640": "assets/categories/tahadani/640/cover-7c5e209b1dc9310525bc.webp"
+    },
+    {
+      "name": "رحلات طيران",
+      "web320": "assets/categories/tahadani/320/cover-ff2b7faae0b4bc177485.webp",
+      "web640": "assets/categories/tahadani/640/cover-ff2b7faae0b4bc177485.webp"
+    },
+    {
+      "name": "رسم",
+      "web320": "assets/categories/tahadani/320/cover-d835d15714d77b2a6cd3.webp",
+      "web640": "assets/categories/tahadani/640/cover-d835d15714d77b2a6cd3.webp"
+    },
+    {
+      "name": "ركز",
+      "web320": "assets/categories/tahadani/320/cover-ba255ba7543040349abf.webp",
+      "web640": "assets/categories/tahadani/640/cover-ba255ba7543040349abf.webp"
+    },
+    {
+      "name": "رمضانيات",
+      "web320": "assets/categories/tahadani/320/cover-74accb2ee3c1896b5daf.webp",
+      "web640": "assets/categories/tahadani/640/cover-74accb2ee3c1896b5daf.webp"
+    },
+    {
+      "name": "رياضة الكترونية",
+      "web320": "assets/categories/tahadani/320/cover-17c4c6099b88dcdc8f4e.webp",
+      "web640": "assets/categories/tahadani/640/cover-17c4c6099b88dcdc8f4e.webp"
+    },
+    {
+      "name": "ريال مدريد",
+      "web320": "assets/categories/tahadani/320/cover-4c2bacc658750e836281.webp",
+      "web640": "assets/categories/tahadani/640/cover-4c2bacc658750e836281.webp"
+    },
+    {
+      "name": "زوم",
+      "web320": "assets/categories/tahadani/320/cover-9692b2a87410cfd69f5a.webp",
+      "web640": "assets/categories/tahadani/640/cover-9692b2a87410cfd69f5a.webp"
+    },
+    {
+      "name": "سيارات",
+      "web320": "assets/categories/tahadani/320/cover-64a611253ef5aa402df8.webp",
+      "web640": "assets/categories/tahadani/640/cover-64a611253ef5aa402df8.webp"
+    },
+    {
+      "name": "سياسة الكويت",
+      "web320": "assets/categories/tahadani/320/cover-3ec89381629ec2d01306.webp",
+      "web640": "assets/categories/tahadani/640/cover-3ec89381629ec2d01306.webp"
+    },
+    {
+      "name": "شخصية لعبة الكترونية",
+      "web320": "assets/categories/tahadani/320/cover-937c1992424eb691ec14.webp",
+      "web640": "assets/categories/tahadani/640/cover-937c1992424eb691ec14.webp"
+    },
+    {
+      "name": "شعارات أندية ومنتخبات",
+      "web320": "assets/categories/tahadani/320/cover-6e106374ac33ca461ef4.webp",
+      "web640": "assets/categories/tahadani/640/cover-6e106374ac33ca461ef4.webp"
+    },
+    {
+      "name": "شعارات الأردن",
+      "web320": "assets/categories/tahadani/320/cover-728d9f375cd6194a2e5c.webp",
+      "web640": "assets/categories/tahadani/640/cover-728d9f375cd6194a2e5c.webp"
+    },
+    {
+      "name": "شعارات دول",
+      "web320": "assets/categories/tahadani/320/cover-bfeba3232d4de47570e3.webp",
+      "web640": "assets/categories/tahadani/640/cover-bfeba3232d4de47570e3.webp"
+    },
+    {
+      "name": "شعارات قطر",
+      "web320": "assets/categories/tahadani/320/cover-35678138b71acd3a2e8f.webp",
+      "web640": "assets/categories/tahadani/640/cover-35678138b71acd3a2e8f.webp"
+    },
+    {
+      "name": "شعارات",
+      "web320": "assets/categories/tahadani/320/cover-72fa293b9dd5abfe9dbb.webp",
+      "web640": "assets/categories/tahadani/640/cover-72fa293b9dd5abfe9dbb.webp"
+    },
+    {
+      "name": "شمال المملكة",
+      "web320": "assets/categories/tahadani/320/cover-570d976cd90ca132fb73.webp",
+      "web640": "assets/categories/tahadani/640/cover-570d976cd90ca132fb73.webp"
+    },
+    {
+      "name": "صحح الخطأ",
+      "web320": "assets/categories/tahadani/320/cover-9a05cf475d7cdd579a49.webp",
+      "web640": "assets/categories/tahadani/640/cover-9a05cf475d7cdd579a49.webp"
+    },
+    {
+      "name": "صوت فنان اجنبي",
+      "web320": "assets/categories/tahadani/320/cover-e39a138da19c1596b02f.webp",
+      "web640": "assets/categories/tahadani/640/cover-e39a138da19c1596b02f.webp"
+    },
+    {
+      "name": "صوت فنان عربي",
+      "web320": "assets/categories/tahadani/320/cover-1a51178f0920f75878a4.webp",
+      "web640": "assets/categories/tahadani/640/cover-1a51178f0920f75878a4.webp"
+    },
+    {
+      "name": "صورة فنان أجنبي",
+      "web320": "assets/categories/tahadani/320/cover-8061070b857095d9b20f.webp",
+      "web640": "assets/categories/tahadani/640/cover-8061070b857095d9b20f.webp"
+    },
+    {
+      "name": "صورة فنان عربي",
+      "web320": "assets/categories/tahadani/320/cover-7508ccb80510d36ba813.webp",
+      "web640": "assets/categories/tahadani/640/cover-7508ccb80510d36ba813.webp"
+    },
+    {
+      "name": "صورة مسلسل خليجي",
+      "web320": "assets/categories/tahadani/320/cover-e1e1d0b8fe27a80dc301.webp",
+      "web640": "assets/categories/tahadani/640/cover-e1e1d0b8fe27a80dc301.webp"
+    },
+    {
+      "name": "صورة من فيلم",
+      "web320": "assets/categories/tahadani/320/cover-bc00d44015e3771c8c3a.webp",
+      "web640": "assets/categories/tahadani/640/cover-bc00d44015e3771c8c3a.webp"
+    },
+    {
+      "name": "صورة ناقصة",
+      "web320": "assets/categories/tahadani/320/cover-337ea9776eb0944297b2.webp",
+      "web640": "assets/categories/tahadani/640/cover-337ea9776eb0944297b2.webp"
+    },
+    {
+      "name": "طاش ما طاش",
+      "web320": "assets/categories/tahadani/320/cover-91afdedac9c083d6f567.webp",
+      "web640": "assets/categories/tahadani/640/cover-91afdedac9c083d6f567.webp"
+    },
+    {
+      "name": "طب",
+      "web320": "assets/categories/tahadani/320/cover-d3a5552cfa7b637d9a60.webp",
+      "web640": "assets/categories/tahadani/640/cover-d3a5552cfa7b637d9a60.webp"
+    },
+    {
+      "name": "طفولة لاعب",
+      "web320": "assets/categories/tahadani/320/cover-7cefb9ad1219ec018536.webp",
+      "web640": "assets/categories/tahadani/640/cover-7cefb9ad1219ec018536.webp"
+    },
+    {
+      "name": "ظل اللاعب",
+      "web320": "assets/categories/tahadani/320/cover-2591a67800c9c5781b06.webp",
+      "web640": "assets/categories/tahadani/640/cover-2591a67800c9c5781b06.webp"
+    },
+    {
+      "name": "عالم الحيوان",
+      "web320": "assets/categories/tahadani/320/cover-16f8ebd9c6407f101616.webp",
+      "web640": "assets/categories/tahadani/640/cover-16f8ebd9c6407f101616.webp"
+    },
+    {
+      "name": "عالم الساعات",
+      "web320": "assets/categories/tahadani/320/cover-246a0663732a7ee3d99b.webp",
+      "web640": "assets/categories/tahadani/640/cover-246a0663732a7ee3d99b.webp"
+    },
+    {
+      "name": "عالم الطيران",
+      "web320": "assets/categories/tahadani/320/cover-4d88c8c753b4b3a902d1.webp",
+      "web640": "assets/categories/tahadani/640/cover-4d88c8c753b4b3a902d1.webp"
+    },
+    {
+      "name": "عالم العطور",
+      "web320": "assets/categories/tahadani/320/cover-1a88b842f6a27d53d698.webp",
+      "web640": "assets/categories/tahadani/640/cover-1a88b842f6a27d53d698.webp"
+    },
+    {
+      "name": "عالم هوليوود",
+      "web320": "assets/categories/tahadani/320/cover-38eda18d9d54ccc49e07.webp",
+      "web640": "assets/categories/tahadani/640/cover-38eda18d9d54ccc49e07.webp"
+    },
+    {
+      "name": "عبدالكريم عبدالقادر",
+      "web320": "assets/categories/tahadani/320/cover-1fa806bb5373d057f057.webp",
+      "web640": "assets/categories/tahadani/640/cover-1fa806bb5373d057f057.webp"
+    },
+    {
+      "name": "علوم",
+      "web320": "assets/categories/tahadani/320/cover-234196bfaf6fc26457b2.webp",
+      "web640": "assets/categories/tahadani/640/cover-234196bfaf6fc26457b2.webp"
+    },
+    {
+      "name": "عملات",
+      "web320": "assets/categories/tahadani/320/cover-3b09b52be5060ebdab5e.webp",
+      "web640": "assets/categories/tahadani/640/cover-3b09b52be5060ebdab5e.webp"
+    },
+    {
+      "name": "عواصم",
+      "web320": "assets/categories/tahadani/320/cover-08fafea7f444767b625c.webp",
+      "web640": "assets/categories/tahadani/640/cover-08fafea7f444767b625c.webp"
+    },
+    {
+      "name": "فاشن رجالي",
+      "web320": "assets/categories/tahadani/320/cover-e7be66108b6e3353ec10.webp",
+      "web640": "assets/categories/tahadani/640/cover-e7be66108b6e3353ec10.webp"
+    },
+    {
+      "name": "فتّح عينك",
+      "web320": "assets/categories/tahadani/320/cover-532eca330b6d75d61f93.webp",
+      "web640": "assets/categories/tahadani/640/cover-532eca330b6d75d61f93.webp"
+    },
+    {
+      "name": "فريق POWR",
+      "web320": "assets/categories/tahadani/320/cover-a54d536b2efe603b1f47.webp",
+      "web640": "assets/categories/tahadani/640/cover-a54d536b2efe603b1f47.webp"
+    },
+    {
+      "name": "فن الطيبين",
+      "web320": "assets/categories/tahadani/320/cover-606a2fbc9523103c5fcd.webp",
+      "web640": "assets/categories/tahadani/640/cover-606a2fbc9523103c5fcd.webp"
+    },
+    {
+      "name": "فنانين أجانب بصورة",
+      "web320": "assets/categories/tahadani/320/cover-1c1b1d08c05b3888d9a5.webp",
+      "web640": "assets/categories/tahadani/640/cover-1c1b1d08c05b3888d9a5.webp"
+    },
+    {
+      "name": "فنانين عرب بصورة",
+      "web320": "assets/categories/tahadani/320/cover-b4a33b764eced468d182.webp",
+      "web640": "assets/categories/tahadani/640/cover-b4a33b764eced468d182.webp"
+    },
+    {
+      "name": "قروب البلام",
+      "web320": "assets/categories/tahadani/320/cover-0d8d6c6461a8859d12e3.webp",
+      "web640": "assets/categories/tahadani/640/cover-0d8d6c6461a8859d12e3.webp"
+    },
+    {
+      "name": "قصة عمل سعودي",
+      "web320": "assets/categories/tahadani/320/cover-0c4fa0db27d03171c43c.webp",
+      "web640": "assets/categories/tahadani/640/cover-0c4fa0db27d03171c43c.webp"
+    },
+    {
+      "name": "قصة عمل كويتي",
+      "web320": "assets/categories/tahadani/320/cover-74fdeda134b21644510c.webp",
+      "web640": "assets/categories/tahadani/640/cover-74fdeda134b21644510c.webp"
+    },
+    {
+      "name": "قصة فيلم أجنبي",
+      "web320": "assets/categories/tahadani/320/cover-ff6fc18bf457340024ba.webp",
+      "web640": "assets/categories/tahadani/640/cover-ff6fc18bf457340024ba.webp"
+    },
+    {
+      "name": "قصة فيلم مصري",
+      "web320": "assets/categories/tahadani/320/cover-3c20515155cf95bc12ad.webp",
+      "web640": "assets/categories/tahadani/640/cover-3c20515155cf95bc12ad.webp"
+    },
+    {
+      "name": "قصة مسلسل أجنبي",
+      "web320": "assets/categories/tahadani/320/cover-92dd88092b07191f2a39.webp",
+      "web640": "assets/categories/tahadani/640/cover-92dd88092b07191f2a39.webp"
+    },
+    {
+      "name": "قصة مسلسل مصري",
+      "web320": "assets/categories/tahadani/320/cover-3026588c075367d17485.webp",
+      "web640": "assets/categories/tahadani/640/cover-3026588c075367d17485.webp"
+    },
+    {
+      "name": "قصص الانبياء",
+      "web320": "assets/categories/tahadani/320/cover-572ae94f526eef2c5b69.webp",
+      "web640": "assets/categories/tahadani/640/cover-572ae94f526eef2c5b69.webp"
+    },
+    {
+      "name": "قطر",
+      "web320": "assets/categories/tahadani/320/cover-ca4f67181ac91ce00cb7.webp",
+      "web640": "assets/categories/tahadani/640/cover-ca4f67181ac91ce00cb7.webp"
+    },
+    {
+      "name": "كأس العالم 2026",
+      "web320": "assets/categories/tahadani/320/cover-eea75433f2f7890b8419.webp",
+      "web640": "assets/categories/tahadani/640/cover-eea75433f2f7890b8419.webp"
+    },
+    {
+      "name": "كاس الخليج",
+      "web320": "assets/categories/tahadani/320/cover-c1dd5c5cf1e1dabcb5e2.webp",
+      "web640": "assets/categories/tahadani/640/cover-c1dd5c5cf1e1dabcb5e2.webp"
+    },
+    {
+      "name": "كاس العالم",
+      "web320": "assets/categories/tahadani/320/cover-ab5b42ba82d3fa7c1b21.webp",
+      "web640": "assets/categories/tahadani/640/cover-ab5b42ba82d3fa7c1b21.webp"
+    },
+    {
+      "name": "كرة اليد الكويتية",
+      "web320": "assets/categories/tahadani/320/cover-b9faf06cb19982c379b1.webp",
+      "web640": "assets/categories/tahadani/640/cover-b9faf06cb19982c379b1.webp"
+    },
+    {
+      "name": "كرة قدم عالمية",
+      "web320": "assets/categories/tahadani/320/cover-8e49882a684786f8f8aa.webp",
+      "web640": "assets/categories/tahadani/640/cover-8e49882a684786f8f8aa.webp"
+    },
+    {
+      "name": "لاعب خليجي",
+      "web320": "assets/categories/tahadani/320/cover-a92ead932c58fae9e20e.webp",
+      "web640": "assets/categories/tahadani/640/cover-a92ead932c58fae9e20e.webp"
+    },
+    {
+      "name": "لاعب غير واضح",
+      "web320": "assets/categories/tahadani/320/cover-e1766ebcb369972ad724.webp",
+      "web640": "assets/categories/tahadani/640/cover-e1766ebcb369972ad724.webp"
+    },
+    {
+      "name": "لاعبين بصورة",
+      "web320": "assets/categories/tahadani/320/cover-f26cbd35bd3ad3e80ad9.webp",
+      "web640": "assets/categories/tahadani/640/cover-f26cbd35bd3ad3e80ad9.webp"
+    },
+    {
+      "name": "لعبة PUBG",
+      "web320": "assets/categories/tahadani/320/cover-18218e34ce2544e52033.webp",
+      "web640": "assets/categories/tahadani/640/cover-18218e34ce2544e52033.webp"
+    },
+    {
+      "name": "لعبة البلوت",
+      "web320": "assets/categories/tahadani/320/cover-49a671755d2f02fe2a7d.webp",
+      "web640": "assets/categories/tahadani/640/cover-49a671755d2f02fe2a7d.webp"
+    },
+    {
+      "name": "لغات ولهجات",
+      "web320": "assets/categories/tahadani/320/cover-711b88bbcdf19d4d3526.webp",
+      "web640": "assets/categories/tahadani/640/cover-711b88bbcdf19d4d3526.webp"
+    },
+    {
+      "name": "لغة الجسد",
+      "web320": "assets/categories/tahadani/320/cover-e5984f38f29e7f9e84ce.webp",
+      "web640": "assets/categories/tahadani/640/cover-e5984f38f29e7f9e84ce.webp"
+    },
+    {
+      "name": "لقطة رياضية",
+      "web320": "assets/categories/tahadani/320/cover-257d395ca9ed9b63a97a.webp",
+      "web640": "assets/categories/tahadani/640/cover-257d395ca9ed9b63a97a.webp"
+    },
+    {
+      "name": "لوكيشن في الكويت",
+      "web320": "assets/categories/tahadani/320/cover-9455d65763d44b648e99.webp",
+      "web640": "assets/categories/tahadani/640/cover-9455d65763d44b648e99.webp"
+    },
+    {
+      "name": "مؤثر سعودي",
+      "web320": "assets/categories/tahadani/320/cover-d91d83391c89d1a0eeb8.webp",
+      "web640": "assets/categories/tahadani/640/cover-d91d83391c89d1a0eeb8.webp"
+    },
+    {
+      "name": "ما اسم الشخصية ؟ [id-314]",
+      "web320": "assets/categories/tahadani/320/cover-3cbdb7df5e8c2c201a4e.webp",
+      "web640": "assets/categories/tahadani/640/cover-3cbdb7df5e8c2c201a4e.webp"
+    },
+    {
+      "name": "ما اسم الشخصية ؟ [id-74]",
+      "web320": "assets/categories/tahadani/320/cover-c08ceb9e82f9b503ee01.webp",
+      "web640": "assets/categories/tahadani/640/cover-c08ceb9e82f9b503ee01.webp"
+    },
+    {
+      "name": "مجمع الأڤنيوز",
+      "web320": "assets/categories/tahadani/320/cover-6156e9e272b0610c3cd0.webp",
+      "web640": "assets/categories/tahadani/640/cover-6156e9e272b0610c3cd0.webp"
+    },
+    {
+      "name": "مخمخ بيوتي",
+      "web320": "assets/categories/tahadani/320/cover-24f5c6fc9a779705d8c0.webp",
+      "web640": "assets/categories/tahadani/640/cover-24f5c6fc9a779705d8c0.webp"
+    },
+    {
+      "name": "مخمخ كتشن",
+      "web320": "assets/categories/tahadani/320/cover-4f34484d8f172798694f.webp",
+      "web640": "assets/categories/tahadani/640/cover-4f34484d8f172798694f.webp"
+    },
+    {
+      "name": "مخمخ مارت",
+      "web320": "assets/categories/tahadani/320/cover-71dc58c80ee14d5fa682.webp",
+      "web640": "assets/categories/tahadani/640/cover-71dc58c80ee14d5fa682.webp"
+    },
+    {
+      "name": "مسرحيات زين",
+      "web320": "assets/categories/tahadani/320/cover-aaaec91ff234f2d5f2fa.webp",
+      "web640": "assets/categories/tahadani/640/cover-aaaec91ff234f2d5f2fa.webp"
+    },
+    {
+      "name": "مسرحيات ٢٠٢٥",
+      "web320": "assets/categories/tahadani/320/cover-8f927c9ee8c7e1f74e8f.webp",
+      "web640": "assets/categories/tahadani/640/cover-8f927c9ee8c7e1f74e8f.webp"
+    },
+    {
+      "name": "مسرحية العيال كبرت",
+      "web320": "assets/categories/tahadani/320/cover-13b01c5511e32c1de6a9.webp",
+      "web640": "assets/categories/tahadani/640/cover-13b01c5511e32c1de6a9.webp"
+    },
+    {
+      "name": "مسرحية الواد سيد الشغال",
+      "web320": "assets/categories/tahadani/320/cover-3702f2f76274dab458c5.webp",
+      "web640": "assets/categories/tahadani/640/cover-3702f2f76274dab458c5.webp"
+    },
+    {
+      "name": "مسرحية مدرسة المشاغبين",
+      "web320": "assets/categories/tahadani/320/cover-f0c8798d2d9eeaa16951.webp",
+      "web640": "assets/categories/tahadani/640/cover-f0c8798d2d9eeaa16951.webp"
+    },
+    {
+      "name": "مسلسل آسر",
+      "web320": "assets/categories/tahadani/320/cover-a8d908c35c73f2b31c1e.webp",
+      "web640": "assets/categories/tahadani/640/cover-a8d908c35c73f2b31c1e.webp"
+    },
+    {
+      "name": "مسلسل أشغال شقة",
+      "web320": "assets/categories/tahadani/320/cover-c5854745ccfdde5bfc12.webp",
+      "web640": "assets/categories/tahadani/640/cover-c5854745ccfdde5bfc12.webp"
+    },
+    {
+      "name": "مسلسل أم البنات",
+      "web320": "assets/categories/tahadani/320/cover-7fdaa2719cc530981e85.webp",
+      "web640": "assets/categories/tahadani/640/cover-7fdaa2719cc530981e85.webp"
+    },
+    {
+      "name": "مسلسل أم ٤٤",
+      "web320": "assets/categories/tahadani/320/cover-21be486b36b5dd8d7167.webp",
+      "web640": "assets/categories/tahadani/640/cover-21be486b36b5dd8d7167.webp"
+    },
+    {
+      "name": "مسلسل اعوام الظلام",
+      "web320": "assets/categories/tahadani/320/cover-83e23ef20e4a061d8e6a.webp",
+      "web640": "assets/categories/tahadani/640/cover-83e23ef20e4a061d8e6a.webp"
+    },
+    {
+      "name": "مسلسل الحفرة",
+      "web320": "assets/categories/tahadani/320/cover-7b8646dad5dc46442c9d.webp",
+      "web640": "assets/categories/tahadani/640/cover-7b8646dad5dc46442c9d.webp"
+    },
+    {
+      "name": "مسلسل الحيالة",
+      "web320": "assets/categories/tahadani/320/cover-22ddc87a9256b9bfb923.webp",
+      "web640": "assets/categories/tahadani/640/cover-22ddc87a9256b9bfb923.webp"
+    },
+    {
+      "name": "مسلسل الزير سالم",
+      "web320": "assets/categories/tahadani/320/cover-546410fd9316a33ce8d4.webp",
+      "web640": "assets/categories/tahadani/640/cover-546410fd9316a33ce8d4.webp"
+    },
+    {
+      "name": "مسلسل العاصوف",
+      "web320": "assets/categories/tahadani/320/cover-cb0b1c095d131fd5fe09.webp",
+      "web640": "assets/categories/tahadani/640/cover-cb0b1c095d131fd5fe09.webp"
+    },
+    {
+      "name": "مسلسل الغميضة",
+      "web320": "assets/categories/tahadani/320/cover-c0d4a69b4a7115f2e31d.webp",
+      "web640": "assets/categories/tahadani/640/cover-c0d4a69b4a7115f2e31d.webp"
+    },
+    {
+      "name": "مسلسل الكبير أوي",
+      "web320": "assets/categories/tahadani/320/cover-ac1990f8ce2c8653c38e.webp",
+      "web640": "assets/categories/tahadani/640/cover-ac1990f8ce2c8653c38e.webp"
+    },
+    {
+      "name": "مسلسل اللعبة",
+      "web320": "assets/categories/tahadani/320/cover-c47c3640e3d2a784968d.webp",
+      "web640": "assets/categories/tahadani/640/cover-c47c3640e3d2a784968d.webp"
+    },
+    {
+      "name": "مسلسل جميل وهناء",
+      "web320": "assets/categories/tahadani/320/cover-11144981f29bebec3db1.webp",
+      "web640": "assets/categories/tahadani/640/cover-11144981f29bebec3db1.webp"
+    },
+    {
+      "name": "مسلسل جناية حب",
+      "web320": "assets/categories/tahadani/320/cover-9e8d4abdda4954f807fb.webp",
+      "web640": "assets/categories/tahadani/640/cover-9e8d4abdda4954f807fb.webp"
+    },
+    {
+      "name": "مسلسل خاتون",
+      "web320": "assets/categories/tahadani/320/cover-8c3132aa768517007dcf.webp",
+      "web640": "assets/categories/tahadani/640/cover-8c3132aa768517007dcf.webp"
+    },
+    {
+      "name": "مسلسل خالتي قماشة",
+      "web320": "assets/categories/tahadani/320/cover-23b36da03d16ac58b23e.webp",
+      "web640": "assets/categories/tahadani/640/cover-23b36da03d16ac58b23e.webp"
+    },
+    {
+      "name": "مسلسل خريف القلب",
+      "web320": "assets/categories/tahadani/320/cover-76aee975980ba22bf117.webp",
+      "web640": "assets/categories/tahadani/640/cover-76aee975980ba22bf117.webp"
+    },
+    {
+      "name": "مسلسل زوارة خميس",
+      "web320": "assets/categories/tahadani/320/cover-5ee46ce5449ca8652b97.webp",
+      "web640": "assets/categories/tahadani/640/cover-5ee46ce5449ca8652b97.webp"
+    },
+    {
+      "name": "مسلسل شارع الأعشى",
+      "web320": "assets/categories/tahadani/320/cover-456f7c93ae91dc6aa052.webp",
+      "web640": "assets/categories/tahadani/640/cover-456f7c93ae91dc6aa052.webp"
+    },
+    {
+      "name": "مسلسل شارع الاعشى٢",
+      "web320": "assets/categories/tahadani/320/cover-97a69b7fa110ebbb1ad6.webp",
+      "web640": "assets/categories/tahadani/640/cover-97a69b7fa110ebbb1ad6.webp"
+    },
+    {
+      "name": "مسلسل قيامة ارطغرل",
+      "web320": "assets/categories/tahadani/320/cover-09644ba30fd4c267e9fb.webp",
+      "web640": "assets/categories/tahadani/640/cover-09644ba30fd4c267e9fb.webp"
+    },
+    {
+      "name": "مسلسل كان إنسان",
+      "web320": "assets/categories/tahadani/320/cover-3676a6bf0c7b2a1c9cbe.webp",
+      "web640": "assets/categories/tahadani/640/cover-3676a6bf0c7b2a1c9cbe.webp"
+    },
+    {
+      "name": "مسلسل وحوش",
+      "web320": "assets/categories/tahadani/320/cover-51d02679a6bfd625054c.webp",
+      "web640": "assets/categories/tahadani/640/cover-51d02679a6bfd625054c.webp"
+    },
+    {
+      "name": "مسيرة لاعب",
+      "web320": "assets/categories/tahadani/320/cover-95e53882ebcd946b1030.webp",
+      "web640": "assets/categories/tahadani/640/cover-95e53882ebcd946b1030.webp"
+    },
+    {
+      "name": "مسيرة مدرب",
+      "web320": "assets/categories/tahadani/320/cover-5eae752a8596f9e3c7c4.webp",
+      "web640": "assets/categories/tahadani/640/cover-5eae752a8596f9e3c7c4.webp"
+    },
+    {
+      "name": "مشاهير أجانب صغار",
+      "web320": "assets/categories/tahadani/320/cover-920a1ed66536a7a5f3c2.webp",
+      "web640": "assets/categories/tahadani/640/cover-920a1ed66536a7a5f3c2.webp"
+    },
+    {
+      "name": "مشاهير عرب صغار",
+      "web320": "assets/categories/tahadani/320/cover-148d338c2a3282b1fef0.webp",
+      "web640": "assets/categories/tahadani/640/cover-148d338c2a3282b1fef0.webp"
+    },
+    {
+      "name": "مصر",
+      "web320": "assets/categories/tahadani/320/cover-f468e988a2932d922cd1.webp",
+      "web640": "assets/categories/tahadani/640/cover-f468e988a2932d922cd1.webp"
+    },
+    {
+      "name": "مطاعم الأردن",
+      "web320": "assets/categories/tahadani/320/cover-383c05c04f62efbbc671.webp",
+      "web640": "assets/categories/tahadani/640/cover-383c05c04f62efbbc671.webp"
+    },
+    {
+      "name": "مطاعم الكويت",
+      "web320": "assets/categories/tahadani/320/cover-8dc8794fd918f790c091.webp",
+      "web640": "assets/categories/tahadani/640/cover-8dc8794fd918f790c091.webp"
+    },
+    {
+      "name": "معالم الأردن",
+      "web320": "assets/categories/tahadani/320/cover-09891901f1adcd10cc40.webp",
+      "web640": "assets/categories/tahadani/640/cover-09891901f1adcd10cc40.webp"
+    },
+    {
+      "name": "معالم السعودية",
+      "web320": "assets/categories/tahadani/320/cover-7fd1a023f51a2a9b4c6b.webp",
+      "web640": "assets/categories/tahadani/640/cover-7fd1a023f51a2a9b4c6b.webp"
+    },
+    {
+      "name": "معلومات عامة",
+      "web320": "assets/categories/tahadani/320/cover-65d35a5beb4222e96f1a.webp",
+      "web640": "assets/categories/tahadani/640/cover-65d35a5beb4222e96f1a.webp"
+    },
+    {
+      "name": "مقاطع انمي",
+      "web320": "assets/categories/tahadani/320/cover-2a6a607f5911cfdd48f2.webp",
+      "web640": "assets/categories/tahadani/640/cover-2a6a607f5911cfdd48f2.webp"
+    },
+    {
+      "name": "مقاطع تعليق",
+      "web320": "assets/categories/tahadani/320/cover-8b8ae0dc7f4519b8c14a.webp",
+      "web640": "assets/categories/tahadani/640/cover-8b8ae0dc7f4519b8c14a.webp"
+    },
+    {
+      "name": "مقاطع فن اجنبي",
+      "web320": "assets/categories/tahadani/320/cover-81994fca380e2ed7ceb5.webp",
+      "web640": "assets/categories/tahadani/640/cover-81994fca380e2ed7ceb5.webp"
+    },
+    {
+      "name": "مقاطع فن عربي",
+      "web320": "assets/categories/tahadani/320/cover-cdcd097413fccbf6cf6d.webp",
+      "web640": "assets/categories/tahadani/640/cover-cdcd097413fccbf6cf6d.webp"
+    },
+    {
+      "name": "مقاطع كرتون",
+      "web320": "assets/categories/tahadani/320/cover-fc54d925d93f31981274.webp",
+      "web640": "assets/categories/tahadani/640/cover-fc54d925d93f31981274.webp"
+    },
+    {
+      "name": "من أنا ؟",
+      "web320": "assets/categories/tahadani/320/cover-6f38ad5b4a8a804f077e.webp",
+      "web640": "assets/categories/tahadani/640/cover-6f38ad5b4a8a804f077e.webp"
+    },
+    {
+      "name": "من أنا جغرافيا",
+      "web320": "assets/categories/tahadani/320/cover-a454f7c671379ab9bd20.webp",
+      "web640": "assets/categories/tahadani/640/cover-a454f7c671379ab9bd20.webp"
+    },
+    {
+      "name": "من أنا حيوانات",
+      "web320": "assets/categories/tahadani/320/cover-2350f70254d00b7c745e.webp",
+      "web640": "assets/categories/tahadani/640/cover-2350f70254d00b7c745e.webp"
+    },
+    {
+      "name": "من أنا رياضية",
+      "web320": "assets/categories/tahadani/320/cover-0e8ca28866b5c13848d1.webp",
+      "web640": "assets/categories/tahadani/640/cover-0e8ca28866b5c13848d1.webp"
+    },
+    {
+      "name": "من أنا مسلسلات عربية",
+      "web320": "assets/categories/tahadani/320/cover-5a54ef54aa7e69207f4b.webp",
+      "web640": "assets/categories/tahadani/640/cover-5a54ef54aa7e69207f4b.webp"
+    },
+    {
+      "name": "من القائل",
+      "web320": "assets/categories/tahadani/320/cover-5437ad868cf8dfc09957.webp",
+      "web640": "assets/categories/tahadani/640/cover-5437ad868cf8dfc09957.webp"
+    },
+    {
+      "name": "من هو اللاعب",
+      "web320": "assets/categories/tahadani/320/cover-b63aa23da9f1f9c2bece.webp",
+      "web640": "assets/categories/tahadani/640/cover-b63aa23da9f1f9c2bece.webp"
+    },
+    {
+      "name": "من هو المشهور الاجنبي",
+      "web320": "assets/categories/tahadani/320/cover-26ee21dff4fbbfe96d07.webp",
+      "web640": "assets/categories/tahadani/640/cover-26ee21dff4fbbfe96d07.webp"
+    },
+    {
+      "name": "من هو المشهور العربي",
+      "web320": "assets/categories/tahadani/320/cover-0b0a76f8cf6aa6bde190.webp",
+      "web640": "assets/categories/tahadani/640/cover-0b0a76f8cf6aa6bde190.webp"
+    },
+    {
+      "name": "منو المشهور",
+      "web320": "assets/categories/tahadani/320/cover-e27a8d260da3efb7fb17.webp",
+      "web640": "assets/categories/tahadani/640/cover-e27a8d260da3efb7fb17.webp"
+    },
+    {
+      "name": "منوعات شعرية",
+      "web320": "assets/categories/tahadani/320/cover-1f04b3c5d5d997a6c97b.webp",
+      "web640": "assets/categories/tahadani/640/cover-1f04b3c5d5d997a6c97b.webp"
+    },
+    {
+      "name": "منوعات كرة قدم",
+      "web320": "assets/categories/tahadani/320/cover-91e5f890546273107317.webp",
+      "web640": "assets/categories/tahadani/640/cover-91e5f890546273107317.webp"
+    },
+    {
+      "name": "موسم الرياض",
+      "web320": "assets/categories/tahadani/320/cover-e0c033f4019f30ad6d6c.webp",
+      "web640": "assets/categories/tahadani/640/cover-e0c033f4019f30ad6d6c.webp"
+    },
+    {
+      "name": "ميسي وكرستيانو",
+      "web320": "assets/categories/tahadani/320/cover-85de10cfb42c2f3dc426.webp",
+      "web640": "assets/categories/tahadani/640/cover-85de10cfb42c2f3dc426.webp"
+    },
+    {
+      "name": "نشيد وطني",
+      "web320": "assets/categories/tahadani/320/cover-ed456ce78f4e21d970af.webp",
+      "web640": "assets/categories/tahadani/640/cover-ed456ce78f4e21d970af.webp"
+    },
+    {
+      "name": "نيللي وشريهان",
+      "web320": "assets/categories/tahadani/320/cover-8895e281411508517910.webp",
+      "web640": "assets/categories/tahadani/640/cover-8895e281411508517910.webp"
+    },
+    {
+      "name": "وزارة الداخلية",
+      "web320": "assets/categories/tahadani/320/cover-08bdf521d5413eece3f1.webp",
+      "web640": "assets/categories/tahadani/640/cover-08bdf521d5413eece3f1.webp"
+    },
+    {
+      "name": "وسط المملكة",
+      "web320": "assets/categories/tahadani/320/cover-3e8a1ad328e4a4405b84.webp",
+      "web640": "assets/categories/tahadani/640/cover-3e8a1ad328e4a4405b84.webp"
+    },
+    {
+      "name": "ولا كلمة أغاني عربية",
+      "web320": "assets/categories/tahadani/320/cover-6c6e724bc3e90c1745e6.webp",
+      "web640": "assets/categories/tahadani/640/cover-6c6e724bc3e90c1745e6.webp"
+    },
+    {
+      "name": "ولا كلمة أمثال",
+      "web320": "assets/categories/tahadani/320/cover-9933f97e2d87d8b40b60.webp",
+      "web640": "assets/categories/tahadani/640/cover-9933f97e2d87d8b40b60.webp"
+    },
+    {
+      "name": "ولا كلمة انجليزية",
+      "web320": "assets/categories/tahadani/320/cover-cee59b6378f316b6f877.webp",
+      "web640": "assets/categories/tahadani/640/cover-cee59b6378f316b6f877.webp"
+    },
+    {
+      "name": "ولا كلمة حيوانات",
+      "web320": "assets/categories/tahadani/320/cover-dc2d7ef4b63bd757abf2.webp",
+      "web640": "assets/categories/tahadani/640/cover-dc2d7ef4b63bd757abf2.webp"
+    },
+    {
+      "name": "ولا كلمة دول",
+      "web320": "assets/categories/tahadani/320/cover-b6c83a1bbc2b901eea45.webp",
+      "web640": "assets/categories/tahadani/640/cover-b6c83a1bbc2b901eea45.webp"
+    },
+    {
+      "name": "ولا كلمة عامة",
+      "web320": "assets/categories/tahadani/320/cover-ebcc90987fc1e56a405d.webp",
+      "web640": "assets/categories/tahadani/640/cover-ebcc90987fc1e56a405d.webp"
+    },
+    {
+      "name": "ولا كلمة فن اجنبي",
+      "web320": "assets/categories/tahadani/320/cover-1e8606e3d1960fc64c9e.webp",
+      "web640": "assets/categories/tahadani/640/cover-1e8606e3d1960fc64c9e.webp"
+    },
+    {
+      "name": "ولا كلمة فن عربي",
+      "web320": "assets/categories/tahadani/320/cover-de43fa0b2df4a865d6f6.webp",
+      "web640": "assets/categories/tahadani/640/cover-de43fa0b2df4a865d6f6.webp"
+    },
+    {
+      "name": "ولا كلمة كرتون",
+      "web320": "assets/categories/tahadani/320/cover-c2a2aae59ffb0e0d688f.webp",
+      "web640": "assets/categories/tahadani/640/cover-c2a2aae59ffb0e0d688f.webp"
+    },
+    {
+      "name": "ولا كلمة مشاهير عرب",
+      "web320": "assets/categories/tahadani/320/cover-6848fcdde26a587355f8.webp",
+      "web640": "assets/categories/tahadani/640/cover-6848fcdde26a587355f8.webp"
+    }
+  ]
+}

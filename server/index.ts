@@ -49,6 +49,19 @@ const service = new AuthoritativeGameService({
       }
     : {}),
 });
+let sqliteRefresh = Promise.resolve();
+const refreshLocalSqliteQuestionSource = () => {
+  if (!localSqliteImportMode) return;
+  const refresh = sqliteRefresh.then(async () => {
+    service.replaceLocalQuestionSource(
+      await loadLocalSqliteImportQuestionSource({
+        dbPath: process.env.GAME_DB_PATH,
+      }),
+    );
+  });
+  sqliteRefresh = refresh.catch(() => undefined);
+  return refresh;
+};
 const json = async (
   request: import("node:http").IncomingMessage,
 ): Promise<Record<string, unknown>> => {
@@ -175,6 +188,7 @@ const server = createServer(async (request, response) => {
     ) {
       if (!trustedLocalDbRequest(request))
         throw new Error("LOCAL_DB_ORIGIN_REQUIRED");
+      await refreshLocalSqliteQuestionSource();
       const inventory = service.questionInventory();
       if (!inventory) throw new Error("LOCAL_DB_SOURCE_DISABLED");
       response
@@ -219,6 +233,7 @@ const server = createServer(async (request, response) => {
     if (request.method === "POST" && url.pathname === "/api/rooms") {
       if (localImportedSourceMode && !trustedLocalDbRequest(request))
         throw new Error("LOCAL_DB_ORIGIN_REQUIRED");
+      await refreshLocalSqliteQuestionSource();
       const body = await json(request);
       const payload = JSON.stringify(
         service.create(

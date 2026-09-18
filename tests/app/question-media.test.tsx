@@ -1,6 +1,6 @@
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { expect, it, vi } from 'vitest';
-import { canRenderCurrentQuestionMedia, CurrentQuestionMedia } from '../../src/routes/GameRoutes';
+import { canRenderCurrentQuestionMedia, CurrentQuestionMedia, shouldConcealAudienceQuestionMedia, shouldShowSharedRevealedAnswer } from '../../src/routes/GameRoutes';
 
 const media = { mediaId: 'v18-011-001', assetSha256: 'a'.repeat(64), altAr: 'صورة السؤال' };
 
@@ -40,6 +40,58 @@ it('refreshes a valid image grant shortly before expiry', async () => {
   } finally { vi.useRealTimers(); }
 });
 
+it('renders filtered and revealed goal videos without image concealment while retaining image concealment', async () => {
+  const video = { mediaId: 'goal-quiz-2026:001:blur', assetSha256: 'c'.repeat(64), altAr: 'مقطع السؤال', type: 'video' as const, contentType: 'video/mp4' };
+  const load = vi.fn().mockResolvedValue({ ...video, url: 'blob:goal', expiresAt: new Date(Date.now() + 60_000).toISOString() });
+  const view = render(<CurrentQuestionMedia concealed={shouldConcealAudienceQuestionMedia(video)} roomId="room-a" media={video} load={load} />);
+  expect(screen.getByTestId('question-media')).not.toHaveClass('question-media--concealed');
+  const element = (await screen.findByTestId('question-media')).querySelector('video')!;
+  expect(element).toHaveAttribute('src', 'blob:goal');
+  expect(element).toHaveProperty('muted', true);
+  expect(element).toHaveAttribute('playsinline');
+  const clear = { ...video, mediaId: 'goal-quiz-2026:001:clean', assetSha256: 'd'.repeat(64) };
+  view.rerender(<CurrentQuestionMedia concealed={shouldConcealAudienceQuestionMedia(clear)} roomId="room-a" media={clear} load={vi.fn().mockResolvedValue({ ...clear, url: 'blob:clear', expiresAt: new Date(Date.now() + 60_000).toISOString() })} />);
+  expect(screen.getByTestId('question-media')).not.toHaveClass('question-media--concealed');
+  expect((await screen.findByTestId('question-media')).querySelector('video')).toHaveAttribute('src', 'blob:clear');
+  const image = { ...media, contentType: 'image/jpeg' };
+  view.rerender(<CurrentQuestionMedia concealed={shouldConcealAudienceQuestionMedia(image)} roomId="room-a" media={image} load={vi.fn().mockResolvedValue({ ...image, url: 'blob:image', expiresAt: new Date(Date.now() + 60_000).toISOString() })} />);
+  expect(screen.getByTestId('question-media')).toHaveClass('question-media--concealed');
+  expect((await screen.findByTestId('question-media')).querySelector('img')).toHaveAttribute('src', 'blob:image');
+  expect(shouldShowSharedRevealedAnswer(video)).toBe(false);
+  expect(shouldShowSharedRevealedAnswer(clear)).toBe(false);
+  expect(shouldShowSharedRevealedAnswer(image)).toBe(false);
+  expect(shouldShowSharedRevealedAnswer()).toBe(false);
+});
+
+it('keeps a playing video source through a same-binding grant refresh and starts a clear variant fresh', async () => {
+  vi.useFakeTimers();
+  const revoke = vi.fn();
+  Object.defineProperty(URL, 'revokeObjectURL', { configurable: true, value: revoke });
+  try {
+    vi.setSystemTime(new Date('2026-09-11T12:00:00.000Z'));
+    const video = { mediaId: 'goal-quiz-2026:001:blur', assetSha256: 'c'.repeat(64), altAr: 'مقطع السؤال', type: 'video' as const, contentType: 'video/mp4' };
+    const load = vi.fn()
+      .mockResolvedValueOnce({ ...video, url: 'blob:first', expiresAt: new Date(Date.now() + 1_500).toISOString() })
+      .mockResolvedValueOnce({ ...video, url: 'blob:refresh', expiresAt: new Date(Date.now() + 60_000).toISOString() });
+    const view = render(<CurrentQuestionMedia roomId="room-a" media={video} load={load} />);
+    await act(async () => { await Promise.resolve(); });
+    const original = screen.getByTestId('question-media').querySelector('video')!;
+    await act(async () => { await vi.advanceTimersByTimeAsync(600); });
+    expect(load).toHaveBeenCalledTimes(2);
+    expect((screen.getByTestId('question-media')).querySelector('video')).toBe(original);
+    expect(original).toHaveAttribute('src', 'blob:first');
+    expect(revoke).toHaveBeenCalledWith('blob:refresh');
+    view.rerender(<CurrentQuestionMedia roomId="room-a" media={{ ...video, mediaId: 'goal-quiz-2026:001:clean', assetSha256: 'd'.repeat(64) }} load={vi.fn().mockResolvedValue({ ...video, mediaId: 'goal-quiz-2026:001:clean', assetSha256: 'd'.repeat(64), url: 'blob:clear', expiresAt: new Date(Date.now() + 60_000).toISOString() })} />);
+    await act(async () => { await Promise.resolve(); });
+    const clear = screen.getByTestId('question-media').querySelector('video')!;
+    expect(clear).toHaveAttribute('src', 'blob:clear');
+    expect(clear).not.toBe(original);
+  } finally {
+    vi.useRealTimers();
+    delete (URL as typeof URL & { revokeObjectURL?: () => void }).revokeObjectURL;
+  }
+});
+
 it('rejects expired or mismatched grants without displaying or rapidly refreshing them', async () => {
   const load = vi.fn().mockResolvedValue({ mediaId: 'v18-011-002', assetSha256: 'b'.repeat(64), url: 'blob:wrong', expiresAt: new Date(Date.now() - 1).toISOString() });
   render(<CurrentQuestionMedia roomId="room-a" media={media} load={load} />);
@@ -48,14 +100,13 @@ it('rejects expired or mismatched grants without displaying or rapidly refreshin
   expect(load).toHaveBeenCalledTimes(1);
 });
 
-it('requires a current authoritative host/audience surface before rendering image media', () => {
-  expect(canRenderCurrentQuestionMedia({ audienceQuestionVisible: true, authoritative: true, connection: 'connected', role: 'host', state: 'PAUSED', surface: 'host' })).toBe(true);
-  expect(canRenderCurrentQuestionMedia({ audienceQuestionVisible: true, authoritative: true, connection: 'connected', role: 'audience', state: 'QUESTION_READING', surface: 'display' })).toBe(true);
+it('keeps current media independent of the audience question-text toggle', () => {
+  expect(canRenderCurrentQuestionMedia({ authoritative: true, connection: 'connected', role: 'host', state: 'PAUSED', surface: 'host' })).toBe(true);
+  expect(canRenderCurrentQuestionMedia({ authoritative: true, connection: 'connected', role: 'audience', state: 'QUESTION_READING', surface: 'display' })).toBe(true);
   for (const patch of [
     { authoritative: false },
     { connection: 'offline' },
     { role: 'player' as const },
-    { audienceQuestionVisible: false },
     { state: 'CELL_SELECTION' },
-  ]) expect(canRenderCurrentQuestionMedia({ audienceQuestionVisible: true, authoritative: true, connection: 'connected', role: 'audience', state: 'QUESTION_READING', surface: 'display', ...patch })).toBe(false);
+  ]) expect(canRenderCurrentQuestionMedia({ authoritative: true, connection: 'connected', role: 'audience', state: 'QUESTION_READING', surface: 'display', ...patch })).toBe(false);
 });

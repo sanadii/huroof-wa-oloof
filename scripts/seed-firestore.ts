@@ -41,7 +41,11 @@ async function main() {
   const catalog = JSON.parse(await readFile(resolve(ROOT, 'content/categories/categories.json'), 'utf8')) as { categories?: Array<{ id?: unknown; displayNameAr?: unknown }> };
   for (const group of chunks((catalog.categories ?? []).flatMap((category) => typeof category.id === 'string' && typeof category.displayNameAr === 'string' && category.displayNameAr.trim() ? [{ id: category.id, displayNameAr: category.displayNameAr.trim() }] : []))) {
     const batch = database.batch();
-    for (const category of group) batch.set(database.doc(`categories/${category.id}`), { displayNameAr: category.displayNameAr, seededDemoCatalog: true });
+    for (const category of group) {
+      const data = { id: category.id, labelAr: category.displayNameAr, displayNameAr: category.displayNameAr, seededDemoCatalog: true };
+      batch.set(database.doc(`categories/${category.id}`), data);
+      batch.create(database.doc(`releases/${plan.releaseId}/catalogCategories/${category.id}`), data);
+    }
     await batch.commit();
   }
   await root.create({ releaseId: plan.releaseId, immutable: true, demoFixture: true, unreviewed: true, approvedCount: plan.documents.length, documentRootSha256: plan.documentRootSha256, distinctLetters: plan.letters });

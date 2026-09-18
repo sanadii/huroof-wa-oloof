@@ -2,6 +2,9 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 const firebaseMocks = vi.hoisted(() => ({
   linkWithPopup: vi.fn(),
+  createUserWithEmailAndPassword: vi.fn(),
+  sendEmailVerification: vi.fn(),
+  signInWithEmailAndPassword: vi.fn(),
   signInWithPopup: vi.fn(),
   signOut: vi.fn(),
 }));
@@ -9,12 +12,15 @@ const firebaseMocks = vi.hoisted(() => ({
 vi.mock('firebase/auth', async (importOriginal) => ({
   ...(await importOriginal<typeof import('firebase/auth')>()),
   GoogleAuthProvider: class GoogleAuthProvider {},
+  createUserWithEmailAndPassword: firebaseMocks.createUserWithEmailAndPassword,
   linkWithPopup: firebaseMocks.linkWithPopup,
+  sendEmailVerification: firebaseMocks.sendEmailVerification,
+  signInWithEmailAndPassword: firebaseMocks.signInWithEmailAndPassword,
   signInWithPopup: firebaseMocks.signInWithPopup,
   signOut: firebaseMocks.signOut,
 }));
 
-import { authErrorMessage, signInOrLinkGoogle, signOutFirebaseUser } from '../../src/features/auth/auth-service';
+import { authErrorMessage, createEmailPasswordAccount, signInOrLinkGoogle, signInWithEmailPassword, signOutFirebaseUser } from '../../src/features/auth/auth-service';
 
 const user = (uid: string, isAnonymous: boolean) => ({
   uid,
@@ -42,12 +48,14 @@ describe('Google auth service', () => {
     expect(firebaseMocks.signInWithPopup).not.toHaveBeenCalled();
   });
 
-  it('keeps the guest path on a credential collision and gives Arabic guidance', async () => {
+  it('switches a guest session to its existing Google account on a credential collision', async () => {
     const guest = user('guest-uid', true);
+    const googleUser = user('google-user', false);
     firebaseMocks.linkWithPopup.mockRejectedValue({ code: 'auth/credential-already-in-use' });
-    await expect(signInOrLinkGoogle({ currentUser: guest } as never)).rejects.toMatchObject({ code: 'auth/credential-already-in-use' });
-    expect(firebaseMocks.signInWithPopup).not.toHaveBeenCalled();
-    expect(authErrorMessage({ code: 'auth/credential-already-in-use' }).message).toContain('بقيت جلستك الضيف كما هي');
+    firebaseMocks.signInWithPopup.mockResolvedValue({ user: googleUser });
+    await expect(signInOrLinkGoogle({ currentUser: guest } as never)).resolves.toBe(googleUser);
+    expect(firebaseMocks.signOut).toHaveBeenCalledOnce();
+    expect(firebaseMocks.signInWithPopup).toHaveBeenCalledOnce();
     expect(authErrorMessage({ code: 'auth/popup-blocked' }).message).toContain('حظر المتصفح');
   });
 
@@ -57,5 +65,21 @@ describe('Google auth service', () => {
     expect(firebaseMocks.linkWithPopup).not.toHaveBeenCalled();
     await signOutFirebaseUser({} as never);
     expect(firebaseMocks.signOut).toHaveBeenCalledOnce();
+  });
+});
+
+describe('email/password auth service', () => {
+  it('signs in using the trimmed email address', async () => {
+    const signedIn = user('password-user', false);
+    firebaseMocks.signInWithEmailAndPassword.mockResolvedValue({ user: signedIn });
+    await expect(signInWithEmailPassword({} as never, ' admin@example.test ', 'password')).resolves.toBe(signedIn);
+    expect(firebaseMocks.signInWithEmailAndPassword).toHaveBeenCalledWith(expect.anything(), 'admin@example.test', 'password');
+  });
+
+  it('creates an account and sends a verification email', async () => {
+    const created = user('password-user', false);
+    firebaseMocks.createUserWithEmailAndPassword.mockResolvedValue({ user: created });
+    await expect(createEmailPasswordAccount({} as never, 'admin@example.test', 'password')).resolves.toBe(created);
+    expect(firebaseMocks.sendEmailVerification).toHaveBeenCalledWith(created);
   });
 });

@@ -8,7 +8,7 @@ import {
   nearestCell,
   type BoardCell,
 } from "../../src/features/board/game-board";
-import { activeLobbyDestination, canDispatchLobbyStart, currentRoomDestination, previewBoardCells, resultRouteState, TeamScoreCard } from "../../src/routes/GameRoutes";
+import { activeLobbyDestination, boardPresentationTransition, canDispatchLobbyStart, currentRoomDestination, previewBoardCells, resultRouteState, TeamScoreCard } from "../../src/routes/GameRoutes";
 
 const cells: BoardCell[] = Array.from({ length: 25 }, (_, index) => ({
   id: `cell-${index % 5}-${Math.floor(index / 5)}`,
@@ -20,6 +20,37 @@ const cells: BoardCell[] = Array.from({ length: 25 }, (_, index) => ({
 
 const withOwners = (ids: string[], owner: NonNullable<BoardCell["owner"]>) =>
   cells.map((cell) => (ids.includes(cell.id) ? { ...cell, owner } : cell));
+
+it("gives each surrounding hexagon exactly one team color without diagonal seams", () => {
+  const { container } = render(<GameBoard cells={cells} />);
+  const enclosure = container.querySelector(".game-board__enclosure")!;
+  expect(enclosure.querySelectorAll("path")).toHaveLength(0);
+  const tiles = enclosure.querySelectorAll("[data-surround-cell]");
+  expect(tiles.length).toBeGreaterThan(0);
+  for (const tile of tiles) {
+    const [q, r] = tile.getAttribute("data-surround-cell")!.split(",").map(Number);
+    expect(q < 0 || q > 4 || r < 0 || r > 4).toBe(true);
+    const row = r + (q % 2 < 0 ? -1 : 0);
+    const axis = row < 0 || row > 4 ? "vertical" : "horizontal";
+    expect(tile).toHaveClass(`game-board__enclosure-section--${axis}`);
+    expect(tile.getAttribute("points")!.split(" ")).toHaveLength(6);
+  }
+});
+it("cuts the upper and lower surround only at hexagon centers or flat edges", () => {
+  const { container } = render(<GameBoard cells={cells} />);
+  const frame = container.querySelector(".game-board__enclosure-outline")!;
+  const top = Number(frame.getAttribute("y"));
+  const bottom = top + Number(frame.getAttribute("height"));
+  for (const tile of container.querySelectorAll("[data-surround-cell]")) {
+    const ys = tile.getAttribute("points")!.split(" ").map((point) => Number(point.split(",")[1]));
+    const min = Math.min(...ys), max = Math.max(...ys);
+    for (const cut of [top, bottom]) {
+      if (cut > min + .001 && cut < max - .001) {
+        expect(cut).toBeCloseTo((min + max) / 2, 5);
+      }
+    }
+  }
+});
 
 it("keeps axial keyboard adjacency in the SVG board", () => {
   expect(nearestCell(cells, 2, 2, "ArrowLeft")?.id).toBe("cell-1-2");
@@ -143,7 +174,9 @@ it("keeps flat gameplay cells unchanged unless the isolated tactile presentation
   expect(tactile.container.querySelectorAll('[data-material-layer="tactile-top-highlight"]')).toHaveLength(25);
   expect(tactile.container.querySelectorAll('[data-material-layer="tactile-rail-depth"]')).toHaveLength(4);
   expect(tactile.container.querySelectorAll('.game-board__cell-inset-outline')).toHaveLength(0);
-  expect(tactile.container.querySelectorAll("defs, linearGradient")).toHaveLength(9);
+  expect(tactile.container.querySelectorAll("linearGradient")).toHaveLength(8);
+  expect(tactile.container.querySelectorAll('[data-material-layer="surround-inset-groove"]')).toHaveLength(56);
+  expect(tactile.container.querySelector('[data-material-layer="tactile-shell"]')).toHaveAttribute("filter");
   for (const rail of ["horizontal-start", "horizontal-end", "vertical-start", "vertical-end"]) {
     expect(screen.getByTestId(`board-rail-${rail}`)).toHaveAttribute("data-rail-shape", "fitted-boundary");
   }
@@ -185,7 +218,7 @@ it("uses no SVG gradients or material-depth elements", () => {
       <GameBoard cells={cells} />
     </>,
   );
-  expect(container.querySelectorAll("defs, linearGradient, stop")).toHaveLength(
+  expect(container.querySelectorAll("linearGradient, stop")).toHaveLength(
     0,
   );
   expect(
@@ -314,7 +347,55 @@ it("pulses each newly authoritative winning path cell exactly three times in pat
   expect(screen.getByTestId("cell-0-1")).toBe(firstPulse);
 });
 
-it("uses the fixed broadcast score label while keeping round markers on the host surface", () => {
+it("applies route-authorized selection and award effects without moving board hit targets", () => {
+  const steady = { roomId: "room-1", round: 1, phase: "CELL_SELECTION", revision: 4, eventKey: "room-1:4:steady" } as const;
+  const entrance = { ...steady, revision: 4.5, event: "round-entry" as const, eventKey: "room-1:4.5:round-entry" };
+  const selection = { ...steady, revision: 5, event: "selection" as const, eventCellId: "cell-2-2", eventKey: "room-1:5:selection:cell-2-2" };
+  const award = { ...steady, revision: 6, event: "award" as const, eventCellId: "cell-2-2", eventKey: "room-1:6:award:cell-2-2", eventTeam: "horizontal" as const };
+  const { rerender } = render(<GameBoard cells={cells} presentation="tactile" presentationContext={steady} selectable />);
+  const target = screen.getByTestId("cell-2-2");
+  const before = target.getAttribute("style");
+  rerender(<GameBoard cells={cells} presentation="tactile" presentationContext={entrance} selectable />);
+  expect(document.querySelector(".game-board-wrap--round-enter")).not.toBeNull();
+  rerender(<GameBoard cells={cells} presentation="tactile" presentationContext={selection} selectable />);
+  expect(document.querySelector(".game-board-wrap--round-enter")).toBeNull();
+  expect(document.querySelector(".game-board__cell--selection")).not.toBeNull();
+  expect(screen.getByTestId("cell-2-2").getAttribute("style")).toBe(before);
+  rerender(<GameBoard cells={withOwners(["cell-2-2"], "horizontal")} presentation="tactile" presentationContext={award} selectable />);
+  expect(document.querySelector(".game-board__cell--selection")).toBeNull();
+  expect(document.querySelector(".game-board__cell--awarded")).not.toBeNull();
+});
+
+it("suppresses cached, paused, correction, and non-increasing projection transitions", () => {
+  const projection = (state: "ROUND_SETUP" | "CELL_SELECTION" | "FIRST_ANSWER" | "CORRECTION" | "PAUSED", options: Partial<{ owner: "horizontal"; active: string; winner: string[]; hold: true }> = {}) => ({
+    room: { roomCode: "T19", state, readyCount: 2, memberCount: 2 },
+    board: cells.map((cell) => cell.id === options.active && options.owner ? { ...cell, owner: options.owner } : cell),
+    ...(options.active ? { activeCellId: options.active } : {}),
+    ...(options.winner ? { winningPath: options.winner } : {}),
+    ...(options.hold ? { contentHold: { reason: "CONTENT_EXHAUSTED" as const, operation: "SELECT_CELL" as const } } : {}),
+  });
+  const previous = { roomId: "room-1", revision: 7, role: "host" as const, serverTime: "2026-01-01", authoritative: false, projection: projection("ROUND_SETUP") };
+  const live = { ...previous, authoritative: true, revision: 8, projection: projection("CELL_SELECTION") };
+  expect(boardPresentationTransition(previous, live, true)).toMatchObject({ suppressEffects: true });
+  const paused = { ...live, revision: 9, projection: projection("PAUSED") };
+  expect(boardPresentationTransition(live, paused, true)).toMatchObject({ suppressEffects: true });
+  const correction = { ...live, revision: 9, projection: projection("CORRECTION") };
+  expect(boardPresentationTransition(live, correction, true)).toMatchObject({ suppressEffects: true });
+  expect(boardPresentationTransition(live, { ...live, revision: 7 }, true)).toMatchObject({ suppressEffects: true });
+});
+
+it("emits a genuine post-answer award, but lets a new winning path supersede it", () => {
+  const base = {
+    roomId: "room-1", revision: 7, role: "host" as const, serverTime: "2026-01-01", authoritative: true,
+    projection: { room: { roomCode: "T19", state: "FIRST_ANSWER" as const, readyCount: 2, memberCount: 2 }, activeCellId: "cell-0-0", answeringTeam: "horizontal" as const, board: cells },
+  };
+  const awarded = { ...base, revision: 8, projection: { ...base.projection, room: { ...base.projection.room, state: "CELL_SELECTION" as const }, board: withOwners(["cell-0-0"], "horizontal") } };
+  expect(boardPresentationTransition(base, awarded, true)).toMatchObject({ event: "award", eventCellId: "cell-0-0" });
+  const victory = { ...awarded, revision: 9, projection: { ...awarded.projection, winningPath: ["cell-0-0"] } };
+  expect(boardPresentationTransition(base, victory, true)).toMatchObject({ event: "victory" });
+});
+
+it("uses the shared compact card and actual team name on the audience surface", () => {
   render(
     <TeamScoreCard
       axis="vertical"
@@ -329,11 +410,11 @@ it("uses the fixed broadcast score label while keeping round markers on the host
       variant="stage"
     />,
   );
-  expect(screen.getByText("الأخضر")).toBeInTheDocument();
-  expect(screen.queryByText("اسم مخصص")).toBeNull();
-  expect(document.querySelectorAll(".stage-score__medallion")).toHaveLength(1);
+  expect(screen.getByText(/اسم مخصص/)).toBeInTheDocument();
+  expect(document.querySelector(".team-score-card")).not.toBeNull();
+  expect(document.querySelectorAll(".stage-score__medallion")).toHaveLength(0);
   expect(document.querySelector(".stage-score__team")).toHaveTextContent(
-    "الأخضر",
+    "اسم مخصص",
   );
   expect(screen.getByText("الجولات")).toBeInTheDocument();
   expect(screen.getByText("النقاط")).toBeInTheDocument();
@@ -342,7 +423,7 @@ it("uses the fixed broadcast score label while keeping round markers on the host
   expect(document.querySelectorAll(".round-markers__marker")).toHaveLength(0);
 });
 
-it("shows five real round markers in the host score card", () => {
+it("keeps host score totals without round circles", () => {
   render(
     <TeamScoreCard
       axis="vertical"
@@ -356,13 +437,8 @@ it("shows five real round markers in the host score card", () => {
       variant="host"
     />,
   );
-  expect(document.querySelectorAll(".round-markers__marker")).toHaveLength(5);
-  expect(document.querySelector('[data-round="1"]')).toHaveClass(
-    "round-markers__marker--won",
-  );
-  expect(document.querySelector('[data-round="3"]')).toHaveClass(
-    "round-markers__marker--current",
-  );
+  expect(document.querySelectorAll(".round-markers__marker")).toHaveLength(0);
+  expect(document.querySelector(".team-score-card .team-score__rounds strong")).toHaveTextContent("1");
 });
 
 it("keeps both generated background fields at their recorded dimensions and production weights", async () => {

@@ -25,7 +25,7 @@ describe('EntryRoute', () => {
   it('normalizes a room code to uppercase LTR ASCII before continuing to the room name step', async () => {
     const user = userEvent.setup();
     renderJoinJourney();
-    expect(document.title).toBe('الدخول | تحدي الخلية');
+    expect(document.title).toBe('الرئيسية | الخلية');
     const input = screen.getByLabelText('رمز الغرفة');
     await user.type(input, 'ab-12 عرب c');
     expect(input).toHaveValue('AB12C');
@@ -85,8 +85,7 @@ describe('EntryRoute', () => {
     expect(screen.getByRole('button', { name: 'دخول الغرفة' })).toBeDisabled();
   });
 
-  it('keeps creation separate from joining and carries the selected game kind into setup', async () => {
-    const user = userEvent.setup();
+  it('keeps creation separate from joining and sends board selection to setup', () => {
     render(<ThemeProvider><MemoryRouter><EntryRoute /></MemoryRouter></ThemeProvider>);
     expect(Array.from(document.querySelectorAll('[data-home-region]')).map((node) => node.getAttribute('data-home-region'))).toEqual([
       'header',
@@ -95,24 +94,31 @@ describe('EntryRoute', () => {
       'category-chooser',
       'footer',
     ]);
-    expect(screen.getByRole('region', { name: 'أنشئ مباراة جديدة' })).not.toContainElement(screen.getByLabelText('رمز الغرفة'));
-    expect(screen.getByRole('region', { name: 'انضم إلى غرفة' })).toContainElement(screen.getByLabelText('رمز الغرفة'));
-    expect(screen.getByRole('radio', { name: 'الحروف' })).toBeChecked();
-    expect(screen.getByRole('link', { name: 'أنشئ مباراة' })).toHaveAttribute('href', '/host/new?kind=huroof&mode=classic');
-    await user.click(screen.getByRole('radio', { name: 'الفئات' }));
-    expect(screen.getByRole('link', { name: 'أنشئ مباراة' })).toHaveAttribute('href', '/host/new?kind=categories&mode=classic');
+    expect(screen.getByRole('region', { name: 'انضم إلى غرفة فريقك' })).toContainElement(screen.getByLabelText('رمز الغرفة'));
+    expect(screen.queryByRole('radiogroup', { name: 'اختر نوع اللوح' })).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'ابدأ مباراة' })).toHaveAttribute('href', '/host/new');
     expect(screen.getByRole('link', { name: 'تسجيل الدخول' })).toHaveAttribute('href', '/login');
     expect(screen.queryByTestId('spatial-board-scene')).not.toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'تحدي الخلية' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'اجمع فريقك وابدأ التحدي' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'الخلية' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /قواعد اللعب/ })).toHaveAttribute('href', '/how-to-play');
-    expect(screen.getAllByRole('link', { name: /قيد الإعداد/ })).toHaveLength(8);
+    expect(screen.getByRole('heading', { name: 'اختر نقطة انطلاق للإعداد' })).toBeVisible();
   });
 
   it('keeps category recovery keyboard-operable for the documented inventory', async () => {
     const user = userEvent.setup();
     render(<ThemeProvider><MemoryRouter><EntryRoute /></MemoryRouter></ThemeProvider>);
-    expect(screen.getAllByRole('link', { name: /قيد الإعداد/ })).toHaveLength(8);
     await user.type(screen.getByRole('searchbox', { name: 'تصفية الفئات' }), 'لا تطابق');
     expect(screen.getByText('لا توجد فئات مطابقة للبحث. امسح البحث لعرض الفئات المتاحة.')).toBeInTheDocument();
+  });
+
+  it('opens the compact navigation control on small viewports', async () => {
+    const user = userEvent.setup();
+    render(<ThemeProvider><MemoryRouter><EntryRoute /></MemoryRouter></ThemeProvider>);
+    const menu = screen.getByRole('button', { name: 'القائمة' });
+    expect(menu).toHaveAttribute('aria-expanded', 'false');
+    await user.click(menu);
+    expect(menu).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByRole('navigation', { name: 'التنقل الرئيسي' })).toHaveClass('is-open');
   });
 });

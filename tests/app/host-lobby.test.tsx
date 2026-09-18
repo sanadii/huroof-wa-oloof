@@ -1,7 +1,20 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { createRef } from 'react';
+import { MemoryRouter } from 'react-router-dom';
 import { expect, it, vi } from 'vitest';
-import { applyLocalIntentResponse, audienceQuestionBandVisible, canManageTeamsInState, CorrectionDialog, createGameIntentId, HostActions, HostJoinDialog, HostLobbyControls, HostPauseAction, HostVisibilityControls, isReadOnlyFixtureRoom, playerJoinUrl, shouldShowHostAnswers } from '../../src/routes/GameRoutes';
+import { applyLocalIntentResponse, audienceQuestionBandVisible, canManageTeamsInState, CorrectionDialog, createGameIntentId, HostActions, HostJoinDialog, HostJoinInlineQr, HostLobbyControls, HostPauseAction, HostVisibilityControls, isReadOnlyFixtureRoom, playerJoinUrl, shouldShowHostAnswers } from '../../src/routes/GameRoutes';
+
+const hostJoin = (overrides = {}) => ({
+  copyLink: vi.fn().mockResolvedValue(undefined),
+  copyStatus: '',
+  joinUrl: 'https://play.example.test/?room=ABC123',
+  origin: 'https://play.example.test',
+  originIsInvalid: false,
+  qrDataUrl: 'data:image/png;base64,player-join-qr',
+  qrError: '',
+  setOrigin: vi.fn(),
+  ...overrides,
+});
 
 
 it('treats an HTTP-successful stale local intent as a failed action after refreshing its projection', () => {
@@ -88,23 +101,72 @@ it('keeps identified roster capsules unavailable while offline or busy', () => {
 
 it('opens and dismisses the host QR join dialog used from the waiting room', () => {
   const onDismiss = vi.fn();
-  render(<HostJoinDialog onDismiss={onDismiss} open roomCode="ABC123" />);
+  const join = hostJoin();
+  render(<HostJoinDialog join={join} onDismiss={onDismiss} open />);
 
   expect(screen.getByRole('dialog')).toHaveAttribute('open');
   expect(screen.getByRole('heading', { name: 'امسح رمز QR للانضمام' })).toBeVisible();
+  expect(screen.getByRole('img', { name: 'رمز QR لرابط انضمام اللاعب' })).toHaveAttribute('src', join.qrDataUrl);
+  fireEvent.change(screen.getByLabelText('عنوان الموقع للاعبين'), { target: { value: 'https://join.example.test' } });
+  expect(join.setOrigin).toHaveBeenCalledWith('https://join.example.test');
   fireEvent.click(screen.getByRole('button', { name: 'إغلاق رمز الانضمام' }));
   expect(onDismiss).toHaveBeenCalledTimes(1);
+});
+
+it('keeps the lobby QR scannable for a public origin and opens its shared configuration', () => {
+  const onOpen = vi.fn();
+  const join = hostJoin();
+  render(<HostJoinInlineQr join={join} onOpen={onOpen} />);
+
+  expect(screen.getByRole('img', { name: 'رمز QR لرابط انضمام اللاعب' })).toHaveAttribute('src', join.qrDataUrl);
+  expect(screen.getByText('امسح الرمز للانضمام إلى هذه المباراة.')).toBeVisible();
+  fireEvent.click(screen.getByRole('button', { name: 'تكبير رمز QR للانضمام' }));
+  expect(onOpen).toHaveBeenCalledTimes(1);
+});
+
+it('asks for a reachable origin instead of showing a localhost QR in the lobby', () => {
+  render(
+    <HostJoinInlineQr
+      join={hostJoin({ joinUrl: undefined, origin: 'http://127.0.0.1:8787', originIsInvalid: true, qrDataUrl: '' })}
+      onOpen={vi.fn()}
+    />,
+  );
+
+  expect(screen.queryByRole('img', { name: 'رمز QR لرابط انضمام اللاعب' })).not.toBeInTheDocument();
+  expect(screen.getByText('عنوان الموقع غير صالح للهاتف. اضغط لتعديله.')).toBeVisible();
+});
+
+it('shows an explicit inline QR failure instead of leaving a loading state behind', () => {
+  render(
+    <HostJoinInlineQr
+      join={hostJoin({ qrDataUrl: '', qrError: 'تعذر إنشاء رمز QR محلياً. يمكنك نسخ الرابط.' })}
+      onOpen={vi.fn()}
+    />,
+  );
+
+  expect(screen.getByRole('alert')).toHaveTextContent('تعذر إنشاء الرمز');
+  expect(screen.getByRole('button', { name: 'فتح إعدادات رمز QR بعد تعذر إنشائه' })).toBeVisible();
 });
 
 it('renders the two host visibility controls with an available local answer switch and a disabled shared setting state', () => {
   const setAnswer = vi.fn();
   const setAudienceQuestion = vi.fn();
   render(<HostVisibilityControls audienceQuestionVisible={true} disabled onAudienceQuestionChange={setAudienceQuestion} onHostAnswerChange={setAnswer} showHostAnswer={true} />);
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  const options = screen.getByRole('button', { name: 'خيارات' });
+  fireEvent.click(options);
+  expect(screen.getByRole('dialog', { name: 'خيارات العرض' })).toBeVisible();
   expect(screen.getByLabelText('إظهار الإجابة للمضيف')).toBeChecked();
   expect(screen.getByLabelText('إظهار السؤال على شاشة العرض')).toBeChecked();
   expect(screen.getByLabelText('إظهار السؤال على شاشة العرض')).toBeDisabled();
   fireEvent.click(screen.getByLabelText('إظهار الإجابة للمضيف'));
   expect(setAnswer).toHaveBeenCalledWith(false);
+  fireEvent.click(screen.getByRole('button', { name: 'إغلاق' }));
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  expect(options).toHaveFocus();
+  fireEvent.click(options);
+  fireEvent(screen.getByRole('dialog'), new Event('cancel', { bubbles: true, cancelable: true }));
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
 });
 
 it('hides both private answer fields locally and reserves the audience question area when its shared setting is off', () => {
@@ -257,21 +319,50 @@ it('opens the question and buzzer from cell selection without manual host action
   expect(container.querySelector('.control-grid .host-controls__pause')).toBeNull();
 });
 
-it('makes terminal failure a single safe replacement decision and makes exhaustion a truthful end-only hold', () => {
+it('offers a fresh same-cell question or a board return after nobody answers, and permits ending only while paused', async () => {
   const action = vi.fn();
   const teams = { horizontal: 'الأحمر', vertical: 'الأخضر' };
   const { rerender } = render(<HostActions action={action} playerCount={2} state="QUESTION_FAILED" teams={teams} />);
 
-  expect(screen.getByRole('status')).toHaveTextContent('لن تعيد السؤال المكشوف');
-  fireEvent.click(screen.getByRole('button', { name: 'متابعة واستبدال الخلية' }));
+  expect(screen.getByRole('status')).toHaveTextContent('سؤالاً جديدًا في حرفًا نفسها');
+  fireEvent.click(screen.getByRole('button', { name: 'سؤال جديد في حرفًا نفسها' }));
   expect(action).toHaveBeenCalledWith('RETRY_CELL');
-  expect(screen.queryByRole('button', { name: 'أعد الخلية' })).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: 'غيّر حرفًا والعودة إلى اللوحة' }));
+  expect(action).toHaveBeenLastCalledWith('RETURN_CELL');
+  expect(screen.queryByRole('button', { name: 'إنهاء المباراة كاملةً بلا فائز' })).not.toBeInTheDocument();
+  expect(screen.getByTestId('end-without-winner-dialog')).not.toHaveAttribute('open');
+  expect(action).toHaveBeenCalledTimes(2);
 
-  rerender(<HostActions action={action} contentHold={{ reason: 'CONTENT_EXHAUSTED', operation: 'SELECT_CELL' }} playerCount={2} state="CELL_SELECTION" teams={teams} />);
+  rerender(<><HostActions action={action} contentHold={{ reason: 'CONTENT_EXHAUSTED', operation: 'SELECT_CELL' }} playerCount={2} state="CELL_SELECTION" teams={teams} /><HostPauseAction action={action} contentHold state="CELL_SELECTION" /></>);
   expect(screen.getByRole('status')).toHaveTextContent('لا تتغير ملكية الخلية');
   expect(screen.queryByRole('button', { name: 'اختر حرفًا من اللوحة' })).not.toBeInTheDocument();
-  fireEvent.click(screen.getByRole('button', { name: 'إنهاء المباراة بلا فائز' }));
+  fireEvent.click(screen.getByRole('button', { name: 'إيقاف مؤقت' }));
+  expect(action).toHaveBeenLastCalledWith('PAUSE');
+
+  rerender(<><HostActions action={action} contentHold={{ reason: 'CONTENT_EXHAUSTED', operation: 'SELECT_CELL' }} playerCount={2} state="PAUSED" teams={teams} /><HostPauseAction action={action} contentHold state="PAUSED" /></>);
+  expect(screen.queryByRole('button', { name: 'استئناف' })).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: 'إنهاء المباراة كاملةً بلا فائز' }));
+  fireEvent.click(screen.getByRole('button', { name: 'إنهاء المباراة كاملةً' }));
   expect(action).toHaveBeenLastCalledWith('END_WITHOUT_WINNER');
+});
+
+it('gives a completed host a same-settings new-match path', () => {
+  const teams = { horizontal: 'الأحمر', vertical: 'الأخضر' };
+  render(
+    <MemoryRouter>
+      <HostActions
+        action={vi.fn()}
+        endedWithoutWinner
+        newMatchHref="/host/new?kind=categories&mode=fast&category=tahadani-006"
+        playerCount={2}
+        state="MATCH_COMPLETE"
+        teams={teams}
+      />
+    </MemoryRouter>,
+  );
+
+  expect(screen.getByRole('status')).toHaveTextContent('انتهت المباراة بلا فائز');
+  expect(screen.getByRole('link', { name: 'مباراة جديدة بالإعدادات نفسها' })).toHaveAttribute('href', '/host/new?kind=categories&mode=fast&category=tahadani-006');
 });
 
 it('uses category-specific selection wording without changing the Huroof host prompt', () => {

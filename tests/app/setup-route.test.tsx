@@ -3,7 +3,14 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { ThemeProvider } from '../../src/app/ThemeProvider';
+
+vi.mock('../../src/features/game/runtime', () => ({
+  gameRuntime: { kind: 'local', createRoom: vi.fn() },
+}));
+
 import { HostNewRoute, QuestionsRoute, readableError } from '../../src/routes/GameRoutes';
+
+const categoryButtons = () => Array.from(document.querySelectorAll<HTMLButtonElement>('.category-choice'));
 
 afterEach(() => {
   vi.restoreAllMocks();
@@ -17,16 +24,16 @@ beforeEach(() => {
 it('shows only available categories and excludes unavailable content from browsing', async () => {
   const user = userEvent.setup();
   render(<ThemeProvider><MemoryRouter><HostNewRoute /></MemoryRouter></ThemeProvider>);
-  await waitFor(() => expect(document.title).toBe('إنشاء مباراة | تحدي الخلية'));
-  const category = screen.getAllByRole('button', { pressed: false })[0];
-  expect(screen.getAllByRole('img')).toHaveLength(8);
+  await waitFor(() => expect(document.title).toBe('إنشاء مباراة | الخلية'));
+  const category = categoryButtons()[0];
+  expect(screen.getAllByRole('img')).toHaveLength(9);
   expect(screen.queryByRole('button', { name: /غير متاحة للعب بعد/ })).not.toBeInTheDocument();
   expect(category).toHaveTextContent('معلومات عامة');
   expect(category).not.toHaveTextContent('جاهزية الأسئلة');
-  expect(screen.getByRole('option', { name: 'جغرافيا ودول (3)' })).toBeInTheDocument();
-  expect(screen.getByRole('option', { name: 'علوم وطبيعة (3)' })).toBeInTheDocument();
-  expect(screen.getByRole('option', { name: 'ثقافة وألغاز (2)' })).toBeInTheDocument();
-  expect(screen.queryByRole('option', { name: /رياضة/ })).not.toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'جغرافيا ودول 3' })).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'علوم وطبيعة 3' })).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'ثقافة وألغاز 2' })).toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: /رياضة/ })).not.toBeInTheDocument();
   await user.click(category);
   expect(category).toHaveAttribute('aria-pressed', 'true');
   expect(category).toHaveClass('is-selected');
@@ -38,14 +45,50 @@ it('replaces legacy setup cards with the metadata-only local DB inventory', asyn
     source: 'local_firestore_import',
     huroofAvailable: true,
     categories: [
-      { id: 'huroof-068', labelAr: 'منتخب الكويت', sourceOnly: true, categoryGameEligible: true },
-      { id: 'tahadani-015', labelAr: 'أمثال وغطاوي', sourceOnly: false, categoryGameEligible: true },
+      { id: 'huroof-068', labelAr: 'منتخب الكويت', sourceOnly: true, questionCount: 14, heldQuestionCount: 0, huroofQuestionCount: 14, availability: 'ready', categoryGameEligible: true },
+      { id: 'tahadani-015', labelAr: 'أمثال وغطاوي', sourceOnly: false, questionCount: 14, heldQuestionCount: 0, huroofQuestionCount: 14, availability: 'ready', categoryGameEligible: true },
     ],
   })));
   render(<ThemeProvider><MemoryRouter><HostNewRoute /></MemoryRouter></ThemeProvider>);
   await waitFor(() => expect(screen.getByRole('button', { name: /منتخب الكويت/ })).toBeVisible());
-  expect(screen.getByRole('option', { name: 'كل الموضوعات (2)' })).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'كل الموضوعات 2' })).toBeInTheDocument();
   expect(screen.queryByRole('button', { name: /معلومات عامة/ })).not.toBeInTheDocument();
+});
+
+it('hides local categories that cannot play the selected board', async () => {
+  vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(JSON.stringify({
+    source: 'local_sqlite_import',
+    huroofAvailable: true,
+    categories: [
+      { id: 'tahadani-ready', labelAr: 'فئة جاهزة', sourceOnly: true, questionCount: 14, heldQuestionCount: 0, huroofQuestionCount: 14, availability: 'ready', categoryGameEligible: true },
+      { id: 'tahadani-held', labelAr: 'فئة مؤجلة', sourceOnly: true, questionCount: 0, heldQuestionCount: 6, huroofQuestionCount: 0, availability: 'held_only', categoryGameEligible: false },
+    ],
+  })));
+  render(<ThemeProvider><MemoryRouter><HostNewRoute /></MemoryRouter></ThemeProvider>);
+  await screen.findByRole('button', { name: 'فئة جاهزة — أضف إلى الاختيار' });
+  expect(screen.queryByText('فئة مؤجلة')).not.toBeInTheDocument();
+  await userEvent.click(screen.getByRole('radio', { name: 'الفئات' }));
+  expect(screen.getByRole('button', { name: 'فئة جاهزة — أضف إلى الاختيار' })).toBeEnabled();
+  expect(screen.queryByText('فئة مؤجلة')).not.toBeInTheDocument();
+});
+
+it('filters local categories per board and prunes a deep-linked Huroof-ineligible selection', async () => {
+  vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(JSON.stringify({
+    source: 'local_sqlite_import', huroofAvailable: true,
+    categories: [
+      { id: 'huroof-ready', labelAr: 'تغطية الحروف', sourceOnly: true, questionCount: 1, heldQuestionCount: 0, huroofQuestionCount: 1, availability: 'ready', categoryGameEligible: true },
+      { id: 'categories-only', labelAr: 'فئات فقط', sourceOnly: true, questionCount: 300, heldQuestionCount: 0, huroofQuestionCount: 0, availability: 'ready', categoryGameEligible: true },
+    ],
+  })));
+  const user = userEvent.setup();
+  render(<ThemeProvider><MemoryRouter initialEntries={['/host/new?category=categories-only']}><HostNewRoute /></MemoryRouter></ThemeProvider>);
+
+  expect(await screen.findByRole('button', { name: 'تغطية الحروف — أضف إلى الاختيار' })).toBeVisible();
+  expect(screen.queryByText('فئات فقط')).not.toBeInTheDocument();
+  expect(screen.queryByRole('complementary', { name: 'الفئات المختارة' })).not.toBeInTheDocument();
+
+  await user.click(screen.getByRole('radio', { name: 'الفئات' }));
+  expect(screen.getByRole('button', { name: 'فئات فقط — أضف إلى الاختيار' })).toBeVisible();
 });
 
 it('does not silently show fixture categories after a DB inventory error and can retry', async () => {
@@ -53,7 +96,7 @@ it('does not silently show fixture categories after a DB inventory error and can
     .mockResolvedValueOnce(new Response(JSON.stringify({ error: 'LOCAL_DB_ORIGIN_REQUIRED' }), { status: 400 }))
     .mockResolvedValueOnce(new Response(JSON.stringify({
       source: 'local_firestore_import', huroofAvailable: true,
-      categories: [{ id: 'huroof-068', labelAr: 'منتخب الكويت', sourceOnly: true, categoryGameEligible: true }],
+      categories: [{ id: 'huroof-068', labelAr: 'منتخب الكويت', sourceOnly: true, huroofQuestionCount: 14, categoryGameEligible: true }],
     })));
   render(<ThemeProvider><MemoryRouter><HostNewRoute /></MemoryRouter></ThemeProvider>);
   await screen.findByRole('alert');
@@ -73,6 +116,30 @@ it('disables room creation before transport in an explicit static preview', asyn
   expect(fetchMock).not.toHaveBeenCalled();
 });
 
+it('uses all public preview categories across board modes and preserves a deep-linked category beyond the legacy eight', async () => {
+  vi.stubEnv('VITE_STATIC_PREVIEW', 'true');
+  const fetchMock = vi.spyOn(globalThis, 'fetch');
+  const user = userEvent.setup();
+  render(
+    <ThemeProvider>
+      <MemoryRouter initialEntries={['/host/new?kind=categories&category=huroof-100']}>
+        <HostNewRoute />
+      </MemoryRouter>
+    </ThemeProvider>,
+  );
+
+  expect(await screen.findByRole('button', { name: /كل الموضوعات \d+/ })).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'جغرافيا العالم — محددة' })).toBeVisible();
+  expect(screen.getByText('يعرض هذا الفهرس محتوى معاينة الواجهة فقط، ولا يثبت توفره للعب المنشور.')).toBeVisible();
+  await user.click(screen.getByRole('radio', { name: 'الحروف' }));
+  expect(screen.getByRole('button', { name: 'جغرافيا العالم — محددة' })).toBeVisible();
+  await user.type(screen.getByRole('searchbox', { name: 'تصفية الفئات' }), 'كرة السلة وNBA');
+  expect(screen.queryByText('كرة السلة وNBA')).not.toBeInTheDocument();
+  await user.click(screen.getByRole('radio', { name: 'الفئات' }));
+  expect(screen.getByRole('button', { name: 'كرة السلة وNBA — أضف إلى الاختيار' })).toBeVisible();
+  expect(fetchMock).not.toHaveBeenCalled();
+});
+
 it('replaces a missing category cover with the default image', () => {
   render(<ThemeProvider><MemoryRouter><HostNewRoute /></MemoryRouter></ThemeProvider>);
   fireEvent.error(screen.getByRole('img', { name: 'غلاف فئة معلومات عامة' }));
@@ -83,8 +150,7 @@ it('replaces a missing category cover with the default image', () => {
 it('keeps the current available categories in a removable floating tray', async () => {
   const user = userEvent.setup();
   render(<ThemeProvider><MemoryRouter><HostNewRoute /></MemoryRouter></ThemeProvider>);
-  const categoryButtons = screen.getAllByRole('button', { pressed: false });
-  for (const category of categoryButtons) await user.click(category);
+  for (const category of categoryButtons()) await user.click(category);
 
   expect(screen.getByRole('complementary', { name: 'الفئات المختارة' })).toHaveTextContent('8 / 10');
   expect(screen.getAllByRole('listitem')).toHaveLength(8);
@@ -96,7 +162,7 @@ it('keeps the current available categories in a removable floating tray', async 
 it('keeps keyboard focus in the selection tray after removing a category', async () => {
   const user = userEvent.setup();
   render(<ThemeProvider><MemoryRouter><HostNewRoute /></MemoryRouter></ThemeProvider>);
-  const categories = screen.getAllByRole('button', { pressed: false });
+  const categories = categoryButtons();
   await user.click(categories[0]);
   await user.click(categories[1]);
 
@@ -115,7 +181,7 @@ it('keeps keyboard focus in the selection tray after removing a category', async
 it('filters setup categories by Arabic name without clearing the selected categories', async () => {
   const user = userEvent.setup();
   render(<ThemeProvider><MemoryRouter><HostNewRoute /></MemoryRouter></ThemeProvider>);
-  const firstCategory = screen.getAllByRole('button', { pressed: false })[0];
+  const firstCategory = categoryButtons()[0];
   await user.click(firstCategory);
   await user.type(screen.getByRole('searchbox', { name: 'تصفية الفئات' }), 'تكنولوجيا');
   expect(screen.getByRole('button', { name: /تكنولوجيا/ })).toBeVisible();
@@ -127,10 +193,10 @@ it('filters setup categories by Arabic name without clearing the selected catego
 it('intersects browse filters and resets them without clearing the game selection', async () => {
   const user = userEvent.setup();
   render(<ThemeProvider><MemoryRouter><HostNewRoute /></MemoryRouter></ThemeProvider>);
-  const selected = screen.getAllByRole('button', { pressed: false })[0];
+  const selected = categoryButtons()[0];
   await user.click(selected);
 
-  await user.selectOptions(screen.getByLabelText('الموضوع'), 'geography');
+  await user.click(screen.getByRole('button', { name: /جغرافيا ودول/ }));
   await user.click(screen.getByLabelText('الفئات المختارة فقط'));
   expect(screen.getByText('لا توجد فئات مطابقة. أعد ضبط التصفية لعرض كل الفئات.')).toBeVisible();
 
@@ -148,18 +214,18 @@ it('explains selected-only filtering before a category is selected', async () =>
   expect(screen.getByRole('button', { name: 'إعادة ضبط التصفية' })).toBeEnabled();
 });
 
-it('uses every catalog category by default and can return to that complete set', async () => {
+it('requires an explicit category choice before creating a match', async () => {
   const user = userEvent.setup();
   render(<ThemeProvider><MemoryRouter><HostNewRoute /></MemoryRouter></ThemeProvider>);
-  const firstCategory = screen.getAllByRole('button', { pressed: false })[0];
+  const firstCategory = categoryButtons()[0];
 
-  expect(screen.getByText('كل الفئات المتاحة (8) ستدخل في ترشيح الأسئلة.')).toBeVisible();
+  expect(screen.getByText('اختر فئة واحدة على الأقل قبل إنشاء المباراة.')).toBeVisible();
+  await user.click(screen.getByTestId('create-room'));
+  expect(screen.getByText('اختر فئة واحدة على الأقل من الفئات المختارة قبل إنشاء المباراة.')).toBeVisible();
+  expect(screen.getByRole('searchbox', { name: 'تصفية الفئات' })).toHaveFocus();
 
   await user.click(firstCategory);
   expect(screen.getByText('سيجري ترشيح الأسئلة من 1 فئة مختارة.')).toBeVisible();
-
-  await user.click(screen.getByRole('button', { name: 'استخدام كل الفئات' }));
-  expect(screen.getByText('كل الفئات المتاحة (8) ستدخل في ترشيح الأسئلة.')).toBeVisible();
 });
 
 it('maps an insufficient selected-question scope to clear Arabic recovery copy', () => {
@@ -201,11 +267,19 @@ it('keeps board kind separate from pace and blocks a category board until two ca
   const huroof = screen.getByRole('radio', { name: 'الحروف' });
   const categories = screen.getByRole('radio', { name: 'الفئات' });
   expect(huroof).toHaveAttribute('aria-checked', 'true');
+  expect(huroof).toHaveAttribute('aria-describedby', 'setup-kind-huroof-description');
+  expect(screen.getByText('إجابات تبدأ بحرف الخلية')).toBeVisible();
+  expect(screen.getByText('أسئلة من الفئات التي تختارها')).toBeVisible();
   expect(screen.getByRole('radio', { name: 'كلاسيكية' })).toHaveAttribute('aria-checked', 'true');
+  expect(screen.getByText('حروف')).toBeVisible();
+  expect(screen.getByText('مجموعات')).toBeVisible();
+  expect(document.querySelector('.setup-kind-selector__image[src="/assets/game-types/huroof.png"]')).toBeInTheDocument();
+  expect(document.querySelector('.setup-kind-selector__image[src="/assets/game-types/categories.png"]')).toBeInTheDocument();
 
-  await user.click(categories);
+  huroof.focus();
+  await user.keyboard('{ArrowLeft}');
+  expect(categories).toHaveFocus();
   expect(categories).toHaveAttribute('aria-checked', 'true');
-  expect(screen.getByText(/الرقم يميز تكرار الخلية وليس نقاطاً/)).toBeVisible();
   await user.click(screen.getByTestId('create-room'));
   expect(screen.getByText('لإنشاء لعبة الفئات، اختر فئتين مختلفتين على الأقل من الفئات المختارة.')).toBeVisible();
   expect(screen.getByRole('searchbox', { name: 'تصفية الفئات' })).toHaveFocus();
@@ -221,10 +295,13 @@ it('seeds a supported category-board URL and keeps its selected categories', () 
 
 it('restores valid editable setup settings from a shared URL', () => {
   render(<ThemeProvider><MemoryRouter initialEntries={['/host/new?kind=categories&mode=custom&category=tahadani-006&category=tahadani-007&horizontal=فريق%20أ&vertical=فريق%20ب&questionSeconds=35&opponentSeconds=15&demo=0']}><HostNewRoute /></MemoryRouter></ThemeProvider>);
-  expect(screen.getByLabelText('اسم الفريق الأحمر ↔ الأحمر')).toHaveValue('فريق أ');
-  expect(screen.getByLabelText('اسم الفريق الأخضر ↕ الأخضر')).toHaveValue('فريق ب');
+  expect(screen.queryByRole('heading', { name: 'الفريقان' })).not.toBeInTheDocument();
+  expect(screen.queryByLabelText('اسم الفريق الأحمر ↔ الأحمر')).not.toBeInTheDocument();
+  expect(screen.queryByLabelText('اسم الفريق الأخضر ↕ الأخضر')).not.toBeInTheDocument();
   expect(screen.getByLabelText('وقت السؤال')).toHaveValue(35);
   expect(screen.getByLabelText('فرصة الخصم')).toHaveValue(15);
+  expect(screen.getByLabelText('وقت السؤال').closest('.timing-fields__control')).toContainElement(screen.getByText('وقت السؤال'));
+  expect(screen.getByLabelText('فرصة الخصم').closest('.timing-fields__control')).toContainElement(screen.getByText('فرصة الخصم'));
   expect(screen.getByRole('checkbox', { name: /استخدم مسودات تجريبية/ })).not.toBeChecked();
 });
 

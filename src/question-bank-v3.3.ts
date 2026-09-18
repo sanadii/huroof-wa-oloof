@@ -95,6 +95,12 @@ export type V33CategoryPolicy = {
   closedDomainConceptReuseCap?: 2;
   policyHash: Hash;
 };
+/** Immutable Arabic labels are reviewed corpus metadata, never a mutable global catalog lookup. */
+export type V33CategoryCatalog = {
+  schemaVersion: typeof QUESTION_BANK_V33;
+  categories: Array<{ id: string; labelAr: string }>;
+  contentHash: Hash;
+};
 export type V33Slot = {
   slotId: string;
   categoryId: string;
@@ -224,6 +230,7 @@ export type V33ValidationReport = {
   candidateCorpusHash: Hash;
   sourcePolicyRegistryHash: Hash;
   evidenceBodiesHash: Hash;
+  catalogHash: Hash;
   withinCategoryCandidateComparisons: number;
   findings: V33Finding[];
   counts: Record<V33Severity, number>;
@@ -245,6 +252,7 @@ export type V33TrustRoot = {
 };
 export type V33Corpus = {
   scope: V33ScopeManifest;
+  catalog: V33CategoryCatalog;
   policies: V33CategoryPolicy[];
   slots: V33Slot[];
   candidates: V33Candidate[];
@@ -292,6 +300,14 @@ const add = (
 export const policyHashV33 = (
   x: Omit<V33CategoryPolicy, "policyHash"> | V33CategoryPolicy,
 ) => hash(omit(x as Record<string, unknown>, ["policyHash"]));
+export const catalogContentHashV33 = (
+  x: Omit<V33CategoryCatalog, "contentHash"> | V33CategoryCatalog,
+) => hash({
+  schemaVersion: x.schemaVersion,
+  categories: x.categories
+    .map((category) => ({ id: category.id, labelAr: category.labelAr }))
+    .sort((left, right) => cmp(left.id, right.id)),
+});
 export const candidateHashV33 = (
   x: Omit<V33Candidate, "candidateHash"> | V33Candidate,
 ) => hash(omit(x as Record<string, unknown>, ["candidateHash"]));
@@ -566,6 +582,19 @@ export function validateCorpusV33(
     );
   if (canonicalJsonV32(c.scope) !== canonicalJsonV32(createScopeManifestV33()))
     add(f, "scope_manifest_invalid", undefined, "fixed scope");
+  if (
+    c.catalog.schemaVersion !== QUESTION_BANK_V33 ||
+    c.catalog.contentHash !== catalogContentHashV33(c.catalog) ||
+    c.catalog.categories.length !== 62 ||
+    new Set(c.catalog.categories.map((category) => category.id)).size !== 62 ||
+    c.catalog.categories.some(
+      (category) =>
+        !c.scope.categoryIds.includes(category.id) ||
+        typeof category.labelAr !== "string" ||
+        !category.labelAr.trim(),
+    )
+  )
+    add(f, "catalog_labels_invalid", undefined, "immutable category labels");
   if (
     c.policies.length !== 62 ||
     new Set(c.policies.map((x) => x.categoryId)).size !== 62
@@ -872,6 +901,7 @@ export function validateCorpusV33(
     candidateCorpusHash: candidateCorpusHashV33(c.candidates),
     sourcePolicyRegistryHash: c.sourcePolicyRegistry.contentHash,
     evidenceBodiesHash: evidenceBodiesHashV33(c.evidenceBodies),
+    catalogHash: c.catalog.contentHash,
     withinCategoryCandidateComparisons: comparisons,
     findings,
     counts,
@@ -1013,5 +1043,5 @@ export function deriveReleaseIdentityV33(
   t: V33TrustRoot,
 ) {
   assertReleaseReadyV33(r, c, t);
-  return `release-${hash({ asOf: c.asOfArtifact.contentHash, report: r.reportHash })}`;
+  return `release-${hash({ asOf: c.asOfArtifact.contentHash, catalog: c.catalog.contentHash, report: r.reportHash })}`;
 }

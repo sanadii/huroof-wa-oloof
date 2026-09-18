@@ -49,3 +49,15 @@ describe('ThemeToggle', () => {
     expect(screen.getByRole('radio', { name: 'حسب الجهاز — فاتح الآن' })).toBeChecked();
   });
 });
+
+  it('closes the compact appearance choices on Escape and restores the summary focus', async () => {
+    const user = userEvent.setup();
+    render(<ThemeProvider><ThemeToggle compact /></ThemeProvider>);
+    const summary = screen.getByLabelText(/المظهر:/);
+    await user.click(summary);
+    const control = summary.closest('details');
+    expect(control).toHaveAttribute('open');
+    await user.keyboard('{Escape}');
+    await waitFor(() => expect(control).not.toHaveAttribute('open'));
+    expect(summary).toHaveFocus();
+  });

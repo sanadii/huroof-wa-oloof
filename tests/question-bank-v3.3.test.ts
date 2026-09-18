@@ -7,6 +7,7 @@ import {
   answerVariantsMatchSlotV33,
   asOfArtifactHashV33,
   candidateHashV33,
+  catalogContentHashV33,
   candidateCorpusHashV33,
   createScopeManifestV33,
   evidenceBodiesHashV33,
@@ -194,7 +195,10 @@ function receiptCorpus() {
   sourcePolicyRegistry.contentHash = sourcePolicyRegistryHashV33(sourcePolicyRegistry);
   const asOfArtifact = { version: 1 as const, asOf: "2026-09-04T00:00:00.000Z", sourcePolicyRegistryHash: sourcePolicyRegistry.contentHash, candidateCorpusHash: candidateCorpusHashV33([candidate]), evidenceBodiesHash: evidenceBodiesHashV33({}), contentHash: "" };
   asOfArtifact.contentHash = asOfArtifactHashV33(asOfArtifact);
-  const corpus: V33Corpus = { scope: createScopeManifestV33(), policies: [policy], slots: [], candidates: [candidate], questions: [question], evidence: [], media: [], receipts: [], asOfArtifact, sourcePolicyRegistry, evidenceBodies: {} };
+  const scope = createScopeManifestV33();
+  const catalog = { schemaVersion: "3.3.0" as const, categories: scope.categoryIds.map((id) => ({ id, labelAr: `فئة ${id}` })), contentHash: "" };
+  catalog.contentHash = catalogContentHashV33(catalog);
+  const corpus: V33Corpus = { scope, catalog, policies: [policy], slots: [], candidates: [candidate], questions: [question], evidence: [], media: [], receipts: [], asOfArtifact, sourcePolicyRegistry, evidenceBodies: {} };
   return { corpus, trust, makeReceipt, question };
 }
 

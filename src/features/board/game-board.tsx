@@ -23,6 +23,19 @@ type EffectTokens = Partial<Record<TeamAxis, { token: number; signature: string 
 type ContentEffectTokens = Record<string, { token: number; signature: string }>;
 const teams: TeamAxis[] = ["horizontal", "vertical"];
 
+/** Presentation-only context calculated from consecutive authoritative room snapshots. */
+export type BoardPresentationContext = {
+  roomId: string;
+  round?: number;
+  phase: string;
+  revision: number;
+  event?: "round-entry" | "selection" | "award" | "content" | "victory" | "buzzer";
+  eventCellId?: string;
+  eventTeam?: TeamAxis;
+  eventKey?: string;
+  suppressEffects?: boolean;
+};
+
 function splitCategoryLabel(label: string) {
   const words = label.trim().split(/\s+/).filter(Boolean);
   if (words.length < 2) return [label];
@@ -134,6 +147,12 @@ const tactileLowerSidePoints = (q: number, r: number) => {
     .map(([x, y]) => `${x},${y}`)
     .join(" ");
 };
+const scaledPoints = (q: number, r: number, scale: number, offsetY = 0) => {
+  const c = center(q, r);
+  return vertices(q, r)
+    .map(([x, y]) => `${c.x + (x - c.x) * scale},${c.y + (y - c.y) * scale + offsetY}`)
+    .join(" ");
+};
 
 function edgeCells(
   axis: "horizontal" | "vertical",
@@ -203,6 +222,45 @@ function tactileRailPath(
   return `M${pointList(boundary)} L${pointList([...outer].reverse())} Z`;
 }
 
+/** Extend the same honeycomb lattice: every surrounding tile has one team color. */
+function CellEnclosure({ cells }: { cells: BoardCell[] }) {
+  const clipId = `enclosure-${useId().replace(/:/g, "")}`;
+  const top = railBoundary("vertical", "start", cells);
+  const bottom = railBoundary("vertical", "end", cells);
+  if (!top.length || !bottom.length) return null;
+  const x = top[0][0] - 70;
+  // Trim the upper band to even-column centers: half cells alternate with
+  // full odd-column cells, matching the depth of the lower surround.
+  const y = center(0, -1).y;
+  const width = top[top.length - 1][0] + 70 - x;
+  const height = center(1, 5).y - y;
+  const surround = Array.from({ length: 81 }, (_, index) => {
+    const q = index % 9 - 2;
+    const r = Math.floor(index / 9) - 2;
+    // Negative odd columns are shifted up by center(); normalize their row
+    // when assigning colors so the two sides have matching corner tiles.
+    const row = r + (q % 2 < 0 ? -1 : 0);
+    return { q, r, axis: row < 0 || row > 4 ? "vertical" : "horizontal" };
+  }).filter(({ q, r }) => q < 0 || q > 4 || r < 0 || r > 4);
+  return <g className="game-board__enclosure" aria-hidden="true">
+    <defs><clipPath id={clipId}><rect x={x} y={y} width={width} height={height} rx={14} /></clipPath></defs>
+    <rect className="game-board__enclosure-rim-shadow" x={x + 2} y={y + 3} width={width - 4} height={height - 4} rx={12} />
+    <g clipPath={`url(#${clipId})`}>
+      {surround.map(({ q, r, axis }) => (
+        <g key={`${q}-${r}`}>
+          <polygon data-surround-cell={`${q},${r}`}
+            className={`game-board__enclosure-section game-board__enclosure-section--${axis}`}
+            points={points(q, r)} />
+          <polygon aria-hidden="true" className={`game-board__enclosure-groove game-board__enclosure-groove--${axis}`}
+            data-material-layer="surround-inset-groove" points={scaledPoints(q, r, .82)} />
+        </g>
+      ))}
+    </g>
+    <rect className="game-board__enclosure-outline" x={x} y={y} width={width} height={height} rx={14} />
+    <rect className="game-board__enclosure-rim" x={x + 2} y={y + 2} width={width - 4} height={height - 4} rx={12} />
+    <rect className="game-board__enclosure-rim-groove" x={x + 6} y={y + 6} width={width - 12} height={height - 12} rx={8} />
+  </g>;
+}
 function Rail({
   axis,
   edge,
@@ -269,6 +327,7 @@ export function GameBoard({
   presentation = "flat",
   motionBaselineKey = "authoritative",
   motionEnabled = true,
+  presentationContext,
 }: {
   cells: BoardCell[];
   activeCellId?: string;
@@ -283,6 +342,7 @@ export function GameBoard({
   /** A new server/cache/connection baseline suppresses historical replay effects. */
   motionBaselineKey?: string;
   motionEnabled?: boolean;
+  presentationContext?: BoardPresentationContext;
 }) {
   const materialId = useId().replace(/:/g, "");
   const boardId = useId().replace(/:/g, "");
@@ -319,15 +379,21 @@ export function GameBoard({
   const [contentEffectTokens, setContentEffectTokens] = useState<ContentEffectTokens>({});
   const [winningPulse, setWinningPulse] = useState<{ token: number; signature: string }>();
   const [winAnnouncement, setWinAnnouncement] = useState<string>();
+  const [selectionToken, setSelectionToken] = useState<{ token: number; cellId: string }>();
+  const [awardToken, setAwardToken] = useState<{ token: number; cellId: string; team?: TeamAxis }>();
+  const [entranceToken, setEntranceToken] = useState<number>();
+  const [hoveredCellId, setHoveredCellId] = useState<string>();
+  const [pressedCellId, setPressedCellId] = useState<string>();
   const previousOwnership = useRef<string | undefined>(undefined);
   const previousNear = useRef<Record<TeamAxis, string> | undefined>(undefined);
   const previousWinningPath = useRef<string | undefined>(undefined);
   const previousContent = useRef<Record<string, string> | undefined>(undefined);
   const previousMotionBaseline = useRef<string | undefined>(undefined);
+  const previousPresentationEvent = useRef<string | undefined>(undefined);
   const nextEffectToken = useRef(0);
 
   useEffect(() => {
-    if (motionEnabled && previousMotionBaseline.current === motionBaselineKey) return;
+    if (motionEnabled && previousMotionBaseline.current === motionBaselineKey && !presentationContext?.suppressEffects) return;
     previousMotionBaseline.current = motionBaselineKey;
     previousOwnership.current = ownershipSignature;
     previousNear.current = nearSignatures;
@@ -337,10 +403,60 @@ export function GameBoard({
     setContentEffectTokens({});
     setWinningPulse(undefined);
     setWinAnnouncement(undefined);
-  }, [contentSignatures, motionBaselineKey, motionEnabled, nearSignatures, ownershipSignature, winningSignature]);
+    setSelectionToken(undefined);
+    setAwardToken(undefined);
+    setEntranceToken(undefined);
+  }, [contentSignatures, motionBaselineKey, motionEnabled, nearSignatures, ownershipSignature, presentationContext?.suppressEffects, winningSignature]);
 
   useEffect(() => {
-    if (previousOwnership.current !== undefined && previousOwnership.current !== ownershipSignature) {
+    const eventKey = presentationContext?.eventKey;
+    if (!eventKey || previousPresentationEvent.current === eventKey) return;
+    // A mounting/reconnecting view takes the current event as its baseline, so an
+    // expanded board cannot replay a previous round, selection, or award.
+    if (previousPresentationEvent.current === undefined) {
+      previousPresentationEvent.current = eventKey;
+      return;
+    }
+    previousPresentationEvent.current = eventKey;
+    if (!motionEnabled || presentationContext?.suppressEffects) return;
+
+    const token = ++nextEffectToken.current;
+    // A newer authoritative event always takes visual precedence. In particular,
+    // a fast first selection must not remain under the round entrance stagger,
+    // and an award must replace its preceding selection acknowledgement.
+    if (presentationContext?.event !== "round-entry") setEntranceToken(undefined);
+    if (presentationContext?.event !== "selection") setSelectionToken(undefined);
+    if (presentationContext?.event !== "award") setAwardToken(undefined);
+    if (presentationContext?.event === "round-entry") setEntranceToken(token);
+    if (presentationContext?.event === "selection" && presentationContext.eventCellId)
+      setSelectionToken({ token, cellId: presentationContext.eventCellId });
+    if (presentationContext?.event === "award" && presentationContext.eventCellId && !winningPath.length)
+      setAwardToken({ token, cellId: presentationContext.eventCellId, team: presentationContext.eventTeam });
+    if (presentationContext?.event === "content" && presentationContext.eventCellId)
+      setContentEffectTokens((current) => ({
+        ...current,
+        [presentationContext.eventCellId!]: { token, signature: contentSignatures[presentationContext.eventCellId!] ?? "" },
+      }));
+  }, [contentSignatures, motionEnabled, presentationContext, winningPath.length]);
+
+  useEffect(() => {
+    if (!entranceToken) return;
+    const timeout = window.setTimeout(() => setEntranceToken(undefined), 700);
+    return () => window.clearTimeout(timeout);
+  }, [entranceToken]);
+  useEffect(() => {
+    if (!selectionToken) return;
+    const timeout = window.setTimeout(() => setSelectionToken(undefined), 220);
+    return () => window.clearTimeout(timeout);
+  }, [selectionToken]);
+  useEffect(() => {
+    if (!awardToken) return;
+    const timeout = window.setTimeout(() => setAwardToken(undefined), 420);
+    return () => window.clearTimeout(timeout);
+  }, [awardToken]);
+
+  useEffect(() => {
+    if (!presentationContext?.suppressEffects && previousOwnership.current !== undefined && previousOwnership.current !== ownershipSignature) {
       const changedTeams = teams.filter((team) =>
         Boolean(nearSignatures[team]) && nearSignatures[team] !== previousNear.current?.[team],
       );
@@ -356,14 +472,14 @@ export function GameBoard({
     }
     previousOwnership.current = ownershipSignature;
     previousNear.current = nearSignatures;
-  }, [nearSignatures, ownershipSignature]);
+  }, [nearSignatures, ownershipSignature, presentationContext?.suppressEffects]);
 
   useEffect(() => {
     if (previousContent.current) {
       const changed = Object.entries(contentSignatures).filter(
         ([cellId, signature]) => previousContent.current?.[cellId] !== signature,
       );
-      if (changed.length) {
+      if (changed.length && !presentationContext) {
         setContentEffectTokens((current) => {
           const next = { ...current };
           for (const [cellId, signature] of changed) {
@@ -374,7 +490,7 @@ export function GameBoard({
       }
     }
     previousContent.current = contentSignatures;
-  }, [contentSignatures]);
+  }, [contentSignatures, presentationContext]);
 
   useEffect(() => {
     if (previousWinningPath.current === undefined) {
@@ -389,6 +505,7 @@ export function GameBoard({
       return;
     }
 
+    if (presentationContext && presentationContext.event !== "victory") return;
     const token = ++nextEffectToken.current;
     setWinningPulse({ token, signature: winningSignature });
     setWinAnnouncement(
@@ -396,7 +513,7 @@ export function GameBoard({
     );
     const timeout = window.setTimeout(() => setWinAnnouncement(undefined), 320 * 3);
     return () => window.clearTimeout(timeout);
-  }, [winningPath.length, winningSignature, winningTeam]);
+  }, [presentationContext, winningPath.length, winningSignature, winningTeam]);
 
   const keyMove = (
     event: KeyboardEvent<HTMLButtonElement>,
@@ -413,7 +530,7 @@ export function GameBoard({
     nextButton?.focus({ preventScroll: true });
   };
   return (
-    <div className={`game-board-wrap ${presentation === "tactile" ? "game-board-wrap--tactile" : ""} ${className}`} dir="ltr" ref={boardRootRef}>
+    <div className={`game-board-wrap ${presentation === "tactile" ? "game-board-wrap--tactile" : ""} ${entranceToken ? "game-board-wrap--round-enter" : ""} ${!motionEnabled ? "game-board-wrap--motion-disabled" : ""} ${className}`} data-board-event={presentationContext?.event} data-board-revision={presentationContext?.revision} dir="ltr" ref={boardRootRef}>
       <span className="sr-only">
         لوحة سداسية من 25 خلية. الفريق الأحمر يصل اليسار باليمين والفريق الأخضر
         يصل الأعلى بالأسفل.
@@ -436,26 +553,33 @@ export function GameBoard({
             <linearGradient id={`${materialId}-vertical`} x1="0" x2="0" y1="0" y2="1"><stop offset="0" stopColor="var(--arena-green-top)" /><stop offset="1" stopColor="var(--arena-green)" /></linearGradient>
             <linearGradient id={`${materialId}-horizontal-rail`} x1="0" x2="0" y1="0" y2="1"><stop offset="0" stopColor="var(--arena-red-top)" /><stop offset="1" stopColor="var(--arena-red)" /></linearGradient>
             <linearGradient id={`${materialId}-vertical-rail`} x1="0" x2="0" y1="0" y2="1"><stop offset="0" stopColor="var(--arena-green-top)" /><stop offset="1" stopColor="var(--arena-green)" /></linearGradient>
+            <filter id={`${materialId}-contact-shadow`} x="-20%" y="-20%" width="140%" height="150%"><feDropShadow dx="0" dy="2.5" floodColor="#071b36" floodOpacity=".2" stdDeviation="1.4" /></filter>
           </defs>
         ) : null}
+        <CellEnclosure cells={cells} />
         <g aria-hidden="true">
           <Rail axis="vertical" cells={cells} edge="start" presentation={presentation} />
           <Rail axis="vertical" cells={cells} edge="end" presentation={presentation} />
           <Rail axis="horizontal" cells={cells} edge="start" presentation={presentation} />
           <Rail axis="horizontal" cells={cells} edge="end" presentation={presentation} />
         </g>
-        {cells.map((cell) => {
+        {cells.map((cell, cellIndex) => {
           const active = cell.id === activeCellId;
           const won = winning.has(cell.id);
           const winningIndex = winningPath.indexOf(cell.id);
           const nearTeam = teams.find((team) =>
             nearWins[team]?.path.includes(cell.id) && nearWins[team]?.candidateId !== cell.id,
           );
+          const sharedNearCandidateTeams = teams.filter((team) => nearWins[team]?.candidateId === cell.id);
           const nearFlash = nearTeam ? nearFlashTokens[nearTeam] : undefined;
           const nearFlashToken = nearTeam && nearFlash && nearFlash.signature === nearSignatures[nearTeam]
             ? nearFlash.token
             : undefined;
           const isWinningPulse = won && winningPulse?.signature === winningSignature;
+          const selected = selectionToken?.cellId === cell.id;
+          const awarded = awardToken?.cellId === cell.id && !won;
+          const hovered = hoveredCellId === cell.id;
+          const pressed = pressedCellId === cell.id;
           const content = cellText(cell);
           const contentEffect = contentEffectTokens[cell.id];
           const contentTransition = contentEffect?.signature === contentSignatures[cell.id]
@@ -466,23 +590,26 @@ export function GameBoard({
           const lineHeight = content.variant === "category" ? 14 : 12;
           return (
             <g
-              className={`game-board__cell game-cell ${cell.owner ? `game-board__cell--${cell.owner}` : ""} ${active ? "game-board__cell--active" : ""} ${nearTeam ? "game-board__cell--near-path" : ""} ${nearFlashToken ? "game-board__cell--near-flash" : ""} ${contentTransition ? "game-board__cell--content-updated" : ""} ${won ? "game-board__cell--winning" : ""} ${isWinningPulse ? "game-board__cell--winning-pulse" : ""}`}
+              className={`game-board__cell game-cell ${cell.owner ? `game-board__cell--${cell.owner}` : ""} ${active ? "game-board__cell--active" : ""} ${nearTeam ? "game-board__cell--near-path" : ""} ${sharedNearCandidateTeams.length > 1 ? "game-board__cell--near-shared-candidate" : ""} ${nearFlashToken ? "game-board__cell--near-flash" : ""} ${contentTransition ? "game-board__cell--content-updated" : ""} ${selected ? "game-board__cell--selection" : ""} ${awarded ? "game-board__cell--awarded" : ""} ${hovered ? "game-board__cell--hovered" : ""} ${pressed ? "game-board__cell--pressed" : ""} ${won ? "game-board__cell--winning" : ""} ${isWinningPulse ? "game-board__cell--winning-pulse" : ""}`}
               data-active={active || undefined}
               data-content-transition={contentTransition || undefined}
               data-near-flash={nearFlashToken || undefined}
               data-near-path={nearTeam || undefined}
+              data-near-candidate={sharedNearCandidateTeams.length > 1 ? sharedNearCandidateTeams.join(" ") : undefined}
               data-owned={cell.owner || undefined}
               data-testid={selectable ? undefined : `cell-${cell.q}-${cell.r}`}
               data-winning={won || undefined}
               data-winning-index={winningIndex >= 0 ? winningIndex : undefined}
               data-winning-pulse-count={isWinningPulse ? 3 : undefined}
-              key={`${cell.id}:${nearFlashToken ?? "rest"}:${contentTransition ?? "stable"}:${won ? isWinningPulse ? winningPulse.token : "static" : ""}`}
+              style={{ "--board-cell-index": cellIndex, "--winning-index": Math.max(winningIndex, 0) } as CSSProperties}
+              key={`${cell.id}:${nearFlashToken ?? "rest"}:${contentTransition ?? "stable"}:${selected ? selectionToken?.token : ""}:${awarded ? awardToken?.token : ""}:${won ? isWinningPulse ? winningPulse.token : "static" : ""}`}
             >
               {presentation === "tactile" ? (
                 <>
                   <polygon
                     className="game-board__cell-shell"
                     data-material-layer="tactile-shell"
+                    filter={`url(#${materialId}-contact-shadow)`}
                     points={points(cell.q, cell.r)}
                   />
                   <polygon
@@ -510,6 +637,21 @@ export function GameBoard({
                   points={insetPoints(cell.q, cell.r)}
                 />
               )}
+              {sharedNearCandidateTeams.length > 1 ? sharedNearCandidateTeams.map((team) => (
+                <polygon
+                  className={`game-board__cell-near-candidate-ring game-board__cell-near-candidate-ring--${team}`}
+                  data-near-candidate-team={team}
+                  key={team}
+                  points={scaledPoints(cell.q, cell.r, .8, -2)}
+                />
+              )) : null}
+              {awarded ? (
+                <polygon
+                  className="game-board__cell-award-sweep"
+                  data-award-team={awardToken?.team}
+                  points={scaledPoints(cell.q, cell.r, .76, -2)}
+                />
+              ) : null}
               <text
                 aria-hidden="true"
                 className={`game-board__cell-label game-board__cell-label--${content.variant}`}
@@ -530,7 +672,7 @@ export function GameBoard({
         })}
       </svg>
       {winAnnouncement ? (
-        <p aria-live="polite" className="game-board__win-announcement" role="status">
+        <p aria-live="polite" className="sr-only game-board__win-announcement" role="status">
           {winAnnouncement}
         </p>
       ) : null}
@@ -546,7 +688,13 @@ export function GameBoard({
               id={`board-${boardId}-${cell.id}`}
               key={cell.id}
               onClick={() => onSelect?.(cell.id)}
+              onBlur={() => setHoveredCellId((current) => current === cell.id ? undefined : current)}
+              onFocus={() => setHoveredCellId(cell.id)}
               onKeyDown={(event) => keyMove(event, cell)}
+              onMouseEnter={() => setHoveredCellId(cell.id)}
+              onMouseLeave={() => { setHoveredCellId((current) => current === cell.id ? undefined : current); setPressedCellId((current) => current === cell.id ? undefined : current); }}
+              onPointerDown={() => setPressedCellId(cell.id)}
+              onPointerUp={() => setPressedCellId((current) => current === cell.id ? undefined : current)}
               style={{
                 left: `${15.91 + cell.q * 16.84}%`,
                 top: `${14 + cell.r * 15.47 + (cell.q % 2) * 7.74}%`,

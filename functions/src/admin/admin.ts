@@ -1,7 +1,8 @@
 import { createHash } from "node:crypto";
 import { getApps, initializeApp } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
-import { FieldValue, getFirestore } from "firebase-admin/firestore";
+import { FieldPath, FieldValue, getFirestore } from "firebase-admin/firestore";
+import { getStorage } from "firebase-admin/storage";
 import { HttpsError, onCall, type CallableRequest } from "firebase-functions/https";
 import { reduceGame } from "../../../src/features/game/domain/lifecycle.js";
 import { projectRoom, type CanonicalMember, type CanonicalRoom } from "../game.js";
@@ -9,7 +10,7 @@ import { projectRoom, type CanonicalMember, type CanonicalRoom } from "../game.j
 if (!getApps().length) initializeApp();
 const db = getFirestore();
 const auth = getAuth();
-const region = process.env.FUNCTIONS_REGION || "me-central2";
+const region = process.env.FUNCTIONS_REGION || "me-central1";
 const callable = { region, enforceAppCheck: process.env.FUNCTIONS_EMULATOR !== "true" } as const;
 const roles = ["super_admin", "content_admin", "reviewer", "game_ops", "viewer"] as const;
 type Role = (typeof roles)[number];
@@ -23,6 +24,19 @@ const capabilities: Record<Role, readonly Capability[]> = {
 };
 export function sameAdminAuthorization(liveRoles: readonly string[], claimRoles: readonly string[], liveVersion: number, claimVersion: unknown) {
   return liveVersion === claimVersion && liveRoles.length === claimRoles.length && liveRoles.every(role => claimRoles.includes(role));
+}
+export function isVerifiedAdminProvider(provider: unknown, emailVerified: unknown) {
+  return emailVerified === true && (provider === "google.com" || provider === "password");
+}
+export function publishedQuestionMediaBinding(question: Record<string, unknown>, variant: unknown) {
+  if (variant !== "question" && variant !== "answer") throw new HttpsError("invalid-argument", "Invalid media variant.");
+  const raw = question[variant === "question" ? "media" : "answerMedia"];
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) throw new HttpsError("not-found", "Requested published media is not available.");
+  const media = raw as Record<string, unknown>;
+  // Release media IDs use colon-delimited variants (for example goal blur/clean
+  // pairs). Keep the path boundary closed: slashes and dot segments are invalid.
+  if (typeof media.mediaId !== "string" || !/^[A-Za-z0-9:_-]{1,128}$/.test(media.mediaId) || typeof media.assetSha256 !== "string" || !/^[a-f0-9]{64}$/i.test(media.assetSha256)) throw new HttpsError("failed-precondition", "Published media binding is invalid.");
+  return { mediaId: media.mediaId, assetSha256: media.assetSha256, type: media.type === "video" ? "video" : "image", altAr: typeof media.altAr === "string" ? media.altAr : null } as const;
 }
 const maxPageSize = 100;
 const id = (value: unknown, name = "id") => {
@@ -43,9 +57,9 @@ function only(data: Record<string, unknown>, keys: readonly string[]) {
   for (const key of Object.keys(data)) if (!keys.includes(key)) throw new HttpsError("invalid-argument", `Unsupported field: ${key}.`);
 }
 function listInput(value: unknown) {
-  const data = object(value ?? {}); only(data, ["limit", "cursor", "status", "categoryId", "query"]);
+  const data = object(value ?? {}); only(data, ["limit", "cursor", "status", "categoryId", "query", "modality", "releaseId"]);
   const limit = data.limit === undefined ? 25 : integer(data.limit, "limit", 1, maxPageSize);
-  return { limit, cursor: optionalId(data.cursor, "cursor"), status: typeof data.status === "string" ? data.status.slice(0, 64) : undefined, categoryId: typeof data.categoryId === "string" ? id(data.categoryId, "categoryId") : undefined, query: typeof data.query === "string" ? data.query.trim().slice(0, 120) : undefined };
+  return { limit, cursor: optionalId(data.cursor, "cursor"), status: typeof data.status === "string" ? data.status.slice(0, 64) : undefined, categoryId: typeof data.categoryId === "string" ? id(data.categoryId, "categoryId") : undefined, query: typeof data.query === "string" ? data.query.trim().slice(0, 120) : undefined, modality: typeof data.modality === "string" ? data.modality.slice(0, 64) : undefined, releaseId: optionalId(data.releaseId, "releaseId") };
 }
 function mutationEnabled() { return process.env.FUNCTIONS_EMULATOR === "true" || process.env.ADMIN_MUTATIONS_ENABLED === "true"; }
 function productionBlocked() { if (!mutationEnabled()) throw new HttpsError("failed-precondition", "Admin mutations are staged and disabled in this environment."); }
@@ -68,7 +82,7 @@ async function principal(request: CallableRequest<unknown>, capability: Capabili
   const uid = request.auth?.uid;
   const token = request.auth?.token as Record<string, unknown> | undefined;
   const provider = token?.firebase && typeof token.firebase === "object" ? (token.firebase as Record<string, unknown>).sign_in_provider : undefined;
-  if (!uid || provider !== "google.com" || token?.email_verified !== true) throw new HttpsError("unauthenticated", "A verified Google identity is required for administration.");
+  if (!uid || !isVerifiedAdminProvider(provider, token?.email_verified)) throw new HttpsError("unauthenticated", "A verified Google or email/password identity is required for administration.");
   const snap = await db.doc(`adminPrincipals/${uid}`).get();
   const row = snap.data();
   if (!snap.exists || row?.enabled !== true || row.identityReady !== true || !Array.isArray(row.roles) || !Number.isInteger(row.authzVersion)) throw new HttpsError("permission-denied", "No synchronized enabled administrator registry record.");
@@ -175,8 +189,122 @@ async function mutate(actor: Principal, operationId: string, action: string, tar
 async function enforceRateLimit(uid: string) { const now = Date.now(); const bucket = Math.floor(now / 60_000); const ref = db.doc(`adminRateLimits/${uid}_${bucket}`); await db.runTransaction(async tx => { const snap = await tx.get(ref); const count = Number(snap.data()?.count ?? 0); if (count >= 120) throw new HttpsError("resource-exhausted", "Administrative request rate exceeded."); tx.set(ref, { uid, bucket, count: count + 1, expiresAt: new Date(now + 5 * 60_000) }, { merge: true }); }); }
 function call(capability: Capability, handler: (request: CallableRequest<unknown>, actor: Principal) => Promise<unknown>) { return onCall(callable, async request => { if (Buffer.byteLength(JSON.stringify(request.data ?? {}), "utf8") > 64 * 1024) throw new HttpsError("invalid-argument", "Administrative request is too large."); const actor = await principal(request, capability); await enforceRateLimit(actor.uid); return handler(request, actor); }); }
 
+type ActiveRelease = { id: string; approvedCount: number; categoryCount: number | null; documentRootSha256: string };
+/** Binds every published-content request to the one immutable runtime pointer. */
+async function activeRelease(input?: { releaseId?: string; cursor?: string }): Promise<ActiveRelease> {
+  if (input?.cursor && input.releaseId === undefined) throw new HttpsError("invalid-argument", "releaseId is required when continuing a published page.");
+  const pointer = await db.doc("runtime/activeRelease").get();
+  const releaseId = pointer.data()?.releaseId;
+  if (!pointer.exists || typeof releaseId !== "string" || !/^[A-Za-z0-9_-]{1,128}$/.test(releaseId)) throw new HttpsError("failed-precondition", "No active immutable release.");
+  if (input?.releaseId && input.releaseId !== releaseId) throw new HttpsError("aborted", "ACTIVE_RELEASE_CHANGED");
+  const root = await db.doc(`releases/${releaseId}`).get();
+  const data = root.data();
+  if (!root.exists || data?.immutable !== true || !Number.isSafeInteger(data.approvedCount) || data.approvedCount < 0 || typeof data.documentRootSha256 !== "string") throw new HttpsError("failed-precondition", "Active release is incomplete or not immutable.");
+  return { id: releaseId, approvedCount: data.approvedCount, categoryCount: Number.isSafeInteger(data.categoryCount) ? data.categoryCount : null, documentRootSha256: data.documentRootSha256 };
+}
+function publishedScope(actor: Principal, categoryId?: string) {
+  // Preserve the existing fail-closed policy: only super admins are globally scoped.
+  if (actor.roles.includes("super_admin")) return undefined;
+  const scopes = [...new Set(actor.categoryScopes ?? [])].sort();
+  if (categoryId && !scopes.includes(categoryId)) throw new HttpsError("permission-denied", "Category is outside your assigned scope.");
+  if (!scopes.length) return [];
+  if (!categoryId && scopes.length > 30) throw new HttpsError("failed-precondition", "Select one assigned category to page published content.");
+  return categoryId ? [categoryId] : scopes;
+}
+function publishedQuestionDto(id: string, row: Record<string, unknown>, detail = false) {
+  const media = (value: unknown) => value && typeof value === "object" ? (() => { const item = value as Record<string, unknown>; return { mediaId: item.mediaId ?? null, type: item.type ?? null, contentType: item.contentType ?? null, altAr: item.altAr ?? null, assetSha256: item.assetSha256 ?? null }; })() : null;
+  return {
+    id, categoryId: row.categoryId, modality: row.modality, headerAr: row.headerAr, promptAr: row.promptAr, targetLetter: row.targetLetter ?? null,
+    ...(detail ? { promptAr: row.promptAr, canonicalAnswer: row.canonicalAnswer, acceptedAnswers: Array.isArray(row.acceptedAnswers) ? row.acceptedAnswers : [], media: media(row.media), answerMedia: media(row.answerMedia) } : {}),
+  };
+}
+async function publishedCategoryDto(releaseId: string, snapshot: FirebaseFirestore.DocumentSnapshot) {
+  const value = snapshot.data() ?? {};
+  const inventory = await db.doc(`releases/${releaseId}/inventory/${snapshot.id}`).get();
+  const count = inventory.data()?.approvedCount;
+  const readiness = value.runtimeReadiness && typeof value.runtimeReadiness === "object" ? value.runtimeReadiness as Record<string, unknown> : {};
+  return { id: snapshot.id, labelAr: value.labelAr ?? value.displayNameAr ?? snapshot.id, runtimeReadiness: { huroof: readiness.huroof === true, categories: readiness.categories === true, charades: readiness.charades === true }, approvedCount: Number.isSafeInteger(count) ? count : 0, uniqueAnswerConceptCount: Number.isSafeInteger(inventory.data()?.uniqueAnswerConceptCount) ? inventory.data()!.uniqueAnswerConceptCount : null };
+}
+async function publishedQuestionPage(release: ActiveRelease, actor: Principal, input: ReturnType<typeof listInput>) {
+  const scope = publishedScope(actor, input.categoryId);
+  if (scope?.length === 0) return { releaseId: release.id, items: [], nextCursor: null };
+  let query: FirebaseFirestore.Query = db.collection(`releases/${release.id}/questions`);
+  if (input.categoryId) query = query.where("categoryId", "==", input.categoryId);
+  else if (scope) query = query.where("categoryId", "in", scope);
+  if (input.modality) query = query.where("modality", "==", input.modality);
+  query = query.orderBy(FieldPath.documentId()).limit(input.limit + 1);
+  if (input.cursor) {
+    const cursor = await db.doc(`releases/${release.id}/questions/${input.cursor}`).get();
+    if (!cursor.exists || (scope && !scope.includes(String(cursor.data()?.categoryId))) || (input.categoryId && cursor.data()?.categoryId !== input.categoryId) || (input.modality && cursor.data()?.modality !== input.modality)) throw new HttpsError("aborted", "Invalid, filtered-out, or out-of-scope published cursor.");
+    query = query.startAfter(cursor);
+  }
+  const result = await query.get(); const docs = result.docs.slice(0, input.limit);
+  return { releaseId: release.id, items: docs.map(doc => publishedQuestionDto(doc.id, doc.data())), nextCursor: result.docs.length > input.limit ? docs.at(-1)?.id ?? null : null };
+}
+
 export const adminGetSession = call("session", async (_request, actor) => ({ uid: actor.uid, roles: actor.roles, authzVersion: actor.authzVersion, capabilities: [...new Set(actor.roles.flatMap(role => capabilities[role]))], mutationMode: mutationEnabled() ? "enabled" : "staged" }));
-export const adminGetOverview = call("session", async (_request, actor) => { const inventory: Record<string, number> = {}; const globalViewer = actor.roles.includes("super_admin") || actor.roles.includes("viewer"); const scopedCount = async (collection: string) => { const scopes = actor.categoryScopes ?? []; if (!scopes.length) return 0; if (scopes.length <= 30) return (await db.collection(collection).where("categoryId", "in", scopes).count().get()).data().count; const counts = await Promise.all(scopes.map(async categoryId => (await db.collection(collection).where("categoryId", "==", categoryId).count().get()).data().count)); return counts.reduce((sum, count) => sum + count, 0); }; if (globalViewer) { const names = ["adminQuestionDrafts", "adminReviewRequests", "adminRoomSummaries", "adminOperations"]; const counts = await Promise.all(names.map(async name => (await db.collection(name).count().get()).data().count)); names.forEach((name, index) => { inventory[name] = counts[index]; }); } else { if (actor.roles.some(role => role === "content_admin" || role === "reviewer")) { inventory.adminQuestionDrafts = await scopedCount("adminQuestionDrafts"); inventory.adminReviewRequests = await scopedCount("adminReviewRequests"); } if (actor.roles.includes("game_ops")) inventory.adminRoomSummaries = (await db.collection("adminRoomSummaries").count().get()).data().count; } return { inventory, mutationMode: mutationEnabled() ? "enabled" : "staged", actor: { uid: actor.uid, roles: actor.roles } }; });
+export const adminGetOverview = call("session", async (_request, actor) => {
+  const inventory: Record<string, number> = {};
+  const draftScope = actor.roles.includes("super_admin") || actor.roles.includes("viewer");
+  const scopedCount = async (collection: string) => { const scopes = actor.categoryScopes ?? []; if (!scopes.length) return 0; if (scopes.length <= 30) return (await db.collection(collection).where("categoryId", "in", scopes).count().get()).data().count; const counts = await Promise.all(scopes.map(async categoryId => (await db.collection(collection).where("categoryId", "==", categoryId).count().get()).data().count)); return counts.reduce((sum, count) => sum + count, 0); };
+  if (draftScope) { const names = ["adminQuestionDrafts", "adminReviewRequests", "adminRoomSummaries", "adminOperations"]; const counts = await Promise.all(names.map(async name => (await db.collection(name).count().get()).data().count)); names.forEach((name, index) => { inventory[name] = counts[index]; }); }
+  else { if (actor.roles.some(role => role === "content_admin" || role === "reviewer")) { inventory.adminQuestionDrafts = await scopedCount("adminQuestionDrafts"); inventory.adminReviewRequests = await scopedCount("adminReviewRequests"); } if (actor.roles.includes("game_ops")) inventory.adminRoomSummaries = (await db.collection("adminRoomSummaries").count().get()).data().count; }
+  let published: { releaseId: string | null; questionCount: number | null; categoryCount: number | null; scoped: boolean } = { releaseId: null, questionCount: null, categoryCount: null, scoped: !actor.roles.includes("super_admin") };
+  if (actor.roles.some(role => capabilities[role].includes("questions.read"))) {
+    const release = await activeRelease(); const scope = actor.roles.includes("super_admin") ? undefined : [...new Set(actor.categoryScopes ?? [])].sort();
+    if (scope === undefined) published = { releaseId: release.id, questionCount: release.approvedCount, categoryCount: release.categoryCount, scoped: false };
+    else if (scope.length) {
+      const inventoryRows = await db.getAll(...scope.map(categoryId => db.doc(`releases/${release.id}/inventory/${categoryId}`)));
+      published = { releaseId: release.id, questionCount: inventoryRows.reduce((sum, row) => sum + (Number.isSafeInteger(row.data()?.approvedCount) ? row.data()!.approvedCount : 0), 0), categoryCount: scope.length, scoped: true };
+    } else published = { releaseId: release.id, questionCount: 0, categoryCount: 0, scoped: true };
+  }
+  return { inventory, published, mutationMode: mutationEnabled() ? "enabled" : "staged", actor: { uid: actor.uid, roles: actor.roles } };
+});
+
+/** Read-only projections of the active immutable release. Draft APIs remain separate below. */
+export const adminListPublishedQuestions = call("questions.read", async (request, actor) => publishedQuestionPage(await activeRelease(listInput(request.data)), actor, listInput(request.data)));
+export const adminGetPublishedQuestion = call("questions.read", async (request, actor) => {
+  const data = object(request.data); only(data, ["id", "releaseId"]); const release = await activeRelease({ releaseId: optionalId(data.releaseId, "releaseId") }); const questionId = id(data.id);
+  const snap = await db.doc(`releases/${release.id}/questions/${questionId}`).get();
+  if (!snap.exists) throw new HttpsError("not-found", "Published question not found."); scopeCategory(actor, String(snap.data()?.categoryId));
+  return { releaseId: release.id, ...publishedQuestionDto(snap.id, snap.data()!, true) };
+});
+/**
+ * Delivers a small, verified release-owned preview only after question scope is
+ * checked. The client supplies no object path, media id, or generation.
+ */
+export const adminGetPublishedQuestionMedia = call("questions.read", async (request, actor) => {
+  const data = object(request.data); only(data, ["id", "releaseId", "variant"]); const release = await activeRelease({ releaseId: optionalId(data.releaseId, "releaseId") }); const questionId = id(data.id);
+  const question = await db.doc(`releases/${release.id}/questions/${questionId}`).get(); if (!question.exists) throw new HttpsError("not-found", "Published question not found."); scopeCategory(actor, String(question.data()?.categoryId));
+  const binding = publishedQuestionMediaBinding(question.data()!, data.variant);
+  const media = await db.doc(`releases/${release.id}/media/${binding.mediaId}`).get(); const record = media.data();
+  const contentType = record?.contentType;
+  if (!media.exists || record?.immutable !== true || record?.mediaId !== binding.mediaId || record?.assetSha256 !== binding.assetSha256 || typeof record?.objectName !== "string" || typeof record?.generation !== "string" || !/^[1-9][0-9]*$/.test(record.generation) || !["image/png", "image/jpeg", "video/mp4"].includes(String(contentType))) throw new HttpsError("failed-precondition", "Immutable media preview binding is unavailable.");
+  const file = getStorage().bucket().file(record.objectName, { generation: record.generation }); const [metadata] = await file.getMetadata(); const size = Number(metadata.size);
+  // Base64 expands by roughly one third; keep the callable result well below its response cap.
+  if (!Number.isSafeInteger(size) || size < 1 || size > 1_000_000) throw new HttpsError("resource-exhausted", "Published media is too large for an inline administration preview.");
+  const [bytes] = await file.download();
+  if (bytes.length !== size || createHash("sha256").update(bytes).digest("hex") !== binding.assetSha256 || metadata.generation !== record.generation || metadata.contentType !== contentType) throw new HttpsError("failed-precondition", "Immutable media preview verification failed.");
+  const png = bytes.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10])); const jpeg = bytes.subarray(0, 3).equals(Buffer.from([0xff, 0xd8, 0xff])); const video = bytes.subarray(4, 8).toString("ascii") === "ftyp";
+  if ((contentType === "image/png" && !png) || (contentType === "image/jpeg" && !jpeg) || (contentType === "video/mp4" && !video)) throw new HttpsError("failed-precondition", "Immutable media preview format mismatch.");
+  return { releaseId: release.id, questionId, variant: data.variant, mediaId: binding.mediaId, type: binding.type, contentType, altAr: binding.altAr, url: `data:${contentType};base64,${bytes.toString("base64")}` };
+});
+export const adminListPublishedCategories = call("categories.read", async (request, actor) => {
+  const input = listInput(request.data); const release = await activeRelease(input); const scope = publishedScope(actor, input.categoryId);
+  if (scope?.length === 0) return { releaseId: release.id, items: [], nextCursor: null };
+  let query: FirebaseFirestore.Query = db.collection(`releases/${release.id}/catalogCategories`);
+  if (input.categoryId) query = query.where(FieldPath.documentId(), "==", input.categoryId);
+  else if (scope) query = query.where(FieldPath.documentId(), "in", scope);
+  query = query.orderBy(FieldPath.documentId()).limit(input.limit + 1);
+  if (input.cursor) { const cursor = await db.doc(`releases/${release.id}/catalogCategories/${input.cursor}`).get(); if (!cursor.exists || (scope && !scope.includes(cursor.id)) || (input.categoryId && cursor.id !== input.categoryId)) throw new HttpsError("aborted", "Invalid, filtered-out, or out-of-scope published cursor."); query = query.startAfter(cursor); }
+  const result = await query.get(); const docs = result.docs.slice(0, input.limit);
+  return { releaseId: release.id, items: await Promise.all(docs.map(doc => publishedCategoryDto(release.id, doc))), nextCursor: result.docs.length > input.limit ? docs.at(-1)?.id ?? null : null };
+});
+export const adminGetPublishedCategory = call("categories.read", async (request, actor) => {
+  const data = object(request.data); only(data, ["id", "releaseId"]); const release = await activeRelease({ releaseId: optionalId(data.releaseId, "releaseId") }); const categoryId = id(data.id); scopeCategory(actor, categoryId);
+  const snap = await db.doc(`releases/${release.id}/catalogCategories/${categoryId}`).get(); if (!snap.exists) throw new HttpsError("not-found", "Published category not found.");
+  return { releaseId: release.id, ...await publishedCategoryDto(release.id, snap) };
+});
 
 export const adminListQuestions = call("questions.read", async (request, actor) => { const input = listInput(request.data); const result = await page("adminQuestionDrafts", input, { status: input.status, categoryId: input.categoryId }, actor.roles.includes("super_admin") ? undefined : actor.categoryScopes); const items = (result.items as Record<string, unknown>[]).map(item => ({ id: item.id, revision: item.revision, status: item.status, categoryId: item.categoryId, modality: item.modality, headerAr: item.headerAr, updatedAt: item.updatedAt })); return { ...result, items }; });
 export const adminGetQuestion = call("questions.read", async (request, actor) => { const data = object(request.data); only(data, ["id"]); const snap = await db.doc(`adminQuestionDrafts/${id(data.id)}`).get(); if (!snap.exists) throw new HttpsError("not-found", "Question draft not found."); scopeCategory(actor, String(snap.data()!.categoryId)); return { id: snap.id, ...snap.data() }; });
@@ -217,7 +345,7 @@ export const adminGetRoom = call("rooms.act", async request => { const data = ob
 export const adminRoomAction = call("rooms.act", async (request, actor) => { const data = object(request.data); only(data, ["id", "operationId", "expectedRevision", "action", "reason", "memberUid"]); const roomId = id(data.id); const action = data.action === "pause" || data.action === "resume" || data.action === "close" || data.action === "remove_member" ? data.action : (() => { throw new HttpsError("invalid-argument", "Invalid room action."); })(); const reason = text(data.reason, "reason", 1000); const memberUid = action === "remove_member" ? id(data.memberUid, "memberUid") : undefined; const expected = integer(data.expectedRevision, "expectedRevision", 1); return mutate(actor, id(data.operationId, "operationId"), `room.${action}`, roomId, expected, async tx => { const ref = db.doc(`rooms/${roomId}`); const snap = await tx.get(ref); const membersSnap = await tx.get(ref.collection("members")); if (!snap.exists) throw new HttpsError("not-found", "Room not found."); const room = snap.data() as CanonicalRoom; if (room.revision !== expected || (room as unknown as { closedAt?: unknown }).closedAt) throw new HttpsError("aborted", "stale-or-closed-room"); const targetMember = memberUid ? membersSnap.docs.map(doc => doc.data() as CanonicalMember).find(member => member.uid === memberUid) : undefined; if (memberUid && (!targetMember || targetMember.role === "host" || targetMember.active !== true)) throw new HttpsError("failed-precondition", "Only an active non-host participant may be removed."); const game = action === "pause" || action === "resume" ? reduceGame(room.game, { type: action === "pause" ? "PAUSE" : "RESUME" }) : room.game; const timer = action === "pause" && room.timer ? { deadlineMs: 0, buzzOpen: false, remainingMs: Math.max(0, room.timer.deadlineMs - Date.now()), pausedBuzzOpen: room.timer.buzzOpen } : action === "resume" && room.timer?.remainingMs !== undefined ? { deadlineMs: Date.now() + room.timer.remainingMs, buzzOpen: Boolean(room.timer.pausedBuzzOpen) } : room.timer; const next = { ...room, game, timer, revision: expected + 1, updatedAt: FieldValue.serverTimestamp(), ...(action === "close" ? { closedAt: FieldValue.serverTimestamp() } : {}) } as CanonicalRoom; const members = membersSnap.docs.map(doc => doc.data() as CanonicalMember).map(member => memberUid && member.uid === memberUid ? { ...member, active: false } : member); if (memberUid) tx.update(ref.collection("members").doc(memberUid), { active: false, removedBy: actor.uid, removedReason: reason, updatedAt: FieldValue.serverTimestamp() }); tx.update(ref, next); tx.create(ref.collection("events").doc(String(next.revision).padStart(12, "0")), { type: `ADMIN_${action.toUpperCase()}`, actorUid: actor.uid, reason, revision: next.revision, createdAt: FieldValue.serverTimestamp() }); writeRoomAdminViews(tx, roomId, next, members); return { revision: next.revision }; }); });
 
 export const adminLookupUser = call("users.read", async request => { const data = object(request.data); only(data, ["uid", "email"]); if ((data.uid === undefined) === (data.email === undefined)) throw new HttpsError("invalid-argument", "Provide exactly one UID or email."); const user = data.uid !== undefined ? await auth.getUser(id(data.uid, "uid")) : await auth.getUserByEmail(text(data.email, "email", 320).toLowerCase()); const registry = await db.doc(`adminPrincipals/${user.uid}`).get(); return { uid: user.uid, displayName: user.displayName ?? null, email: user.email ?? null, providerIds: user.providerData.map(provider => provider.providerId), emailVerified: user.emailVerified, disabled: user.disabled, admin: registry.exists ? { enabled: registry.data()!.enabled === true, identityReady: registry.data()!.identityReady === true, roles: registry.data()!.roles ?? [], categoryScopes: registry.data()!.categoryScopes ?? [], reviewerScopes: registry.data()!.reviewerScopes ?? [], authzVersion: registry.data()!.authzVersion ?? 0 } : null }; });
-async function synchronizeClaims(targetUid: string) { const [user, registry] = await Promise.all([auth.getUser(targetUid), db.doc(`adminPrincipals/${targetUid}`).get()]); const row = registry.data()!; if (!user.emailVerified || !user.providerData.some(provider => provider.providerId === "google.com") || (row.enabled === true && user.disabled)) throw new HttpsError("failed-precondition", "Target must be a verified, usable Google identity before administrative activation."); await auth.setCustomUserClaims(targetUid, { ...(user.customClaims ?? {}), adminRoles: row.enabled === true ? row.roles : [], authzVersion: row.authzVersion }); await auth.revokeRefreshTokens(targetUid); }
+async function synchronizeClaims(targetUid: string) { const [user, registry] = await Promise.all([auth.getUser(targetUid), db.doc(`adminPrincipals/${targetUid}`).get()]); const row = registry.data()!; if (!user.emailVerified || !user.providerData.some(provider => provider.providerId === "google.com" || provider.providerId === "password") || (row.enabled === true && user.disabled)) throw new HttpsError("failed-precondition", "Target must be a verified, usable Google or email/password identity before administrative activation."); await auth.setCustomUserClaims(targetUid, { ...(user.customClaims ?? {}), adminRoles: row.enabled === true ? row.roles : [], authzVersion: row.authzVersion }); await auth.revokeRefreshTokens(targetUid); }
 async function recordIdentityOutcome(actor: Principal, operationId: string, action: string, targetUid: string, result: "identity_synced" | "identity_sync_failed") {
   const batch = db.batch();
   batch.set(db.doc(`adminOperations/${operationId}`), { status: result, identityUpdatedAt: FieldValue.serverTimestamp() }, { merge: true });

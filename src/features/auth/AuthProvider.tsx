@@ -1,12 +1,13 @@
 import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import { onAuthStateChanged, type Auth, type User } from 'firebase/auth';
 import { getOptionalFirebaseAuth } from '../../lib/firebase/client';
-import { authErrorMessage, signInOrLinkGoogle, signOutFirebaseUser, type AuthActionError } from './auth-service';
+import { authErrorMessage, createEmailPasswordAccount, signInOrLinkGoogle, signInWithEmailPassword, signOutFirebaseUser, type AuthActionError } from './auth-service';
 import { FirebaseAuthContext, type AuthPendingAction, type FirebaseAuthContextValue, type FirebaseAuthStatus, useFirebaseAuth } from './auth-context';
 
 function userStatus(user: User | null): Exclude<FirebaseAuthStatus, 'loading' | 'unavailable' | 'error'> {
   if (!user) return 'signedOut';
-  return user.isAnonymous ? 'anonymous' : 'google';
+  if (user.isAnonymous) return 'anonymous';
+  return user.providerData.some((provider) => provider.providerId === 'password') ? 'password' : 'google';
 }
 
 export function FirebaseAuthProvider({ children }: { children: ReactNode }) {
@@ -94,6 +95,8 @@ export function FirebaseAuthProvider({ children }: { children: ReactNode }) {
     error,
     isAvailable,
     signInWithGoogle: () => runAction('signIn', async (auth) => { await signInOrLinkGoogle(auth); }),
+    signInWithEmailPassword: (email, password) => runAction('signIn', async (auth) => { await signInWithEmailPassword(auth, email, password); }),
+    createEmailPasswordAccount: (email, password) => runAction('signIn', async (auth) => { await createEmailPasswordAccount(auth, email, password); }),
     signOut: () => runAction('signOut', signOutFirebaseUser),
   }), [status, user, pendingAction, error, isAvailable]);
   return <FirebaseAuthContext.Provider value={value}>{children}</FirebaseAuthContext.Provider>;

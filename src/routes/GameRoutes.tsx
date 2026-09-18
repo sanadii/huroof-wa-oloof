@@ -11,13 +11,11 @@ import {
 import * as QRCode from "qrcode";
 import {
   Link,
-  NavLink,
   useLocation,
   useNavigate,
   useParams,
 } from "react-router-dom";
-import { ThemeToggle } from "../design-system/ThemeToggle";
-import { AuthAccountControl } from "../features/auth/AuthAccountControl";
+import { InternalHeader as AppHeader } from "../design-system/InternalHeader";
 import { QuestionReveal } from "../features/ui/QuestionReveal";
 import {
   availableCategoryCatalog as legacyAvailableCategoryCatalog,
@@ -25,15 +23,22 @@ import {
 } from "../data/category-catalog";
 import {
   fetchLocalQuestionInventory,
+  catalogCategoryCovers,
   inventoryCategoryCovers,
+  staticPreviewQuestionInventory,
   type LocalQuestionInventory,
 } from "../data/local-question-inventory";
 import {
+  categoryTopicIdForCategory,
   categoryTopics,
   filterCategories,
   type CategoryTopicId,
 } from "../data/category-filters";
-import { GameBoard, type BoardCell } from "../features/board/game-board";
+import {
+  approvedCategoryPlayable,
+  localCategoryPlayable,
+} from "../data/category-playability";
+import { GameBoard, type BoardCell, type BoardPresentationContext } from "../features/board/game-board";
 import { generateBoard } from "../features/game/domain/board";
 import {
   matchModeOptions,
@@ -44,6 +49,7 @@ import {
 import { connectionLabel, stateLabel } from "../features/ui/game-state";
 import type {
   HostPresenceSnapshot,
+  ApprovedReleaseCatalog,
   IntentType,
   PlayerPresenceState,
   ProjectionEnvelope,
@@ -63,8 +69,9 @@ type ViewProjection = SafeProjection & {
     primaryAnswer?: string;
     acceptedAnswers?: string[];
     revealedAnswer?: string;
+    occurrence?: string;
     sources?: Array<{ title?: string; url?: string }>;
-    media?: { mediaId: string; assetSha256: string; altAr: string };
+    media?: { mediaId: string; assetSha256: string; altAr: string; type?: "image" | "video"; contentType?: string };
   };
   audit?: Array<{ revision: number; type: string; payload?: unknown }>;
 };
@@ -79,6 +86,30 @@ type CurrentQuestionMediaRequest = {
   mediaId: string;
   assetSha256: string;
 };
+type QuestionMediaBinding = {
+  mediaId: string;
+  assetSha256: string;
+  altAr: string;
+  type?: "image" | "video";
+  contentType?: string;
+};
+
+/**
+ * Old immutable bindings have a declared type, while newer releases also bind
+ * a MIME type.  Treat either authoritative video signal as a video so the
+ * audience never applies the image concealment treatment to a clear reveal.
+ */
+export const isQuestionMediaVideo = (media: Pick<QuestionMediaBinding, "type" | "contentType">) =>
+  media.type === "video" || media.contentType?.toLowerCase().startsWith("video/") === true;
+
+/** The encoded prompt video is already filtered; image prompts retain their legacy concealment. */
+export const shouldConcealAudienceQuestionMedia = (media: Pick<QuestionMediaBinding, "type" | "contentType">) =>
+  !isQuestionMediaVideo(media);
+
+/** Answers belong to the host, never to the audience display. */
+export const shouldShowSharedRevealedAnswer = () =>
+  false;
+
 const revokeObjectUrl = (url: string) => {
   if (url.startsWith("blob:") && typeof URL.revokeObjectURL === "function")
     URL.revokeObjectURL(url);
@@ -89,16 +120,21 @@ export function CurrentQuestionMedia({
   roomId,
   media,
   load,
+  concealed = false,
 }: {
   roomId: string;
-  media: { mediaId: string; assetSha256: string; altAr: string };
+  media: QuestionMediaBinding;
   load?: (
     request: CurrentQuestionMediaRequest,
   ) => Promise<CurrentQuestionMediaGrant>;
+  concealed?: boolean;
 }) {
   const [url, setUrl] = useState("");
   const [failed, setFailed] = useState(false);
   const [refresh, setRefresh] = useState(0);
+  const activeUrl = useRef("");
+  const activeBinding = useRef("");
+  const binding = `${roomId}\u0000${media.mediaId}\u0000${media.assetSha256}`;
   const request = useCallback(() => {
     const value = {
       roomId,
@@ -112,12 +148,28 @@ export function CurrentQuestionMedia({
       Promise.reject(new Error("MEDIA_UNAVAILABLE"))
     );
   }, [load, media.assetSha256, media.mediaId, roomId]);
+  // A reauthorization for the same immutable video must not replace its Blob
+  // URL: replacing src would make the native autoplay attribute replay it.
+  useEffect(
+    () => () => {
+      revokeObjectUrl(activeUrl.current);
+      activeUrl.current = "";
+      activeBinding.current = "";
+    },
+    [binding],
+  );
   useEffect(() => {
     let alive = true;
-    let objectUrl = "";
+    let receivedUrl = "";
     let refreshTimer: number | undefined;
-    setUrl("");
-    setFailed(false);
+    const preserveVideo =
+      isQuestionMediaVideo(media) &&
+      activeBinding.current === binding &&
+      Boolean(activeUrl.current);
+    if (!preserveVideo) {
+      setUrl("");
+      setFailed(false);
+    }
     void request()
       .then((value) => {
         if (!alive) {
@@ -135,22 +187,29 @@ export function CurrentQuestionMedia({
           setFailed(true);
           return;
         }
-        objectUrl = value.url;
-        setUrl(value.url);
+        receivedUrl = value.url;
+        if (preserveVideo) revokeObjectUrl(value.url);
+        else {
+          revokeObjectUrl(activeUrl.current);
+          activeBinding.current = binding;
+          activeUrl.current = value.url;
+          setUrl(value.url);
+        }
         refreshTimer = window.setTimeout(
           () => setRefresh((current) => current + 1),
           Math.max(0, expiresAtMs - Date.now() - 1_000),
         );
       })
       .catch(() => {
-        if (alive) setFailed(true);
+        if (alive && !preserveVideo) setFailed(true);
       });
     return () => {
       alive = false;
       if (refreshTimer !== undefined) window.clearTimeout(refreshTimer);
-      revokeObjectUrl(objectUrl);
+      if (receivedUrl && receivedUrl !== activeUrl.current)
+        revokeObjectUrl(receivedUrl);
     };
-  }, [request, refresh]);
+  }, [binding, media.contentType, media.type, refresh, request]);
   if (failed)
     return (
       <section
@@ -158,7 +217,7 @@ export function CurrentQuestionMedia({
         aria-live="polite"
         data-testid="question-media-error"
       >
-        <p>تعذر تحميل صورة السؤال.</p>
+        <p>تعذر تحميل وسائط السؤال.</p>
         <button
           className="button button--quiet"
           onClick={() => setRefresh((value) => value + 1)}
@@ -170,14 +229,16 @@ export function CurrentQuestionMedia({
     );
   return (
     <figure
-      className="question-media"
+      className={`question-media${concealed ? " question-media--concealed" : ""}`}
       aria-busy={!url}
       data-testid="question-media"
     >
-      {url ? (
+      {url && isQuestionMediaVideo(media) ? (
+        <video autoPlay controls muted onError={() => setFailed(true)} playsInline src={url} />
+      ) : url ? (
         <img alt={media.altAr} onError={() => setFailed(true)} src={url} />
       ) : (
-        <p aria-live="polite">جارٍ تحميل صورة السؤال…</p>
+        <p aria-live="polite">جارٍ تحميل وسائط السؤال…</p>
       )}
     </figure>
   );
@@ -221,6 +282,10 @@ export const readableError = (error: unknown) => {
     )
   )
     return "لا تكفي الأسئلة في الفئات المختارة لتجهيز لوحة المباراة. اختر «استخدام كل الفئات» أو أضف «معلومات عامة».";
+  if (message === "SELECTED_SCOPE_NOT_PLAYABLE")
+    return "الفئات المختارة لا تكفي للوحة المطلوبة في الحزمة المعتمدة. غيّر الاختيار ثم حاول مرة أخرى.";
+  if (message === "ACTIVE_RELEASE_CHANGED")
+    return "تغيّرت الحزمة المعتمدة. حدّث الإعدادات للتحقق من الفهرس الجديد.";
   return message || "تعذر إتمام العملية.";
 };
 type LocalIntentResponse = {
@@ -266,7 +331,7 @@ export const isReadOnlyFixtureRoom = (
 ) => runtimeKind === "fixture" && roomId === "fixture-room";
 function useDocumentTitle(title: string) {
   useEffect(() => {
-    document.title = `${title} | تحدي الخلية`;
+    document.title = `${title} | الخلية`;
   }, [title]);
 }
 const teamName = (name?: string) =>
@@ -374,6 +439,24 @@ export function resultRouteState(
   };
 }
 
+/** Keeps a completed host's next-match link on the setup route with its chosen scope. */
+export function sameSettingsNewMatchHref(
+  settings: SafeProjection["room"]["matchSettings"] | undefined,
+) {
+  if (!settings) return "/host/new";
+  const search = setupQueryString({
+    categories: settings.categories,
+    demo: settings.demo,
+    gameKind: settings.gameKind ?? "huroof",
+    horizontal: settings.teams.horizontal,
+    mode: settings.mode,
+    opponentSeconds: settings.opponentSeconds,
+    questionSeconds: settings.questionSeconds,
+    vertical: settings.teams.vertical,
+  });
+  return `/host/new?${search}`;
+}
+
 export function activeLobbyDestination(
   roomCode: string | undefined,
   surface: "lobby" | "host" | "play" | "display" | "results",
@@ -387,26 +470,7 @@ export function activeLobbyDestination(
   return undefined;
 }
 
-export function AppHeader() {
-  return (
-    <>
-      <a className="skip-link" href="#main-content">
-        تجاوز إلى المحتوى
-      </a>
-      <header className="app-header">
-        <Link className="wordmark" to="/">
-          تحدي الخلية
-        </Link>
-        <nav aria-label="التنقل الرئيسي">
-          <NavLink to="/how-to-play">كيف تلعب؟</NavLink>
-          <NavLink to="/questions">الأسئلة</NavLink>
-        </nav>
-        <AuthAccountControl />
-        <ThemeToggle />
-      </header>
-    </>
-  );
-}
+export { AppHeader };
 const AxisMark = ({ axis }: { axis: "horizontal" | "vertical" }) => (
   <span className={`axis-mark axis-mark--${axis}`}>
     {axis === "horizontal" ? "↔ الأحمر" : "↕ الأخضر"}
@@ -414,6 +478,19 @@ const AxisMark = ({ axis }: { axis: "horizontal" | "vertical" }) => (
 );
 const defaultCategoryCover = "/assets/categories/320/category-006.webp";
 const maximumSelectedCategories = 10;
+const setupGameKindCardLabels = {
+  huroof: "حروف",
+  categories: "مجموعات",
+} as const;
+const setupGameKindCardDescriptions = {
+  huroof: "إجابات تبدأ بحرف الخلية",
+  categories: "أسئلة من الفئات التي تختارها",
+} as const;
+
+const setupGameKindImages = {
+  huroof: "/assets/game-types/huroof.png",
+  categories: "/assets/game-types/categories.png",
+} as const;
 
 export function HostNewRoute() {
   useDocumentTitle("إنشاء مباراة");
@@ -449,6 +526,10 @@ export function HostNewRoute() {
   const [localQuestionInventoryError, setLocalQuestionInventoryError] =
     useState("");
   const [inventoryAttempt, setInventoryAttempt] = useState(0);
+  const [approvedReleaseCatalog, setApprovedReleaseCatalog] = useState<ApprovedReleaseCatalog>();
+  const [approvedReleaseCatalogError, setApprovedReleaseCatalogError] = useState("");
+  const [approvedReleaseCatalogAttempt, setApprovedReleaseCatalogAttempt] = useState(0);
+  const firebaseRuntime = gameRuntime.kind === "firebase";
   const modeControls = useRef<Array<HTMLButtonElement | null>>([]);
   const kindControls = useRef<Array<HTMLButtonElement | null>>([]);
   const categoryFilterControl = useRef<HTMLInputElement | null>(null);
@@ -476,26 +557,75 @@ export function HostNewRoute() {
       active = false;
     };
   }, [inventoryAttempt, staticPreview]);
-  const availableCategoryCatalog = useMemo(() => {
+  useEffect(() => {
+    if (staticPreview || !firebaseRuntime) return;
+    let active = true;
+    void (gameRuntime.getApprovedReleaseCatalog?.() ?? Promise.reject(new Error("APPROVED_RELEASE_CATALOG_UNAVAILABLE")))
+      .then((catalog) => {
+        if (!active) return;
+        setApprovedReleaseCatalog(catalog);
+        setApprovedReleaseCatalogError("");
+      })
+      .catch(() => {
+        if (!active) return;
+        setApprovedReleaseCatalog(undefined);
+        setApprovedReleaseCatalogError("تعذر الاتصال بخدمة اللعبة أو التحقق من إعدادات الاتصال. أعد المحاولة لاحقاً.");
+      });
+    return () => { active = false; };
+  }, [approvedReleaseCatalogAttempt, firebaseRuntime, staticPreview]);
+  const activeQuestionInventory = localQuestionInventory ?? (staticPreview ? staticPreviewQuestionInventory : undefined);
+  const localCategoryById = useMemo(
+    () =>
+      new Map(
+        activeQuestionInventory?.categories.map((category) => [
+          category.id,
+          category,
+        ]) ?? [],
+      ),
+    [activeQuestionInventory],
+  );
+  const categorySelectionAllowed = useCallback((id: string) => {
+    if (firebaseRuntime)
+      return approvedCategoryPlayable(
+        approvedReleaseCatalog?.categories.find((category) => category.id === id),
+        form.gameKind,
+      );
+    if (!activeQuestionInventory) return true;
+    return localCategoryPlayable(
+      localCategoryById.get(id),
+      form.gameKind,
+      activeQuestionInventory.huroofAvailable,
+    );
+  }, [activeQuestionInventory, approvedReleaseCatalog, firebaseRuntime, form.gameKind, localCategoryById]);
+  const categoryCatalogue = useMemo(() => {
     if (localQuestionInventoryError) return [];
-    if (!localQuestionInventory) return legacyAvailableCategoryCatalog;
-    const covers = inventoryCategoryCovers(localQuestionInventory);
-    return form.gameKind === "categories"
-      ? covers.filter(
-          (category) =>
-            localQuestionInventory.categories.find(
-              (item) => item.id === category.id,
-            )?.categoryGameEligible,
-        )
-      : localQuestionInventory.huroofAvailable
-        ? covers
-        : [];
-  }, [form.gameKind, localQuestionInventory, localQuestionInventoryError]);
+    if (firebaseRuntime)
+      return approvedReleaseCatalog ? catalogCategoryCovers(approvedReleaseCatalog.categories) : [];
+    const inventory = localQuestionInventory ?? (staticPreview ? staticPreviewQuestionInventory : undefined);
+    return inventory ? inventoryCategoryCovers(inventory) : legacyAvailableCategoryCatalog;
+  }, [approvedReleaseCatalog, firebaseRuntime, localQuestionInventory, localQuestionInventoryError, staticPreview]);
+  const availableCategoryCatalog = useMemo(
+    () => categoryCatalogue.filter((category) => categorySelectionAllowed(category.id)),
+    [categoryCatalogue, categorySelectionAllowed],
+  );
+  const firebaseSelectedModeUnavailable = Boolean(
+    firebaseRuntime && approvedReleaseCatalog && !approvedReleaseCatalog.boardCapabilities[form.gameKind],
+  );
+  const firebaseSelectedModeMessage = "الأسئلة المعتمدة الحالية لا تكفي لهذا النمط. اختر نمطاً متاحاً أو حدّث الحزمة.";
+  useEffect(() => {
+    if (!activeQuestionInventory && (!firebaseRuntime || !approvedReleaseCatalog)) return;
+    setForm((current) => {
+      const categories = current.categories.filter((id) => categorySelectionAllowed(id));
+      return categories.length === current.categories.length
+        ? current
+        : { ...current, categories };
+    });
+  }, [activeQuestionInventory, approvedReleaseCatalog, categorySelectionAllowed, firebaseRuntime]);
   const availableCategoryTopics = useMemo(
     () =>
       categoryTopics.flatMap((topic) => {
         const count = availableCategoryCatalog.filter((category) =>
-          topic.categoryIds.includes(category.id),
+          categoryTopicIdForCategory(category) === topic.id,
         ).length;
         return count ? [{ topic, count }] : [];
       }),
@@ -598,6 +728,7 @@ export function HostNewRoute() {
     selectGameKind(nextIndex, true);
   };
   const toggleCategory = (id: string) => {
+    if (!categorySelectionAllowed(id)) return;
     const isSelected = form.categories.includes(id);
     if (!isSelected && form.categories.length >= maximumSelectedCategories) {
       setSelectionLimitMessage(
@@ -645,6 +776,15 @@ export function HostNewRoute() {
       setError(staticPreviewNotice);
       return;
     }
+    if (firebaseRuntime && !approvedReleaseCatalog) {
+      setError(approvedReleaseCatalogError || "جارٍ التحقق من الحزمة المعتمدة قبل إنشاء الغرفة.");
+      return;
+    }
+    const releaseCatalog = approvedReleaseCatalog;
+    if (firebaseRuntime && !releaseCatalog!.boardCapabilities[form.gameKind]) {
+      setError("لا توجد تغطية معتمدة كافية لنوع اللوح المحدد. اختر نوعاً آخر أو انتظر نشر حزمة مكتملة.");
+      return;
+    }
     if (localQuestionInventory && !form.demo) {
       setError(
         "أسئلة قاعدة البيانات المحلية مسودات للتجربة فقط؛ فعّل وضع التجربة أو استخدم المصدر المعتمد.",
@@ -661,10 +801,15 @@ export function HostNewRoute() {
       );
       return;
     }
-    if (form.gameKind === "categories" && form.categories.length < 2) {
+    if (form.gameKind === "categories" && selectedCategories.length < 2) {
       setError(
         "لإنشاء لعبة الفئات، اختر فئتين مختلفتين على الأقل من الفئات المختارة.",
       );
+      categoryFilterControl.current?.focus();
+      return;
+    }
+    if (selectedCategories.length === 0) {
+      setError("اختر فئة واحدة على الأقل من الفئات المختارة قبل إنشاء المباراة.");
       categoryFilterControl.current?.focus();
       return;
     }
@@ -672,19 +817,15 @@ export function HostNewRoute() {
     try {
       const request = {
         displayName: "المضيف",
-        demo: form.demo,
+        demo: firebaseRuntime ? releaseCatalog?.demoFixture === true : form.demo,
+        ...(firebaseRuntime && releaseCatalog ? { expectedRelease: { releaseId: releaseCatalog.releaseId, releaseRootSha256: releaseCatalog.releaseRootSha256 } } : {}),
         gameKind: form.gameKind,
         mode: form.mode,
         modality: "classic" as const,
         questionSeconds: form.questionSeconds,
         opponentSeconds: form.opponentSeconds,
         teams: { horizontal: form.horizontal, vertical: form.vertical },
-        categories: form.categories.length
-          ? form.categories
-          : form.gameKind === "huroof" &&
-              localQuestionInventory?.recommendedHuroofCategoryIds?.length
-            ? localQuestionInventory.recommendedHuroofCategoryIds
-            : availableCategoryCatalog.map((category) => category.id),
+        categories: selectedCategories.map((category) => category.id),
       };
       const body =
         gameRuntime.kind === "fixture"
@@ -711,6 +852,12 @@ export function HostNewRoute() {
       navigate(`/room/${body.roomCode}/lobby`);
     } catch (reason) {
       setError(readableError(reason));
+      if (
+        firebaseRuntime &&
+        reason instanceof Error &&
+        reason.message.replace(/^Error:\s*/, "") === "ACTIVE_RELEASE_CHANGED"
+      )
+        setApprovedReleaseCatalogAttempt((attempt) => attempt + 1);
     } finally {
       setBusy(false);
     }
@@ -731,16 +878,18 @@ export function HostNewRoute() {
           {staticPreview ? <p className="form-message" role="status">{staticPreviewNotice}</p> : null}
         </div>
         <form className="setup-form" id="match-setup-form" onSubmit={create}>
-          <section>
+          <section className="game-kind-fields">
             <h2>نوع اللوح</h2>
             <div
-              className="segmented setup-kind-selector"
+              className="setup-kind-selector"
               role="radiogroup"
               aria-label="نوع اللوح"
             >
               {setupGameKindOptions.map((kind, index) => (
                 <button
                   aria-checked={form.gameKind === kind.id}
+                  aria-label={kind.labelAr}
+                  aria-describedby={`setup-kind-${kind.id}-description`}
                   className={form.gameKind === kind.id ? "is-selected" : ""}
                   key={kind.id}
                   onClick={() => selectGameKind(index)}
@@ -752,18 +901,19 @@ export function HostNewRoute() {
                   tabIndex={form.gameKind === kind.id ? 0 : -1}
                   type="button"
                 >
-                  {kind.labelAr}
+                  <img alt="" className="setup-kind-selector__image" src={setupGameKindImages[kind.id]} />
+                  <span className="setup-kind-selector__copy">
+                    <strong>{setupGameKindCardLabels[kind.id]}</strong>
+                    <small id={`setup-kind-${kind.id}-description`}>
+                      {setupGameKindCardDescriptions[kind.id]}
+                    </small>
+                  </span>
+                  <span aria-hidden="true" className="setup-kind-selector__check">✓</span>
                 </button>
               ))}
             </div>
-            <p className="field-note">
-              {
-                setupGameKindOptions.find((kind) => kind.id === form.gameKind)
-                  ?.descriptionAr
-              }
-            </p>
           </section>
-          <section>
+          <section className="match-mode-fields">
             <h2>المباراة</h2>
             <div
               className="segmented"
@@ -788,43 +938,17 @@ export function HostNewRoute() {
                 </button>
               ))}
             </div>
-            <p className="field-note">
-              {
+            <p className="field-note match-mode-description">
+              <span>{
                 matchModeOptions.find((mode) => mode.id === form.mode)
                   ?.descriptionAr
-              }
+              }</span>{" "}<span>تنتهي المباراة بفوز فريق بجولتين متتاليتين أو بثلاث جولات إجمالاً</span>
             </p>
-            <p className="field-note">
-              تنتهي المباراة بفوز فريق بجولتين متتاليتين أو بثلاث جولات إجمالاً
-            </p>
-          </section>
-          <section className="team-fields">
-            <h2>الفريقان</h2>
-            <label className="team-card team-card--horizontal">
-              <span className="team-card__header">
-                الفريق الأحمر <AxisMark axis="horizontal" />
-              </span>
-              <input
-                aria-label="اسم الفريق الأحمر ↔ الأحمر"
-                value={form.horizontal}
-                onChange={(event) => update("horizontal", event.target.value)}
-              />
-            </label>
-            <label className="team-card team-card--vertical">
-              <span className="team-card__header">
-                الفريق الأخضر <AxisMark axis="vertical" />
-              </span>
-              <input
-                aria-label="اسم الفريق الأخضر ↕ الأخضر"
-                value={form.vertical}
-                onChange={(event) => update("vertical", event.target.value)}
-              />
-            </label>
           </section>
           <section className="timing-fields">
             <h2>التوقيت</h2>
-            <label>
-              وقت السؤال
+            <label className="timing-fields__control">
+              <span>وقت السؤال</span>
               <input
                 min="10"
                 max="60"
@@ -835,8 +959,8 @@ export function HostNewRoute() {
                 }
               />
             </label>
-            <label>
-              فرصة الخصم
+            <label className="timing-fields__control">
+              <span>فرصة الخصم</span>
               <input
                 min="10"
                 max="60"
@@ -850,14 +974,9 @@ export function HostNewRoute() {
           </section>
           <section>
             <h2>الفئات</h2>
-            <p className="field-note category-filter__hint">
-              {form.gameKind === "categories"
-                ? "اختر من فئتين إلى عشر فئات. لا يُستبدل النقص بفئة غير مختارة."
-                : "اختر فئات محددة، أو اترك الاختيار فارغاً لاستخدام كل الفئات في ترشيح الأسئلة."}
-            </p>
-            {localQuestionInventory ? (
+            {staticPreview ? (
               <p className="field-note" role="status">
-                أسئلة مستوردة للتجربة المحلية وليست إصداراً معتمداً.
+                يعرض هذا الفهرس محتوى معاينة الواجهة فقط، ولا يثبت توفره للعب المنشور.
               </p>
             ) : null}
             {localQuestionInventoryError ? (
@@ -885,27 +1004,37 @@ export function HostNewRoute() {
                 />
               </label>
               <div className="category-filter__controls">
-                <label>
-                  <span>الموضوع</span>
-                  <select
-                    aria-label="الموضوع"
-                    onChange={(event) =>
-                      setCategoryTopic(
-                        event.target.value as CategoryTopicId | "all",
-                      )
-                    }
-                    value={categoryTopic}
-                  >
-                    <option value="all">
-                      كل الموضوعات ({availableCategoryCatalog.length})
-                    </option>
+                <div aria-label="الموضوع" className="category-topic-picker" role="group">
+                  <span className="category-topic-picker__label">الموضوع</span>
+                  <div className="category-topic-picker__list">
+                    <button
+                      aria-pressed={categoryTopic === "all"}
+                      className={`category-topic-picker__button category-topic-picker__button--all${categoryTopic === "all" ? " is-selected" : ""}`}
+                      onClick={() => setCategoryTopic("all")}
+                      type="button"
+                    >
+                      <span aria-hidden="true" className="category-topic-picker__all-mark">الكل</span>
+                      <span>كل الموضوعات</span>
+                      <small>{availableCategoryCatalog.length}</small>
+                    </button>
                     {availableCategoryTopics.map(({ topic, count }) => (
-                      <option key={topic.id} value={topic.id}>
-                        {topic.labelAr} ({count})
-                      </option>
+                      <button
+                        aria-pressed={categoryTopic === topic.id}
+                        className={`category-topic-picker__button${categoryTopic === topic.id ? " is-selected" : ""}`}
+                        key={topic.id}
+                        onClick={() => setCategoryTopic(topic.id)}
+                        type="button"
+                      >
+                        <span
+                          aria-hidden="true"
+                          className={`category-topic-picker__image category-topic-picker__image--${topic.id}`}
+                        />
+                        <span>{topic.labelAr}</span>
+                        <small>{count}</small>
+                      </button>
                     ))}
-                  </select>
-                </label>
+                  </div>
+                </div>
                 <label className="category-filter__selected-only">
                   <input
                     checked={selectedOnly}
@@ -938,21 +1067,9 @@ export function HostNewRoute() {
                       form.categories.length === 1
                     ? "اختر فئة ثانية: لا تكفي فئة واحدة لتدوير خلية فئات عند الفشل."
                     : form.categories.length === 0
-                      ? `كل الفئات المتاحة (${availableCategoryCatalog.length}) ستدخل في ترشيح الأسئلة.`
+                      ? "اختر فئة واحدة على الأقل قبل إنشاء المباراة."
                       : `سيجري ترشيح الأسئلة من ${form.categories.length} فئة مختارة.`}
               </p>
-              {form.categories.length > 0 ? (
-                <button
-                  className="category-filter__all"
-                  onClick={() => {
-                    setSelectionLimitMessage("");
-                    update("categories", []);
-                  }}
-                  type="button"
-                >
-                  استخدام كل الفئات
-                </button>
-              ) : null}
             </div>
             <div className="category-grid">
               {visibleCategories.map((category) =>
@@ -1047,23 +1164,29 @@ export function HostNewRoute() {
               {querySeed.current.notice}
             </p>
           )}
-          <label className="demo-control">
+          {firebaseRuntime ? (
+            <p className="field-note" role="status">
+              {approvedReleaseCatalog
+                ? firebaseSelectedModeUnavailable
+                  ? firebaseSelectedModeMessage
+                  : approvedReleaseCatalog.demoFixture
+                  ? "هذه حزمة تجريبية للمحاكي فقط."
+                  : "سيُنشأ اللعب المباشر من الحزمة المعتمدة النشطة."
+                : approvedReleaseCatalogError || "جارٍ التحقق من الحزمة المعتمدة…"}
+              {approvedReleaseCatalogError ? (
+                <button className="button button--quiet" onClick={() => setApprovedReleaseCatalogAttempt((attempt) => attempt + 1)} type="button">أعد المحاولة</button>
+              ) : null}
+            </p>
+          ) : <label className="demo-control">
             <input
               checked={form.demo}
               onChange={(event) => update("demo", event.target.checked)}
               type="checkbox"
             />{" "}
             استخدم مسودات تجريبية صريحة؛ يمكن للمضيف تشغيل الفريقين دون لاعبين.
-          </label>
-        </form>
+          </label>}
         <aside className="setup-summary">
           <p className="eyebrow">ملخص مباشر</p>
-          <h2>
-            {form.horizontal} <span>×</span> {form.vertical}
-          </h2>
-          <p>
-            <AxisMark axis="horizontal" /> مقابل <AxisMark axis="vertical" />
-          </p>
           <dl>
             <div>
               <dt>نوع اللوح</dt>
@@ -1087,7 +1210,7 @@ export function HostNewRoute() {
                 {form.categories.length ||
                   (form.gameKind === "categories"
                     ? "يلزم اختيار فئتين"
-                    : "كل الفئات")}
+                    : "لم تُحدد فئة بعد")}
               </dd>
             </div>
             <div>
@@ -1105,21 +1228,25 @@ export function HostNewRoute() {
             className="button button--primary"
             data-testid="create-room"
             disabled={
-              busy || !form.demo || Boolean(localQuestionInventoryError) || staticPreview
+              busy || Boolean(localQuestionInventoryError) || staticPreview || (firebaseRuntime ? !approvedReleaseCatalog || !approvedReleaseCatalog.boardCapabilities[form.gameKind] : !form.demo)
             }
-            form="match-setup-form"
-            title={staticPreview ? staticPreviewNotice : !form.demo ? "لا يوجد مخزون معتمد كافٍ" : undefined}
+            title={staticPreview ? staticPreviewNotice : firebaseRuntime && !approvedReleaseCatalog ? approvedReleaseCatalogError || "جارٍ التحقق من الحزمة المعتمدة" : !form.demo ? "لا يوجد مخزون معتمد كافٍ" : undefined}
             type="submit"
           >
-            {staticPreview ? "إنشاء الغرفة غير متاح في المعاينة" : busy ? "جارٍ الإنشاء…" : "أنشئ الغرفة التجريبية"}
+            {staticPreview ? "إنشاء الغرفة غير متاح في المعاينة" : busy ? "جارٍ الإنشاء…" : firebaseRuntime ? "أنشئ الغرفة المباشرة" : "أنشئ الغرفة التجريبية"}
           </button>
           <p aria-live="polite" className="form-message">
             {error ||
-              (!form.demo
+              (firebaseRuntime && !approvedReleaseCatalog
+                ? approvedReleaseCatalogError || "جارٍ التحقق من الحزمة المعتمدة…"
+                : firebaseSelectedModeUnavailable
+                  ? firebaseSelectedModeMessage
+                : !firebaseRuntime && !form.demo
                 ? "لا يوجد مخزون معتمد كافٍ لإنشاء مباراة عادية."
                 : "")}
           </p>
         </aside>
+        </form>
       </section>
     </main>
   );
@@ -1437,6 +1564,24 @@ function useRoom(
   return { envelope, connection, error, presence, send, reportError: setError };
 }
 
+export function QuestionReadingShield({ children, state, team, deadlineAt, serverTime }: {
+  children: ReactNode; state: string; team?: "horizontal" | "vertical"; deadlineAt?: string; serverTime: string;
+}) {
+  const [running, setRunning] = useState(false);
+  useEffect(() => {
+    const remaining = deadlineAt ? Date.parse(deadlineAt) - Date.parse(serverTime) : 0;
+    const active = state === "FIRST_ANSWER" && Boolean(team) && remaining > 0;
+    setRunning(active);
+    if (!active) return;
+    const timeout = window.setTimeout(() => setRunning(false), remaining);
+    return () => window.clearTimeout(timeout);
+  }, [state, team, deadlineAt, serverTime]);
+  return <span className={`question-reading-shield${running ? " is-covered" : ""}`} data-team={team}>
+    <span>{children}</span>
+    {running && <span className="sr-only">وقت إجابة الفريق — توقفت قراءة السؤال</span>}
+  </span>;
+}
+
 function Countdown({
   deadlineAt,
   serverTime,
@@ -1619,56 +1764,12 @@ function HostPlayerCapsule({
   );
 }
 
-function RoundMarkers({
-  axis,
-  currentRound,
-  roundResults = [],
-}: {
-  axis: TeamAxis;
-  currentRound?: number;
-  roundResults?: NonNullable<SafeProjection["roundResults"]>;
-}) {
-  return (
-    <ol
-      className="round-markers"
-      aria-label={`نتائج جولات الفريق ${axis === "vertical" ? "الأخضر" : "الأحمر"}`}
-    >
-      {Array.from({ length: 5 }, (_, index) => {
-        const round = index + 1;
-        const result = roundResults.find((item) => item.round === round);
-        const status =
-          result?.winner === axis
-            ? "won"
-            : result
-              ? "lost"
-              : currentRound === round
-                ? "current"
-                : "pending";
-        return (
-          <li
-            aria-label={`الجولة ${round}: ${status === "won" ? "فوز" : status === "lost" ? "خسارة" : status === "current" ? "الحالية" : "بانتظار"}`}
-            className={`round-markers__marker round-markers__marker--${status}`}
-            data-round={round}
-            key={round}
-          >
-            <svg aria-hidden="true" viewBox="0 0 12 12">
-              <circle cx="6" cy="6" r="5" />
-            </svg>
-          </li>
-        );
-      })}
-    </ol>
-  );
-}
-
 export function TeamScoreCard({
   axis,
   assignment,
   players,
   presence,
-  currentRound,
   points,
-  roundResults,
   rounds,
   testId,
   teamName: customName,
@@ -1690,7 +1791,7 @@ export function TeamScoreCard({
   return (
     <section
       aria-label={`فريق ${label}: ${teamName(customName)}، محور ${axis === "vertical" ? "عمودي" : "أفقي"}`}
-      className={`${variant}-score ${variant}-score--${axis}`}
+      className={`team-score-card team-score-card--${axis} ${variant}-score ${variant}-score--${axis}`}
       data-testid={testId}
       onDragOver={(event) => {
         if (assignment?.enabled && assignment.draggedTarget)
@@ -1705,18 +1806,8 @@ export function TeamScoreCard({
           );
       }}
     >
-      {variant === "stage" ? (
-        <span aria-hidden="true" className="stage-score__medallion">
-          <svg viewBox="0 0 24 24">
-            <path d="M8 3h8l-1 6h-6L8 3Z" />
-            <path d="M9 5 5 7l4 5M15 5l4 2-4 5" />
-            <path d="M8 10h8v3a4 4 0 0 1-8 0v-3Z" />
-            <path d="M12 17v3M9 21h6" />
-          </svg>
-        </span>
-      ) : null}
-      <span className={`${variant}-score__team`}>
-        {variant === "host" ? teamName(customName) : label}
+      <span className={`team-score-card__team ${variant}-score__team`}>
+        {customName ? teamName(customName) : `فريق ${label}`}
       </span>
       <div className="team-score__rounds">
         <strong
@@ -1727,13 +1818,6 @@ export function TeamScoreCard({
           {rounds}
         </strong>
         <small>الجولات</small>
-        {variant === "host" && (
-          <RoundMarkers
-            axis={axis}
-            currentRound={currentRound}
-            roundResults={roundResults}
-          />
-        )}
       </div>
       <div className={`team-score__points ${variant}-score__points`}>
         <span aria-hidden="true" className="team-score__points-label">
@@ -1768,40 +1852,21 @@ export function TeamScoreCard({
   );
 }
 
-function RoundTimerModule({
-  hasQuestion,
-  deadlineAt,
-  onDeadline,
-  serverTime,
-}: {
-  hasQuestion: boolean;
-  deadlineAt?: string;
-  onDeadline?: () => void;
-  serverTime: string;
-}) {
-  return (
-    <section className="round-timer-module" aria-label="مؤقت الجولة">
-      {deadlineAt ? (
-        <>
-          <svg
-            aria-hidden="true"
-            className="round-timer-module__icon"
-            viewBox="0 0 24 24"
-          >
-            <circle cx="12" cy="13" fill="none" r="8" />
-            <path d="M12 9v4l3 2M9 2h6M12 2v3" fill="none" />
-          </svg>
-          <Countdown
-            deadlineAt={deadlineAt}
-            onDeadline={onDeadline}
-            serverTime={serverTime}
-          />
-        </>
-      ) : (
-        <span>{hasQuestion ? "تم اختيار السؤال" : "اختر السؤال"}</span>
-      )}
-    </section>
-  );
+export function BoardStatusStrip({ projection, serverTime, presentationContext, onDeadline }: { projection: SafeProjection; serverTime: string; presentationContext?: BoardPresentationContext; onDeadline?: () => void; notification?: string }) {
+  const state = projection.room.state;
+  const answering = (state === "FIRST_ANSWER" || state === "OPPONENT_CHANCE")
+    ? projection.answeringTeam ?? projection.entitledTeam : undefined;
+  const category = projection.board?.find((cell) => cell.id === projection.activeCellId)?.categoryLabelAr || projection.question?.headerAr;
+  const label = answering ? projection.room.teams?.[answering] || (answering === "vertical" ? "الفريق الأخضر" : "الفريق الأحمر") : state === "CELL_SELECTION" ? "اختر السؤال" : stateLabel(state);
+  return <section className={`board-status-strip ${presentationContext?.event === "buzzer" ? "board-status-strip--buzzer" : ""}`} aria-label="حالة اللعب" data-event={presentationContext?.event} data-team={answering}>
+    <div className="board-status-strip__copy" role="status">
+      <strong title={label}>{projection.contentHold ? "توقف المحتوى" : label}</strong>
+      <small title={category}>{category || "\u00a0"}</small>
+    </div>
+    {projection.deadlineAt && state !== "PAUSED" && state !== "QUESTION_READING" ? <div className="board-status-strip__timer" aria-label="الوقت المتبقي">
+      <Countdown deadlineAt={projection.deadlineAt} serverTime={serverTime} onDeadline={onDeadline} />
+    </div> : <div className="board-status-strip__timer" aria-hidden="true" />}
+  </section>;
 }
 
 function matchWinner(projection: SafeProjection): string | undefined {
@@ -1836,50 +1901,156 @@ function BuzzWinnerBanner({
     </p>
   );
 }
+
+function EndWithoutWinnerDialog({
+  open,
+  onCancel,
+  onConfirm,
+}: {
+  open: boolean;
+  onCancel: () => void;
+  onConfirm: () => void;
+}) {
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const cancelRef = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+    if (open && !dialog.open) {
+      if (typeof dialog.showModal === "function") dialog.showModal();
+      else dialog.setAttribute("open", "");
+      queueMicrotask(() => cancelRef.current?.focus());
+    }
+    if (!open && dialog.open) {
+      if (typeof dialog.close === "function") dialog.close();
+      else dialog.removeAttribute("open");
+    }
+  }, [open]);
+  return (
+    <dialog
+      aria-describedby="end-without-winner-description"
+      aria-labelledby="end-without-winner-title"
+      className="correction-dialog"
+      data-testid="end-without-winner-dialog"
+      onCancel={(event) => {
+        event.preventDefault();
+        onCancel();
+      }}
+      onClose={onCancel}
+      ref={dialogRef}
+    >
+      <div className="correction-dialog__surface">
+        <header className="correction-dialog__header">
+          <h2 id="end-without-winner-title">إنهاء المباراة بلا فائز</h2>
+        </header>
+        <p id="end-without-winner-description">
+          سيُنهي هذا الخيار المباراة كاملةً الآن، ولن يحتسب أي فريق فائزًا.
+        </p>
+        <div className="control-grid">
+          <button
+            className="button button--primary"
+            onClick={onConfirm}
+            type="button"
+          >
+            إنهاء المباراة كاملةً
+          </button>
+          <button className="button" onClick={onCancel} ref={cancelRef} type="button">
+            متابعة اللعب
+          </button>
+        </div>
+      </div>
+    </dialog>
+  );
+}
+
 export function HostActions({
   state,
+  answeringTeam,
   action,
   playerCount,
   teams,
   entitledTeam,
   contentHold,
   gameKind = "huroof",
+  endedWithoutWinner,
+  newMatchHref = "/host/new",
 }: {
   state: string;
+  answeringTeam?: "horizontal" | "vertical";
   action: (type: IntentType, payload?: Record<string, unknown>) => void;
   playerCount: number;
   teams: NonNullable<SafeProjection["room"]["teams"]>;
   entitledTeam?: "horizontal" | "vertical";
   contentHold?: SafeProjection["contentHold"];
   gameKind?: "huroof" | "categories";
+  endedWithoutWinner?: boolean;
+  newMatchHref?: string;
 }) {
   const manualSelection =
     state === "QUESTION_READING" || state === "OPPONENT_CHANCE";
   const hostOnly = playerCount === 0;
+  const selectionLabel = gameKind === "categories" ? "فئة" : "حرفًا";
+  const [endConfirmOpen, setEndConfirmOpen] = useState(false);
+  const endTriggerRef = useRef<HTMLButtonElement>(null);
+  const closeEndConfirmation = () => {
+    setEndConfirmOpen(false);
+    window.setTimeout(() => endTriggerRef.current?.focus(), 0);
+  };
+  const endButton = (
+    <button
+      className={`button${contentHold ? " button--primary" : ""}`}
+      onClick={() => setEndConfirmOpen(true)}
+      ref={endTriggerRef}
+      type="button"
+    >
+      إنهاء المباراة كاملةً بلا فائز
+    </button>
+  );
+  const endConfirmation = (
+    <EndWithoutWinnerDialog
+      onCancel={closeEndConfirmation}
+      onConfirm={() => {
+        setEndConfirmOpen(false);
+        action("END_WITHOUT_WINNER");
+      }}
+      open={endConfirmOpen}
+    />
+  );
   const primary: Partial<Record<string, [IntentType, string]>> = {
     ROUND_SETUP: ["ROUND_READY", "جهّز الجولة"],
     ROUND_COMPLETE: ["START_NEXT_ROUND", "جولة جديدة"],
   };
-  if (contentHold) {
+  if (state === "MATCH_COMPLETE") {
     return (
-      <div className="control-grid control-grid--content-hold" role="status">
+      <section className="control-grid" role="status">
         <p>
-          توقف اختيار المحتوى: لا يتوفر بديل صالح لهذه الخطوة. لا تُحتسب أي نقطة
-          ولا تتغير ملكية الخلية.
+          {endedWithoutWinner
+            ? "انتهت المباراة بلا فائز."
+            : "اكتملت المباراة."}
         </p>
-        <button
-          className="button button--primary"
-          onClick={() => action("END_WITHOUT_WINNER")}
-        >
-          إنهاء المباراة بلا فائز
-        </button>
-      </div>
+        <Link className="button button--primary" to={newMatchHref}>
+          مباراة جديدة بالإعدادات نفسها
+        </Link>
+      </section>
+    );
+  }
+  if (contentHold && state !== "PAUSED") {
+    return (
+      <>
+        <div className="control-grid control-grid--content-hold" role="status">
+          <p>
+            توقف اختيار المحتوى: لا يتوفر بديل صالح لهذه الخطوة. لا تُحتسب أي نقطة
+            ولا تتغير ملكية الخلية. أوقف المباراة مؤقتًا ثم اختر إنهاء المباراة بلا فائز.
+          </p>
+        </div>
+      </>
     );
   }
   return (
-    <div
-      className={`control-grid ${manualSelection && !hostOnly ? "control-grid--player-override" : ""}`}
-    >
+    <>
+      <div
+        className={`control-grid ${manualSelection && !hostOnly ? "control-grid--player-override" : ""}`}
+      >
       {state === "CELL_SELECTION" && (
         <button
           className="button button--primary host-select-cell"
@@ -1888,17 +2059,15 @@ export function HostActions({
             const cell = document.querySelector<HTMLButtonElement>(
               ".host-board .game-board__button:not(:disabled)",
             );
-            cell?.scrollIntoView({ block: "center", behavior: "instant" });
+            cell?.scrollIntoView?.({ block: "center", behavior: "instant" });
             cell?.focus({ preventScroll: true });
           }}
         >
-          {gameKind === "categories"
-            ? "اختر فئة من اللوحة"
-            : "اختر حرفًا من اللوحة"}
+          {`اختر ${selectionLabel} من اللوحة`}
         </button>
       )}
       {state === "FIRST_ANSWER" && (
-        <>
+        <div className="host-answer-judgment" data-team={answeringTeam}>
           <button
             className="button button--primary"
             onClick={() => action("JUDGE_CORRECT")}
@@ -1908,26 +2077,29 @@ export function HostActions({
           <button className="button" onClick={() => action("JUDGE_INCORRECT")}>
             إجابة خاطئة
           </button>
-        </>
+        </div>
       )}
       {state === "QUESTION_FAILED" && (
         <>
           <p className="host-failure-summary" role="status">
-            لم تُمنح الخلية لأي فريق. ستستبدل المتابعة محتواها بسؤال جديد ولن
-            تعيد السؤال المكشوف.
+            لم تُمنح الخلية لأي فريق. اختر سؤالاً جديدًا في {selectionLabel} نفسها،
+            أو غيّر {selectionLabel} ثم عد إلى اللوحة؛ لن يعود السؤال المكشوف.
           </p>
           <button
             className="button button--primary"
             onClick={() => action("RETRY_CELL")}
           >
-            متابعة واستبدال الخلية
+            {`سؤال جديد في ${selectionLabel} نفسها`}
           </button>
-          <button
-            className="button"
-            onClick={() => action("END_WITHOUT_WINNER")}
-          >
-            إنهاء بلا فائز
+          <button className="button" onClick={() => action("RETURN_CELL")}>
+            {`غيّر ${selectionLabel} والعودة إلى اللوحة`}
           </button>
+        </>
+      )}
+      {state === "PAUSED" && (
+        <>
+          <p role="status">المباراة متوقفة مؤقتًا.</p>
+          {endButton}
         </>
       )}
       {primary[state] && (
@@ -1959,7 +2131,9 @@ export function HostActions({
           </div>
         </section>
       )}
-    </div>
+      </div>
+      {endConfirmation}
+    </>
   );
 }
 
@@ -1972,7 +2146,7 @@ export function HostPauseAction({
   action: (type: IntentType, payload?: Record<string, unknown>) => void;
   contentHold?: boolean;
 }) {
-  if (contentHold || state === "CORRECTION" || state === "MATCH_COMPLETE")
+  if (state === "CORRECTION" || state === "MATCH_COMPLETE" || (contentHold && state === "PAUSED"))
     return null;
   return (
     <button
@@ -2000,8 +2174,31 @@ export function HostVisibilityControls({
   onHostAnswerChange: (visible: boolean) => void;
   showHostAnswer: boolean;
 }) {
+  const [open, setOpen] = useState(false);
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const closeOptions = () => {
+    setOpen(false);
+    triggerRef.current?.focus();
+  };
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+    if (open && !dialog.open) {
+      if (typeof dialog.showModal === "function") dialog.showModal();
+      else dialog.setAttribute("open", "");
+    } else if (!open && dialog.open) {
+      if (typeof dialog.close === "function") dialog.close();
+      else dialog.removeAttribute("open");
+    }
+  }, [open]);
   return (
-    <section className="host-visibility-controls" aria-label="خيارات العرض">
+    <>
+    <button className="button" type="button" ref={triggerRef} aria-haspopup="dialog" onClick={() => setOpen(true)}>خيارات</button>
+    <dialog className="correction-dialog" aria-label="خيارات العرض" ref={dialogRef} onCancel={(event) => { event.preventDefault(); closeOptions(); }} onClose={closeOptions}>
+    <div className="correction-dialog__surface">
+    <header className="correction-dialog__header"><h2>خيارات العرض</h2></header>
+    <section className="host-visibility-controls">
       <label className="host-visibility-control">
         <span>إظهار الإجابة للمضيف</span>
         <input
@@ -2027,6 +2224,10 @@ export function HostVisibilityControls({
         </p>
       ) : null}
     </section>
+    <button className="button" type="button" onClick={closeOptions}>إغلاق</button>
+    </div>
+    </dialog>
+    </>
   );
 }
 
@@ -2043,20 +2244,19 @@ export const audienceQuestionBandVisible = (
 
 /** Cached/offline projections may render safe text, but never retain a media grant. */
 const activeImageStatesForView = new Set([
+  "PAUSED",
   "QUESTION_READING",
   "FIRST_ANSWER",
   "OPPONENT_CHANCE",
   "QUESTION_FAILED",
 ]);
 export const canRenderCurrentQuestionMedia = ({
-  audienceQuestionVisible,
   authoritative,
   connection,
   role,
   state,
   surface,
 }: {
-  audienceQuestionVisible: boolean;
   authoritative?: boolean;
   connection: string;
   role: "host" | "player" | "audience";
@@ -2068,7 +2268,6 @@ export const canRenderCurrentQuestionMedia = ({
   return (
     role === "audience" &&
     surface === "display" &&
-    audienceQuestionVisible &&
     activeImageStatesForView.has(state)
   );
 };
@@ -2384,43 +2583,40 @@ function HostTeamManagementStatus({ state }: { state: string }) {
   );
 }
 
-export function HostJoinDialog({
-  onDismiss,
-  open,
-  roomCode,
-}: {
-  onDismiss: () => void;
-  open: boolean;
-  roomCode: string;
-}) {
-  const dialogRef = useRef<HTMLDialogElement>(null);
+type HostJoinLink = {
+  copyLink: () => Promise<void>;
+  copyStatus: string;
+  origin: string;
+  originIsInvalid: boolean;
+  qrDataUrl: string;
+  qrError: string;
+  setOrigin: (origin: string) => void;
+  joinUrl: string | undefined;
+};
+
+function useHostJoinLink(roomCode: string): HostJoinLink {
   const [origin, setOrigin] = useState(
     () =>
       import.meta.env.VITE_PUBLIC_JOIN_ORIGIN ||
       (typeof window === "undefined" ? "" : window.location.origin),
   );
-  const [qrDataUrl, setQrDataUrl] = useState("");
+  const [qr, setQr] = useState<{ joinUrl: string; value: string }>();
+  const [qrFailure, setQrFailure] = useState<{
+    joinUrl: string;
+    message: string;
+  }>();
   const [copyStatus, setCopyStatus] = useState("");
   const joinUrl = playerJoinUrl(origin, roomCode);
   const originIsInvalid =
     Boolean(origin.trim()) && !normalizedJoinOrigin(origin);
-
-  useEffect(() => {
-    const dialog = dialogRef.current;
-    if (!dialog) return;
-    if (open && !dialog.open) {
-      if (typeof dialog.showModal === "function") dialog.showModal();
-      else dialog.setAttribute("open", "");
-    }
-    if (!open && dialog.open) {
-      if (typeof dialog.close === "function") dialog.close();
-      else dialog.removeAttribute("open");
-    }
-  }, [open]);
+  const qrDataUrl = qr && qr.joinUrl === joinUrl ? qr.value : "";
+  const qrError =
+    qrFailure && qrFailure.joinUrl === joinUrl ? qrFailure.message : "";
 
   useEffect(() => {
     let cancelled = false;
-    setQrDataUrl("");
+    setQr(undefined);
+    setQrFailure(undefined);
     if (!joinUrl) return;
     void QRCode.toDataURL(joinUrl, {
       color: { dark: "#071d38", light: "#ffffffff" },
@@ -2429,11 +2625,14 @@ export function HostJoinDialog({
       width: 280,
     })
       .then((value) => {
-        if (!cancelled) setQrDataUrl(value);
+        if (!cancelled) setQr({ joinUrl, value });
       })
       .catch(() => {
         if (!cancelled)
-          setCopyStatus("تعذر إنشاء رمز QR محلياً. يمكنك نسخ الرابط.");
+          setQrFailure({
+            joinUrl,
+            message: "تعذر إنشاء رمز QR محلياً. يمكنك نسخ الرابط.",
+          });
       });
     return () => {
       cancelled = true;
@@ -2451,6 +2650,88 @@ export function HostJoinDialog({
       setCopyStatus(readableError(reason));
     }
   };
+
+  return {
+    copyLink,
+    copyStatus,
+    joinUrl,
+    origin,
+    originIsInvalid,
+    qrDataUrl,
+    qrError,
+    setOrigin,
+  };
+}
+
+export function HostJoinInlineQr({
+  join,
+  onOpen,
+}: {
+  join: HostJoinLink;
+  onOpen: () => void;
+}) {
+  const status = join.joinUrl
+    ? join.qrError || "امسح الرمز للانضمام إلى هذه المباراة."
+    : join.originIsInvalid
+      ? "عنوان الموقع غير صالح للهاتف. اضغط لتعديله."
+      : "اضبط عنوان الموقع القابل للوصول لإظهار الرمز.";
+  return (
+    <aside className="lobby-join-qr" aria-label="انضمام اللاعبين برمز QR">
+      <button
+        aria-describedby="lobby-join-qr-caption"
+        aria-label={
+          join.qrError
+            ? "فتح إعدادات رمز QR بعد تعذر إنشائه"
+            : join.joinUrl
+              ? "تكبير رمز QR للانضمام"
+              : "إعداد عنوان انضمام اللاعبين"
+        }
+        className="lobby-join-qr__trigger"
+        data-testid="lobby-join-qr"
+        onClick={onOpen}
+        type="button"
+      >
+        <span className="lobby-join-qr__code">
+          {join.qrDataUrl ? (
+            <img alt="رمز QR لرابط انضمام اللاعب" src={join.qrDataUrl} />
+          ) : join.qrError ? (
+            <span role="alert">تعذر إنشاء الرمز</span>
+          ) : (
+            <span role="status">
+              {join.joinUrl ? "جارٍ إنشاء الرمز…" : "إعداد رمز الانضمام"}
+            </span>
+          )}
+        </span>
+        <span className="lobby-join-qr__label">رمز QR للانضمام</span>
+      </button>
+      <p id="lobby-join-qr-caption">{status}</p>
+    </aside>
+  );
+}
+
+export function HostJoinDialog({
+  join,
+  onDismiss,
+  open,
+}: {
+  join: HostJoinLink;
+  onDismiss: () => void;
+  open: boolean;
+}) {
+  const dialogRef = useRef<HTMLDialogElement>(null);
+
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+    if (open && !dialog.open) {
+      if (typeof dialog.showModal === "function") dialog.showModal();
+      else dialog.setAttribute("open", "");
+    }
+    if (!open && dialog.open) {
+      if (typeof dialog.close === "function") dialog.close();
+      else dialog.removeAttribute("open");
+    }
+  }, [open]);
 
   return (
     <dialog
@@ -2485,35 +2766,37 @@ export function HostJoinDialog({
             aria-describedby="host-join-origin-help"
             dir="ltr"
             inputMode="url"
-            onChange={(event) => setOrigin(event.target.value)}
+            onChange={(event) => join.setOrigin(event.target.value)}
             placeholder="http://192.168.1.10:5173"
-            value={origin}
+            value={join.origin}
           />
         </label>
         <p className="host-join-dialog__hint" id="host-join-origin-help">
-          {originIsInvalid
+          {join.originIsInvalid
             ? "استخدم عنوان http أو https عاماً أو من الشبكة المحلية. لا يمكن مسح localhost من هاتف."
             : "عند تشغيل التطبيق على localhost، أدخل عنوان الشبكة المحلية أو العنوان العام الذي يصل إليه اللاعبون."}
         </p>
-        {joinUrl ? (
+        {join.joinUrl ? (
           <>
             <div
               className="host-join-dialog__qr"
               aria-label="رمز QR لرابط انضمام اللاعب"
             >
-              {qrDataUrl ? (
-                <img alt="رمز QR لرابط انضمام اللاعب" src={qrDataUrl} />
+              {join.qrDataUrl ? (
+                <img alt="رمز QR لرابط انضمام اللاعب" src={join.qrDataUrl} />
+              ) : join.qrError ? (
+                <p role="alert">تعذر إنشاء الرمز.</p>
               ) : (
                 <p role="status">جارٍ إنشاء الرمز…</p>
               )}
             </div>
             <label className="host-join-dialog__link">
               <span>رابط انضمام اللاعب</span>
-              <input dir="ltr" readOnly value={joinUrl} />
+              <input dir="ltr" readOnly value={join.joinUrl} />
             </label>
             <button
               className="button"
-              onClick={() => void copyLink()}
+              onClick={() => void join.copyLink()}
               type="button"
             >
               انسخ رابط الانضمام
@@ -2521,11 +2804,86 @@ export function HostJoinDialog({
           </>
         ) : null}
         <p aria-live="polite" className="form-message">
-          {copyStatus}
+          {join.qrError || join.copyStatus}
         </p>
       </section>
     </dialog>
   );
+}
+
+/**
+ * Converts consecutive authoritative room projections into visual-only board
+ * events.  It deliberately uses no timer or intent authority: a correction,
+ * cache snapshot, reconnect, content hold, or pause simply establishes a new
+ * baseline and cancels any in-flight decorative effect.
+ */
+export function boardPresentationTransition(
+  previous: ProjectionEnvelope<SafeProjection> | undefined,
+  current: ProjectionEnvelope<SafeProjection> | null | undefined,
+  connected: boolean,
+): BoardPresentationContext | undefined {
+  if (!current) return undefined;
+  const projection = current.projection;
+  const base: BoardPresentationContext = {
+    roomId: current.roomId,
+    round: projection.currentRound,
+    phase: projection.room.state,
+    revision: current.revision,
+    eventKey: `${current.roomId}:${current.revision}:steady`,
+  };
+  const suppressed = !connected || current.authoritative === false || Boolean(projection.contentHold) || ["PAUSED", "CORRECTION"].includes(projection.room.state);
+  const previousSuppressed = !previous || previous.authoritative === false || Boolean(previous.projection.contentHold) || ["PAUSED", "CORRECTION"].includes(previous.projection.room.state);
+  if (!previous || previous.roomId !== current.roomId || current.revision <= previous.revision || suppressed || previousSuppressed)
+    return { ...base, suppressEffects: true };
+
+  const before = previous.projection;
+  const event = (type: NonNullable<BoardPresentationContext["event"]>, cellId?: string, team?: TeamAxis): BoardPresentationContext => ({
+    ...base,
+    event: type,
+    eventCellId: cellId,
+    eventKey: `${current.roomId}:${current.revision}:${type}:${cellId ?? ""}:${team ?? ""}`,
+    eventTeam: team,
+  });
+  const currentWinning = projection.winningPath?.join("|") ?? "";
+  const previousWinning = before.winningPath?.join("|") ?? "";
+  if (currentWinning && currentWinning !== previousWinning)
+    return event("victory", projection.winningPath?.[0]);
+
+  const wasAnswering = before.room.state === "FIRST_ANSWER" || before.room.state === "OPPONENT_CHANCE";
+  const awardCellId = before.activeCellId;
+  const newlyAwarded = awardCellId && !before.board?.find((cell) => cell.id === awardCellId)?.owner &&
+    projection.board?.find((cell) => cell.id === awardCellId)?.owner === before.answeringTeam;
+  if (wasAnswering && awardCellId && before.answeringTeam && newlyAwarded)
+    return event("award", awardCellId, before.answeringTeam);
+
+  const changedContent = projection.board?.find((cell) => {
+    const prior = before.board?.find((value) => value.id === cell.id);
+    return prior && (prior.revealedLetter !== cell.revealedLetter || prior.categoryLabelAr !== cell.categoryLabelAr);
+  });
+  if (before.room.state === "LETTER_REVEAL" && changedContent)
+    return event("content", changedContent.id);
+  if (before.room.state === "ROUND_SETUP" && projection.room.state === "CELL_SELECTION")
+    return event("round-entry");
+  if (projection.activeCellId && projection.activeCellId !== before.activeCellId)
+    return event("selection", projection.activeCellId);
+  if (!before.buzzWinner && projection.buzzWinner)
+    return event("buzzer", undefined, projection.buzzWinner.team);
+  return base;
+}
+
+function useBoardPresentationContext(
+  envelope: ProjectionEnvelope<SafeProjection> | null | undefined,
+  connection: string,
+) {
+  const previous = useRef<ProjectionEnvelope<SafeProjection> | undefined>(undefined);
+  const context = useMemo(
+    () => boardPresentationTransition(previous.current, envelope, connection === "connected"),
+    [connection, envelope],
+  );
+  useEffect(() => {
+    if (envelope) previous.current = envelope;
+  }, [envelope]);
+  return context;
 }
 
 export function RoomRoute({
@@ -2564,6 +2922,7 @@ function RoomRouteInstance({
     surface === "display",
     surface === "display" ? "audience" : undefined,
   );
+  const boardPresentationContext = useBoardPresentationContext(envelope, connection);
   const navigate = useNavigate();
   const projection = envelope?.projection;
   // The legacy fixture setting still creates a real local room through the
@@ -2575,6 +2934,9 @@ function RoomRouteInstance({
   const [visibilityBusy, setVisibilityBusy] = useState(false);
   const [showHostAnswer, setShowHostAnswer] = useState(true);
   const [joinDialogOpen, setJoinDialogOpen] = useState(false);
+  const hostJoin = useHostJoinLink(
+    envelope?.role === "host" ? projection?.room.roomCode ?? "" : "",
+  );
   const [draggedTeamTarget, setDraggedTeamTarget] =
     useState<AssignmentTarget>();
   const liveTeamFocusTarget = useRef<string | undefined>(undefined);
@@ -2587,6 +2949,7 @@ function RoomRouteInstance({
   const expandedBoardTriggerRef = useRef<HTMLButtonElement>(null);
   const buzzSubmittingRef = useRef(false);
   const automaticHostTransitionRef = useRef<string | undefined>(undefined);
+  const priorHostStateRef = useRef<string | undefined>(undefined);
   const restoreExpandedBoardFocus = () => {
     setExpandedBoardOpen(false);
     window.requestAnimationFrame(() =>
@@ -2631,6 +2994,24 @@ function RoomRouteInstance({
     buzzSubmittingRef.current = false;
     setBuzzSubmitting(false);
   }, [envelope?.revision, projection?.self?.canBuzz]);
+  useEffect(() => {
+    const priorState = priorHostStateRef.current;
+    priorHostStateRef.current = projection?.room.state;
+    if (
+      priorState !== "QUESTION_FAILED" ||
+      projection?.room.state !== "CELL_SELECTION" ||
+      envelope?.role !== "host" ||
+      projection.contentHold
+    )
+      return;
+    window.requestAnimationFrame(() => {
+      const cell = document.querySelector<HTMLButtonElement>(
+        ".host-board .game-board__button:not(:disabled)",
+      );
+      cell?.scrollIntoView?.({ block: "center", behavior: "instant" });
+      cell?.focus({ preventScroll: true });
+    });
+  }, [envelope?.role, projection?.contentHold, projection?.room.state]);
   const activeDestination = activeLobbyDestination(
     roomCode,
     surface,
@@ -2821,13 +3202,17 @@ function RoomRouteInstance({
   const questionMediaVisible =
     Boolean(projection.question?.media) &&
     canRenderCurrentQuestionMedia({
-      audienceQuestionVisible,
       authoritative: envelope.authoritative,
       connection,
       role,
       state,
       surface,
     });
+  const audienceQuestionTextVisible = audienceQuestionBandVisible(
+    audienceQuestionVisible,
+    state,
+    projection.question?.promptAr,
+  );
   const visibilityControls = host ? (
     <HostVisibilityControls
       audienceQuestionVisible={audienceQuestionVisible}
@@ -2852,6 +3237,7 @@ function RoomRouteInstance({
   const correctionPending = state === "CORRECTION";
   const correctionDialogVisible = correctionDialogOpen || correctionPending;
   const resultState = resultRouteState(roomCode, role, state);
+  const newMatchHref = sameSettingsNewMatchHref(projection.room.matchSettings);
   const canStartMatch = canDispatchLobbyStart(state, projection.room.canStart);
   const team = projection.self?.team;
   const cells = projection.board ?? previewBoardCells;
@@ -2948,7 +3334,7 @@ function RoomRouteInstance({
       >
         <AppHeader />
         <section className="lobby-page spatial-lobby">
-          <div className="lobby-title">
+          <div className={`lobby-title${host ? " lobby-title--host" : ""}`}>
             <div className="lobby-title__identity">
               <p className="eyebrow">غرفة مباشرة</p>
               <h1>ردهة المباراة</h1>
@@ -2968,18 +3354,14 @@ function RoomRouteInstance({
                 >
                   انسخ الرمز
                 </button>
-                {host && (
-                  <button
-                    className="copy-button"
-                    data-testid="lobby-join-qr"
-                    onClick={() => setJoinDialogOpen(true)}
-                    type="button"
-                  >
-                    رمز QR
-                  </button>
-                )}
               </div>
             </div>
+            {host && (
+              <HostJoinInlineQr
+                join={hostJoin}
+                onOpen={() => setJoinDialogOpen(true)}
+              />
+            )}
             {host && (
               <div className="lobby-start">
                 <button
@@ -3063,12 +3445,12 @@ function RoomRouteInstance({
             {error}
           </p>
         </section>
-        {host && (
-          <HostJoinDialog
-            onDismiss={() => setJoinDialogOpen(false)}
-            open={joinDialogOpen}
-            roomCode={projection.room.roomCode}
-          />
+          {host && (
+            <HostJoinDialog
+              join={hostJoin}
+              onDismiss={() => setJoinDialogOpen(false)}
+              open={joinDialogOpen}
+            />
         )}
       </main>
     );
@@ -3197,20 +3579,12 @@ function RoomRouteInstance({
           <span className="game-arena__hex game-arena__hex--left" />
           <span className="game-arena__hex game-arena__hex--right" />
         </div>
-        {state === "FIRST_ANSWER" && projection.buzzWinner ? (
-          <BuzzWinnerBanner winner={projection.buzzWinner} />
-        ) : null}
         <header className="game-arena__header">
           <p className="game-arena__brand">
-            <span>تحدي الخلية</span>
+            <span>الخلية</span>
             <small>شاشة الجمهور</small>
           </p>
-          <RoundTimerModule
-            hasQuestion={Boolean(projection.question)}
-            deadlineAt={projection.deadlineAt}
-            onDeadline={reconcileDeadline}
-            serverTime={envelope.serverTime}
-          />
+          <BoardStatusStrip projection={projection} serverTime={envelope.serverTime} presentationContext={boardPresentationContext} onDeadline={reconcileDeadline} notification={activeCellCaption || undefined} />
           <p className="game-arena__badge">
             <svg aria-hidden="true" viewBox="0 0 24 24">
               <path d="M8 3h8l-1 6h-6L8 3Z" />
@@ -3242,21 +3616,8 @@ function RoomRouteInstance({
               winningPath={projection.winningPath}
               motionBaselineKey={boardMotionBaselineKey}
               motionEnabled={boardMotionEnabled}
+              presentationContext={boardPresentationContext}
             />
-            {activeCellCaption ? (
-              <p className="active-cell-caption" role="status">
-                {activeCellCaption}
-              </p>
-            ) : null}
-            {state === "CELL_SELECTION" || state === "ROUND_SETUP" ? (
-              <p className="stage-waiting" role="status">
-                بانتظار اختيار المضيف للخلية التالية
-              </p>
-            ) : state === "QUESTION_FAILED" ? (
-              <p className="stage-waiting" role="status">
-                انتهت المحاولة بلا نقطة. بانتظار متابعة المضيف.
-              </p>
-            ) : null}
           </div>
           <TeamScoreCard
             axis="horizontal"
@@ -3269,19 +3630,15 @@ function RoomRouteInstance({
           />
         </section>
         <section
-          className="question-band"
+          className={`question-band${questionMediaVisible ? " question-band--with-media" : ""}${questionMediaVisible && !audienceQuestionTextVisible ? " question-band--media-only" : ""}`}
           aria-live="polite"
           style={{
-            visibility: audienceQuestionBandVisible(
-              audienceQuestionVisible,
-              state,
-              projection.question?.promptAr,
-            )
+            visibility: (audienceQuestionTextVisible || questionMediaVisible)
               ? "visible"
               : "hidden",
           }}
         >
-          <div className="question-band__heading">
+          {audienceQuestionTextVisible ? <div className="question-band__heading">
             <span aria-hidden="true" className="question-band__line" />
             <svg
               aria-hidden="true"
@@ -3297,7 +3654,7 @@ function RoomRouteInstance({
                 : projection.question?.headerAr || "سؤال الجولة"}
             </h2>
             <span aria-hidden="true" className="question-band__line" />
-          </div>
+          </div> : null}
           {state === "MATCH_COMPLETE" ? (
             <>
               <p className="question-band__eyebrow">اكتمل المسار والمباراة</p>
@@ -3306,32 +3663,40 @@ function RoomRouteInstance({
             </>
           ) : (
             <>
+              {audienceQuestionTextVisible ? <h1>
+                <QuestionReadingShield state={state} team={projection.answeringTeam} deadlineAt={projection.deadlineAt} serverTime={envelope.serverTime}>
+                {projection.question?.promptAr ? (
+                  state === "QUESTION_READING" || state === "OPPONENT_CHANCE" ? (
+                    <QuestionReveal
+                      prompt={projection.question.promptAr}
+                      questionKey={[
+                        roomCode ?? projection.room.roomCode,
+                        projection.currentRound ?? "",
+                        projection.activeCellId ?? "",
+                        projection.question.promptAr,
+                      ].join("|")}
+                    />
+                  ) : (
+                    projection.question.promptAr
+                  )
+                ) : (
+                  projection.messageAr || "بانتظار السؤال"
+                )}
+                </QuestionReadingShield>
+              </h1> : null}
               {questionMediaVisible && projection.question?.media ? (
                 <CurrentQuestionMedia
                   key={`${envelope.roomId}:${projection.activeCellId ?? ""}:${projection.question.media.mediaId}:${projection.question.media.assetSha256}`}
                   roomId={envelope.roomId}
                   media={projection.question.media}
+                  concealed={shouldConcealAudienceQuestionMedia(projection.question.media)}
                 />
               ) : null}
-              <h1>
-                {projection.question?.promptAr ? (
-                  <QuestionReveal
-                    paused={
-                      state !== "QUESTION_READING" &&
-                      state !== "OPPONENT_CHANCE"
-                    }
-                    prompt={projection.question.promptAr}
-                    questionKey={[
-                      roomCode ?? projection.room.roomCode,
-                      projection.currentRound ?? "",
-                      projection.activeCellId ?? "",
-                      projection.question.promptAr,
-                    ].join("|")}
-                  />
-                ) : (
-                  projection.messageAr || "بانتظار السؤال"
-                )}
-              </h1>
+              {projection.question?.revealedAnswer && shouldShowSharedRevealedAnswer() ? (
+                <p className="question-band__revealed-answer" data-testid="shared-revealed-answer">
+                  <b>الإجابة:</b> {projection.question.revealedAnswer}
+                </p>
+              ) : null}
             </>
           )}
         </section>
@@ -3388,6 +3753,7 @@ function RoomRouteInstance({
             winningPath={projection.winningPath}
             motionBaselineKey={boardMotionBaselineKey}
             motionEnabled={boardMotionEnabled}
+            presentationContext={boardPresentationContext}
           />
           <div className="result-meta">
             <p>
@@ -3413,7 +3779,7 @@ function RoomRouteInstance({
                   <li>إجابة صحيحة وتثبيت ملكيتها (+1 نقطة)</li>
                   <li>اكتمال المسار (+1 جولة)</li>
                 </ol>
-                <Link className="button button--primary" to="/host/new">
+                <Link className="button button--primary" to={host ? newMatchHref : "/host/new"}>
                   مباراة جديدة
                 </Link>
               </>
@@ -3452,7 +3818,7 @@ function RoomRouteInstance({
       data-state={state}
       id="main-content"
     >
-      <AppHeader />
+      {state === "LOBBY" ? <AppHeader /> : null}
       <h1 className="sr-only">لوحة المضيف</h1>
       <div aria-hidden="true" className="game-arena__decor">
         <span className="game-arena__rail game-arena__rail--left" />
@@ -3462,8 +3828,9 @@ function RoomRouteInstance({
       </div>
       <section className="host-layout">
         <div className="host-stage" aria-label="لوحة المباراة والنتيجة">
-          <div className="host-board">
-            <GameBoard
+          <div className={`host-board${questionMediaVisible ? " host-board--media" : ""}`}>
+            <BoardStatusStrip presentationContext={boardPresentationContext} projection={projection} serverTime={envelope.serverTime} />
+            {!questionMediaVisible && <GameBoard
               activeCellId={projection.activeCellId}
               cells={cells}
               className="host-game-board"
@@ -3475,13 +3842,14 @@ function RoomRouteInstance({
               winningPath={projection.winningPath}
               motionBaselineKey={boardMotionBaselineKey}
               motionEnabled={boardMotionEnabled}
-            />
-            {activeCellCaption ? (
+              presentationContext={boardPresentationContext}
+            />}
+            {!questionMediaVisible && activeCellCaption ? (
               <p className="active-cell-caption" role="status">
                 {activeCellCaption}
               </p>
             ) : null}
-            {projection.room.matchSettings?.gameKind === "categories" ? (
+            {!questionMediaVisible && projection.room.matchSettings?.gameKind === "categories" ? (
               <button
                 aria-expanded={expandedBoardOpen}
                 className="host-board-expand"
@@ -3499,10 +3867,23 @@ function RoomRouteInstance({
                 <h2>{projection.question?.headerAr || "سؤال الجولة"}</h2>
                 <span aria-hidden="true" className="question-band__line" />
               </div>
-              {state === "CELL_SELECTION" ? (
+              {state === "MATCH_COMPLETE" ? (
+                <p className="host-question-band__finished" role="status">
+                  {incompleteEnd
+                    ? "انتهت المباراة بلا فائز. أنشئ مباراة جديدة للعب من البداية."
+                    : "اكتملت المباراة. أنشئ مباراة جديدة للعب من البداية."}
+                </p>
+              ) : state === "CELL_SELECTION" ? (
                 <p>بانتظار اختيار الخلية</p>
               ) : (
                 <>
+                  <h3>
+                    <QuestionReadingShield state={state} team={projection.answeringTeam} deadlineAt={projection.deadlineAt} serverTime={envelope.serverTime}>
+                    {projection.question?.promptAr ||
+                      projection.messageAr ||
+                      "بانتظار السؤال"}
+                    </QuestionReadingShield>
+                  </h3>
                   {questionMediaVisible && projection.question?.media ? (
                     <CurrentQuestionMedia
                       key={`${envelope.roomId}:${projection.activeCellId ?? ""}:${projection.question.media.mediaId}:${projection.question.media.assetSha256}`}
@@ -3510,11 +3891,11 @@ function RoomRouteInstance({
                       media={projection.question.media}
                     />
                   ) : null}
-                  <h3>
-                    {projection.question?.promptAr ||
-                      projection.messageAr ||
-                      "بانتظار السؤال"}
-                  </h3>
+                  {projection.question?.revealedAnswer ? (
+                    <p className="host-question-band__revealed-answer" data-testid="shared-revealed-answer">
+                      <b>الإجابة:</b> {projection.question.revealedAnswer}
+                    </p>
+                  ) : null}
                 </>
               )}
             </section>
@@ -3523,21 +3904,6 @@ function RoomRouteInstance({
         <aside className="host-controls">
           {state === "LOBBY" ? (
             <>
-              {host && (
-                <section
-                  className="host-controls__utility"
-                  aria-label="انضمام اللاعبين"
-                >
-                  <span>انضمام اللاعبين</span>
-                  <button
-                    className="button host-join-trigger"
-                    onClick={() => setJoinDialogOpen(true)}
-                    type="button"
-                  >
-                    رمز QR للانضمام
-                  </button>
-                </section>
-              )}
               <HostLobbyControls
                 action={hostLobbyAction}
                 busy={lobbyBusy}
@@ -3552,21 +3918,6 @@ function RoomRouteInstance({
             </>
           ) : (
             <>
-              {host && (
-                <section
-                  className="host-controls__utility"
-                  aria-label="انضمام اللاعبين"
-                >
-                  <span>انضمام اللاعبين</span>
-                  <button
-                    className="button host-join-trigger"
-                    onClick={() => setJoinDialogOpen(true)}
-                    type="button"
-                  >
-                    رمز QR للانضمام
-                  </button>
-                </section>
-              )}
               <section className="host-score-pair" aria-label="نتيجة الفريقين">
                 <TeamScoreCard
                   assignment={teamAssignment}
@@ -3627,6 +3978,7 @@ function RoomRouteInstance({
                 ) : null}
                 <HostActions
                   action={action}
+                  answeringTeam={projection.answeringTeam}
                   entitledTeam={projection.entitledTeam}
                   playerCount={
                     projection.room.members?.filter(
@@ -3637,7 +3989,9 @@ function RoomRouteInstance({
                   }
                   state={state}
                   contentHold={projection.contentHold}
+                  endedWithoutWinner={projection.endedWithoutWinner}
                   gameKind={projection.room.matchSettings?.gameKind}
+                  newMatchHref={newMatchHref}
                   teams={
                     projection.room.teams ?? {
                       horizontal: "الأحمر",
@@ -3646,7 +4000,16 @@ function RoomRouteInstance({
                   }
                 />
               </div>
-              {visibilityControls}
+              {projection.question?.occurrence && ["QUESTION_READING", "FIRST_ANSWER", "OPPONENT_CHANCE", "QUESTION_FAILED", "PAUSED"].includes(state) ? (
+                <button
+                  className="button button--quiet"
+                  data-testid="shared-answer-reveal"
+                  onClick={() => action("REVEAL_ANSWER", { occurrence: projection.question!.occurrence })}
+                  type="button"
+                >
+                  إظهار الإجابة
+                </button>
+              ) : null}
               {shouldShowHostAnswers(showHostAnswer, projection.question) &&
                 projection.question && (
                   <section className="private-question">
@@ -3668,17 +4031,6 @@ function RoomRouteInstance({
                     </div>
                   </section>
                 )}
-              <button
-                className="correction-trigger"
-                data-testid="correction-trigger"
-                onClick={() => setCorrectionDialogOpen(true)}
-                ref={correctionTriggerRef}
-                type="button"
-              >
-                {projection.contentHold
-                  ? "سجل التدقيق (للقراءة فقط)"
-                  : "تصحيح وسجل التدقيق"}
-              </button>
               <CorrectionDialog
                 audit={projection.audit}
                 cells={cells}
@@ -3708,31 +4060,25 @@ function RoomRouteInstance({
                 <ConnectionStatus value={connection} />
               </div>
               <HostTeamManagementStatus state={state} />
-              <HostPauseAction
-                action={action}
-                contentHold={Boolean(projection.contentHold)}
-                state={state}
-              />
             </>
           )}
-          {host && (
-            <Link
-              aria-label="فتح شاشة العرض في تبويب جديد"
-              className="button button--quiet host-controls__display"
-              data-testid="host-display-link"
-              rel="noopener noreferrer"
-              target="_blank"
-              to={`/room/${projection.room.roomCode}/display`}
-            >
-              شاشة العرض
-            </Link>
-          )}
+          {host && <div className="host-controls__bottom-actions">
+            <div className="host-controls__action-row host-controls__action-row--two">
+              <Link className="button" aria-label="فتح شاشة العرض في تبويب جديد" data-testid="host-display-link" rel="noopener noreferrer" target="_blank" to={`/room/${projection.room.roomCode}/display`}>شاشة العرض</Link>
+              <button className="button" type="button" onClick={() => setJoinDialogOpen(true)}>رمز QR</button>
+            </div>
+            {state !== "LOBBY" && <div className="host-controls__action-row host-controls__action-row--three">
+              <button className="button" data-testid="correction-trigger" ref={correctionTriggerRef} type="button" onClick={() => setCorrectionDialogOpen(true)}>تصحيح</button>
+              {visibilityControls}
+              <HostPauseAction action={action} contentHold={Boolean(projection.contentHold)} state={state} />
+            </div>}
+          </div>}
         </aside>
         {host && (
           <HostJoinDialog
+            join={hostJoin}
             onDismiss={() => setJoinDialogOpen(false)}
             open={joinDialogOpen}
-            roomCode={projection.room.roomCode}
           />
         )}
         {host && projection.room.matchSettings?.gameKind === "categories" ? (
@@ -3786,6 +4132,7 @@ function RoomRouteInstance({
                   winningPath={projection.winningPath}
                   motionBaselineKey={boardMotionBaselineKey}
                   motionEnabled={boardMotionEnabled}
+                  presentationContext={boardPresentationContext}
                 />
               </div>
             </div>

@@ -12,6 +12,8 @@ functions/lib/
 content/question-bank-v3/cache/
 content/question-bank-v3/evidence-bodies/
 *.tsbuildinfo
+__pycache__/
+*.pyc
 
 # Local environment configuration (keep the committed template)
 .env
@@ -58,3 +60,7 @@ tmp/
 *.zip
 
 .vercel
+
+# Local football source video and extracted goal clips
+/resources/100 Best Goals of 2026 \[So Far\].mp4
+/resources/100-best-goals-2026-clips/

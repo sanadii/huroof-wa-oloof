@@ -23,6 +23,17 @@ test("production preflight accepts an explicit non-emulator Node 22 release buil
   assert.doesNotThrow(() => assertProductionPreflight(valid, "22.16.0"));
 });
 
+test("production preflight rejects the former Dammam Functions region", () => {
+  assert.throws(
+    () =>
+      assertProductionPreflight(
+        { ...valid, VITE_FIREBASE_FUNCTIONS_REGION: "me-central2" },
+        "22.16.0",
+      ),
+    /VITE_FIREBASE_FUNCTIONS_REGION must be me-central1/,
+  );
+});
+
 test("production preflight rejects fixture, emulator, missing release, and wrong Node inputs", () => {
   assert.throws(
     () =>
@@ -38,5 +49,22 @@ test("production preflight rejects fixture, emulator, missing release, and wrong
         "24.0.0",
       ),
     /Node 22.*VITE_GAME_RUNTIME.*VITE_USE_FIREBASE_EMULATORS.*VITE_FIREBASE_PROJECT_ID.*FIREBASE_ACTIVE_RELEASE_ID.*FIRESTORE_EMULATOR_HOST/s,
+  );
+});
+
+test("production preflight accepts the Enterprise provider and rejects an unknown one", () => {
+  assert.doesNotThrow(() =>
+    assertProductionPreflight(
+      { ...valid, VITE_FIREBASE_APP_CHECK_PROVIDER: "recaptcha-enterprise" },
+      "22.16.0",
+    ),
+  );
+  assert.throws(
+    () =>
+      assertProductionPreflight(
+        { ...valid, VITE_FIREBASE_APP_CHECK_PROVIDER: "recaptcha-unknown" },
+        "22.16.0",
+      ),
+    /VITE_FIREBASE_APP_CHECK_PROVIDER/,
   );
 });
