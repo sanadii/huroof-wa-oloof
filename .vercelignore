@@ -10,9 +10,9 @@ functions/
 server/**
 !server/local-admin-guard.ts
 content/
-data/
-reports/
-resources/
+/data/
+/reports/
+/resources/
 design/mockups/
 tahdani.sa.json
 tahdani.sa.md
