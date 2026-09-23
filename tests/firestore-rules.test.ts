@@ -10,17 +10,24 @@ async function setup() {
     await setDoc(doc(context.firestore(), 'rooms/r1/members/u2'), { uid: 'u2', role: 'player', active: true });
     await setDoc(doc(context.firestore(), 'rooms/r1/members/u3'), { uid: 'u3', role: 'host', active: true });
     await setDoc(doc(context.firestore(), 'rooms/r1/members/u4'), { uid: 'u4', role: 'player', active: false });
+    await setDoc(doc(context.firestore(), 'rooms/r1/members/u5'), { uid: 'u5', role: 'audience', active: true });
     await setDoc(doc(context.firestore(), 'rooms/r1/projections/player_u1'), { revision: 1 });
     await setDoc(doc(context.firestore(), 'rooms/r1/projections/player_u2'), { revision: 1 });
     await setDoc(doc(context.firestore(), 'rooms/r1/projections/audience'), { revision: 1 });
     await setDoc(doc(context.firestore(), 'rooms/r1/projections/host'), { revision: 1 });
     await setDoc(doc(context.firestore(), 'rooms/r1/canonical/private'), { canonicalAnswer: 'secret' });
+    await setDoc(doc(context.firestore(), 'qaChallengePermits/permit-private'), { immutable: true, hostUid: 'u3' });
+    await setDoc(doc(context.firestore(), 'qaChallengePermitUses/permit-private'), { immutable: true, roomId: 'r1', hostUid: 'u3' });
+    await setDoc(doc(context.firestore(), 'rooms/r1/qaClosureReceipts/receipt-private'), { immutable: true, actorUid: 'u3' });
+    await setDoc(doc(context.firestore(), 'challengeDefinitionSets/manifest-private/definitions/definition-private'), { canonicalJson: 'secret' });
+    await setDoc(doc(context.firestore(), 'releases/release-private/mapVariants/map-private'), { runtimeQuestionId: 'map-private' });
   });
 }
 await setup();
 const player = environment.authenticatedContext('u1').firestore();
 const hostUser = environment.authenticatedContext('u3').firestore();
 const inactive = environment.authenticatedContext('u4').firestore();
+const staleAudience = environment.authenticatedContext('u5').firestore();
 const anonymous = environment.unauthenticatedContext().firestore();
 await assertSucceeds(getDoc(doc(player, 'rooms/r1/projections/player_u1')));
 await assertSucceeds(getDoc(doc(player, 'rooms/r1/projections/audience')));
@@ -28,8 +35,21 @@ await assertFails(getDoc(doc(player, 'rooms/r1/projections/player_u2')));
 await assertFails(getDoc(doc(player, 'rooms/r1/projections/host')));
 await assertSucceeds(getDoc(doc(hostUser, 'rooms/r1/projections/host')));
 await assertFails(getDoc(doc(inactive, 'rooms/r1/projections/audience')));
+await assertFails(getDoc(doc(staleAudience, 'rooms/r1/projections/player_u5')));
+await assertSucceeds(getDoc(doc(staleAudience, 'rooms/r1/projections/audience')));
 await assertFails(getDoc(doc(anonymous, 'rooms/r1/projections/audience')));
 await assertFails(getDoc(doc(player, 'rooms/r1/canonical/private')));
 await assertFails(setDoc(doc(player, 'rooms/r1/projections/player_u1'), { revision: 2 }));
 await assertFails(getDocs(collection(player, 'rooms/r1/projections')));
+// M6 server-only namespaces remain unreadable and unwritable even to a current player or host.
+for (const path of [
+  'qaChallengePermits/permit-private', 'qaChallengePermitUses/permit-private',
+  'rooms/r1/qaClosureReceipts/receipt-private',
+  'challengeDefinitionSets/manifest-private/definitions/definition-private',
+  'releases/release-private/mapVariants/map-private',
+]) {
+  await assertFails(getDoc(doc(player, path)));
+  await assertFails(getDoc(doc(hostUser, path)));
+  await assertFails(setDoc(doc(player, path), { forged: true }));
+}
 await environment.cleanup();

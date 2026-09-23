@@ -1,124 +1,66 @@
 # Information Architecture
 
-Product language: Arabic-first, RTL.  
-Client: React + TypeScript + Vite single-page application.  
-Working name: «استوديو الحروف»; treat as provisional until legal/name review.
+Arabic-first RTL SPA. Router truth: [src/app/App.tsx](../src/app/App.tsx). Admin route
+presence is not authorization; server/projection authorization governs editing and publication.
 
-## Route map
+## Route map and access boundary
 
-| Route | Surface | Primary user | Purpose |
+| Pattern | Surface | Intended role | Authorization distinction |
 |---|---|---|---|
-| `/` | Entry | Everyone | Join with room code or create a match |
-| `/how-to-play` | Rules | Everyone | Concise visual explanation of board, buzz, capture, path |
-| `/host/new` | Setup | Host | Configure rules, teams, questions, and timers |
-| `/room/:roomCode/lobby` | Shared lobby | Host/player/audience projection | Join, assign teams, test buzzers, mark ready |
-| `/room/:roomCode/host` | Host console | Host | Run the match and adjudicate answers |
-| `/room/:roomCode/play` | Player controller | Player | Connection, team identity, buzzer, and personal status |
-| `/room/:roomCode/display` | Audience stage | Audience/projector | Board, public question, timer, score, and results |
-| `/room/:roomCode/results` | Match summary | Everyone, filtered | Winner, round history, statistics, rematch/share |
-| `/questions` | Question administration | Editor/admin | Search, filter, review, and inventory health |
-| `/questions/new` | Question editor | Editor/admin | Create a sourced question |
-| `/questions/:questionId` | Question editor | Editor/admin | Edit, version, approve, block, or inspect objections |
+| `/` | entry | everyone | join/create is not role proof |
+| `/how-to-play` | rules | everyone | public explanation |
+| `/host/new` | setup | host | setup capability is runtime-authorized |
+| `/login` | Google sign-in | everyone | identity only; no room or editor role is granted |
+| `/account` | Firebase identity | signed-in user | basic Auth fields and sign-out only |
+| `/room/:roomCode/lobby` | lobby | host/player/audience | filtered projection per role |
+| `/room/:roomCode/host` | host | host | private answers/judgment only when authorized |
+| `/room/:roomCode/play` | player | player | personal buzzer only |
+| `/room/:roomCode/display` | display | audience | public projection; no answer/moderation fields |
+| `/room/:roomCode/results` | results | filtered | host actions are not shown/accepted for other roles |
+| `/questions` | inventory | editor/admin | route does not grant production access |
+| `/questions/new` | editor | editor/admin | create/save/review require authorization |
+| `/questions/:questionId` | editor | editor/admin | approved may be read-only; unauthorized stays safe |
+| `/admin` | admin redirect | Google administrator | redirects to `/admin/overview`; UI guard is not authorization |
+| `/admin/overview` | inventory health | enabled server-authorized administrator | callable-backed summary, no fake metrics |
+| `/admin/questions`, `/admin/questions/new`, `/admin/questions/:questionId` | question inventory/editor | scoped content administrator or reviewer | authoring authority only; immutable review revisions |
+| `/admin/reviews/:id`, `/admin/categories/:id`, `/admin/releases/:id`, `/admin/rooms/:id` | administrative detail | exact callable capability | direct Firestore browser access remains denied |
+| `/admin/users`, `/admin/audit`, `/admin/health`, `/admin/settings` | system operations | capability- and role-gated | user changes require super administrator |
+| `*` | not found | everyone | expired/unknown path returns safely |
 
-Room codes are displayed with `dir="ltr"`, uppercase ASCII, and tabular numerals even inside RTL layouts.
+The homepage section map is [HOME-SURFACE-SPEC.md](HOME-SURFACE-SPEC.md). Current entry supports
+join, `/host/new`, `/how-to-play`, `/login`, and `/account`. Google identity is limited to Firebase
+Auth basic fields and sign-out; it does not add profile data or permissions.
+Credits, reward verification, gifts, commerce, daily challenges, match history,
+global discovery, game variants/catalogue, contact, legal/company, social, and store routes are
+deferred until separately authorized and source-backed.
 
-## Primary journeys
+## Journeys
 
-### Host
-
-`Entry → Create match → Rule setup → Team setup → Buzzer test → Lobby ready → Host console → Round result → Match result → Rematch or close`
-
-### Player
-
-`Entry → Enter room code → Enter name → Confirm team → Test buzzer → Wait ready → Buzz/answer status → Round result → Match result`
-
-### Audience display
-
-`Open display URL → Lobby join code → Live board → Public adjudication feedback → Round result → Match result`
-
-### Question editor
-
-`Inventory → Filter weak letter → Create/edit → Add source and alternatives → Preview normalization → Submit review → Approve or return`
-
-## Screen contracts
-
-### Entry `/`
-
-- Dominant code-native cropped hex-letter composition.
-- Working wordmark and concise line: `أسئلة عربية. فريقان. مسار واحد يفوز.`
-- Room code field and `انضم إلى غرفة` as primary task.
-- `أنشئ مباراة` as distinct secondary action.
-- Link to `كيف تلعب؟`; no marketing feature grid.
-
-### Match setup `/host/new`
-
-Steps are visible but not presented as a long wizard unless validation requires it:
-
-1. Match: classic/fast/custom, best of 1/3/5/7.
-2. Teams: name, horizontal/vertical identity, accessible colors/pattern preview.
-3. Questions: categories, difficulty, stock sufficiency.
-4. Timing: first question and opponent chance.
-5. Review: full summary and `أنشئ الغرفة`.
-
-Unsaved changes are protected. Creation errors keep all entered values and identify the field/action needed.
-
-### Lobby
-
-- Join code and copy action.
-- Two team rosters organized by axis, not color alone.
-- Device connection and buzzer-test status.
-- Host-only team assignment and start control.
-- Audience sees a clean roster and `بانتظار بدء المباراة`.
-
-### Host console
-
-- Board context and active-cell selection.
-- Private question panel: letter, category, prompt, accepted answer, alternatives, source.
-- Timer controls and buzzer winner.
-- Fixed judgment actions: `إجابة صحيحة`, `إجابة خاطئة`, `قبول بديل`, `إلغاء السؤال`.
-- Pause, correction, and event log are secondary but always reachable.
-- An action that changes awarded ownership requires the current revision and creates an audit reason.
-
-### Player controller
-
-- Player and team identity.
-- Connection/ready state.
-- One large hexagonal buzzer.
-- Explicit copy per state: `استعد`, `اضغط الآن`, `أنت الأسرع — أجب`, `الفرصة للفريق الآخر`, `بانتظار الحكم`, `انقطع الاتصال`.
-- No board interaction in V1; the host selects the team’s declared cell.
-
-### Audience display
-
-- The board is the largest element.
-- Public question text appears only when the question is live.
-- Do not reveal the accepted answer before `QUESTION_FAILED` or a host-approved post-judgment reveal.
-- Winner/buzzer identity is announced visually and through a polite live region.
-- Operational errors are phrased for a room, not as technical stack traces.
-
-### Results
-
-- Winner and completed path first.
-- Rounds won second; optional points and answer accuracy third.
-- Timeline answers “how did the match turn?” without exposing private moderation details.
-- Actions: `مباراة جديدة`, `إعادة بنفس الإعدادات`, `عرض تقرير الأسئلة` for host.
-
-### Question administration
-
-- Inventory health by letter is the default overview.
-- Filters: letter, category, difficulty, status, source state, use count, objection state.
-- Editor fields: prompt, canonical answer, normalized answer, alternatives, target letter, category, difficulty, source URL/citation, explanation, status, version notes.
-- Never publish machine-generated questions directly without human review.
+- Host: entry → setup → lobby readiness → host board/console → round/match result → role-safe
+  rematch or new setup. All lifecycle transitions are source-defined, not invented by UI.
+- Player: entry → room/name/role session → lobby ready → phase instruction/buzz eligibility →
+  public result. No host data or other-player latency.
+- Audience: display URL → lobby wait → board-first public live projection → result. No private
+  answer/source/moderation.
+- Editor: inventory health/filter → new or record editor → validation/source/review → saved or
+  read-only outcome. No direct publication claim without source-authorized flow.
+- Unknown/expired: wildcard → Arabic explanation → safe return to entry.
+- Homepage now plans classic/fast/custom setup shortcuts and a Tahadani category preview over
+  existing setup concepts; their homepage preselection contract still requires implementation.
+  Reward/daily/commerce/discovery/footer utilities cannot imply an account, entitlement,
+  analytics result, or destination before it exists in the route/data map. Google
+  identity itself grants no editor, admin, publication, or room role.
 
 ## Responsive matrix
 
-| Surface | Minimum supported | Preferred | Composition |
-|---|---:|---:|---|
-| Player | 320×568 | 390×844 | Single column, thumb-zone buzzer |
-| Host | 768×1024 | 1440×900 | Stacked at tablet; asymmetric 62/38 desktop |
-| Audience | 1024×576 | 1920×1080 | Fixed safe-stage composition with fluid board |
-| Admin | 1024×768 | 1440×900 | Filter rail + table/editor; narrow widths show read-only warning |
+| Surface | Preferred composition | Narrow treatment |
+|---|---|---|
+| Shared entry/rules/lobby | centered max-width framed zones | one column; decision/action before support |
+| Setup | two balanced desktop columns | one focused column, selection count/next action remain visible |
+| Host | physical green-left / centered-board / crimson-right plus console below | tablet scores above board; under 768 safe limitation |
+| Player | phone-first phase then thumb-zone buzzer | 320×568 minimum target |
+| Audience | 16:9 centered board with physical score flanks | preserve safe stage; do not mirror board |
+| Admin | 6/10 filters then records/editor | do not hide validation/save/authorization status |
 
-## Deferred routes
-
-Spotlight bonus, individual “thousands” mode, global seasons, public profiles, economy/rewards, and AI question generation are outside V1 and must not occupy navigation yet.
-
+Coverage, all lifecycle states, all connections, and cross-route accessibility/failure work are
+audited in [ROUTE-STATE-COVERAGE.md](ROUTE-STATE-COVERAGE.md).

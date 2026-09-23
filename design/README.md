@@ -1,30 +1,32 @@
 # Design Documentation Index
 
-Start with [`../DESIGN.md`](../DESIGN.md) for the product/interface contract and [`../DESIGN-DNA.md`](../DESIGN-DNA.md) for visual authority.
+Start with [DESIGN.md](../DESIGN.md) and [DESIGN-DNA.md](../DESIGN-DNA.md). They define the
+current Studio of Letters authority; history 0005 is active gameplay supersession and history
+0004 remains historical context.
 
-Question-category import, cover-image copying, and letter-aware content production are specified separately in [`../QUESTIONS_PLAN.md`](../QUESTIONS_PLAN.md).
+The human selected `spatial-studio` as the whole-app target in 0006. Homepage-first rollout
+is active; later route rollout requires its human live review.
 
-## Build-facing documents
+## Build-facing authority
 
-- [`TOKENS.md`](TOKENS.md) — exact semantic values.
-- [`tokens.css`](tokens.css) — React/Vite CSS token seed.
-- [`IA.md`](IA.md) — routes, journeys, screens, responsive targets.
-- [`BOARD-SPEC.md`](BOARD-SPEC.md) — hex coordinates, states, accessibility, path tests.
-- [`UI-STATE-MATRIX.md`](UI-STATE-MATRIX.md) — host/player/audience projections for all game states.
-- [`ADR-001-runtime-topology.md`](ADR-001-runtime-topology.md) — fixture and server-authoritative adapter boundary.
-- [`ACCEPTANCE.md`](ACCEPTANCE.md) — future implementation and visual QA gate.
+- [TOKENS.md](TOKENS.md) — exact values; do not change through prose interpretation.
+- [IA.md](IA.md) — all 12 router patterns, journeys, responsive and authorization boundaries.
+- [ROUTE-VISUAL-CONTRACT.md](ROUTE-VISUAL-CONTRACT.md) — route composition/theme/state treatment.
+- [HOME-SURFACE-SPEC.md](HOME-SURFACE-SPEC.md) — binding homepage section map, ownership,
+  route/data truth, responsive/accessibility behavior, and explicit deferred scope.
+- [UI-STATE-MATRIX.md](UI-STATE-MATRIX.md) — lifecycle roles, current exits, conceptual gaps.
+- [ROUTE-STATE-COVERAGE.md](ROUTE-STATE-COVERAGE.md) — auditable required/implemented/tested/gap matrix.
+- [ACCEPTANCE.md](ACCEPTANCE.md) — evidence gate and human/deterministic boundary.
+- [BOARD-SPEC.md](BOARD-SPEC.md) and [ADR-001-runtime-topology.md](ADR-001-runtime-topology.md) — geometry/runtime boundaries.
 
 ## Evidence and governance
 
-- [`evidence/visual-reference-manifest.md`](evidence/visual-reference-manifest.md) — Refero and product evidence.
-- [`evidence/concepts.md`](evidence/concepts.md) — exactly three directions considered.
-- [`evidence/history/0001-human-selection.md`](evidence/history/0001-human-selection.md) — immutable human decision record.
-- [`evidence/selection-receipt.json`](evidence/selection-receipt.json) — hash-bound selection receipt.
-- [`reviews/ENTRY-SCREEN-REVIEW.md`](reviews/ENTRY-SCREEN-REVIEW.md) — human review gate after the first screen is implemented.
+- [visual-reference-manifest.md](evidence/visual-reference-manifest.md) — retained research plus bounded Golbha/Refero sources.
+- [golbha-public-site-study-2026-09-04.md](evidence/golbha-public-site-study-2026-09-04.md) — descriptive secondary research, not visual approval.
+- [history/0005-flat-broadcast-game-direction.md](evidence/history/0005-flat-broadcast-game-direction.md) — active gameplay record.
+- [selection-receipt-0005.json](evidence/selection-receipt-0005.json) — immutable 0005 receipt.
+- [history/0004-premium-material-evolution.md](evidence/history/0004-premium-material-evolution.md) — immutable historical material record; gameplay clauses are superseded.
+- [selection-receipt.json](evidence/selection-receipt.json) and [history/0001-human-selection.md](evidence/history/0001-human-selection.md) — original immutable selection evidence.
 
-## Change policy
-
-- Do not edit numbered history records.
-- A new visual direction requires a new numbered record and receipt that explicitly supersedes the prior receipt.
-- Update token values only with a linked design decision explaining semantic impact and accessibility results.
-- Update game rules in `GAME_REVIEW_AR.md` before changing state, score, timer, or board behavior here.
+Do not edit numbered history records or existing receipts. A direction change requires exactly
+three concepts, explicit human selection, a new numbered record, and a receipt.

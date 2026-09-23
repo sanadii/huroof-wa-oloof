@@ -1,83 +1,64 @@
-# Design & Frontend Acceptance Contract
+# Design and Frontend Acceptance Contract
 
-This is a future implementation gate. Deterministic tooling can validate identity, structure, dimensions, provenance, tokens, behavior, and accessibility thresholds; it cannot certify aesthetic quality.
+This is an evidence gate, not aesthetic authorization. Scope and gaps are enumerated in
+[ROUTE-STATE-COVERAGE.md](ROUTE-STATE-COVERAGE.md).
 
-## Required viewport evidence
+## Required evidence
 
-| Surface/state | Viewports |
+| Evidence family | Required coverage |
 |---|---|
-| Entry | 320×568, 390×844, 768×1024, 1440×900 |
-| Player buzzer | 320×568, 390×844; ready, open, first, locked, offline |
-| Host console | 768×1024, 1024×768, 1440×900; question, judgment, correction |
-| Audience stage | 1024×576, 1280×720, 1920×1080; selection, question, award, win |
-| Question admin | 1024×768, 1440×900; list, editor, review error |
+| Router | all 14 patterns: entry, rules, setup, login, account, four room views, results, inventory, new/editor record, wildcard |
+| Homepage sections | [HOME-SURFACE-SPEC.md](HOME-SURFACE-SPEC.md): each audited region’s component owner, supported target, current/deferred data status, responsive shared themes, and keyboard/RTL/state treatment; no claim that deferred marketplace/commerce features exist |
+| Lifecycle | all 14 values in `LIFECYCLE_STATES` for relevant host/player/audience projections |
+| Connection | connecting, connected, reconnecting, offline, stale across room views |
+| Setup/lobby | default/demo/selection/empty/no-stock/creating/error/success; readiness/closed/unavailable variants |
+| Gameplay | question unavailable, correction, fatal, sub-768 host limitation; player buzzer/result/unauthorized states; public display selection/question/winner/reveal/award/correction/results |
+| Results/admin | both winners, nonterminal, filtered actions, rematch busy/error, history missing; loading/populated/filtered/empty/service/authorization and every editor save/review mode |
+| Cross-route | light/dark/system where shared; midnight gameplay exception; keyboard focus, reduced motion, 200% zoom, mixed Arabic-LTR, loading/empty/error/closed/unauthorized/stale/offline/reconnecting/fatal |
+| Viewports | player 320×568 and 390×844; host 768×1024/1024×768/1440×900; audience 1024×576/1280×720/1920×1080; admin 1024×768/1440×900 |
 
-## Traceability matrix
+## Deterministic and human boundary
 
-| Requirement | Evidence target | Future verification |
-|---|---|---|
-| 5×5 board and six-neighbor topology | `HexBoard` fixture | Unit tests from `BOARD-SPEC.md` |
-| Horizontal/vertical win axes | Path fixtures | LTR/RTL identical graph tests |
-| 14 engine states | Fixture gallery | One fixture per role/state intersection |
-| Server-authoritative buzzer | Realtime adapter | Contention test with ordered acknowledgements |
-| No early answer disclosure | Role payloads | Schema/contract tests assert field absence |
-| Human adjudication | Host console | Keyboard and browser flow tests |
-| Correction with audit reason | Correction flow | State rollback/recompute integration test |
-| Arabic RTL | Every route | Screenshot + computed direction + bidi cases |
-| Non-color team identity | Board/team blocks | Grayscale and color-vision review |
-| Reduced motion | All motion states | Media emulation screenshots and behavior tests |
-| Reconnect recovery | Player/host/display | Offline/reconnect browser flow |
-| Question provenance | Admin editor | Required-field and version-flow tests |
+C1: “The deterministic validator may verify only evidence identity, structure, dimensions,
+provenance, and threshold consistency; it must never certify aesthetic quality or emit an
+aesthetic PASS.”
 
-## Visual DNA checks
+C2: “Every AI/model review is optional and advisory; it cannot authorize or block exact human
+selection or live-review gates. Distinct-family, distinct-session, read-only,
+provenance-backed review may be provenance-separated but remains advisory, and same-family or
+same-session review is never independent.”
 
-- Light uses the approved mineral-white palette and dark uses the approved charcoal palette; mint appears only in active/focus/ready roles.
-- No yellow, amber, gold, or yellow-tinted gradient appears in either theme.
-- Team colors never become general chrome or judgment colors.
-- All rectangular panels, fields, and buttons use zero radius.
-- No elevation shadows or gradients are introduced.
-- The hex board is the dominant focal point during play.
-- The entry screen uses the approved asymmetric composition and code-native board graphic.
-- No generic cards, stock Arabesque, mosque silhouette, emoji icon, violet/indigo accent, or dark-default shell appears.
-- Exact colors and spacing come from tokens, not component-local literals.
+Deterministic evidence may check route identity, source/state coverage, token/geometry use,
+dimensions, contrast thresholds, overflow, keyboard semantics, accessibility thresholds, and
+provenance. Human review decides visual fidelity to the selected direction; technical QA cannot
+override a human rejection.
 
-## Accessibility checks
+## Invariants and severity
 
-- Body text ≥4.5:1; large text and meaningful graphics ≥3:1.
-- Interactive targets ≥44×44px.
-- Visible `:focus-visible` for every keyboard action.
-- No interactive `<div>`/`<span>` substitutes for buttons or links.
-- Screen-reader labels include letter/value, ownership, axis, selection, and path state.
-- Countdown does not announce every tick.
-- 200% zoom does not hide host judgment or player leave/reconnect actions.
-- Mixed Arabic/LTR codes remain readable and copyable.
-- Reduced-motion users receive no sweep, bounce, scale, or repeated pulse.
+- 25-cell six-neighbour board; fixed physical axes; non-color redundancy; no early answer leak.
+- Shared light/dark/system and history-0005 flat midnight gameplay exception.
+- No Golbha copy; no generic neon, yellow/gold, glass, or nested rounded dashboard.
+- Homepage review confirms all nine ordered sections, proves classic/fast/custom and Tahadani
+  category preselection against the real setup contract before enabling them, and preserves
+  honest omission/deferred labelling for credits, rewards, purchases, gifts, daily,
+  analytics, legal/company, social, and store features without source-backed ownership.
+- P0: answer leak, wrong winner/path, unavailable legal action, severe accessibility/security.
+  P1: missing required lifecycle/recovery or material visual-contract break. P2: responsive,
+  state-evidence, or significant accessibility gap. P3: non-blocking polish.
 
-## Behavioral scenarios
+No handoff calls an untested requirement passed. Evidence must state its source, viewport/state,
+and whether it is deterministic or human-reviewed.
 
-1. Create room, join four players, test all buzzers, start.
-2. Select visible letter, open buzzers, award correct first answer.
-3. Reject first answer, give exclusive opponent chance, award cell.
-4. Fail both teams, reveal answer, retry same cell.
-5. Reveal a numbered surprise cell and continue.
-6. Complete winding horizontal and vertical paths.
-7. Pause during question, reconnect a player, resume without duplicate buzz.
-8. Correct an awarded cell and recompute a formerly complete path.
-9. Reject stale host judgment and recover without losing entered note.
-10. Confirm audience/player clients never receive private answer fields early.
+## Current homepage implementation evidence
 
-## Quality severity
+The homepage composition is implemented in `HomeSurface`, with the shared setup query registry
+used by both its mode/category destinations and `HostNewRoute`. Deterministic unit evidence is
+in `tests/app/entry-route.test.tsx` and `tests/app/setup-route.test.tsx`; local browser checks
+covered the supported `mode=fast` route, invalid-query fallback, and 320px horizontal bounds.
+These records do not approve visual quality. Account identity is limited to Firebase Auth basic
+fields and no privileges; reward, daily, commerce, weekly analytics,
+legal, social, and store capabilities remain deferred.
 
-- `P0`: broken match, answer leak, wrong winner/path, unusable controls, or severe accessibility failure.
-- `P1`: major visual DNA drift, unreliable buzzer state, missing correction/reconnect path.
-- `P2`: responsive break, missing state, contrast/pattern issue, or significant reference drift.
-- `P3`: polish that does not impair understanding or identity.
+## Admin implementation evidence
 
-Do not hand off with unresolved P0/P1/P2 unless blocked by a named missing external dependency.
-
-## Human authority
-
-- Automated validation never emits an aesthetic PASS.
-- AI/model review is optional and advisory.
-- The first implemented entry screen requires the human receipt template under `design/reviews/` before visual expansion.
-- A human rejection cannot be overridden by technical QA.
+Deterministic route evidence covers the `/admin` redirect, capability-filtered shell, callable-backed question inventory, legacy identifier redirect, a real v3.3 draft-save payload, and preservation of source provenance across revisioned editor saves in `tests/app/admin-routes.test.tsx`. `functions/src/admin.test.ts` covers answer/source/member non-disclosure for room lists, canonical idempotency hashing, claim-version parity, modality reviewer/source validation, last-Super-Admin policy, review-revision binding, and archive-state policy. `tests/storage-rules.test.ts` defines anonymous and forged claimed-admin denial assertions for Storage list/upload operations. The Storage and Firestore rules suites could not execute on this workstation because Java is absent; these source-level tests therefore do not prove Emulator Suite behavior. Deployed App Check, administrative claim propagation against a staging project, visual quality, and production readiness also remain unproven until the configured staging and human-review gates run.

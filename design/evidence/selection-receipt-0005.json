@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "visual-selection-2026-09-04-005",
+  "recordedAt": "2026-09-04",
+  "selectedConceptId": "flat-midnight-broadcast-gameplay",
+  "selectedConceptNameAr": "بثّ منتصف الليل المسطّح",
+  "selectionAuthority": "human-product-owner",
+  "historyPrefix": {
+    "recordId": "design-history-0004",
+    "path": "design/evidence/history/0004-premium-material-evolution.md",
+    "sha256": "25318ADB904AB14DEC3B174F0503D4A684AAB7FA0818123983E0CD0C29DD858C"
+  },
+  "directionRecord": {
+    "recordId": "design-history-0005",
+    "path": "design/evidence/history/0005-flat-broadcast-game-direction.md",
+    "sha256": "C12D2B41CE656B4C98B1DC462456C841598C32F1051C6FEC82B27585142EA27C"
+  },
+  "evidence": [
+    { "path": "design/mockups/flat-broadcast/flat-midnight-final.png", "sha256": "AD71AE062F4C3541F0712565D0433BDF42BF8A9BD67A8F5266B9DD95CD71C5F6" },
+    { "path": "design/mockups/flat-broadcast/score-card.png", "sha256": "DC7A1D92AD6F57560F825A35CE904DCB3825456059E0725547383160499667D6" },
+    { "path": "design/mockups/flat-broadcast/question-tray.png", "sha256": "E3DB55D3D8ACE636133257D5B01C5EC25DC5ABDDB078E28AA258D11C15E0BBCE" },
+    { "path": "design/mockups/flat-broadcast/rail-detail.png", "sha256": "E4D8A3D7D90A926674CF48D4BD5B68E43A8770B6AD2500A0278B51D82D84E247" },
+    { "path": "design/mockups/flat-broadcast/timer-module.png", "sha256": "F692B60BBDC7CAB63B1DD35A7320F198AE0046429CF3B1F136B3006267B077DD" }
+  ],
+  "validationRule": "Validate only the immutable numbered record and exact evidence files listed here. Never validate this receipt against a later mutable directory or whole-history hash.",
+  "supersedes": "design/evidence/selection-receipt.json for incompatible gameplay-material clauses only"
+}

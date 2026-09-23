@@ -12,6 +12,8 @@ functions/lib/
 content/question-bank-v3/cache/
 content/question-bank-v3/evidence-bodies/
 *.tsbuildinfo
+__pycache__/
+*.pyc
 
 # Local environment configuration (keep the committed template)
 .env
@@ -35,3 +37,30 @@ pnpm-debug.log*
 .evidence-migration-staging/
 .playwright-cli/
 graphify-out/
+
+# Private intake and local-master-import material. Public app presentation metadata
+# lives under src/data and public/assets; never add raw questions or private media.
+content/questions/
+content/question-media/
+content/categories/originals/
+content/categories/extensions/
+content/categories/asset-manifest.json
+content/categories/import-receipt.json
+content/question-bank-v3/*
+!content/question-bank-v3/schemas/
+!content/question-bank-v3/schemas/*.json
+!content/question-bank-v3/v3.3/
+content/question-bank-v3/v3.3/**
+!content/question-bank-v3/v3.3/*.json
+public/assets/questions/
+tmp/
+*.sqlite
+*.sqlite-*
+*.db
+*.zip
+
+.vercel
+
+# Local football source video and extracted goal clips
+/resources/100 Best Goals of 2026 \[So Far\].mp4
+/resources/100-best-goals-2026-clips/

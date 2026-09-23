@@ -35,6 +35,10 @@ export interface GameState {
   attempt: 'initial' | 'opponent';
   pausedFrom?: LifecycleState;
   correction?: { cellId: string; owner?: TeamAxis; reason: string };
+  /** A persisted, non-scoring stop when pinned content cannot safely continue. */
+  contentHold?: { reason: 'CONTENT_EXHAUSTED'; operation: 'SELECT_CELL' | 'START_NEXT_ROUND' | 'CONTINUE'; cellId?: string; heldAtRevision: number };
+  /** A host may explicitly end an exhausted match without inventing a winner. Recovery creates a new room. */
+  endedWithoutWinner?: true;
 }
 
 export type GameEvent =

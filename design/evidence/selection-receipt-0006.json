@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "visual-selection-2026-09-05-006",
+  "recordedAt": "2026-09-05",
+  "selectedConceptId": "spatial-studio",
+  "selectedConceptNameAr": "مدار الحروف",
+  "selectionAuthority": "human-product-owner",
+  "exactHumanAnswer": "C — مدار الحروف: vivid blue spatial studio",
+  "historyPrefix": {
+    "recordId": "design-history-0005",
+    "path": "design/evidence/history/0005-flat-broadcast-game-direction.md",
+    "sha256": "C12D2B41CE656B4C98B1DC462456C841598C32F1051C6FEC82B27585142EA27C"
+  },
+  "conceptSet": {
+    "path": "design/evidence/concept-set-immersive-2026-09-05.json",
+    "sha256": "F4F620A8AF3E11786307E17913C36ACEEBEFB5F44418113E260C7EF5310EF9B5"
+  },
+  "directionRecord": {
+    "recordId": "design-history-0006",
+    "path": "design/evidence/history/0006-spatial-studio-homepage-direction.md",
+    "sha256": "651F61920EDC000AA62961B1C168F4E23B821E62C2BCC93F6BA88963BC8BD84F"
+  },
+  "scope": "Representative homepage and its create/join primary journey only. Other route visual expansion requires a new human live homepage review.",
+  "validationRule": "Validate only the immutable numbered record and exact immutable concept-set artifact listed here. Never validate this receipt against a later mutable directory or whole-history hash.",
+  "supersedes": "Incompatible homepage-only clauses from prior visual authority. Gameplay 0005 remains binding."
+}

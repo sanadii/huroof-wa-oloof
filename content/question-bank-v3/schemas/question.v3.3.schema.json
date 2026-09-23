@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "question-bank-v3/question.v3.3.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "candidateId",
+    "candidateHash",
+    "schemaVersion",
+    "categoryId",
+    "modality",
+    "slotId",
+    "authorUid",
+    "state",
+    "headerAr",
+    "promptAr",
+    "canonicalAnswer",
+    "acceptedAnswers",
+    "acceptDefiniteArticle",
+    "answerConceptId",
+    "difficulty",
+    "claimIds",
+    "evidenceIds",
+    "evidenceHash",
+    "reviewReceiptIds",
+    "contentHash"
+  ],
+  "properties": {
+    "candidateId": { "type": "string", "minLength": 1 },
+    "candidateHash": { "pattern": "^[a-f0-9]{64}$" },
+    "schemaVersion": { "const": "3.3.0" },
+    "categoryId": { "pattern": "^tahadani-(0[0-5][0-9]|06[0-2])$" },
+    "modality": { "enum": ["classic", "image", "charades"] },
+    "slotId": { "type": "string", "minLength": 1 },
+    "authorUid": { "type": "string", "minLength": 1 },
+    "state": { "const": "approved" },
+    "headerAr": { "type": "string", "minLength": 1 },
+    "promptAr": { "type": "string", "minLength": 1 },
+    "canonicalAnswer": { "type": "string", "minLength": 1 },
+    "acceptedAnswers": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "acceptDefiniteArticle": { "type": "boolean" },
+    "answerConceptId": { "pattern": "^concept:[a-f0-9]{64}$" },
+    "difficulty": { "enum": ["easy", "medium", "hard"] },
+    "explanationAr": { "type": ["string", "null"] },
+    "claimIds": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "evidenceIds": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "evidenceHash": { "pattern": "^[a-f0-9]{64}$" },
+    "reviewReceiptIds": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "contentHash": { "pattern": "^[a-f0-9]{64}$" },
+    "targetLetter": { "pattern": "^[ابتثجحخدذرزسشصضطظعغفقكلمنهوي]$" },
+    "facetId": { "type": "string", "minLength": 1 },
+    "performanceFacetId": { "type": "string", "minLength": 1 },
+    "mediaId": { "type": "string", "minLength": 1 }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "modality": { "const": "charades" } },
+        "required": ["modality"]
+      },
+      "then": {
+        "required": ["performanceFacetId"],
+        "not": {
+          "anyOf": [
+            { "required": ["targetLetter"] },
+            { "required": ["facetId"] },
+            { "required": ["mediaId"] }
+          ]
+        }
+      },
+      "else": {
+        "required": ["targetLetter", "facetId"],
+        "not": { "required": ["performanceFacetId"] }
+      }
+    },
+    {
+      "if": {
+        "properties": { "modality": { "const": "image" } },
+        "required": ["modality"]
+      },
+      "then": { "required": ["mediaId"] },
+      "else": { "not": { "required": ["mediaId"] } }
+    }
+  ]
+}

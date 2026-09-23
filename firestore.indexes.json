@@ -1,5 +1,16 @@
 {
-  "indexes": [],
+  "indexes": [
+    { "collectionGroup": "adminQuestionDrafts", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "status", "order": "ASCENDING" }, { "fieldPath": "updatedAt", "order": "DESCENDING" }] },
+    { "collectionGroup": "adminQuestionDrafts", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "categoryId", "order": "ASCENDING" }, { "fieldPath": "updatedAt", "order": "DESCENDING" }] },
+    { "collectionGroup": "adminQuestionDrafts", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "categoryId", "order": "ASCENDING" }, { "fieldPath": "status", "order": "ASCENDING" }, { "fieldPath": "updatedAt", "order": "DESCENDING" }] },
+    { "collectionGroup": "adminReviewRequests", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "status", "order": "ASCENDING" }, { "fieldPath": "updatedAt", "order": "DESCENDING" }] },
+    { "collectionGroup": "adminReviewRequests", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "categoryId", "order": "ASCENDING" }, { "fieldPath": "updatedAt", "order": "DESCENDING" }] },
+    { "collectionGroup": "adminReviewRequests", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "categoryId", "order": "ASCENDING" }, { "fieldPath": "status", "order": "ASCENDING" }, { "fieldPath": "updatedAt", "order": "DESCENDING" }] },
+    { "collectionGroup": "adminRoomSummaries", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "updatedAt", "order": "DESCENDING" }] },
+    { "collectionGroup": "adminOperations", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "actorUid", "order": "ASCENDING" }, { "fieldPath": "serverTime", "order": "DESCENDING" }] },
+    { "collectionGroup": "adminPrincipals", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "roles", "arrayConfig": "CONTAINS" }, { "fieldPath": "enabled", "order": "ASCENDING" }, { "fieldPath": "identityReady", "order": "ASCENDING" }] },
+    { "collectionGroup": "adminAudit", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "actorUid", "order": "ASCENDING" }, { "fieldPath": "createdAt", "order": "DESCENDING" }] }
+  ],
   "fieldOverrides": [
     {
       "collectionGroup": "events",

@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useLayoutEffect, useMemo, useState, type ReactNode } from 'react';
 
 export type ThemeChoice = 'light' | 'dark' | 'system';
 
@@ -32,7 +32,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     return () => query.removeEventListener?.('change', update);
   }, []);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     document.documentElement.dataset.theme = resolvedTheme;
     document.documentElement.lang = 'ar';
     document.documentElement.dir = 'rtl';
