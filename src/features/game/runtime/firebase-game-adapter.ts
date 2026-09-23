@@ -1,7 +1,7 @@
 import { httpsCallable } from 'firebase/functions';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { getOptionalFirebaseClient, signInAnonymouslyIfNeeded } from '../../../lib/firebase/client.js';
-import { isApprovedReleaseCatalog, type ApprovedReleaseCatalog, type ClientRole, type CreateRoomRequest, type GameIntent, type GameRuntimeAdapter, type HostPresenceSnapshot, type JoinRoomRequest, type ProjectionEnvelope } from './contracts.js';
+import { CLIENT_CHALLENGE_CAPABILITY, isApprovedReleaseCatalog, type ApprovedReleaseCatalog, type ClientRole, type CreateRoomRequest, type GameIntent, type GameRuntimeAdapter, type HostPresenceSnapshot, type JoinRoomRequest, type ProjectionEnvelope } from './contracts.js';
 
 const PRESENCE_SNAPSHOT_FRESHNESS_MS = 30_000;
 
@@ -33,6 +33,34 @@ function configuredClient() {
 }
 
 /** Resolves the cold Auth restore before constructing a private player document id. */
+/** Cached challenge delivery is deliberately unusable: private role data must await an authoritative snapshot. */
+export function maskCachedChallengeProjection(envelope: ProjectionEnvelope): ProjectionEnvelope {
+  if (!envelope.projection.challenge) return envelope;
+  const { challenge: _challenge, ...projection } = envelope.projection;
+  void _challenge;
+  return { ...envelope, projection, authoritative: false };
+}
+
+/**
+ * A challenge deadline is evaluated against the resume callable's authority
+ * sample plus local monotonic elapsed time, never against a stale projection
+ * write timestamp.  This keeps delayed Firestore delivery fail-closed.
+ */
+export function advanceChallengeClockFromResume(
+  envelope: ProjectionEnvelope,
+  resumeServerTime: string,
+  receivedAt: number,
+  currentTime = performance.now(),
+): ProjectionEnvelope {
+  if (!envelope.projection.challenge) return envelope;
+  const base = Date.parse(resumeServerTime);
+  if (!Number.isFinite(base)) return { ...envelope, authoritative: false };
+  return {
+    ...envelope,
+    serverTime: new Date(base + Math.max(0, currentTime - receivedAt)).toISOString(),
+  };
+}
+
 export async function projectionIdAfterAuth(auth: { authStateReady(): Promise<void>; currentUser: { uid: string } | null }, role: ClientRole, fallbackUid: string): Promise<string> {
   await auth.authStateReady();
   if (role === 'audience') return 'audience';
@@ -70,9 +98,14 @@ export class FirebaseGameAdapter implements GameRuntimeAdapter {
     return result.data;
   }
 
-  async joinAudience(roomCode: string) {
+  async joinAudience(roomCode: string, challenge = CLIENT_CHALLENGE_CAPABILITY) {
     await signInAnonymouslyIfNeeded();
-    return (await httpsCallable<{ roomCode: string }, { roomId: string; revision: number }>(configuredClient().functions, 'joinAudience')({ roomCode })).data;
+    return (await httpsCallable<{ roomCode: string; challenge?: import('./contracts.js').ChallengeCapabilityOffer }, { roomId: string; revision: number }>(configuredClient().functions, 'joinAudience')({ roomCode, challenge })).data;
+  }
+
+  async resumeRoom(roomId: string, challenge = CLIENT_CHALLENGE_CAPABILITY) {
+    await signInAnonymouslyIfNeeded();
+    return (await httpsCallable<{ roomId: string; challenge: typeof challenge }, { revision: number; serverTime: string }>(configuredClient().functions, 'resumeRoom')({ roomId, challenge })).data;
   }
 
   async syncDeadline(roomId: string) {
@@ -93,14 +126,19 @@ export class FirebaseGameAdapter implements GameRuntimeAdapter {
     void (async () => {
       try {
         const client = configuredClient();
+        const resumed = await this.resumeRoom(roomId);
+        const resumeReceivedAt = performance.now();
         const projectionId = await projectionIdAfterAuth(client.auth, role, uid);
         if (cancelled) return;
         unsubscribe = onSnapshot(doc(client.firestore, 'rooms', roomId, 'projections', projectionId), { includeMetadataChanges: true }, (snapshot) => {
-          if (snapshot.exists()) onProjection({
-            ...(snapshot.data() as ProjectionEnvelope),
-            authoritative: !snapshot.metadata.fromCache,
-          });
-          else onError?.(new Error('ROOM_PROJECTION_MISSING'));
+          if (snapshot.exists()) {
+            const stored = snapshot.data() as ProjectionEnvelope;
+            const envelope = {
+              ...advanceChallengeClockFromResume(stored, resumed.serverTime, resumeReceivedAt),
+              authoritative: !snapshot.metadata.fromCache,
+            };
+            onProjection(snapshot.metadata.fromCache ? maskCachedChallengeProjection(envelope) : envelope);
+          } else onError?.(new Error('ROOM_PROJECTION_MISSING'));
         }, (error) => onError?.(error));
       } catch (error) { if (!cancelled) onError?.(error instanceof Error ? error : new Error(String(error))); }
     })();

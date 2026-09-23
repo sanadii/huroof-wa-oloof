@@ -13,6 +13,19 @@ const coverAliases = new Map([
   ["جغرافيا العالم", "جغرافيا"],
 ].map(([label, name]) => [normalizeCategoryFilterText(label), normalizeCategoryFilterText(name)]));
 
+const generatedCovers = new Map([
+  ["منتخب الكويت", "cover-generated-kuwait-team.png"],
+  ["مسلسلات خليجية", "cover-generated-gulf-series.png"],
+  ["مسلسلات كويتية", "cover-generated-kuwait-series.png"],
+  ["مشاهير الكويت", "cover-generated-kuwait-celebrities.png"],
+  ["مشاهير العرب", "cover-generated-arab-celebrities.png"],
+  ["أغاني خليجية", "cover-generated-gulf-music.png"],
+  ["أغاني كويتية", "cover-generated-kuwait-music.png"],
+  ["السيرة النبوية", "cover-generated-prophetic-biography.png"],
+  ["الصحابة", "cover-generated-companions.png"],
+  ["الحضارة الإسلامية", "cover-generated-islamic-civilization.png"],
+].map(([label, file]) => [normalizeCategoryFilterText(label), file]));
+
 export type LocalQuestionInventory = {
   source: "local_firestore_import" | "local_sqlite_import";
   huroofAvailable: boolean;
@@ -82,14 +95,19 @@ export function catalogCategoryCovers(
     if (knownCategory) return knownCategory;
     const name = normalizeCategoryFilterText(category.labelAr);
     const importedCover = importedCovers.get(coverAliases.get(name) ?? name);
+    const generatedCover = generatedCovers.get(name);
     return {
       id: category.id,
       displayNameAr: category.labelAr,
       questionReadiness: "drafting",
       cover: {
-        web320: importedCover?.web320 ?? "assets/categories/320/category-006.webp",
+        web320: importedCover?.web320 ?? (generatedCover
+          ? `assets/categories/generated/${generatedCover}`
+          : "assets/categories/320/category-006.webp"),
         altAr: importedCover
           ? `غلاف فئة ${category.labelAr}`
+          : generatedCover
+            ? `غلاف مولّد لفئة ${category.labelAr}`
           : `صورة افتراضية لفئة ${category.labelAr}`,
         // Imported legacy artwork retains its unverified rights status.
         publishable: importedCover === undefined,

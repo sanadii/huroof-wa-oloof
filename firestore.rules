@@ -25,7 +25,7 @@ service cloud.firestore {
       allow get: if isRoomMember(roomId) && (
         projectionId == 'audience' ||
         (projectionId == 'host' && isHost(roomId)) ||
-        projectionId == 'player_' + request.auth.uid
+        (projectionId == 'player_' + request.auth.uid && membership(roomId).data.role == 'player')
       );
       allow list, create, update, delete: if false;
     }

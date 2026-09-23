@@ -1,0 +1,5 @@
+# T36 M6.5 reviewed-client parity
+Client snapshot parent manifest: c2e687a5632b2fc59ebce761716ca6d3ff748874fcd4fd60a2da974152378f1f
+Source/public files: 825 exact matches; 1 deliberate difference.
+Difference: src/features/game/runtime/challenge-question-selector.ts (accepted post-snapshot selection repair).
+Backend compiled parity: functions/src/index.js SHA-256 3b1ff7a271b4653fa67bd51b02c472b2caaebf23da06bee0cc3ce173835f9816; challenge-question-selector.js SHA-256 c35698499fe7aa34a09e3c690f08927c21cedd1f07383aee686567e16d7fc62a.

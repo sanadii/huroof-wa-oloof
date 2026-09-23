@@ -1,7 +1,7 @@
 import { type ReactNode, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { ThemeToggle } from "../design-system/ThemeToggle";
-import { AuthAccountControl } from "../features/auth/AuthAccountControl";
+import { InternalHeader } from "../design-system/InternalHeader";
+import { BrandMark } from "../design-system/BrandMark";
 import { gameRuntime } from "../features/game/runtime";
 import { availableCategoryCatalog } from "../data/category-catalog";
 import {
@@ -73,6 +73,7 @@ function CategoryChooser({ staticPreview }: { staticPreview: boolean }) {
         return approvedCategoryPlayable(
           approvedCatalog?.categories.find((candidate) => candidate.id === category.id),
           "categories",
+          approvedCatalog?.challengeAvailability?.enabledMechanics ?? [],
         );
       if (!activeInventory) return true;
       return localCategoryPlayable(
@@ -108,6 +109,7 @@ function CategoryChooser({ staticPreview }: { staticPreview: boolean }) {
           {categories.slice(0, showAll || query ? categories.length : 8).map((category) => (
             <li key={category.id}>
               <Link to={`/host/new?kind=categories&category=${encodeURIComponent(category.id)}`}>
+                <img alt="" src={category.cover.web320} />
                 <strong>{category.displayNameAr}</strong>
                 <span>{!activeInventory && gameRuntime.kind !== "firebase"
                   ? categoryReadinessLabel(category.questionReadiness)
@@ -135,45 +137,51 @@ export function HomeSurface({ joinForm, joinMessage, staticPreview = false }: Ho
     <main className="spatial-home-page" id="main-content">
       <a className="skip-link" href="#join-room">تجاوز إلى الانضمام</a>
       <div className="spatial-home__stage-canvas">
-      <header className="spatial-home__header" data-home-region="header">
-        <Link className="wordmark" to="/">تحدي الخلية</Link>
-        <nav aria-label="التنقل الرئيسي">
-          <Link to="/" aria-current="page">الرئيسية</Link>
-          <Link to="/how-to-play">كيف تلعب؟</Link>
-        </nav>
-        <div className="spatial-home__utilities">
-          {staticPreview ? null : <AuthAccountControl />}
-          <a className="spatial-home__join-link" href="#join-room">انضمام</a>
-          <details className="spatial-home__theme-details"><summary>المظهر</summary><ThemeToggle /></details>
-        </div>
-      </header>
+      <InternalHeader home hideAccount={staticPreview} />
 
       <section className="spatial-home__hero" data-home-region="spatial-stage" aria-labelledby="spatial-home-title">
         <div className="spatial-home__title">
+          <BrandMark className="spatial-home__hero-mark" />
           <p className="spatial-home__eyebrow">لعبة معرفة عربية لفريقين</p>
-          <h1 id="spatial-home-title">تحدي الخلية</h1>
-          <p>اختر لوحة الحروف أو الفئات، ثم تنافسوا لصنع المسار الفائز.</p>
-          <p className="spatial-home__title-context">اجمع فريقك، وابدأ التحدي.</p>
-        </div>
-        <div className="spatial-home__dock spatial-home__action-cards" data-home-region="create-join-dock">
-          <section className="spatial-home__create" aria-labelledby="create-room-title">
-            <h2 id="create-room-title">أنشئ مباراة جديدة</h2>
-            <p className="spatial-home__section-intro">ابدأ إعداد مباراة لفريقين، ثم اختر نوع اللوح والتفاصيل المناسبة.</p>
-            <Link className="button button--primary" to="/host/new">{staticPreview ? "عرض إعداد المباراة" : "أنشئ مباراة"}</Link>
-          </section>
-          <section className="spatial-home__join" id="join-room" aria-labelledby="join-room-title">
-            <h2 id="join-room-title">انضم إلى غرفة</h2>
-            {joinForm}
-            {joinMessage}
-          </section>
+          <h1 id="spatial-home-title">اجمع فريقك وابدأ التحدي</h1>
+          <p>اختاروا الحروف أو الفئات، وتنافسوا في ليلة أسئلة خفيفة حتى تصنعوا المسار الفائز.</p>
+          <Link className="button button--primary spatial-home__hero-action" to="/host/new">ابدأ مباراة</Link>
         </div>
       </section>
       </div>
 
+      <section className="spatial-home__choices" aria-labelledby="game-choices-title">
+        <div className="spatial-home__section-heading">
+          <p className="spatial-home__eyebrow">اختاروا طريقتكم</p>
+          <h2 id="game-choices-title">لعبتان، ووقت واحد ممتع</h2>
+        </div>
+        <div className="spatial-home__choice-grid">
+          <Link className="spatial-home__choice spatial-home__choice--letters" to="/host/new?kind=huroof">
+            <img alt="حروف" src="/assets/game-types/huroof.png" />
+            <span className="spatial-home__choice-copy"><strong>حروف</strong><span>أجب عن سؤال يبدأ بالحرف الذي تختاره.</span></span>
+          </Link>
+          <Link className="spatial-home__choice spatial-home__choice--categories" to="/host/new?kind=categories">
+            <img alt="بعض المجموعات" src="/assets/game-types/categories.png" />
+            <span className="spatial-home__choice-copy"><strong>بعض المجموعات</strong><span>اختر فئة ونافس فريقك بأسئلتها.</span></span>
+          </Link>
+        </div>
+      </section>
+
+      <section className="spatial-home__join-band" data-home-region="create-join-dock" id="join-room" aria-labelledby="join-room-title">
+        <div><p className="spatial-home__eyebrow">عندك رمز؟</p><h2 id="join-room-title">انضم إلى غرفة فريقك</h2><p>أدخل رمز الغرفة الذي شاركه معك المضيف.</p></div>
+        <div className="spatial-home__join-form">{joinForm}{joinMessage}</div>
+      </section>
+
       <CategoryChooser staticPreview={staticPreview} />
 
+      <section className="spatial-home__how" aria-labelledby="how-title">
+        <div><p className="spatial-home__eyebrow">بكل بساطة</p><h2 id="how-title">كيف تبدأون؟</h2></div>
+        <ol><li><b>١</b><span>أنشئ غرفة واختر نوع المباراة.</span></li><li><b>٢</b><span>شارك رمز الغرفة مع الفريقين.</span></li><li><b>٣</b><span>ابدأوا وجمعوا المسار الفائز.</span></li></ol>
+        <details><summary>هل أحتاج حساباً للعب؟</summary><p>لا. يمكنك إنشاء الغرفة أو الانضمام إليها كضيف، وحساب Google اختياري.</p></details>
+      </section>
+
       <footer className="spatial-home__footer" data-home-region="footer">
-        <p><strong>تحدي الخلية</strong> لعبة معرفة عربية مباشرة بلوحات الحروف والفئات.</p>
+        <p><BrandMark /> لعبة معرفة عربية مباشرة بلوحات الحروف والفئات.</p>
         <nav aria-label="روابط المساعدة"><Link to="/how-to-play">قواعد اللعب</Link><Link to="/host/new">إعداد مباراة</Link></nav>
       </footer>
     </main>

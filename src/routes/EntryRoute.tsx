@@ -16,7 +16,7 @@ export function validateJoinDisplayName(value: unknown) {
 }
 
 export function EntryRoute() {
-  useEffect(() => { document.title = 'الرئيسية | تحدي الخلية'; }, []);
+  useEffect(() => { document.title = 'الرئيسية | الخلية'; }, []);
   const [search] = useSearchParams();
   const queryRoomCode = normalizeRoomCode(search.get('room') ?? '');
   const [roomCode, setRoomCode] = useState(queryRoomCode);

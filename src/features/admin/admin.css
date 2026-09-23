@@ -1,0 +1,63 @@
+/* Dashboard-only refinement: keeps the approved cobalt/navy/ice system while
+   making dense operational records readable without touching public surfaces. */
+.spatial-admin {
+  --admin-panel: color-mix(in srgb, var(--khaliah-surface, #fff) 94%, var(--khaliah-cyan, #1bc4df));
+  --admin-border: color-mix(in srgb, var(--khaliah-border, #c6d4e7) 82%, var(--khaliah-cyan, #1bc4df));
+}
+
+.spatial-admin .admin-layout { grid-template-columns: minmax(13.5rem, 14.5rem) minmax(0, 1fr); max-inline-size: 96rem; }
+.spatial-admin .admin-workspace { min-inline-size: 0; padding: clamp(1rem, 2.5vw, 2rem); }
+.spatial-admin .admin-nav { gap: .25rem; padding: .75rem; }
+.spatial-admin .admin-nav a { font-size: .92rem; min-block-size: 2.5rem; padding: .65rem .75rem; }
+.spatial-admin .admin-surface { box-sizing: border-box; gap: 1rem; grid-template-columns: minmax(0, 1fr); inline-size: 100%; max-inline-size: 100%; min-inline-size: 0; }
+.spatial-admin .admin-surface > h1 { font-size: clamp(1.625rem, 2.4vw, 2rem); line-height: 1.3; }
+.spatial-admin .admin-surface h2 { font-size: 1.125rem; margin: 0; }
+.spatial-admin .admin-description { font-size: 1rem; max-inline-size: 65ch; min-inline-size: 0; overflow-wrap: anywhere; }
+.spatial-admin .admin-toolbar { align-items: end; gap: .75rem; min-inline-size: 0; padding: 1rem; }
+.spatial-admin .admin-toolbar > label { flex-basis: min(15rem, 100%); font-size: .875rem; }
+.spatial-admin .admin-toolbar :is(input, select),
+.spatial-admin .admin-toolbar .button,
+.spatial-admin .admin-inline-actions .button,
+.spatial-admin .admin-table__actions .button { min-block-size: 2.5rem; }
+.spatial-admin .admin-toolbar .button { inline-size: auto; }
+.spatial-admin .admin-overview-group { display: grid; gap: .75rem; }
+.spatial-admin .admin-inventory { gap: .75rem; grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); margin: 0; }
+.spatial-admin .admin-inventory div,
+.spatial-admin .admin-detail-list > div { background: var(--admin-panel); border-color: var(--admin-border); border-radius: .875rem; padding: 1rem; }
+.spatial-admin .admin-inventory dd { font-size: 1.45rem; }
+.spatial-admin .admin-inventory dd bdi { font-size: .78rem; font-weight: 600; overflow-wrap: anywhere; }
+.spatial-admin .admin-table { min-inline-size: 42rem; }
+.spatial-admin .admin-table--published .admin-table__row { grid-template-columns: minmax(12rem, 1.8fr) minmax(9rem, 1fr) minmax(7rem, .7fr) minmax(6rem, auto); }
+.spatial-admin .admin-table--categories .admin-table__row { grid-template-columns: minmax(14rem, 1.7fr) minmax(6rem, .6fr) minmax(15rem, 1.2fr) minmax(7rem, auto); }
+.spatial-admin .admin-table__row { font-size: .93rem; min-block-size: 3.25rem; padding: .75rem 1rem; }
+.spatial-admin .admin-table .text-link,
+.spatial-admin .admin-table .text-link:visited { color: #006f91; font-weight: 700; }
+.spatial-admin .admin-table__row small { color: var(--spatial-ink-muted); display: block; font-size: .75rem; margin-block-start: .2rem; }
+.spatial-admin .admin-question-prompt { display: block; font-size: 1rem; font-weight: 600; line-height: 1.7; margin-block-start: .2rem; }
+.spatial-admin .admin-readiness { display: flex; flex-wrap: wrap; gap: .35rem; }
+.spatial-admin .admin-readiness .admin-status { font-size: .72rem; }
+.spatial-admin .admin-detail-list { display: grid; gap: .75rem; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); margin: 0; }
+.spatial-admin .admin-detail-list dt { color: var(--spatial-ink-muted); font-size: .82rem; }
+.spatial-admin .admin-detail-list dd { margin: .35rem 0 0; overflow-wrap: anywhere; }
+.spatial-admin .admin-published-detail { display: grid; gap: 1rem; max-inline-size: 52rem; }
+.spatial-admin .admin-published-detail > section { background: var(--admin-panel); border: 1px solid var(--admin-border); border-radius: .875rem; padding: 1rem; }
+.spatial-admin .admin-published-detail > section p { line-height: 1.8; margin-block: .6rem 0; white-space: pre-wrap; }
+.spatial-admin .admin-media-preview { background: #07142e; border: 1px solid var(--admin-border); border-radius: .75rem; display: block; margin-block-start: 1rem; max-block-size: 22rem; max-inline-size: 100%; }
+.spatial-admin .admin-loading { align-items: center; background: var(--admin-panel); border: 1px solid var(--admin-border); border-radius: .875rem; display: flex; gap: .5rem; min-block-size: 5rem; padding: 1rem; }
+.spatial-admin .admin-loading span { animation: admin-pulse 1.2s ease-in-out infinite; background: var(--admin-border); block-size: .5rem; border-radius: 999px; inline-size: 2.5rem; }
+.spatial-admin .admin-loading span:nth-child(2) { animation-delay: .15s; }.spatial-admin .admin-loading span:nth-child(3) { animation-delay: .3s; }
+.spatial-admin .admin-loading p { color: var(--spatial-ink-muted); font-size: .875rem; margin: 0 .25rem; }
+@keyframes admin-pulse { 50% { opacity: .38; transform: scaleX(.7); } }
+
+html[data-theme="dark"] .spatial-admin { --admin-panel: color-mix(in srgb, var(--khaliah-surface-alt, #112344) 88%, var(--khaliah-cyan, #1bc4df)); --admin-border: color-mix(in srgb, #44678f 70%, var(--khaliah-cyan, #1bc4df)); }
+html[data-theme="dark"] .spatial-admin :is(.admin-inventory dd, .admin-detail-list dd, .admin-published-detail, .admin-question-prompt) { color: #eef6ff; }
+html[data-theme="dark"] .spatial-admin .admin-table .text-link,
+html[data-theme="dark"] .spatial-admin .admin-table .text-link:visited { color: #6fe4f6; }
+html[data-theme="dark"] .spatial-admin :is(.admin-notice, .admin-empty) { background: #17365d; border-color: #62cde4; color: #eef6ff; }
+html[data-theme="dark"] .spatial-admin :is(.admin-hint, .admin-description, .admin-loading p, .admin-table__row small) { color: #c6ddf4; }
+html[data-theme="dark"] .spatial-admin .admin-field-error { color: #ffb7b7; }
+html:not([data-theme="dark"]) .spatial-admin :is(.admin-notice, .admin-empty) { background: #e6f5fb; color: #102b50; }
+html:not([data-theme="dark"]) .spatial-admin :is(.admin-hint, .admin-description, .admin-table__row small) { color: #385878; }
+@media (max-width: 61rem) { .spatial-admin .admin-layout { display: block; }.spatial-admin .admin-table-wrap { margin-inline: -.15rem; }.spatial-admin .admin-toolbar { align-items: stretch; }.spatial-admin .admin-toolbar > label { flex: 1 1 12rem; } }
+@media (max-width: 40rem) { .spatial-admin .admin-workspace { padding: .75rem; }.spatial-admin .admin-toolbar { display: grid; }.spatial-admin .admin-toolbar .button { inline-size: 100%; }.spatial-admin .admin-inventory { grid-template-columns: 1fr; }.spatial-admin .admin-loading { align-items: flex-start; flex-wrap: wrap; }.spatial-admin .admin-loading p { flex-basis: 100%; }.spatial-admin .admin-table__row { padding: .75rem; }.spatial-admin .admin-table-wrap:has(.admin-table--published) { overflow: visible; }.spatial-admin .admin-table--published { min-inline-size: 0; }.spatial-admin .admin-table--published .admin-table__row--head { display: none !important; }.spatial-admin .admin-table--published .admin-table__row { display: grid; gap: .65rem; grid-template-columns: 1fr !important; padding: .85rem; }.spatial-admin .admin-table--published [role="cell"] { display: block; min-inline-size: 0; overflow-wrap: anywhere; }.spatial-admin .admin-table--published [role="cell"]::before { color: var(--spatial-ink-muted); content: attr(data-label); display: block; font-size: .78rem; font-weight: 600; margin-block-end: .18rem; }.spatial-admin .admin-table--published .admin-question-prompt { font-size: 1rem; }.spatial-admin .admin-table--published [role="cell"] small { margin: 0; } }
+@media (prefers-reduced-motion: reduce) { .spatial-admin .admin-loading span { animation: none; } }

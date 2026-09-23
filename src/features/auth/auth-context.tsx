@@ -2,7 +2,7 @@ import { createContext, type ReactNode, useContext, useEffect, useState } from '
 import type { User } from 'firebase/auth';
 import type { AuthActionError } from './auth-service';
 
-export type FirebaseAuthStatus = 'loading' | 'unavailable' | 'signedOut' | 'anonymous' | 'google' | 'error';
+export type FirebaseAuthStatus = 'loading' | 'unavailable' | 'signedOut' | 'anonymous' | 'google' | 'password' | 'error';
 export type AuthPendingAction = 'signIn' | 'signOut' | null;
 
 export type FirebaseAuthContextValue = {
@@ -12,17 +12,19 @@ export type FirebaseAuthContextValue = {
   error: AuthActionError | null;
   isAvailable: boolean;
   signInWithGoogle: () => Promise<void>;
+  signInWithEmailPassword: (email: string, password: string) => Promise<void>;
+  createEmailPasswordAccount: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
 };
 
 export const loadingAuthContext: FirebaseAuthContextValue = {
   status: 'loading', user: null, pendingAction: null, error: null, isAvailable: false,
-  signInWithGoogle: async () => undefined, signOut: async () => undefined,
+  signInWithGoogle: async () => undefined, signInWithEmailPassword: async () => undefined, createEmailPasswordAccount: async () => undefined, signOut: async () => undefined,
 };
 
 const unavailableAuthContext: FirebaseAuthContextValue = {
   status: 'unavailable', user: null, pendingAction: null, error: null, isAvailable: false,
-  signInWithGoogle: async () => undefined, signOut: async () => undefined,
+  signInWithGoogle: async () => undefined, signInWithEmailPassword: async () => undefined, createEmailPasswordAccount: async () => undefined, signOut: async () => undefined,
 };
 
 export const FirebaseAuthContext = createContext<FirebaseAuthContextValue>(unavailableAuthContext);

@@ -66,6 +66,10 @@ function attachAuthEmulatorOnce(app: FirebaseApp, auth: Auth) {
 
 function attachAppCheckOnce(app: FirebaseApp, providerKind: AppCheckProviderKind, siteKey: string) {
   if (appCheckAttachedAppNames.has(app.name)) return;
+  // A registered debug token is local-only; production always uses attestation.
+  if (import.meta.env.DEV && ['localhost', '127.0.0.1'].includes(window.location.hostname) && import.meta.env.VITE_FIREBASE_APP_CHECK_DEBUG_TOKEN) {
+    (self as typeof self & { FIREBASE_APPCHECK_DEBUG_TOKEN?: string }).FIREBASE_APPCHECK_DEBUG_TOKEN = import.meta.env.VITE_FIREBASE_APP_CHECK_DEBUG_TOKEN;
+  }
   const provider = providerKind === 'recaptcha-enterprise'
     ? new ReCaptchaEnterpriseProvider(siteKey)
     : new ReCaptchaV3Provider(siteKey);
@@ -89,9 +93,13 @@ export function getOptionalFirebaseAuth(): Auth | null {
 /** Returns null rather than throwing when fixture mode has no Firebase configuration. */
 export function getOptionalFirebaseClient(): FirebaseClientServices | null {
   if (envRuntimeIsFixture() || !configuredFirebase()) return null;
+  return configuredClient();
+}
+
+function configuredClient(): FirebaseClientServices {
   const emulator = import.meta.env.VITE_USE_FIREBASE_EMULATORS === 'true';
   const appCheckProvider = resolveAppCheckProvider(
-    import.meta.env.VITE_GAME_RUNTIME,
+    'firebase',
     emulator,
     import.meta.env.VITE_FIREBASE_APP_CHECK_PROVIDER,
     import.meta.env.VITE_FIREBASE_APP_CHECK_SITE_KEY,
@@ -109,9 +117,15 @@ export function getOptionalFirebaseClient(): FirebaseClientServices | null {
   return services;
 }
 
-/** Administration is never available in fixture mode and never falls back to anonymous auth. */
+/**
+ * Administration is never anonymous, but it may use the configured Firebase
+ * project while the game itself runs in local/fixture mode.  This keeps local
+ * gameplay isolated without making the administrative studio impossible to
+ * review during development.
+ */
 export function getOptionalFirebaseAdminClient(): FirebaseClientServices | null {
-  return getOptionalFirebaseClient();
+  if (!configuredFirebase()) return null;
+  return configuredClient();
 }
 
 function envRuntimeIsFixture() { return import.meta.env.VITE_GAME_RUNTIME !== 'firebase'; }

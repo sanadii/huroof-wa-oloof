@@ -4,8 +4,9 @@ import { readFile, stat } from "node:fs/promises";
 import { extname, join, normalize } from "node:path";
 import { WebSocketServer } from "ws";
 import { AuthoritativeGameService } from "./service.js";
+import type { ChallengeDefinitionEnvelope } from "../src/features/game/challenges/integration.js";
 import { isLocalAdminPath, isLoopbackAddress } from "./local-admin-guard.js";
-import { loadLocalFirestoreQuestionSource } from "./local-firestore-question-source.js";
+import { loadLocalFirestoreQuestionSource, type LocalRuntimeQuestionSource } from "./local-firestore-question-source.js";
 import { loadLocalSqliteImportQuestionSource } from "./local-sqlite-import-question-source.js";
 import {
   isTrustedImportReviewRequest,
@@ -33,15 +34,51 @@ const localFirestoreSource = localFirestoreMode
       maxReads: Number(process.env.LOCAL_DB_MAX_QUESTION_READS ?? 1400),
     })
   : undefined;
+/**
+ * An explicit, local-only JSON source exists for isolated browser verification.
+ * It is never selected by the product UI and requires an operator-supplied path,
+ * just like the existing local challenge definition bundle.
+ */
+const localChallengeFixturePath = process.env.LOCAL_CHALLENGE_QUESTION_SOURCE_PATH;
+const localChallengeFixtureSource: LocalRuntimeQuestionSource | undefined = localChallengeFixturePath
+  ? await (async () => {
+      const parsed = JSON.parse(await readFile(localChallengeFixturePath, "utf8")) as Partial<LocalRuntimeQuestionSource>;
+      if (!parsed || typeof parsed !== "object" || typeof parsed.snapshotId !== "string" || !Array.isArray(parsed.questions) || !parsed.inventory)
+        throw new Error("LOCAL_CHALLENGE_QUESTION_SOURCE_INVALID");
+      return parsed as LocalRuntimeQuestionSource;
+    })()
+  : undefined;
 const localQuestionSource =
+  localChallengeFixtureSource ??
   localFirestoreSource ??
   (localSqliteImportMode
     ? await loadLocalSqliteImportQuestionSource({
         dbPath: process.env.GAME_DB_PATH,
       })
     : undefined);
+const localChallengeDefinitionPath = process.env.LOCAL_CHALLENGE_DEFINITIONS_PATH;
+const localChallengeDefinitions: ChallengeDefinitionEnvelope[] = localChallengeDefinitionPath
+  ? await (async () => {
+      const parsed = JSON.parse(await readFile(localChallengeDefinitionPath, "utf8")) as unknown;
+      const values = Array.isArray(parsed)
+        ? parsed
+        : parsed && typeof parsed === "object" && Array.isArray((parsed as { definitions?: unknown }).definitions)
+          ? (parsed as { definitions: unknown[] }).definitions
+          : undefined;
+      if (!values) throw new Error("LOCAL_CHALLENGE_DEFINITIONS_INVALID");
+      return values as ChallengeDefinitionEnvelope[];
+    })()
+  : [];
+const localChallengeMechanics = (process.env.LOCAL_CHALLENGE_ENABLED_MECHANICS ?? "")
+  .split(",")
+  .map((value) => value.trim())
+  .filter((value): value is "navigation" | "missing_tile" | "memory" | "qatar_map" =>
+    value === "navigation" || value === "missing_tile" || value === "memory" || value === "qatar_map",
+  );
 const service = new AuthoritativeGameService({
   dbPath: process.env.GAME_DB_PATH,
+  ...(localChallengeDefinitions.length ? { challengeDefinitions: localChallengeDefinitions } : {}),
+  ...(localChallengeMechanics.length ? { enabledChallengeMechanics: localChallengeMechanics } : {}),
   ...(localQuestionSource
     ? {
         localFirestoreQuestionSource: localQuestionSource,
@@ -199,6 +236,12 @@ const server = createServer(async (request, response) => {
         .end(JSON.stringify(inventory));
       return;
     }
+    if (request.method === "GET" && url.pathname === "/api/challenge-availability") {
+      response
+        .writeHead(200, { "content-type": "application/json", "cache-control": "no-store" })
+        .end(JSON.stringify({ enabledMechanics: localChallengeMechanics }));
+      return;
+    }
     if (request.method === "GET" && url.pathname === "/api/admin/questions") {
       const payload = JSON.stringify(await service.legacyAdminQuestions());
       response
@@ -258,6 +301,7 @@ const server = createServer(async (request, response) => {
       const joined = await service.join(
         parts[2],
         typeof body.displayName === "string" ? body.displayName : undefined,
+        body.challenge,
       );
       broadcast(joined.roomId);
       response
@@ -276,14 +320,28 @@ const server = createServer(async (request, response) => {
         throw new Error("LOCAL_DB_ORIGIN_REQUIRED");
       const room = service.store.load(parts[2]);
       if (!room) throw new Error("ROOM_NOT_FOUND");
+      const body = await json(request);
       const payload = JSON.stringify({
         roomId: room.id,
         revision: room.revision,
-        token: service.createAudienceCapability(room.id),
+        token: service.createAudienceCapability(room.id, body.challenge),
       });
       response
         .writeHead(200, { "content-type": "application/json" })
         .end(payload);
+      return;
+    }
+    if (
+      request.method === "POST" &&
+      parts.length === 4 &&
+      parts[0] === "api" &&
+      parts[1] === "rooms" &&
+      parts[3] === "resume"
+    ) {
+      const resumed = service.resume(parts[2], token(request), (await json(request)).challenge);
+      response
+        .writeHead(200, { "content-type": "application/json", "cache-control": "no-store" })
+        .end(JSON.stringify(resumed));
       return;
     }
     if (
@@ -292,9 +350,10 @@ const server = createServer(async (request, response) => {
       parts[0] === "api" &&
       parts[1] === "rooms"
     ) {
-      const payload = JSON.stringify(
-        service.metadata(parts[2], token(request)),
-      );
+      const offered = url.searchParams.get("challenge");
+      const challenge = offered ? JSON.parse(offered) : undefined;
+      service.resume(parts[2], token(request), challenge);
+      const payload = JSON.stringify(service.metadata(parts[2], token(request)));
       response
         .writeHead(200, { "content-type": "application/json" })
         .end(payload);
@@ -419,6 +478,7 @@ type Connection = {
   token: string;
   uid: string;
   role: "host" | "player" | "audience";
+  challenge?: unknown;
   lastPong: number;
 };
 const connections = new Map<string, Set<Connection>>();
@@ -506,7 +566,11 @@ server.on("upgrade", (request, socket, head) => {
   const capability = service.verify(capabilityToken);
   if (!capability || capability.roomId !== roomId) return socket.destroy();
   let actor: { uid: string; role: "host" | "player" | "audience" };
+  let challenge: unknown;
   try {
+    const offered = url.searchParams.get("challenge");
+    if (offered) challenge = JSON.parse(offered);
+    service.resume(roomId, capabilityToken, challenge);
     actor = service.presenceActor(roomId, capabilityToken);
   } catch {
     return socket.destroy();
@@ -516,6 +580,7 @@ server.on("upgrade", (request, socket, head) => {
       ws,
       token: capabilityToken,
       ...actor,
+      challenge,
       lastPong: Date.now(),
     };
     const roomConnections = connections.get(roomId) ?? new Set<Connection>();

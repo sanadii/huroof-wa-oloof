@@ -1,12 +1,12 @@
 import { httpsCallable } from 'firebase/functions';
-import { getOptionalFirebaseClient } from '../../lib/firebase/client';
-import type { AdminSession, Category, Mutation, Page, QuestionDetail, QuestionSummary, Release, Review, RoomSummary } from './types';
+import { getOptionalFirebaseAdminClient } from '../../lib/firebase/client';
+import type { AdminOverview, AdminSession, Category, Mutation, Page, PublishedCategory, PublishedPage, PublishedQuestionDetail, PublishedQuestionSummary, QuestionDetail, QuestionSummary, Release, Review, RoomSummary } from './types';
 export type { AdminSession } from './types';
 
 export type AdminOperation = Mutation;
 
 function client() {
-  const configured = getOptionalFirebaseClient();
+  const configured = getOptionalFirebaseAdminClient();
   if (!configured) throw new Error('خدمات Firebase الإدارية غير مهيأة في هذه البيئة.');
   return configured;
 }
@@ -14,7 +14,12 @@ export async function adminCall<Request, Response>(name: string, data: Request):
   return (await httpsCallable<Request, Response>(client().functions, name)(data)).data;
 }
 export const getAdminSession = () => adminCall<Record<string, never>, AdminSession>('adminGetSession', {});
-export const getAdminOverview = () => adminCall<Record<string, never>, { inventory: Record<string, number>; mutationMode: string }>('adminGetOverview', {});
+export const getAdminOverview = () => adminCall<Record<string, never>, AdminOverview>('adminGetOverview', {});
+export const listPublishedQuestions = (data: Record<string, unknown> = {}) => adminCall<Record<string, unknown>, PublishedPage<PublishedQuestionSummary>>('adminListPublishedQuestions', data);
+export const getPublishedQuestion = (id: string, releaseId?: string) => adminCall<{ id: string; releaseId?: string }, PublishedQuestionDetail>('adminGetPublishedQuestion', { id, ...(releaseId ? { releaseId } : {}) });
+export const getPublishedQuestionMedia = (id: string, releaseId: string, variant: 'question' | 'answer') => adminCall<{ id: string; releaseId: string; variant: 'question' | 'answer' }, { mediaId: string; type: string; contentType: string; altAr: string | null; url: string }>('adminGetPublishedQuestionMedia', { id, releaseId, variant });
+export const listPublishedCategories = (data: Record<string, unknown> = {}) => adminCall<Record<string, unknown>, PublishedPage<PublishedCategory>>('adminListPublishedCategories', data);
+export const getPublishedCategory = (id: string, releaseId?: string) => adminCall<{ id: string; releaseId?: string }, PublishedCategory & { releaseId: string }>('adminGetPublishedCategory', { id, ...(releaseId ? { releaseId } : {}) });
 export const listQuestions = (data: Record<string, unknown> = {}) => adminCall<Record<string, unknown>, Page<QuestionSummary>>('adminListQuestions', data);
 export const getQuestion = (id: string) => adminCall<{ id: string }, QuestionDetail>('adminGetQuestion', { id });
 export const saveQuestion = (data: Record<string, unknown>) => adminCall<Record<string, unknown>, Mutation>('adminSaveQuestion', data);

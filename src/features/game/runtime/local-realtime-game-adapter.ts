@@ -1,4 +1,4 @@
-import type { ClientRole, CreateRoomRequest, GameIntent, GameRuntimeAdapter, JoinRoomRequest, ProjectionEnvelope } from './contracts';
+import { CLIENT_CHALLENGE_CAPABILITY, type ChallengeMechanic, type ClientRole, type CreateRoomRequest, type GameIntent, type GameRuntimeAdapter, type JoinRoomRequest, type ProjectionEnvelope } from './contracts';
 
 /** Default adapter; the Node service validates its capability token on every request. */
 export class LocalRealtimeGameAdapter implements GameRuntimeAdapter {
@@ -6,7 +6,10 @@ export class LocalRealtimeGameAdapter implements GameRuntimeAdapter {
   private token = '';
   setCapabilityToken(token: string) { this.token = token; }
   async createRoom(request: CreateRoomRequest) { const response = await fetch('/api/rooms', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(request) }); if (!response.ok) throw new Error(await response.text()); const value = await response.json(); this.token = value.token; return value; }
+  async getChallengeAvailability() { const response = await fetch('/api/challenge-availability', { cache: 'no-store' }); if (!response.ok) throw new Error(await response.text()); return response.json() as Promise<{ enabledMechanics: ChallengeMechanic[] }>; }
   async joinRoom(request: JoinRoomRequest) { const response = await fetch(`/api/rooms/${encodeURIComponent(request.roomCode)}/join`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(request) }); if (!response.ok) throw new Error(await response.text()); const value = await response.json(); this.token = value.token; return value; }
+  async joinAudience(roomCode: string, challenge = CLIENT_CHALLENGE_CAPABILITY) { const response = await fetch(`/api/rooms/${encodeURIComponent(roomCode)}/audience`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ challenge }) }); if (!response.ok) throw new Error(await response.text()); const value = await response.json(); this.token = value.token; return value; }
+  async resumeRoom(roomId: string, challenge = CLIENT_CHALLENGE_CAPABILITY) { const response = await fetch(`/api/rooms/${encodeURIComponent(roomId)}/resume`, { method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${this.token}` }, body: JSON.stringify({ challenge }) }); if (!response.ok) throw new Error(await response.text()); return response.json(); }
   async submitGameIntent(roomId: string, intent: GameIntent) { const response = await fetch(`/api/rooms/${encodeURIComponent(roomId)}/intents`, { method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${this.token}` }, body: JSON.stringify(intent) }); if (!response.ok) throw new Error(await response.text()); return response.json(); }
   async getCurrentQuestionMedia(request: { roomId: string; mediaId: string; assetSha256: string }) {
     const issued = await fetch(`/api/rooms/${encodeURIComponent(request.roomId)}/current-question-media`, { method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${this.token}` }, body: JSON.stringify({ mediaId: request.mediaId, assetSha256: request.assetSha256 }) });
@@ -19,5 +22,5 @@ export class LocalRealtimeGameAdapter implements GameRuntimeAdapter {
     if (!['image/png', 'image/jpeg', 'video/mp4'].includes(blob.type)) throw new Error('MEDIA_INVALID_TYPE');
     return { mediaId: request.mediaId, assetSha256: request.assetSha256, url: URL.createObjectURL(blob), expiresAt: ticket.expiresAt };
   }
-  subscribeProjection(roomId: string, _role: ClientRole, _uid: string, onProjection: (value: ProjectionEnvelope) => void) { const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:'; const socket = new WebSocket(`${protocol}//${location.host}/ws?roomId=${encodeURIComponent(roomId)}&token=${encodeURIComponent(this.token)}`); socket.addEventListener('message', (event) => onProjection(JSON.parse(String(event.data)) as ProjectionEnvelope)); return () => socket.close(); }
+  subscribeProjection(roomId: string, _role: ClientRole, _uid: string, onProjection: (value: ProjectionEnvelope) => void) { const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:'; const socket = new WebSocket(`${protocol}//${location.host}/ws?roomId=${encodeURIComponent(roomId)}&token=${encodeURIComponent(this.token)}&challenge=${encodeURIComponent(JSON.stringify(CLIENT_CHALLENGE_CAPABILITY))}`); socket.addEventListener('message', (event) => onProjection(JSON.parse(String(event.data)) as ProjectionEnvelope)); return () => socket.close(); }
 }

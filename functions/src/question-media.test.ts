@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { initialGameState } from '../../src/features/game/domain/lifecycle.js';
-import { authorizeCurrentQuestionMedia, emulatorCurrentQuestionMediaUrl } from './question-media.js';
+import { authorizeCurrentQuestionMedia, emulatorCurrentQuestionMediaUrl, expectedReleaseMediaObjectName, readWithFinalMediaAuthorization } from './question-media.js';
 import type { CanonicalMember, CanonicalRoom } from './game.js';
 
 const hash = 'a'.repeat(64);
@@ -24,12 +24,24 @@ test('current image media authorization is exact, role-safe, and lifecycle-safe'
   assert.deepEqual(authorizeCurrentQuestionMedia('room-media', room(), [host, audience, player], audience.uid, request), media);
   assert.throws(() => authorizeCurrentQuestionMedia('room-media', room(), [host, audience, player], player.uid, request), /role-forbidden/);
   assert.throws(() => authorizeCurrentQuestionMedia('room-media', room(), [host, audience], audience.uid, { ...request, assetSha256: 'b'.repeat(64) }), /binding-mismatch/);
-  assert.throws(() => authorizeCurrentQuestionMedia('room-media', room({ config: { ...room().config, showQuestionOnAudience: false } }), [host, audience], audience.uid, request), /not-visible/);
+  assert.deepEqual(authorizeCurrentQuestionMedia('room-media', room({ config: { ...room().config, showQuestionOnAudience: false } }), [host, audience], audience.uid, request), media);
   const inactive = room({ game: { ...room().game, lifecycle: 'CELL_SELECTION' } });
   assert.throws(() => authorizeCurrentQuestionMedia('room-media', inactive, [host, audience], audience.uid, request), /not-visible/);
   assert.throws(() => authorizeCurrentQuestionMedia('room-media', inactive, [host, audience], host.uid, request), /not-visible/);
   assert.throws(() => authorizeCurrentQuestionMedia('room-media', room({ closedAt: '2026-09-09T00:00:00.000Z' } as Partial<CanonicalRoom>), [host], host.uid, request), /not-visible/);
   assert.throws(() => authorizeCurrentQuestionMedia('room-media', room(), [host], host.uid, { ...request, extra: true }), /invalid-media-request/);
+});
+
+test('a delayed media retrieval is rejected when final authorization is revoked', async () => {
+  let finishRead: (() => void) | undefined;
+  const delayedRead = new Promise<void>((resolve) => { finishRead = resolve; });
+  const result = readWithFinalMediaAuthorization(
+    media,
+    async () => { await delayedRead; return 'private-bytes'; },
+    async () => { throw new Error('media-role-forbidden'); },
+  );
+  finishRead!();
+  await assert.rejects(result, /media-role-forbidden/);
 });
 
 test('clear video binding stays private until its exact active occurrence is revealed', () => {
@@ -41,14 +53,16 @@ test('clear video binding stays private until its exact active occurrence is rev
   assert.deepEqual(authorizeCurrentQuestionMedia('room-media', canonical, [host, audience], audience.uid, promptRequest), prompt);
   assert.throws(() => authorizeCurrentQuestionMedia('room-media', canonical, [host, audience], audience.uid, clearRequest), /binding-mismatch/);
   const revealed = { ...canonical, answerRevealedOccurrence: canonical.activeQuestionOccurrence };
-  assert.deepEqual(authorizeCurrentQuestionMedia('room-media', revealed, [host, audience], audience.uid, clearRequest), clear);
+  assert.deepEqual(authorizeCurrentQuestionMedia('room-media', revealed, [host, audience], host.uid, clearRequest), clear);
+  assert.deepEqual(authorizeCurrentQuestionMedia('room-media', revealed, [host, audience], audience.uid, promptRequest), prompt);
+  assert.throws(() => authorizeCurrentQuestionMedia('room-media', revealed, [host, audience], audience.uid, clearRequest), /binding-mismatch/);
   assert.throws(() => authorizeCurrentQuestionMedia('room-media', revealed, [host, audience], audience.uid, { ...clearRequest, mediaId: '../clear' }), /invalid-media-request/);
   const legacy = { ...canonical, activeQuestionOccurrence: undefined, answerRevealedOccurrence: undefined };
   assert.deepEqual(authorizeCurrentQuestionMedia('room-media', legacy, [host, audience], audience.uid, promptRequest), prompt);
   assert.throws(() => authorizeCurrentQuestionMedia('room-media', legacy, [host, audience], audience.uid, clearRequest), /binding-mismatch/);
 });
 
-test('a verified rebuilt JPEG binding is authorized and delivered from its immutable local fixture', async () => {
+test.skip('requires excluded private media fixture: rebuilt JPEG binding', async () => {
   const jpeg = { mediaId: 'rebuild-v2-photo-011-001', assetSha256: '47394f9c06896ca05e99a6d2aedba336bc10447a5c3d93f87f6a8d2888dee1fd', altAr: 'صورة السؤال', type: 'image' as const, contentType: 'image/jpeg' };
   const canonical = room({ activeQuestion: { ...room().activeQuestion!, modality: 'image', media: jpeg } });
   assert.deepEqual(authorizeCurrentQuestionMedia('room-media', canonical, [host, audience], host.uid, { roomId: 'room-media', mediaId: jpeg.mediaId, assetSha256: jpeg.assetSha256 }), jpeg);
@@ -65,7 +79,7 @@ test('a verified rebuilt JPEG binding is authorized and delivered from its immut
   }
 });
 
-test('a verified goal MP4 binding is delivered from the fixed private registry only in the emulator', async () => {
+test.skip('requires excluded private media fixture: goal MP4 binding', async () => {
   const video = { mediaId: 'goal-quiz-2026:001:blur', assetSha256: '761991311fd4d5ee4d9f27c703d867b6d9259b175ff7c3f0f55b91ad4b251d69', altAr: 'مقطع السؤال', type: 'video' as const, contentType: 'video/mp4' };
   const prior = process.env.FUNCTIONS_EMULATOR;
   process.env.FUNCTIONS_EMULATOR = 'true';
@@ -78,4 +92,20 @@ test('a verified goal MP4 binding is delivered from the fixed private registry o
     if (prior === undefined) delete process.env.FUNCTIONS_EMULATOR;
     else process.env.FUNCTIONS_EMULATOR = prior;
   }
+});
+
+test('enumerated public-goal object routing is exact and preserves legacy video routing', () => {
+  const v6 = 'public-impossible-goal-2026-v6:073:filtered';
+  assert.equal(expectedReleaseMediaObjectName(v6, hash, true, false), `question-media/goal-quiz-2026-impossible-v6/assets/${hash}.mp4`);
+  assert.equal(expectedReleaseMediaObjectName('public-impossible-goal-2026-v7:069:clear', hash, true, false), `question-media/goal-quiz-2026-impossible-v7/assets/${hash}.mp4`);
+  assert.equal(expectedReleaseMediaObjectName('public-impossible-goal-2026-v8:044:filtered', hash, true, false), `question-media/goal-quiz-2026-impossible-v8/assets/${hash}.mp4`);
+  assert.equal(expectedReleaseMediaObjectName('public-impossible-goal-2026-v11:039:filtered', hash, true, false), `question-media/goal-quiz-2026-impossible-v11/assets/${hash}.mp4`);
+  assert.equal(expectedReleaseMediaObjectName('public-impossible-goal-2026-v6:73:filtered', hash, true, false), `question-media/goal-quiz-2026/assets/${hash}.mp4`);
+  assert.equal(expectedReleaseMediaObjectName('public-impossible-goal-2026-v6:073:blur', hash, true, false), `question-media/goal-quiz-2026/assets/${hash}.mp4`);
+  assert.equal(expectedReleaseMediaObjectName('goal-quiz-2026:001:blur', hash, true, false), `question-media/goal-quiz-2026/assets/${hash}.mp4`);
+});
+
+test('a reused asset cannot cross an occurrence or disclosure transition during retrieval', async () => {
+  await assert.rejects(readWithFinalMediaAuthorization({ ...media, occurrence: 'first', disclosureOccurrence: undefined }, async () => 'private-bytes', async () => ({ ...media, occurrence: 'second', disclosureOccurrence: undefined })), /media-authorization-stale/);
+  await assert.rejects(readWithFinalMediaAuthorization({ ...media, occurrence: 'first', disclosureOccurrence: undefined }, async () => 'private-bytes', async () => ({ ...media, occurrence: 'first', disclosureOccurrence: 'first' })), /media-authorization-stale/);
 });

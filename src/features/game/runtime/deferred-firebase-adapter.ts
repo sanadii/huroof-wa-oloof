@@ -15,7 +15,8 @@ export class DeferredFirebaseGameAdapter implements GameRuntimeAdapter {
   createRoom(request: CreateRoomRequest) { return this.adapter().then((adapter) => adapter.createRoom(request)); }
   getApprovedReleaseCatalog(): Promise<ApprovedReleaseCatalog> { return this.adapter().then((adapter) => adapter.getApprovedReleaseCatalog?.() ?? Promise.reject(new Error('APPROVED_RELEASE_CATALOG_UNAVAILABLE'))); }
   joinRoom(request: JoinRoomRequest) { return this.adapter().then((adapter) => adapter.joinRoom(request)); }
-  joinAudience(roomCode: string) { return this.adapter().then((adapter) => adapter.joinAudience?.(roomCode) ?? Promise.reject(new Error('انضمام الجمهور غير متاح حالياً.'))); }
+  joinAudience(roomCode: string, challenge?: import('./contracts.js').ChallengeCapabilityOffer) { return this.adapter().then((adapter) => adapter.joinAudience?.(roomCode, challenge) ?? Promise.reject(new Error('انضمام الجمهور غير متاح حالياً.'))); }
+  resumeRoom(roomId: string, challenge?: import('./contracts.js').ChallengeCapabilityOffer) { return this.adapter().then((adapter) => adapter.resumeRoom?.(roomId, challenge) ?? Promise.reject(new Error('CHALLENGE_RESUME_UNAVAILABLE'))); }
   syncDeadline(roomId: string) { return this.adapter().then((adapter) => adapter.syncDeadline?.(roomId) ?? Promise.resolve({ revision: 0, expired: false })); }
   getCurrentQuestionMedia(request: { roomId: string; mediaId: string; assetSha256: string }) { return this.adapter().then((adapter) => adapter.getCurrentQuestionMedia?.(request) ?? Promise.reject(new Error('MEDIA_UNAVAILABLE'))); }
   submitGameIntent(roomId: string, intent: GameIntent) { return this.adapter().then((adapter) => adapter.submitGameIntent(roomId, intent)); }

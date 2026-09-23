@@ -1,6 +1,7 @@
 import { Component, lazy, Suspense, type ReactNode } from 'react';
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { ThemeProvider } from './ThemeProvider';
+import { InternalHeader } from '../design-system/InternalHeader';
 import { DeferredFirebaseAuthProvider } from '../features/auth/auth-context';
 import { EntryRoute } from '../routes/EntryRoute';
 import {
@@ -17,6 +18,8 @@ const AccountRoute = lazy(() => import('../routes/AuthRoutes').then(({ AccountRo
 const LoginRoute = lazy(() => import('../routes/AuthRoutes').then(({ LoginRoute }) => ({ default: LoginRoute })));
 const AdminOverviewRoute = lazy(() => import('../features/admin/AdminRoutes').then(({ AdminOverviewRoute }) => ({ default: AdminOverviewRoute })));
 const AdminQuestionEditorRoute = lazy(() => import('../features/admin/AdminRoutes').then(({ AdminQuestionEditorRoute }) => ({ default: AdminQuestionEditorRoute })));
+const AdminPublishedCategoriesRoute = lazy(() => import('../features/admin/AdminRoutes').then(({ AdminPublishedCategoriesRoute }) => ({ default: AdminPublishedCategoriesRoute })));
+const AdminPublishedQuestionsRoute = lazy(() => import('../features/admin/AdminRoutes').then(({ AdminPublishedQuestionsRoute }) => ({ default: AdminPublishedQuestionsRoute })));
 const AdminRecordRoute = lazy(() => import('../features/admin/AdminRoutes').then(({ AdminRecordRoute }) => ({ default: AdminRecordRoute })));
 const AdminRootRedirect = lazy(() => import('../features/admin/AdminRoutes').then(({ AdminRootRedirect }) => ({ default: AdminRootRedirect })));
 const AdminSettingsRoute = lazy(() => import('../features/admin/AdminRoutes').then(({ AdminSettingsRoute }) => ({ default: AdminSettingsRoute })));
@@ -48,9 +51,10 @@ function RouteStatusSurface({
       className="app-page spatial-shell"
       id="main-content"
     >
+      <InternalHeader />
       <section className="setup-page spatial-setup" aria-labelledby={titleId}>
         <div>
-          <p className="eyebrow">تحدي الخلية</p>
+          <p className="eyebrow">الخلية</p>
           <h1 id={titleId}>{title}</h1>
           <p className="form-message" role={messageRole}>{message}</p>
           {action}
@@ -107,17 +111,19 @@ export function App() {
             <Route path="/room/:roomCode/display" element={staticPreview ? unavailable : <RoomRoute surface="display" />} />
             <Route path="/room/:roomCode/results" element={staticPreview ? unavailable : <RoomRoute surface="results" />} />
             <Route path="/questions" element={staticPreview ? unavailable : <Navigate replace to="/admin/questions" />} />
-            <Route path="/questions/new" element={staticPreview ? unavailable : <Navigate replace to="/admin/questions/new" />} />
+            <Route path="/questions/new" element={staticPreview ? unavailable : <Navigate replace to="/admin/drafts/new" />} />
             <Route path="/questions/:questionId" element={staticPreview ? unavailable : <LegacyQuestionRedirect />} />
             <Route path="/local-import-review" element={staticPreview ? unavailable : <LocalImportReviewRoute />} />
             <Route path="/admin" element={staticPreview ? unavailable : <AdminRootRedirect />} />
             <Route path="/admin" element={staticPreview ? unavailable : <AdminShell />}>
               <Route path="overview" element={<AdminOverviewRoute />} />
-              <Route path="questions" element={<AdminRecordRoute section="questions" />} />
-              <Route path="questions/new" element={<AdminQuestionEditorRoute />} />
-              <Route path="questions/:questionId" element={<AdminQuestionEditorRoute />} />
+              <Route path="questions" element={<AdminPublishedQuestionsRoute />} />
+              <Route path="questions/:id" element={<AdminPublishedQuestionsRoute />} />
+              <Route path="drafts" element={<AdminRecordRoute section="drafts" />} />
+              <Route path="drafts/new" element={<AdminQuestionEditorRoute />} />
+              <Route path="drafts/:questionId" element={<AdminQuestionEditorRoute />} />
+              <Route path="categories" element={<AdminPublishedCategoriesRoute />} /><Route path="categories/:id" element={<AdminPublishedCategoriesRoute />} />
               <Route path="reviews" element={<AdminRecordRoute section="reviews" />} /><Route path="reviews/:id" element={<AdminRecordRoute section="reviews" />} />
-              <Route path="categories" element={<AdminRecordRoute section="categories" />} /><Route path="categories/:id" element={<AdminRecordRoute section="categories" />} />
               <Route path="releases" element={<AdminRecordRoute section="releases" />} /><Route path="releases/:id" element={<AdminRecordRoute section="releases" />} />
               <Route path="rooms" element={<AdminRecordRoute section="rooms" />} /><Route path="rooms/:id" element={<AdminRecordRoute section="rooms" />} />
               <Route path="users" element={<AdminUsersRoute />} /><Route path="audit" element={<AdminRecordRoute section="audit" />} />
