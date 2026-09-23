@@ -91,7 +91,7 @@ export function assertQaChallengePermit(value: unknown, expected: QaPermitExpect
   } catch { throw new Error("QA_PERMIT_DENIED"); }
   if (categories.length !== permit.categoryIds.length || mechanics.length !== permit.mechanics.length ||
     categories.some((entry) => !/^[A-Za-z0-9_-]{1,128}$/u.test(entry)) ||
-    mechanics.some((entry) => !["navigation", "missing_tile", "memory", "qatar_map"].includes(entry)) ||
+    mechanics.some((entry) => !["navigation", "missing_tile", "memory", "qatar_map", "word_search"].includes(entry)) ||
     permit.permitId !== expected.permitId || permit.projectId !== expected.projectId || permit.hostUid !== expected.hostUid ||
     permit.releaseId !== expected.releaseId || permit.releaseRootSha256 !== expected.releaseRootSha256 ||
     !same(categories, ids(expected.categoryIds)) || !same(mechanics, ids(expected.mechanics)) ||

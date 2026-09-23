@@ -1038,7 +1038,7 @@ export function HostNewRoute() {
                 التحدّي التفاعلي المراجع
               </label>
             </fieldset> : null}
-            <p className="field-note">تظل التحدّيات متوقفة افتراضياً. {availableSelectedChallengeKinds.length ? `المتاح للفئات المختارة الآن: ${availableSelectedChallengeKinds.map((kind) => ({ missing_tile: "الجزء المفقود", qatar_map: "لوكيشن قطر", navigation: "وجّه صاحبك", memory: "لون الصورة" })[kind]).join("، ")}.` : "لا توجد آلية مفعّلة على الخادم للفئات المختارة."} يحتاج «وجّه صاحبك» إلى هاتف خاص للدليل، ويمكن للمضيف إدخال حركة اللاعب عند التحكم اليدوي. تثبت تسمية ألوان محتوى الذاكرة عند بدء المباراة.</p>
+            <p className="field-note">تظل التحدّيات متوقفة افتراضياً. {availableSelectedChallengeKinds.length ? `المتاح للفئات المختارة الآن: ${availableSelectedChallengeKinds.map((kind) => ({ missing_tile: "الجزء المفقود", qatar_map: "لوكيشن قطر", navigation: "وجّه صاحبك", memory: "لون الصورة", word_search: "صيد المختفي" })[kind]).join("، ")}.` : "لا توجد آلية مفعّلة على الخادم للفئات المختارة."} يحتاج «وجّه صاحبك» إلى هاتف خاص للدليل، ويمكن للمضيف إدخال حركة اللاعب عند التحكم اليدوي. تثبت تسمية ألوان محتوى الذاكرة عند بدء المباراة.</p>
           </section>
           <section>
             <h2>الفئات</h2>

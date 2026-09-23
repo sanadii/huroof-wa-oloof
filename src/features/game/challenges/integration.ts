@@ -9,6 +9,8 @@
 import type { TeamAxis } from "../domain/board.js";
 import {
   CHALLENGE_SCHEMA_VERSION,
+  T37_CHALLENGE_SCHEMA_VERSION,
+  T37_WORD_SEARCH_CHALLENGE_SCHEMA_VERSION,
   validateCanonicalChallengeDefinition,
   type CanonicalChallengeDefinition,
   type Direction,
@@ -20,7 +22,7 @@ export const CHALLENGE_PROTOCOL_VERSION = "t36-challenge-runtime-v1" as const;
 export type ChallengeDefinitionEnvelope = {
   manifestSha256: string;
   id: string;
-  schemaVersion: typeof CHALLENGE_SCHEMA_VERSION;
+  schemaVersion: CanonicalChallengeDefinition["schemaVersion"];
   definitionSha256: string;
   /** Exact sorted-key JSON; it avoids Firestore nested-array encoding. */
   canonicalJson: string;
@@ -109,7 +111,7 @@ export function parseChallengeDefinitionEnvelope(
   envelope: ChallengeDefinitionEnvelope,
   hash: (canonicalJson: string) => string,
 ): CanonicalChallengeDefinition {
-  if (!sha(envelope.manifestSha256) || !sha(envelope.definitionSha256) || !/^[a-z0-9-]+$/u.test(envelope.id) || envelope.schemaVersion !== CHALLENGE_SCHEMA_VERSION)
+  if (!sha(envelope.manifestSha256) || !sha(envelope.definitionSha256) || !/^[a-z0-9-]+$/u.test(envelope.id) || ![CHALLENGE_SCHEMA_VERSION, T37_CHALLENGE_SCHEMA_VERSION, T37_WORD_SEARCH_CHALLENGE_SCHEMA_VERSION].includes(envelope.schemaVersion))
     throw new Error("CHALLENGE_DEFINITION_ENVELOPE_INVALID");
   let definition: CanonicalChallengeDefinition;
   try { definition = JSON.parse(envelope.canonicalJson) as CanonicalChallengeDefinition; }
@@ -227,12 +229,13 @@ export function projectChallenge(
     solutionRevealed: state.solutionRevealed,
   };
   if (definition.kind === "memory" && (state.stage === "setup" || state.stage === "countdown")) projection.stimulus = { rows: definition.publicData.rows, columns: definition.publicData.columns, palette: definition.publicData.palette.map(({ nameAr, hex }) => ({ nameAr, hex })), showSeconds: definition.publicData.showSeconds, answerSeconds: definition.publicData.answerSeconds };
+  if (definition.kind === "missing_tile" && (state.stage === "setup" || state.stage === "countdown")) projection.stimulus = { rule: definition.publicData.rule };
   if (state.paused || state.stage === "setup" || state.stage === "countdown") return projection;
   if (definition.kind === "navigation") projection.stimulus = navStimulus(definition, state, recipient);
   if (definition.kind === "missing_tile") projection.stimulus = {
     rows: definition.publicData.rows, columns: definition.publicData.columns,
-    cells: definition.publicData.cells.flatMap((cells, row) => cells.map((cell, column) => cell ? { row, column, id: cell.id, labelAr: cell.labelAr, shape: cell.shape, hex: cell.hex } : { row, column, missing: true })),
-    options: definition.publicData.options.map(({ id, labelAr, shape, hex }) => ({ id, labelAr, shape, hex })), rule: definition.publicData.rule, promptAr: definition.publicData.promptAr,
+    cells: definition.publicData.cells.flatMap((cells, row) => cells.map((cell, column) => cell ? { row, column, id: cell.id, labelAr: cell.labelAr, shape: cell.shape, hex: cell.hex, ...(cell.bitmask === undefined ? {} : { bitmask: cell.bitmask }) } : { row, column, missing: true })),
+    options: definition.publicData.options.map(({ id, labelAr, shape, hex, bitmask }) => ({ id, labelAr, shape, hex, ...(bitmask === undefined ? {} : { bitmask }) })), rule: definition.publicData.rule, promptAr: definition.publicData.promptAr,
   };
   if (definition.kind === "memory") {
     if (state.stage === "observation") projection.stimulus = {
@@ -245,6 +248,10 @@ export function projectChallenge(
   if (definition.kind === "qatar_map") projection.stimulus = {
     mode: definition.publicData.mode, markers: definition.publicData.markers.map(({ id, x, y }) => ({ id, x, y })), optionIds: [...definition.publicData.optionIds], promptAr: definition.publicData.promptAr,
     ...(definition.publicData.mode === "identify" ? {} : { namedPoints: definition.publicData.namedPoints?.map(({ id, nameAr }) => ({ id, nameAr })) ?? [] }),
+  };
+  if (definition.kind === "word_search") projection.stimulus = {
+    rows: definition.publicData.rows, columns: definition.publicData.columns,
+    grid: definition.publicData.grid.map((row) => [...row]), clueAr: definition.publicData.clueAr,
   };
   if (state.solutionRevealed && state.attemptsClosed) projection.stimulus = { ...projection.stimulus, reveal: codeNativeReveal(definition) };
   return projection;
@@ -279,6 +286,7 @@ function codeNativeReveal(definition: CanonicalChallengeDefinition): Record<stri
   if (definition.kind === "navigation") return { directions: definition.privateGrading.canonicalDirections as readonly Direction[] };
   if (definition.kind === "missing_tile") return { correctOptionId: definition.privateGrading.correctOptionId };
   if (definition.kind === "memory") return { answers: [...definition.privateGrading.targetAnswers] };
+  if (definition.kind === "word_search") return { paths: definition.privateGrading.acceptedPaths.map(({ start, end }) => ({ start: flat(start), end: flat(end) })) };
   return { answerIds: [...definition.privateGrading.answerIds] };
 }
 

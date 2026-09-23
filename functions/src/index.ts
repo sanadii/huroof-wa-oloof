@@ -95,8 +95,8 @@ export const RELEASE_READER_OPTIONS = {
   timeoutSeconds: 60,
 } as const;
 const releaseReaderCallable = { ...callable, ...RELEASE_READER_OPTIONS } as const;
-type ChallengeMechanic = "navigation" | "missing_tile" | "memory" | "qatar_map";
-const challengeMechanicValues: readonly ChallengeMechanic[] = ["navigation", "missing_tile", "memory", "qatar_map"];
+type ChallengeMechanic = "navigation" | "missing_tile" | "memory" | "qatar_map" | "word_search";
+const challengeMechanicValues: readonly ChallengeMechanic[] = ["navigation", "missing_tile", "memory", "qatar_map", "word_search"];
 type ApprovedReleaseCatalog = {
   releaseId: string;
   releaseRootSha256: string;
@@ -180,9 +180,10 @@ function challengeCapabilityOffer(value: unknown) {
   if (value === undefined) return undefined;
   const offer = value && typeof value === "object" && !Array.isArray(value) ? value as Record<string, unknown> : undefined;
   const mechanics = offer?.mechanics;
-  if (!offer || offer.protocolVersion !== "t36-challenge-runtime-v1" || !Array.isArray(mechanics) || !mechanics.length || mechanics.length > 4 || new Set(mechanics).size !== mechanics.length || mechanics.some((mechanic) => !["navigation", "missing_tile", "memory", "qatar_map"].includes(mechanic)))
+  const definitionSchemas = offer?.definitionSchemas === undefined ? ["t36-challenge-definition-v1"] : offer.definitionSchemas;
+  if (!offer || offer.protocolVersion !== "t36-challenge-runtime-v1" || !Array.isArray(mechanics) || !mechanics.length || mechanics.length > 5 || new Set(mechanics).size !== mechanics.length || mechanics.some((mechanic) => !["navigation", "missing_tile", "memory", "qatar_map", "word_search"].includes(mechanic)) || !Array.isArray(definitionSchemas) || !definitionSchemas.length || definitionSchemas.length > 3 || new Set(definitionSchemas).size !== definitionSchemas.length || definitionSchemas.some((schema) => schema !== "t36-challenge-definition-v1" && schema !== "t37-clean70-challenge-definition-v1" && schema !== "t37-topup-word-search-definition-v1"))
     throw new HttpsError("failed-precondition", "CHALLENGE_PROTOCOL_UNSUPPORTED");
-  return { protocolVersion: "t36-challenge-runtime-v1" as const, mechanics: mechanics as Array<"navigation" | "missing_tile" | "memory" | "qatar_map"> };
+  return { protocolVersion: "t36-challenge-runtime-v1" as const, mechanics: mechanics as Array<"navigation" | "missing_tile" | "memory" | "qatar_map" | "word_search">, definitionSchemas: [...definitionSchemas].sort() as Array<"t36-challenge-definition-v1" | "t37-clean70-challenge-definition-v1" | "t37-topup-word-search-definition-v1"> };
 }
 export function normalizeT36CreateOptions(requestData: Record<string, unknown>) {
   const rawMapPresentation = requestData.mapPresentation;
@@ -595,16 +596,21 @@ async function releaseQuestions(
     throw new HttpsError("failed-precondition", "Pinned release identity is invalid.");
   approvedQuestionCount(root.data()?.approvedCount, "Pinned release has an invalid question count.");
   const questions = await releaseScopedQuestions(tx, room.config.releaseId, room.config.categories ?? []);
-  return materializeReleaseMapQuestions(tx, room.config.releaseId, questions, room.config.mapPresentation ?? "ordinary", room.config.mapVariantBinding);
+  const materialized = await materializeReleaseMapQuestions(tx, room.config.releaseId, questions, room.config.mapPresentation ?? "ordinary", room.config.mapVariantBinding);
+  return challengeQuestionsForRoom(materialized, room.config.challenge);
 }
 async function releaseQuestionsForNewRoom(
   tx: FirebaseFirestore.Transaction,
   release: { releaseId: string; releaseRootSha256: string; approvedCount: number },
   categories: string[],
   mapPresentation: MapPresentation,
+  includeChallenges: boolean,
 ): Promise<CanonicalQuestion[]> {
   const questions = await releaseScopedQuestions(tx, release.releaseId, categories);
-  return materializeReleaseMapQuestions(tx, release.releaseId, questions, mapPresentation);
+  const materialized = await materializeReleaseMapQuestions(tx, release.releaseId, questions, mapPresentation);
+  // A legacy room never negotiates the challenge protocol.  Mixed categories
+  // therefore retain their ordinary pool while challenge rows stay invisible.
+  return includeChallenges ? materialized : materialized.filter((question) => !question.challenge);
 }
 
 /** The published map cohort is a fixed reviewed commitment, never a caller-selected count. */
@@ -694,7 +700,7 @@ export function questionRows(docs: Array<{ id: string; data(): FirebaseFirestore
         typeof item.promptAr !== "string" ||
         typeof item.canonicalAnswer !== "string" ||
         !Array.isArray(item.acceptedAnswers) ||
-        (item.challenge !== undefined && (!item.challenge || typeof item.challenge !== "object" || !item.challenge.definition || typeof item.challenge.definition !== "object" || typeof item.challenge.definition.manifestSha256 !== "string" || !/^[a-f0-9]{64}$/.test(item.challenge.definition.manifestSha256) || typeof item.challenge.definition.id !== "string" || typeof item.challenge.definition.definitionSha256 !== "string" || !/^[a-f0-9]{64}$/.test(item.challenge.definition.definitionSha256) || item.challenge.definition.schemaVersion !== "t36-challenge-definition-v1" || !Array.isArray(item.challenge.factFamilies) || !item.challenge.factFamilies.every((family: unknown) => typeof family === "string" && family.length > 0) || !["navigation", "missing_tile", "memory", "qatar_map"].includes(item.challenge.kind))) ||
+        (item.challenge !== undefined && (!item.challenge || typeof item.challenge !== "object" || !item.challenge.definition || typeof item.challenge.definition !== "object" || typeof item.challenge.definition.manifestSha256 !== "string" || !/^[a-f0-9]{64}$/.test(item.challenge.definition.manifestSha256) || typeof item.challenge.definition.id !== "string" || typeof item.challenge.definition.definitionSha256 !== "string" || !/^[a-f0-9]{64}$/.test(item.challenge.definition.definitionSha256) || !["t36-challenge-definition-v1", "t37-clean70-challenge-definition-v1", "t37-topup-word-search-definition-v1"].includes(item.challenge.definition.schemaVersion) || !Array.isArray(item.challenge.factFamilies) || !item.challenge.factFamilies.every((family: unknown) => typeof family === "string" && family.length > 0) || !["navigation", "missing_tile", "memory", "qatar_map", "word_search"].includes(item.challenge.kind))) ||
         (item.modality === "charades"
           ? Boolean(item.targetLetter)
           : typeof item.targetLetter !== "string"),
@@ -719,6 +725,14 @@ const runtimeQuestions = (questions: CanonicalQuestion[]) =>
       answerConceptId: question.answerConceptId,
     };
   });
+export function challengeQuestionsForRoom(
+  questions: CanonicalQuestion[],
+  challenge: CanonicalRoom["config"]["challenge"] | undefined,
+) {
+  return !challenge
+    ? questions.filter((question) => !question.challenge)
+    : questions.filter((question) => !question.challenge || challenge.mechanics.includes(question.challenge.kind));
+}
 /** Category labels are trusted only from Firestore and frozen into the room at create. */
 async function pinnedCategorySnapshot(
   tx: FirebaseFirestore.Transaction,
@@ -748,7 +762,7 @@ function releaseLetters(questions: CanonicalQuestion[], room: CanonicalRoom) {
     throw new Error("Charades never creates a letter-board selection.");
   const selection =
     room.questionSelection ??
-    createMatchQuestionSelection(runtimeQuestions(questions), {
+    createMatchQuestionSelection(runtimeQuestions(challengeQuestionsForRoom(questions, room.config.challenge)), {
       categories: room.config.categories ?? [],
       modality: room.config.modality ?? "classic",
       seed: room.questionCursor + 1,
@@ -966,7 +980,7 @@ export function releaseCategorySelection(questions: CanonicalQuestion[], room: C
       throw error;
     }
   }
-  const selection = room.questionSelection ?? createCategoryQuestionSelection(runtimeQuestions(questions), {
+  const selection = room.questionSelection ?? createCategoryQuestionSelection(runtimeQuestions(challengeQuestionsForRoom(questions, undefined)), {
     categories: room.config.categories ?? [], modality: "classic", seed: room.questionCursor + 1,
   });
   room.questionSelection = selection;
@@ -1071,7 +1085,7 @@ async function pinnedQuestion(
   try {
     roomGameKind(room);
     const questions = await releaseQuestions(tx, room);
-    const runtime = runtimeQuestions(questions);
+    const runtime = runtimeQuestions(challengeQuestionsForRoom(questions, room.config.challenge));
     if (room.config.modality === "charades")
       {
         const question = selectCharadesQuestion(runtime, {
@@ -1177,7 +1191,7 @@ async function retryFailedCell(
   if (!cell || !room.questionSelection)
     throw new HttpsError("failed-precondition", "CONTENT_DEPLETED");
   const questions = await releaseQuestions(tx, room);
-  const runtime = runtimeQuestions(questions);
+  const runtime = runtimeQuestions(challengeQuestionsForRoom(questions, room.config.challenge));
   const queueKey = roomGameKind(room) === "categories"
     ? cell.categoryId
     : cell.revealedLetter ?? cell.visibleValue;
@@ -1208,7 +1222,7 @@ async function replaceFailedCell(
   if (!cell || !room.questionSelection || !room.game.board)
       throw new HttpsError("failed-precondition", "CONTENT_DEPLETED");
   const questions = await releaseQuestions(tx, room);
-  const runtime = runtimeQuestions(questions);
+  const runtime = runtimeQuestions(challengeQuestionsForRoom(questions, room.config.challenge));
   if (roomGameKind(room) === "categories") {
     const alternatives = (room.config.categories ?? []).filter((id) => id !== cell.categoryId).sort();
     const originalChallengeBoardSlot = isChallengeSelection(room.questionSelection)
@@ -1326,7 +1340,7 @@ function firebaseChallengeIntent(intent: import("./game.js").GameIntent, actor: 
   if (type === "ASSIGN") return { ...common, type, assignment: payload.assignment as "guide" | "mover" | "captain" | "stealCaptain", participantId: payload.participantId as string };
   if (type === "READY") return { ...common, type, participantId: payload.participantId as string, readiness: payload.readiness as { protocolHash: string; assignmentHash: string; stimulusHash: string } };
   if (type === "MOVE") return { ...common, type, direction: payload.direction as "north" | "east" | "south" | "west" };
-  if (type === "SUBMIT") return { ...common, type, answers: payload.answers as string[] };
+  if (type === "SUBMIT") return { ...common, type, ...(Array.isArray(payload.answers) ? { answers: payload.answers as string[] } : { start: payload.start as { row: number; column: number }, end: payload.end as { row: number; column: number } }) };
   return common as ChallengeIntent;
 }
 
@@ -1360,7 +1374,7 @@ export const createRoom = onCall(releaseReaderCallable, async (request) => {
   const normalizedQaRequest = qaPermitId ? qaPermitRequestHash({
     permitId: qaPermitId, displayName, teams, demo, questionSeconds, opponentSeconds,
     categories: scope.categories, modality: scope.modality, gameKind: scope.gameKind, mapPresentation,
-    difficulty, mode, labelledColours, expectedRelease, challenge: challenge ? { protocolVersion: challenge.protocolVersion, mechanics: [...challenge.mechanics].sort() } : undefined,
+    difficulty, mode, labelledColours, expectedRelease, challenge: challenge ? { protocolVersion: challenge.protocolVersion, mechanics: [...challenge.mechanics].sort(), definitionSchemas: [...challenge.definitionSchemas].sort() } : undefined,
   }) : undefined;
   const candidates = Array.from({ length: 12 }, code);
   return database.runTransaction(async (tx) => {
@@ -1383,13 +1397,15 @@ export const createRoom = onCall(releaseReaderCallable, async (request) => {
       }
     }
     const release = await activeRelease(tx, demo, expectedRelease);
-    const questions = await releaseQuestionsForNewRoom(tx, release, scope.categories, mapPresentation);
+    const questions = await releaseQuestionsForNewRoom(tx, release, scope.categories, mapPresentation, Boolean(challenge));
     const scopedChallengeKinds = [...new Set([
       ...questions.flatMap((question) => question.challenge ? [question.challenge.kind] : []),
       ...(mapPresentation === "interactive" && scope.categories.includes("tahadani-games-326") ? ["qatar_map" as const] : []),
     ])];
+    const scopedDefinitionSchemas = [...new Set(questions.flatMap((question) => question.challenge ? [question.challenge.definition.schemaVersion] : []))];
     if (scopedChallengeKinds.length && !challenge) throw new HttpsError("failed-precondition", "CHALLENGE_PROTOCOL_REQUIRED");
     if (scopedChallengeKinds.length && !scopedChallengeKinds.every((mechanic) => challenge!.mechanics.includes(mechanic))) throw new HttpsError("failed-precondition", "CHALLENGE_PROTOCOL_UNSUPPORTED");
+    if (scopedDefinitionSchemas.length && !scopedDefinitionSchemas.every((schema) => challenge!.definitionSchemas.includes(schema))) throw new HttpsError("failed-precondition", "CHALLENGE_DEFINITION_SCHEMA_UNSUPPORTED");
     if (qaPermitId && !scopedChallengeKinds.length) throw new HttpsError("failed-precondition", "CHALLENGE_MECHANICS_DISABLED");
     let qaPermit: ReturnType<typeof assertQaChallengePermit> | undefined;
     if (scopedChallengeKinds.length) {
@@ -1454,7 +1470,7 @@ export const createRoom = onCall(releaseReaderCallable, async (request) => {
         ...(categorySnapshot ? { categorySnapshot } : {}),
         difficulty,
         mode,
-        ...(challenge && scopedChallengeKinds.length ? { challenge: { protocolVersion: challenge.protocolVersion, mechanics: scopedChallengeKinds } } : {}),
+        ...(challenge && scopedChallengeKinds.length ? { challenge: { protocolVersion: challenge.protocolVersion, mechanics: scopedChallengeKinds, definitionSchemas: scopedDefinitionSchemas.sort() } } : {}),
         ...(scope.categories.includes("tahadani-games-326") ? { mapVariantBinding: committedMapVariantPin(release.t36Premium as Record<string, unknown> | undefined) } : {}),
         ...(qaPermit ? { qaAdmission: { permitId: qaPermit.permitId } } : {}),
       },
@@ -1559,7 +1575,7 @@ export const joinRoom = onCall(callable, async (request) => {
     let room = expiring(raw.data() as CanonicalRoom);
     if (room.config.challenge) {
       const offered = challengeCapabilityOffer(request.data?.challenge);
-      if (!offered || offered.protocolVersion !== room.config.challenge.protocolVersion || !room.config.challenge.mechanics.every((mechanic) => offered.mechanics.includes(mechanic)))
+      if (!offered || offered.protocolVersion !== room.config.challenge.protocolVersion || !room.config.challenge.mechanics.every((mechanic) => offered.mechanics.includes(mechanic)) || !(room.config.challenge.definitionSchemas ?? ["t36-challenge-definition-v1"]).every((schema) => offered.definitionSchemas.includes(schema)))
         throw new HttpsError("failed-precondition", "CHALLENGE_PROTOCOL_REQUIRED");
     }
     if (isRoomClosed(room))
@@ -1649,7 +1665,7 @@ export const joinAudience = onCall(callable, async (request) => {
       throw new HttpsError("failed-precondition", "Room is closed.");
     if (room.config.challenge) {
       const offered = challengeCapabilityOffer(request.data?.challenge);
-      if (!offered || offered.protocolVersion !== room.config.challenge.protocolVersion || !room.config.challenge.mechanics.every((mechanic) => offered.mechanics.includes(mechanic)))
+      if (!offered || offered.protocolVersion !== room.config.challenge.protocolVersion || !room.config.challenge.mechanics.every((mechanic) => offered.mechanics.includes(mechanic)) || !(room.config.challenge.definitionSchemas ?? ["t36-challenge-definition-v1"]).every((schema) => offered.definitionSchemas.includes(schema)))
         throw new HttpsError("failed-precondition", "CHALLENGE_PROTOCOL_REQUIRED");
     }
     const members = memberDocs.docs.map(
@@ -1718,7 +1734,7 @@ export const resumeRoom = onCall(callable, async (request) => {
     if (!member.active || member.uid !== actor) throw new HttpsError("permission-denied", "Not an active room member.");
     if (room.config.challenge) {
       const offered = challengeCapabilityOffer(request.data?.challenge);
-      if (!offered || offered.protocolVersion !== room.config.challenge.protocolVersion || !room.config.challenge.mechanics.every((mechanic) => offered.mechanics.includes(mechanic)))
+      if (!offered || offered.protocolVersion !== room.config.challenge.protocolVersion || !room.config.challenge.mechanics.every((mechanic) => offered.mechanics.includes(mechanic)) || !(room.config.challenge.definitionSchemas ?? ["t36-challenge-definition-v1"]).every((schema) => offered.definitionSchemas.includes(schema)))
         throw new HttpsError("failed-precondition", "CHALLENGE_PROTOCOL_REQUIRED");
     }
     if (isRoomClosed(room)) throw new HttpsError("failed-precondition", "Room is closed.");

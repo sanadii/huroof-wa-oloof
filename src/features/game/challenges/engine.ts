@@ -4,7 +4,7 @@
  * neither transport-specific identity nor definition source data is stored here.
  */
 import type { TeamAxis } from "../domain/board.js";
-import type { CanonicalChallengeDefinition, Direction, Point } from "./definition.js";
+import { straightWordSearchPath, type CanonicalChallengeDefinition, type Direction, type Point } from "./definition.js";
 
 export type Participant =
   | { kind: "member"; uid: string; /** Auth UID may differ from a kind-qualified assignment ID. */ actorUid?: string; team: TeamAxis }
@@ -85,7 +85,7 @@ export type ChallengeIntent = IntentBase & (
   | { type: "READY"; participantId: string; readiness: ChallengeReadiness }
   | { type: "START" }
   | { type: "MOVE"; direction: Direction }
-  | { type: "SUBMIT"; answers: readonly string[] }
+  | { type: "SUBMIT"; answers?: readonly string[]; start?: ChallengeTrailPoint; end?: ChallengeTrailPoint }
   | { type: "START_STEAL" }
   | { type: "DECLINE_STEAL" }
   | { type: "PAUSE" }
@@ -320,8 +320,8 @@ function reduceSubmission(
   if ((state.stage !== "answer" && state.stage !== "steal") || definition.kind === "navigation") return state;
   const assignedCaptain = state.stage === "steal" ? state.assignments.stealCaptain : state.assignments.captain;
   if (actor.team !== state.answeringTeam || !canActAsAssignment(actor, intent.actor, assignedCaptain)) return state;
-  const answers = [...intent.answers];
-  const good = isCorrect(definition, answers);
+  const answers = [...(intent.answers ?? [])];
+  const good = isCorrect(definition, answers, intent.start, intent.end);
   const submitted = state.stage === "steal" ? { stealSubmission: answers } : { initialSubmission: answers };
   if (good) return accept({ ...submitted, ...closeState(state, "correct") });
   if (state.stage === "steal" || !hasSteal(definition)) return accept({ ...submitted, ...closeState(state, "failed") });
@@ -359,7 +359,7 @@ function isRoleParticipantAllowed(role: keyof Assignment, participant: Participa
 
 function requiredParticipantIds(definition: CanonicalChallengeDefinition, assignments: Assignment): string[] {
   if (definition.kind === "navigation") return assignments.guide && assignments.mover ? [assignments.guide, assignments.mover] : [];
-  if (definition.kind === "memory") return assignments.captain ? [assignments.captain] : [];
+  if (definition.kind === "memory" || definition.kind === "word_search") return assignments.captain ? [assignments.captain] : [];
   return assignments.captain && assignments.stealCaptain ? [assignments.captain, assignments.stealCaptain] : [];
 }
 
@@ -407,10 +407,20 @@ function hasSteal(definition: CanonicalChallengeDefinition): boolean {
   return definition.kind === "missing_tile" || definition.kind === "qatar_map";
 }
 
-function isCorrect(definition: CanonicalChallengeDefinition, answers: readonly string[]): boolean {
+function isCorrect(definition: CanonicalChallengeDefinition, answers: readonly string[], start?: ChallengeTrailPoint, end?: ChallengeTrailPoint): boolean {
   if (definition.kind === "missing_tile") return answers.length === 1 && answers[0] === definition.privateGrading.correctOptionId;
   if (definition.kind === "memory") return equalAnswers(answers, definition.privateGrading.targetAnswers);
   if (definition.kind === "qatar_map") return equalAnswers(answers, definition.privateGrading.answerIds);
+  if (definition.kind === "word_search") {
+    if (answers.length || !start || !end) return false;
+    const submittedStart: Point = [start.row, start.column], submittedEnd: Point = [end.row, end.column];
+    const path = straightWordSearchPath(submittedStart, submittedEnd);
+    if (!path.length) return false;
+    return definition.privateGrading.acceptedPaths.some((candidate) =>
+      (samePoint(candidate.start, submittedStart) && samePoint(candidate.end, submittedEnd)) ||
+      (samePoint(candidate.start, submittedEnd) && samePoint(candidate.end, submittedStart)),
+    );
+  }
   return false;
 }
 

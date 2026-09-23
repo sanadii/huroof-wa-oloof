@@ -1,10 +1,12 @@
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import test from 'node:test';
 import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { AuthoritativeGameService, verifyPrivateQuestionMediaBytes } from '../../server/service.js';
 import { findWinningPath, withOwner } from '../../src/features/game/domain/board.js';
+import { canonicalChallengeJson } from '../../src/features/game/challenges/integration.js';
 
 async function withService(run: (service: AuthoritativeGameService, dbPath: string) => Promise<void>, options: { boardNonce?: () => string } = {}) {
   const dir = await mkdtemp(join(tmpdir(), 'huroof-service-')); const dbPath = join(dir, 'rooms.sqlite'); const service = new AuthoritativeGameService({ dbPath, secret: 'test', ...options });
@@ -266,9 +268,19 @@ test('new rooms fix the v2 rule while preserving rematch-safe categories and dif
     difficulty: 'hard',
     mode: 'custom',
     showQuestionOnAudience: true,
+    labelledColours: false,
   });
   assert.deepEqual(projection.matchRule, { ruleSet: 'v2', victoryAr: 'تنتهي المباراة بفوز فريق بجولتين متتاليتين أو بثلاث جولات إجمالاً' });
   assert.equal(JSON.stringify(projection).includes('bestOf'), false);
+}));
+
+test('labelled-colour setting is persisted at room creation and remains fixed after start', async () => withService(async (service) => {
+  const created = service.create('host', true, { categories: ['tahadani-006', 'tahadani-012'], labelledColours: true });
+  assert.equal(service.metadata(created.roomId, created.token).projection.room.matchSettings?.labelledColours, true);
+  const started = await service.intent(created.roomId, created.token, { type: 'START_MATCH', intentId: 'labelled-start', expectedRevision: created.revision, payload: {} });
+  assert.equal(started.projection.projection.room.matchSettings?.labelledColours, true);
+  const defaultRoom = service.create('host', true, { categories: ['tahadani-006', 'tahadani-012'] });
+  assert.equal(service.metadata(defaultRoom.roomId, defaultRoom.token).projection.room.matchSettings?.labelledColours, false);
 }));
 
 test('JSON persistence upgrades untouched legacy lobbies to v2 and explicitly grandfathers started legacy rooms', async () => withService(async (service) => {
@@ -288,6 +300,34 @@ test('JSON persistence upgrades untouched legacy lobbies to v2 and explicitly gr
   service.store.save(started as never);
   const projection = service.metadata(created.roomId, created.token).projection;
   assert.equal(projection.matchRule?.ruleSet, 'legacy-v1'); assert.deepEqual(projection.roundResults, []); assert.deepEqual(projection.questionScores, { horizontal: 4, vertical: 2 });
+}));
+
+test('local commit rolls back room writes with a duplicate receipt and safely replays exact legacy receipt JSON', async () => withService(async (service) => {
+  const created = service.create('host', true);
+  const before = service.store.load(created.roomId)!;
+  const at = new Date().toISOString();
+  service.store.recordReceipt(created.roomId, 'host', 'durable-receipt', 'first-hash', before.revision, at);
+  assert.throws(
+    () => service.store.commit({ ...before, revision: before.revision + 1 }, { type: 'SHOULD_ROLL_BACK' }, at, { actorUid: 'host', intentId: 'durable-receipt', requestHash: 'second-hash' }),
+    /UNIQUE|constraint/i,
+  );
+  assert.equal(service.store.load(created.roomId)!.revision, before.revision);
+  assert.deepEqual(service.store.receipt(created.roomId, 'host', 'durable-receipt'), { requestHash: 'first-hash', revision: before.revision });
+
+  const actor = service.verify(created.token)!.uid;
+  const legacyIntent = { type: 'START_MATCH' as const, intentId: 'legacy-replay', expectedRevision: before.revision, payload: {} };
+  const legacyJson = JSON.stringify({ type: legacyIntent.type, expectedRevision: legacyIntent.expectedRevision, payload: {} });
+  service.store.save({
+    ...before,
+    intentIds: { [`${actor}:${legacyIntent.intentId}`]: before.revision },
+    intentHashes: { [`${actor}:${legacyIntent.intentId}`]: legacyJson },
+  });
+  const replay = await service.intent(created.roomId, created.token, legacyIntent);
+  assert.equal(replay.replayed, true);
+  await assert.rejects(
+    () => service.intent(created.roomId, created.token, { ...legacyIntent, expectedRevision: before.revision + 1 }),
+    /INTENT_ID_REUSED/,
+  );
 }));
 
 test('pause preserves an open authoritative timer and resume expires only after the saved remainder', async () => {
@@ -376,8 +416,16 @@ test('a correct judgment finalizes exactly once; replay and stale requests canno
   assert.equal(replay.replayed, true); assert.deepEqual(replay.projection.projection.questionScores, { horizontal: 1, vertical: 0 });
   const stale = await service.intent(room.host.roomId, room.host.token, { type: 'JUDGE_CORRECT', intentId: 'correct-stale', expectedRevision: beforeCorrect, payload: {} });
   assert.equal(stale.stale, true); assert.deepEqual(stale.projection.projection.questionScores, { horizontal: 1, vertical: 0 });
+  const persistedJson = JSON.stringify(service.store.load(room.host.roomId)!);
+  assert.equal(persistedJson.includes('intentHashes'), false);
+  assert.equal(persistedJson.includes('intentIds'), false);
   const recovered = new AuthoritativeGameService({ dbPath, secret: 'test' });
-  try { assert.deepEqual(recovered.metadata(room.host.roomId, room.host.token).projection.questionScores, { horizontal: 1, vertical: 0 }); } finally { recovered.close(); }
+  try {
+    assert.deepEqual(recovered.metadata(room.host.roomId, room.host.token).projection.questionScores, { horizontal: 1, vertical: 0 });
+    const replayAfterRestart = await recovered.intent(room.host.roomId, room.host.token, { type: 'JUDGE_CORRECT', intentId: 'correct', expectedRevision: beforeCorrect, payload: {} });
+    assert.equal(replayAfterRestart.replayed, true);
+    assert.deepEqual(replayAfterRestart.projection.projection.questionScores, { horizontal: 1, vertical: 0 });
+  } finally { recovered.close(); }
 }));
 
 test('next round receives a fresh diverse board with no inherited ownership', async () => withService(async (service) => {
@@ -425,6 +473,8 @@ test('ordinary selection exhaustion persists a no-score hold, rejects gameplay, 
   const cell = service.metadata(room.roomId, room.token).projection.board!.find((value) => value.kind === 'letter')!;
   const held = await send('SELECT_CELL', { cellId: cell.id }); assert.equal(held.projection.projection.contentHold?.reason, 'CONTENT_EXHAUSTED'); assert.equal(held.projection.projection.contentHold?.cellId, cell.id); assert.deepEqual(held.projection.projection.questionScores, { horizontal: 0, vertical: 0 });
   await assert.rejects(() => service.intent(room.roomId, room.token, { type: 'ROUND_READY' as never, intentId: 'held-ready', expectedRevision: revision, payload: {} }), /CONTENT_HOLD_ACTIVE/);
+  await assert.rejects(() => service.intent(room.roomId, room.token, { type: 'END_WITHOUT_WINNER' as never, intentId: 'held-end-unpaused', expectedRevision: revision, payload: {} }), /END_WITHOUT_WINNER_NOT_ALLOWED/);
+  await send('PAUSE');
   const ended = await send('END_WITHOUT_WINNER'); assert.equal(ended.projection.projection.room.state, 'MATCH_COMPLETE'); assert.equal(ended.projection.projection.endedWithoutWinner, true); assert.equal(ended.projection.projection.matchWinner, undefined);
   const replacement = service.create('host', true); const fresh = await service.intent(replacement.roomId, replacement.token, { type: 'START_MATCH', intentId: 'fresh-start', expectedRevision: replacement.revision, payload: {} }); assert.equal(fresh.projection.projection.room.state, 'ROUND_SETUP');
 }));
@@ -493,3 +543,314 @@ test('a stale DB snapshot cannot interrupt ticks for other local rooms', async (
   await assert.doesNotReject(() => service.tick());
   assert.ok(service.store.load(healthy.roomId));
 }));
+
+
+function syntheticChallengeFixture() {
+  const hash = 'a'.repeat(64);
+  const categories = ['tahadani-006', 'tahadani-007', 'tahadani-008', 'tahadani-009'];
+  const envelopes: Array<{ manifestSha256: string; id: string; schemaVersion: 't36-challenge-definition-v1'; definitionSha256: string; canonicalJson: string }> = [];
+  const questions = categories.flatMap((categoryId) => Array.from({ length: 8 }, (_, index) => {
+    const id = `local-nav-${categoryId}-${index}`, factFamily = `fact:${categoryId}:${index}`;
+    const payload = {
+      schemaVersion: 't36-challenge-definition-v1' as const, id, kind: 'navigation' as const,
+      categoryId, ordinal: index + 1, disposition: 'ready' as const,
+      source: { sourceId: `synthetic:${id}`, sourcePack: 'test', sourcePath: 'private', sourceRawSha256: hash, sourceContextsSha256: hash, mediaArchiveSha256: hash },
+      media: [
+        { role: 'answer' as const, visibility: 'host_only' as const, originalObjectName: 'private-answer', originalSha256: hash, derivativeObjectName: 'private-answer', derivativeSha256: hash },
+        { role: 'question' as const, visibility: 'guide_only' as const, originalObjectName: 'private-guide', originalSha256: hash, derivativeObjectName: 'private-guide', derivativeSha256: hash },
+        { role: 'question' as const, visibility: 'player' as const, originalObjectName: 'private-player', originalSha256: hash, derivativeObjectName: 'private-player', derivativeSha256: hash },
+      ], publicData: { rows: 5 as const, columns: 5 as const, start: [0, 0] as const, timeLimitSeconds: 60 as const, promptAr: 'اتجه' },
+      privateGrading: { goal: [0, 2] as const, blocked: [[1, 0]] as [number, number][], canonicalDirections: ['east', 'east'], canonicalPath: [[0, 0], [0, 1], [0, 2]] as [number, number][] },
+      factFamilies: [factFamily], maxPerGameFamily: 1 as const,
+    };
+    const definitionSha256 = createHash('sha256').update(canonicalChallengeJson(payload)).digest('hex');
+    const envelope = { manifestSha256: 'b'.repeat(64), id, schemaVersion: payload.schemaVersion, definitionSha256, canonicalJson: canonicalChallengeJson({ ...payload, definitionSha256 }) };
+    envelopes.push(envelope);
+    return {
+      id: `${categoryId}-${index}`, categoryId, modality: 'classic' as const, answerConceptId: `concept:${categoryId}:${index}`,
+      status: 'draft_test_import' as const, sourceContentHash: `source:${categoryId}:${index}`, difficulty: 'mixed',
+      challenge: { definition: { manifestSha256: envelope.manifestSha256, id: envelope.id, schemaVersion: envelope.schemaVersion, definitionSha256 }, factFamilies: [factFamily], kind: 'navigation' as const },
+    };
+  }));
+  const source = { snapshotId: 'synthetic-challenge-source', questions, inventory: {
+    source: 'local_firestore_import' as const, snapshotId: 'synthetic-challenge-source', bundleSha256: 'c'.repeat(64), boundedReadCount: questions.length, sourceCandidateCount: questions.length, usableQuestionCount: questions.length, heldQuestionCount: 0, huroofAvailable: true,
+    categories: categories.map((id) => ({ id, labelAr: id, sourceOnly: false, questionCount: 8, heldQuestionCount: 0, classicQuestionCount: 8, huroofQuestionCount: 8, categoryGameEligible: true, availability: 'ready' as const })),
+  }};
+  return { envelopes, source: source as never, categories };
+}
+
+test('an all-capable client offer does not turn an ordinary room into a challenge match', async () => {
+  const fixture = syntheticChallengeFixture();
+  const source = structuredClone(fixture.source) as { questions: Array<Record<string, unknown>> };
+  source.questions.forEach((question) => delete question.challenge);
+  const dir = await mkdtemp(join(tmpdir(), 'huroof-ordinary-capability-'));
+  const service = new AuthoritativeGameService({ dbPath: join(dir, 'rooms.sqlite'), secret: 'test', localFirestoreQuestionSource: source as never });
+  try {
+    const capability = { protocolVersion: 't36-challenge-runtime-v1' as const, mechanics: ['navigation', 'missing_tile', 'memory', 'qatar_map'] as const };
+    const created = service.create('host', true, { gameKind: 'categories', categories: fixture.categories, mapPresentation: 'ordinary', challenge: capability });
+    const stored = service.store.load(created.roomId)!;
+    assert.equal(stored.config.mapPresentation, 'ordinary');
+    assert.equal(stored.config.challenge, undefined);
+    assert.equal('challengeFamilyState' in (stored.questionSelection ?? {}), false);
+  } finally { service.close(); await rm(dir, { recursive: true, force: true }); }
+});
+
+test('mixed category 122 keeps ordinary rooms playable while flags-off challenge admission fails closed', async () => {
+  const fixture = syntheticChallengeFixture();
+  const source = structuredClone(fixture.source) as { questions: Array<Record<string, unknown>>; inventory: { categories: Array<{ id: string }> } };
+  const originalCategory = fixture.categories[0]!;
+  const categories = ['tahadani-games-122', ...fixture.categories.slice(1)];
+  source.questions.forEach((question) => {
+    if (question.categoryId === originalCategory) question.categoryId = 'tahadani-games-122';
+    else delete question.challenge;
+  });
+  source.inventory.categories[0]!.id = 'tahadani-games-122';
+  for (let index = 0; index < 8; index += 1)
+    source.questions.push({
+      id: `ordinary-122-${index}`, categoryId: 'tahadani-games-122', modality: 'classic', targetLetter: 'category-only',
+      answerConceptId: `ordinary:122:${index}`, headerAr: 'عادي', promptAr: `سؤال عادي ${index}`, canonicalAnswer: `جواب ${index}`,
+      acceptedAnswers: [`جواب ${index}`], status: 'draft_test_import', sourceContentHash: `ordinary:122:${index}`, difficulty: 'mixed',
+    });
+  const dir = await mkdtemp(join(tmpdir(), 'huroof-mixed-122-'));
+  const service = new AuthoritativeGameService({ dbPath: join(dir, 'rooms.sqlite'), secret: 'test', localFirestoreQuestionSource: source as never });
+  try {
+    const created = service.create('host', true, { gameKind: 'categories', categories });
+    assert.equal(service.store.load(created.roomId)!.config.challenge, undefined);
+    assert.ok(service.resume(created.roomId, created.token));
+    let revision = created.revision;
+    const send = async (type: string, payload: Record<string, unknown> = {}) => {
+      const result = await service.intent(created.roomId, created.token, { type: type as never, intentId: `mixed-122-${type}-${revision}`, expectedRevision: revision, payload });
+      revision = result.revision;
+      return result;
+    };
+    await send('START_MATCH'); await send('ROUND_READY');
+    const categoryCell = service.metadata(created.roomId, created.token).projection.board!.find((cell) => cell.categoryId === 'tahadani-games-122')!;
+    await send('SELECT_CELL', { cellId: categoryCell.id });
+    assert.equal(service.store.load(created.roomId)!.activeQuestion?.challenge, undefined);
+    await send('HOST_SELECT_TEAM', { team: 'horizontal' }); await send('JUDGE_INCORRECT');
+    await send('HOST_SELECT_TEAM', { team: 'vertical' }); await send('JUDGE_INCORRECT');
+    await send('RETURN_CELL');
+    const replacement = service.metadata(created.roomId, created.token).projection.board!.find((cell) => cell.id === categoryCell.id)!;
+    await send('SELECT_CELL', { cellId: replacement.id });
+    assert.equal(service.store.load(created.roomId)!.activeQuestion?.challenge, undefined);
+    const capability = { protocolVersion: 't36-challenge-runtime-v1' as const, mechanics: ['navigation' as const] };
+    assert.throws(() => service.create('challenge-host', true, { gameKind: 'categories', categories, challenge: capability }), /CHALLENGE_MECHANICS_DISABLED/);
+  } finally { service.close(); await rm(dir, { recursive: true, force: true }); }
+});
+
+test('local challenge category admission creates an explicit family plan and activates a safe projected occurrence', async () => {
+  const fixture = syntheticChallengeFixture();
+  const dir = await mkdtemp(join(tmpdir(), 'huroof-challenge-service-'));
+  const dbPath = join(dir, 'rooms.sqlite');
+  const service = new AuthoritativeGameService({ dbPath, secret: 'test', localFirestoreQuestionSource: fixture.source, challengeDefinitions: fixture.envelopes, enabledChallengeMechanics: ['navigation'] });
+  try {
+    const capability = { protocolVersion: 't36-challenge-runtime-v1' as const, mechanics: ['navigation' as const] };
+    const created = service.create('host', true, { gameKind: 'categories', categories: fixture.categories, challenge: capability });
+    const guide = await service.join(created.roomCode, 'guide', capability);
+    let revision = guide.revision;
+    const send = async (type: string, payload: Record<string, unknown> = {}) => {
+      const result = await service.intent(created.roomId, created.token, { type: type as never, intentId: `${type}-${revision}`, expectedRevision: revision, payload });
+      revision = result.revision; return result;
+    };
+    await send('LOBBY_ADD_MANUAL_PLAYER', { displayName: 'الفريق الآخر', team: 'vertical' });
+    await send('LOBBY_ASSIGN_TEAM', { memberUid: service.verify(guide.token)!.uid, team: 'horizontal' });
+    const guideReady = await service.intent(created.roomId, guide.token, { type: 'LOBBY_SET_READY', intentId: `guide-ready-${revision}`, expectedRevision: revision, payload: { ready: true } });
+    revision = guideReady.revision;
+    await send('START_MATCH'); await send('ROUND_READY');
+    const cell = service.metadata(created.roomId, created.token).projection.board![0]!;
+    const selected = await send('SELECT_CELL', { cellId: cell.id });
+    const stored = service.store.load(created.roomId)!;
+    assert.equal('challengeFamilyState' in stored.questionSelection!, true);
+    assert.equal((stored.questionSelection as { challengeBoardSlots?: unknown[] }).challengeBoardSlots?.length, 25);
+    assert.equal((stored.questionSelection as { challengeReserveSlots?: unknown[] }).challengeReserveSlots?.length, 4);
+    assert.equal(selected.projection.projection.question, undefined);
+    assert.equal(selected.projection.projection.challenge?.stage, 'setup');
+  } finally { service.close(); await rm(dir, { recursive: true, force: true }); }
+});
+
+test('local create, join, and resume require the exact T37 definition-schema offer', async () => {
+  const fixture = syntheticChallengeFixture();
+  const source = structuredClone(fixture.source) as { questions: Array<{ challenge?: { definition: { schemaVersion: string } } }> };
+  source.questions.forEach((question) => { if (question.challenge) question.challenge.definition.schemaVersion = 't37-clean70-challenge-definition-v1'; });
+  const dir = await mkdtemp(join(tmpdir(), 'huroof-t37-capability-'));
+  const service = new AuthoritativeGameService({ dbPath: join(dir, 'rooms.sqlite'), secret: 'test', localFirestoreQuestionSource: source as never, challengeDefinitions: fixture.envelopes, enabledChallengeMechanics: ['navigation'] });
+  const legacy = { protocolVersion: 't36-challenge-runtime-v1' as const, mechanics: ['navigation' as const] };
+  const t37 = { ...legacy, definitionSchemas: ['t36-challenge-definition-v1', 't37-clean70-challenge-definition-v1'] as const };
+  try {
+    assert.throws(() => service.create('legacy-host', true, { gameKind: 'categories', categories: fixture.categories, challenge: legacy }), /CHALLENGE_DEFINITION_SCHEMA_UNSUPPORTED/);
+    const created = service.create('t37-host', true, { gameKind: 'categories', categories: fixture.categories, challenge: t37 });
+    assert.deepEqual(service.store.load(created.roomId)!.config.challenge?.definitionSchemas, ['t37-clean70-challenge-definition-v1']);
+    await assert.rejects(() => service.join(created.roomCode, 'legacy-player', legacy), /CHALLENGE_PROTOCOL_REQUIRED/);
+    await assert.rejects(() => service.join(created.roomCode, 'malformed-player', { ...legacy, definitionSchemas: 't37-clean70-challenge-definition-v1' } as never), /CHALLENGE_PROTOCOL_REQUIRED/);
+    const joined = await service.join(created.roomCode, 't37-player', t37);
+    assert.ok(joined.token);
+    assert.throws(() => service.resume(created.roomId, created.token, legacy), /CHALLENGE_PROTOCOL_REQUIRED/);
+    assert.ok(Number.isFinite(Date.parse(service.resume(created.roomId, created.token, t37).serverTime)));
+  } finally { service.close(); await rm(dir, { recursive: true, force: true }); }
+});
+
+test('local navigation selection requires an authenticated guide phone and leaves the board recoverable', async () => {
+  const fixture = syntheticChallengeFixture();
+  const dir = await mkdtemp(join(tmpdir(), 'huroof-challenge-guide-required-'));
+  const service = new AuthoritativeGameService({ dbPath: join(dir, 'rooms.sqlite'), secret: 'test', localFirestoreQuestionSource: fixture.source, challengeDefinitions: fixture.envelopes, enabledChallengeMechanics: ['navigation'] });
+  try {
+    const capability = { protocolVersion: 't36-challenge-runtime-v1' as const, mechanics: ['navigation' as const] };
+    const created = service.create('host', true, { gameKind: 'categories', categories: fixture.categories, challenge: capability });
+    let revision = created.revision;
+    const send = (type: string, payload: Record<string, unknown> = {}) => service.intent(created.roomId, created.token, { type: type as never, intentId: `guide-required-${type}-${revision}`, expectedRevision: revision, payload }).then((result) => { revision = result.revision; return result; });
+    await send('START_MATCH'); await send('ROUND_READY');
+    const cell = service.metadata(created.roomId, created.token).projection.board![0]!;
+    const persistedBefore = structuredClone(service.store.load(created.roomId)!);
+    await assert.rejects(() => send('SELECT_CELL', { cellId: cell.id }), /NAVIGATION_PRIVATE_GUIDE_REQUIRED/);
+    const projection = service.metadata(created.roomId, created.token).projection;
+    assert.equal(projection.room.state, 'CELL_SELECTION');
+    assert.equal(projection.activeCellId, undefined);
+    assert.equal(projection.challenge, undefined);
+    assert.deepEqual(service.store.load(created.roomId), persistedBefore);
+  } finally { service.close(); await rm(dir, { recursive: true, force: true }); }
+});
+
+test('local navigation supports one guide phone handed across both entitled teams between attempts', async () => {
+  const fixture = syntheticChallengeFixture();
+  const dir = await mkdtemp(join(tmpdir(), 'huroof-challenge-guide-handoff-'));
+  let now = 1_000;
+  const service = new AuthoritativeGameService({ dbPath: join(dir, 'rooms.sqlite'), secret: 'test', clock: () => new Date(now), localFirestoreQuestionSource: fixture.source, challengeDefinitions: fixture.envelopes, enabledChallengeMechanics: ['navigation'] });
+  try {
+    const capability = { protocolVersion: 't36-challenge-runtime-v1' as const, mechanics: ['navigation' as const] };
+    const created = service.create('host', true, { gameKind: 'categories', categories: fixture.categories, challenge: capability });
+    const guide = await service.join(created.roomCode, 'guide phone', capability);
+    const opponentOne = await service.join(created.roomCode, 'opponent one', capability);
+    const opponentTwo = await service.join(created.roomCode, 'opponent two', capability);
+    let revision = opponentTwo.revision, sequence = 0;
+    const sendAs = (token: string, type: string, payload: Record<string, unknown> = {}) => service.intent(created.roomId, token, { type: type as never, intentId: `guide-handoff-${++sequence}`, expectedRevision: revision, payload }).then((result) => { revision = result.revision; return result; });
+    const send = (type: string, payload: Record<string, unknown> = {}) => sendAs(created.token, type, payload);
+    const guideUid = service.verify(guide.token)!.uid;
+    const opponentOneUid = service.verify(opponentOne.token)!.uid;
+    const opponentTwoUid = service.verify(opponentTwo.token)!.uid;
+    await send('LOBBY_ASSIGN_TEAM', { memberUid: guideUid, team: 'vertical' });
+    await send('LOBBY_ASSIGN_TEAM', { memberUid: opponentOneUid, team: 'vertical' });
+    await send('LOBBY_ASSIGN_TEAM', { memberUid: opponentTwoUid, team: 'vertical' });
+    await send('LOBBY_ADD_MANUAL_PLAYER', { displayName: 'وكيل أفقي', team: 'horizontal' });
+    await send('LOBBY_ADD_MANUAL_PLAYER', { displayName: 'وكيل عمودي', team: 'vertical' });
+    await sendAs(guide.token, 'LOBBY_SET_READY', { ready: true });
+    await sendAs(opponentOne.token, 'LOBBY_SET_READY', { ready: true });
+    await sendAs(opponentTwo.token, 'LOBBY_SET_READY', { ready: true });
+    await send('START_MATCH'); await send('ROUND_READY');
+    const firstCell = service.metadata(created.roomId, created.token).projection.board![0]!;
+    await assert.rejects(() => send('SELECT_CELL', { cellId: firstCell.id }), /NAVIGATION_PRIVATE_GUIDE_REQUIRED/);
+
+    // Before the first selection the same guide phone is handed to horizontal.
+    await send('LOBBY_ASSIGN_TEAM', { memberUid: guideUid, team: 'horizontal' });
+    await send('SELECT_CELL', { cellId: firstCell.id });
+    const challenge = () => service.metadata(created.roomId, created.token).projection.challenge!;
+    const payload = () => ({ occurrence: challenge().occurrence, challengeRevision: challenge().revision, stage: challenge().stage });
+    const manualHorizontal = service.store.load(created.roomId)!.manualParticipants!.find((participant) => participant.team === 'horizontal')!;
+    await send('CHALLENGE_ASSIGN', { ...payload(), assignment: 'guide', participantId: `member:${guideUid}` });
+    await send('CHALLENGE_ASSIGN', { ...payload(), assignment: 'mover', participantId: `manual:${manualHorizontal.id}` });
+    const readiness = () => ({ protocolHash: challenge().readiness.protocolHash, assignmentHash: challenge().readiness.assignmentHash, stimulusHash: challenge().readiness.stimulusHash });
+    await sendAs(guide.token, 'CHALLENGE_READY', { ...payload(), participantId: `member:${guideUid}`, readiness: readiness() });
+    await send('CHALLENGE_READY', { ...payload(), participantId: `manual:${manualHorizontal.id}`, readiness: readiness() });
+    await send('CHALLENGE_START', payload());
+    now += 3_001; await service.tick(); revision = service.metadata(created.roomId, created.token).revision;
+    await send('CHALLENGE_MOVE', { ...payload(), direction: 'east' });
+    await send('CHALLENGE_MOVE', { ...payload(), direction: 'east' });
+    assert.equal(challenge().result, 'correct');
+    await send('CHALLENGE_CONTINUE', payload());
+
+    // The next ordinary board turn is vertically entitled. Model that already
+    // authoritative CELL_SELECTION state, then exercise the same host handoff
+    // path used before the next navigation selection.
+    const nextTurn = service.store.load(created.roomId)!;
+    nextTurn.game = { ...nextTurn.game, entitledTeam: 'vertical' };
+    nextTurn.revision += 1;
+    service.store.commit(nextTurn, { type: 'TEST_NEXT_TURN_VERTICAL' }, new Date(now).toISOString());
+    revision = nextTurn.revision;
+    // Between closed occurrences that same authenticated phone is moved to the
+    // next entitled team; the host uses the vertical manual mover.
+    await send('LOBBY_ASSIGN_TEAM', { memberUid: guideUid, team: 'vertical' });
+    await send('LOBBY_ASSIGN_TEAM', { memberUid: opponentOneUid, team: 'horizontal' });
+    await send('LOBBY_ASSIGN_TEAM', { memberUid: opponentTwoUid, team: 'horizontal' });
+    const secondCell = service.metadata(created.roomId, created.token).projection.board!.find((cell) => cell.id !== firstCell.id && !cell.owner)!;
+    await send('SELECT_CELL', { cellId: secondCell.id });
+    assert.equal(challenge().entitledTeam, 'vertical');
+    const manualVertical = service.store.load(created.roomId)!.manualParticipants!.find((participant) => participant.team === 'vertical')!;
+    await send('CHALLENGE_ASSIGN', { ...payload(), assignment: 'guide', participantId: `member:${guideUid}` });
+    await send('CHALLENGE_ASSIGN', { ...payload(), assignment: 'mover', participantId: `manual:${manualVertical.id}` });
+    await sendAs(guide.token, 'CHALLENGE_READY', { ...payload(), participantId: `member:${guideUid}`, readiness: readiness() });
+    await send('CHALLENGE_READY', { ...payload(), participantId: `manual:${manualVertical.id}`, readiness: readiness() });
+    await send('CHALLENGE_START', payload());
+    now += 3_001; await service.tick();
+    assert.equal(challenge().stage, 'answer');
+    assert.equal(challenge().entitledTeam, 'vertical');
+  } finally { service.close(); await rm(dir, { recursive: true, force: true }); }
+});
+
+test('local challenge failure and void continue to a fresh same-cell occurrence without scoring or family reuse', async () => {
+  const fixture = syntheticChallengeFixture();
+  const dir = await mkdtemp(join(tmpdir(), 'huroof-challenge-continuation-'));
+  const dbPath = join(dir, 'rooms.sqlite');
+  let now = 1_000;
+  const service = new AuthoritativeGameService({
+    dbPath,
+    secret: 'test',
+    clock: () => new Date(now),
+    localFirestoreQuestionSource: fixture.source,
+    challengeDefinitions: fixture.envelopes,
+    enabledChallengeMechanics: ['navigation'],
+  });
+  try {
+    const capability = { protocolVersion: 't36-challenge-runtime-v1' as const, mechanics: ['navigation' as const] };
+    const created = service.create('host', true, { gameKind: 'categories', categories: fixture.categories, challenge: capability });
+    assert.throws(() => service.resume(created.roomId, created.token, { protocolVersion: capability.protocolVersion, mechanics: [] }), /CHALLENGE_PROTOCOL_REQUIRED/);
+    const resumed = service.resume(created.roomId, created.token, capability);
+    assert.equal(resumed.revision, created.revision);
+    assert.ok(Number.isFinite(Date.parse(resumed.serverTime)));
+    const guide = await service.join(created.roomCode, 'guide', capability);
+    const opponent = await service.join(created.roomCode, 'opponent', capability);
+    let revision = opponent.revision;
+    let intentSequence = 0;
+    const send = async (token: string, type: string, payload: Record<string, unknown> = {}) => {
+      const result = await service.intent(created.roomId, token, { type: type as never, intentId: `${type}-${revision}-${++intentSequence}`, expectedRevision: revision, payload });
+      revision = result.revision;
+      return result;
+    };
+    await send(guide.token, 'LOBBY_SET_READY', { ready: true });
+    await send(opponent.token, 'LOBBY_SET_READY', { ready: true });
+    await send(created.token, 'LOBBY_ADD_MANUAL_PLAYER', { displayName: 'mover', team: 'horizontal' });
+    await send(created.token, 'START_MATCH');
+    await send(created.token, 'ROUND_READY');
+    const cell = service.metadata(created.roomId, created.token).projection.board![0]!;
+    await send(created.token, 'SELECT_CELL', { cellId: cell.id });
+    const stored = service.store.load(created.roomId)!;
+    const manualId = stored.manualParticipants![0]!.id;
+    const challenge = () => service.metadata(created.roomId, created.token).projection.challenge!;
+    const firstOccurrence = challenge().occurrence;
+    const payload = () => ({ occurrence: challenge().occurrence, challengeRevision: challenge().revision, stage: challenge().stage });
+    await send(created.token, 'CHALLENGE_ASSIGN', { ...payload(), assignment: 'guide', participantId: `member:${service.verify(guide.token)!.uid}` });
+    await send(created.token, 'CHALLENGE_ASSIGN', { ...payload(), assignment: 'mover', participantId: `manual:${manualId}` });
+    const ready = () => ({ protocolHash: challenge().readiness.protocolHash, assignmentHash: challenge().readiness.assignmentHash, stimulusHash: challenge().readiness.stimulusHash });
+    await send(guide.token, 'CHALLENGE_READY', { ...payload(), participantId: `member:${service.verify(guide.token)!.uid}`, readiness: ready() });
+    await send(created.token, 'CHALLENGE_READY', { ...payload(), participantId: `manual:${manualId}`, readiness: ready() });
+    await send(created.token, 'CHALLENGE_START', payload());
+    now += 3_000;
+    await service.tick();
+    revision = service.metadata(created.roomId, created.token).revision;
+    for (let index = 0; index < 3; index += 1)
+      await send(created.token, 'CHALLENGE_MOVE', { ...payload(), direction: 'south' });
+    assert.equal(challenge().result, 'failed');
+    assert.equal(service.metadata(created.roomId, created.token).projection.questionScores?.horizontal, 0);
+    await send(created.token, 'CHALLENGE_REVEAL', payload());
+    await send(created.token, 'CHALLENGE_CONTINUE', payload());
+    assert.equal(service.metadata(created.roomId, created.token).projection.room.state, 'CELL_SELECTION');
+    assert.equal(service.metadata(created.roomId, created.token).projection.board!.find((item) => item.id === cell.id)?.owner, undefined);
+    await send(created.token, 'SELECT_CELL', { cellId: cell.id });
+    const secondOccurrence = challenge().occurrence;
+    assert.notEqual(secondOccurrence, firstOccurrence);
+    await send(created.token, 'CHALLENGE_VOID', payload());
+    assert.equal(challenge().result, 'void');
+    await send(created.token, 'CHALLENGE_CONTINUE', payload());
+    await send(created.token, 'SELECT_CELL', { cellId: cell.id });
+    assert.notEqual(challenge().occurrence, secondOccurrence);
+    assert.equal(service.metadata(created.roomId, created.token).projection.questionScores?.horizontal, 0);
+  } finally { service.close(); await rm(dir, { recursive: true, force: true }); }
+});

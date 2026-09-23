@@ -30,7 +30,7 @@ import type { MapSelectionFacts } from "./map-variant-resolver.js";
 
 export type ChallengeQuestionMetadata = {
   factFamilies: readonly string[];
-  kind?: "navigation" | "missing_tile" | "memory" | "qatar_map";
+  kind?: "navigation" | "missing_tile" | "memory" | "qatar_map" | "word_search";
   /** Optional selector-owned concept for non-map challenge definitions. */
   conceptId?: string;
 };
