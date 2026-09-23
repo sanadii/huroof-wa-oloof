@@ -4,13 +4,26 @@ import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import { deriveMatch, initialGameState } from '../../src/features/game/domain/lifecycle.js';
 import { generateBoard, generateCategoryBoard, revealSurprise } from '../../src/features/game/domain/board.js';
-import { approvedReleaseCatalogProjection, normalizeT36CreateOptions, validateQaClosureRequest, canonicalQuestionQuery, expectedReleaseMatches, MAX_ROOM_SCOPE_CATEGORIES, MAX_SCOPED_RELEASE_QUESTIONS, prepareLetterReveal, questionRows, RELEASE_READER_OPTIONS, RUNTIME_QUESTION_FIELDS, scopedCanonicalQuestionQuery, scopedCategories, scopedInventoryCount, selectQuestionForActiveCell, validateQuestionScope } from './index.js';
+import { approvedReleaseCatalogProjection, challengeQuestionsForRoom, normalizeT36CreateOptions, validateQaClosureRequest, canonicalQuestionQuery, expectedReleaseMatches, MAX_ROOM_SCOPE_CATEGORIES, MAX_SCOPED_RELEASE_QUESTIONS, prepareLetterReveal, questionRows, RELEASE_READER_OPTIONS, RUNTIME_QUESTION_FIELDS, scopedCanonicalQuestionQuery, scopedCategories, scopedInventoryCount, selectQuestionForActiveCell, validateQuestionScope } from './index.js';
 import { createCategoryQuestionSelection, createMatchQuestionSelection, promoteReservedQuestion, reserveQuestionForCell, selectCategoryQuestion, selectCharadesQuestion, selectMatchQuestion, type RuntimeQuestionV32 } from '../../src/features/game/runtime/question-selector.js';
 import { intentHash, intentReceiptId, isRoomClosed, preflightContentPreparation, projectRoom, reduceIntent, roomGameKind, validIntent, type CanonicalMember, type CanonicalQuestion, type CanonicalRoom } from './game.js';
 
 const room = (): CanonicalRoom => ({ schemaVersion: 2, roomCode: 'A1B2C3D4', revision: 2, game: { ...initialGameState(), lifecycle: 'QUESTION_READING' }, config: { demo: true, questionSeconds: 20, opponentSeconds: 10, teams: { horizontal: 'أفقي', vertical: 'عمودي' }, releaseId: 'demo-drafts', releaseRootSha256: 'hash', releaseDemoFixture: true }, timer: { deadlineMs: 2_000, buzzOpen: true }, questionCursor: 0 });
 const player: CanonicalMember = { uid: 'p1', role: 'player', displayName: 'P', ready: false, active: true, team: 'horizontal' };
 const readyReleaseQuestions: CanonicalQuestion[] = Array.from({ length: 25 }, (_, letter) => Array.from({ length: 3 }, (_, copy) => ({ id: `ready-${letter}-${copy}`, categoryId: 'category-a', modality: 'classic' as const, targetLetter: `ح${letter}`, answerConceptId: `concept-${letter}-${copy}`, headerAr: 'عنوان', promptAr: 'سؤال', canonicalAnswer: 'جواب', acceptedAnswers: ['جواب'] }))).flat();
+
+test('Firebase room scopes exclude mixed-category challenges without a negotiated contract', () => {
+  const ordinary = readyReleaseQuestions[0]!;
+  const challenge = {
+    ...readyReleaseQuestions[1]!, id: 'mixed-challenge', answerConceptId: 'challenge:word-search',
+    challenge: { kind: 'word_search', factFamilies: ['word-search:mixed'], definition: { manifestSha256: 'a'.repeat(64), id: 'word-search-definition', schemaVersion: 't37-topup-word-search-definition-v1', definitionSha256: 'b'.repeat(64) } },
+  } as CanonicalQuestion;
+  assert.deepEqual(challengeQuestionsForRoom([ordinary, challenge], undefined).map((question) => question.id), [ordinary.id]);
+  assert.deepEqual(
+    challengeQuestionsForRoom([ordinary, challenge], { protocolVersion: 't36-challenge-runtime-v1', mechanics: ['word_search'], definitionSchemas: ['t37-topup-word-search-definition-v1'] } as CanonicalRoom['config']['challenge']).map((question) => question.id),
+    [ordinary.id, challenge.id],
+  );
+});
 
 const m05PlanPath = 'D:/projects/huroof_wa_oloof/output/media-live-20260911/owner-category-supplement-plan.json';
 const privateM05Fixture = process.env.RUN_PRIVATE_OWNER_CATEGORY_SUPPLEMENT_TESTS === '1' && existsSync(m05PlanPath);
@@ -185,6 +198,24 @@ test('policy version defaults only legacy Huroof rooms and malformed envelopes f
   assert.equal(validIntent({ ...valid, intentId: undefined }), false);
   assert.equal(validIntent({ ...valid, expectedRevision: Number.MAX_SAFE_INTEGER + 1 }), false);
   assert.equal(validIntent({ ...valid, extra: true }), false);
+});
+
+test('word-search submissions accept only bounded endpoints, never a client path', () => {
+  const intent = {
+    type: 'CHALLENGE_SUBMIT' as const,
+    intentId: 'word-search-endpoints',
+    expectedRevision: 3,
+    payload: {
+      occurrence: '1:cell-word-search',
+      challengeRevision: 1,
+      stage: 'answer',
+      start: { row: 0, column: 2 },
+      end: { row: 0, column: 6 },
+    },
+  };
+  assert.equal(validIntent(intent), true);
+  assert.equal(validIntent({ ...intent, payload: { ...intent.payload, path: [[0, 2], [0, 3]] } }), false);
+  assert.equal(validIntent({ ...intent, payload: { ...intent.payload, start: { row: 9, column: 2 } } }), false);
 });
 test('shared reveal requires the active occurrence and freezes a video question without scoring', () => {
   const host: CanonicalMember = { ...player, uid: 'host', role: 'host', team: undefined };

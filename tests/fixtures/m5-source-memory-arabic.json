@@ -1,0 +1,11 @@
+{
+  "rows": 2,
+  "columns": 2,
+  "instructionAr": "احفظ الألوان",
+  "cells": [
+    { "row": 0, "column": 0, "colorAr": "بنفسجي", "hex": "#8C50B7", "shapeAr": "قلب" },
+    { "row": 0, "column": 1, "colorAr": "بنفسجي", "hex": "#8C50B7", "shapeAr": "معين" },
+    { "row": 1, "column": 0, "colorAr": "أحمر", "hex": "#D52D3A", "shapeAr": "معين" },
+    { "row": 1, "column": 1, "colorAr": "بنفسجي", "hex": "#8C50B7", "shapeAr": "دائرة" }
+  ]
+}

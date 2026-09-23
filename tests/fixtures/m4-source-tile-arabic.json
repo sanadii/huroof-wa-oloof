@@ -1,0 +1,23 @@
+{
+  "rows": 3,
+  "columns": 3,
+  "promptAr": "اختر القطعة الناقصة",
+  "rule": "latin",
+  "cells": [
+    { "row": 0, "column": 0, "id": "r0c0", "labelAr": "دائرة", "shape": "دائرة", "hex": "#246BCE" },
+    { "row": 0, "column": 1, "id": "r0c1", "labelAr": "مربع", "shape": "مربع", "hex": "#EF4444" },
+    { "row": 0, "column": 2, "id": "r0c2", "labelAr": "مثلث", "shape": "مثلث", "hex": "#22C55E" },
+    { "row": 1, "column": 0, "id": "r1c0", "labelAr": "معين", "shape": "معين", "hex": "#EAB308" },
+    { "row": 1, "column": 1, "id": "r1c1", "labelAr": "نجمة", "shape": "نجمة", "hex": "#A855F7" },
+    { "row": 1, "column": 2, "id": "r1c2", "labelAr": "هلال", "shape": "هلال", "hex": "#14B8A6" },
+    { "row": 2, "column": 0, "id": "r2c0", "labelAr": "قلب", "shape": "قلب", "hex": "#F97316" },
+    { "row": 2, "column": 1, "id": "r2c1", "labelAr": "سداسي", "shape": "سداسي", "hex": "#64748B" },
+    { "row": 2, "column": 2, "missing": true }
+  ],
+  "options": [
+    { "id": "أ", "labelAr": "أ", "shape": "دائرة", "hex": "#246BCE" },
+    { "id": "ب", "labelAr": "ب", "shape": "قلب", "hex": "#F97316" },
+    { "id": "ج", "labelAr": "ج", "shape": "مثلث", "hex": "#22C55E" },
+    { "id": "د", "labelAr": "د", "shape": "سداسي", "hex": "#64748B" }
+  ]
+}

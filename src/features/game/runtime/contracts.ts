@@ -2,9 +2,14 @@
 export type ClientRole = 'host' | 'player' | 'audience';
 export type RoomState = import('../domain/lifecycle.js').LifecycleState;
 export const CHALLENGE_PROTOCOL_VERSION = 't36-challenge-runtime-v1' as const;
-export type ChallengeMechanic = 'navigation' | 'missing_tile' | 'memory' | 'qatar_map';
-export type ChallengeCapabilityOffer = { protocolVersion: typeof CHALLENGE_PROTOCOL_VERSION; mechanics: readonly ChallengeMechanic[] };
-export const CLIENT_CHALLENGE_CAPABILITY: ChallengeCapabilityOffer = { protocolVersion: CHALLENGE_PROTOCOL_VERSION, mechanics: ['navigation', 'missing_tile', 'memory', 'qatar_map'] };
+/** Capabilities are negotiated separately from the frozen T36 wire protocol. */
+export const T37_DEFINITION_SCHEMA = 't37-clean70-challenge-definition-v1' as const;
+export const T37_WORD_SEARCH_DEFINITION_SCHEMA = 't37-topup-word-search-definition-v1' as const;
+export const T36_DEFINITION_SCHEMA = 't36-challenge-definition-v1' as const;
+export type ChallengeMechanic = 'navigation' | 'missing_tile' | 'memory' | 'qatar_map' | 'word_search';
+export type ChallengeDefinitionSchema = typeof T36_DEFINITION_SCHEMA | typeof T37_DEFINITION_SCHEMA | typeof T37_WORD_SEARCH_DEFINITION_SCHEMA;
+export type ChallengeCapabilityOffer = { protocolVersion: typeof CHALLENGE_PROTOCOL_VERSION; mechanics: readonly ChallengeMechanic[]; definitionSchemas?: readonly ChallengeDefinitionSchema[] };
+export const CLIENT_CHALLENGE_CAPABILITY: ChallengeCapabilityOffer = { protocolVersion: CHALLENGE_PROTOCOL_VERSION, mechanics: ['navigation', 'missing_tile', 'memory', 'qatar_map', 'word_search'], definitionSchemas: [T36_DEFINITION_SCHEMA, T37_DEFINITION_SCHEMA, T37_WORD_SEARCH_DEFINITION_SCHEMA] };
 
 export interface SafeRoomSummary {
   roomCode: string;
@@ -104,7 +109,7 @@ export const isApprovedReleaseCatalog = (value: unknown): value is ApprovedRelea
   const catalog = value as Partial<ApprovedReleaseCatalog>;
   if (typeof catalog.releaseId !== 'string' || !/^[A-Za-z0-9_-]{1,128}$/.test(catalog.releaseId) || typeof catalog.releaseRootSha256 !== 'string' || !/^[a-f0-9]{64}$/i.test(catalog.releaseRootSha256) || typeof catalog.demoFixture !== 'boolean' || !Array.isArray(catalog.categories) || !catalog.boardCapabilities || typeof catalog.boardCapabilities.huroof !== 'boolean' || typeof catalog.boardCapabilities.categories !== 'boolean' || typeof catalog.boardCapabilities.charades !== 'boolean') return false;
   const ids = new Set<string>();
-  const isChallengeMechanic = (value: unknown): value is ChallengeMechanic => value === 'navigation' || value === 'missing_tile' || value === 'memory' || value === 'qatar_map';
+  const isChallengeMechanic = (value: unknown): value is ChallengeMechanic => value === 'navigation' || value === 'missing_tile' || value === 'memory' || value === 'qatar_map' || value === 'word_search';
   for (const category of catalog.categories) {
     if (!category || typeof category.id !== 'string' || !/^[A-Za-z0-9_-]{1,128}$/.test(category.id) || typeof category.labelAr !== 'string' || !category.labelAr.trim() || !category.playable || typeof category.playable.huroof !== 'boolean' || typeof category.playable.categories !== 'boolean' || typeof category.playable.charades !== 'boolean' || ids.has(category.id)) return false;
     if (category.challengeOnly !== undefined && typeof category.challengeOnly !== 'boolean') return false;

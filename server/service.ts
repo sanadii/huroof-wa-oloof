@@ -94,7 +94,7 @@ type StoredQuestion = RuntimeQuestionV32 & {
   sourceUrl?: string;
   media?: QuestionMedia;
   answerMedia?: QuestionMedia;
-  challenge?: { definition: ChallengeDefinitionReference; factFamilies: string[]; kind: "navigation" | "missing_tile" | "memory" | "qatar_map" };
+  challenge?: { definition: ChallengeDefinitionReference; factFamilies: string[]; kind: "navigation" | "missing_tile" | "memory" | "qatar_map" | "word_search" };
   selectionFacts?: { kind: "qatar_map"; factFamilies: readonly string[] };
 };
 export type MatchConfig = {
@@ -277,11 +277,14 @@ const trustedCategorySnapshot = (
 function validChallengeIntentPayload(type: string, payload: Record<string, unknown>): boolean {
   const keys = Object.keys(payload);
   const revision = payload.challengeRevision;
-  if (!keys.every((key) => ["occurrence", "challengeRevision", "stage", "assignment", "participantId", "readiness", "direction", "answers"].includes(key)) || typeof payload.occurrence !== "string" || !/^[A-Za-z0-9:_-]{1,180}$/.test(payload.occurrence) || typeof revision !== "number" || !Number.isSafeInteger(revision) || revision < 0 || !["setup", "countdown", "observation", "answer", "steal_offer", "steal", "result", "void"].includes(payload.stage as string)) return false;
+  if (!keys.every((key) => ["occurrence", "challengeRevision", "stage", "assignment", "participantId", "readiness", "direction", "answers", "start", "end"].includes(key)) || typeof payload.occurrence !== "string" || !/^[A-Za-z0-9:_-]{1,180}$/.test(payload.occurrence) || typeof revision !== "number" || !Number.isSafeInteger(revision) || revision < 0 || !["setup", "countdown", "observation", "answer", "steal_offer", "steal", "result", "void"].includes(payload.stage as string)) return false;
   if (type === "CHALLENGE_ASSIGN") return keys.length === 5 && ["guide", "mover", "captain", "stealCaptain"].includes(payload.assignment as string) && typeof payload.participantId === "string" && /^(member|manual):[A-Za-z0-9_-]{1,120}$/.test(payload.participantId);
   if (type === "CHALLENGE_READY") { const readiness = payload.readiness; return keys.length === 5 && typeof payload.participantId === "string" && /^(member|manual):[A-Za-z0-9_-]{1,120}$/.test(payload.participantId) && readiness !== null && typeof readiness === "object" && !Array.isArray(readiness) && Object.keys(readiness).sort().join("|") === "assignmentHash|protocolHash|stimulusHash" && Object.values(readiness).every((value) => typeof value === "string" && value.length > 0 && value.length <= 256); }
   if (type === "CHALLENGE_MOVE") return keys.length === 4 && ["north", "east", "south", "west"].includes(payload.direction as string);
-  if (type === "CHALLENGE_SUBMIT") return keys.length === 4 && Array.isArray(payload.answers) && payload.answers.length > 0 && payload.answers.length <= 3 && payload.answers.every((value) => typeof value === "string" && value.length <= 64);
+  if (type === "CHALLENGE_SUBMIT") {
+    const endpoint = (value: unknown) => Boolean(value && typeof value === "object" && !Array.isArray(value) && Object.keys(value).sort().join("|") === "column|row" && Number.isInteger((value as { row?: unknown }).row) && Number.isInteger((value as { column?: unknown }).column) && (value as { row: number }).row >= 0 && (value as { row: number }).row < 9 && (value as { column: number }).column >= 0 && (value as { column: number }).column < 9);
+    return (keys.length === 4 && Array.isArray(payload.answers) && payload.answers.length > 0 && payload.answers.length <= 3 && payload.answers.every((value) => typeof value === "string" && value.length <= 64)) || (keys.length === 5 && endpoint(payload.start) && endpoint(payload.end));
+  }
   return keys.length === 3;
 }
 function validIntent(intent: unknown): intent is GameIntent {
@@ -715,26 +718,31 @@ export class AuthoritativeGameService {
     const challenge = requested.challenge;
     if (challenge !== undefined) {
       const mechanics = challenge && typeof challenge === "object" ? challenge.mechanics : undefined;
+      const definitionSchemas = challenge && typeof challenge === "object" && challenge.definitionSchemas !== undefined ? challenge.definitionSchemas : ["t36-challenge-definition-v1"];
       if (
         !challenge ||
         challenge.protocolVersion !== "t36-challenge-runtime-v1" ||
         !Array.isArray(mechanics) ||
         !mechanics.length ||
-        mechanics.length > 4 ||
+        mechanics.length > 5 ||
         new Set(mechanics).size !== mechanics.length ||
-        mechanics.some((mechanic) => !["navigation", "missing_tile", "memory", "qatar_map"].includes(mechanic))
+        mechanics.some((mechanic) => !["navigation", "missing_tile", "memory", "qatar_map", "word_search"].includes(mechanic)) ||
+        !Array.isArray(definitionSchemas) || !definitionSchemas.length || definitionSchemas.length > 3 || new Set(definitionSchemas).size !== definitionSchemas.length || definitionSchemas.some((schema) => schema !== "t36-challenge-definition-v1" && schema !== "t37-clean70-challenge-definition-v1" && schema !== "t37-topup-word-search-definition-v1")
       ) throw new Error("CHALLENGE_PROTOCOL_UNSUPPORTED");
     }
+    const scopedQuestions = this.questionsForChallengeAdmission(this.questionsSync(demo), challenge);
     const scopedChallengeKinds = [...new Set([
-      ...this.questionsSync(demo)
+      ...scopedQuestions
       .filter((question) => categories.includes(question.categoryId) && question.modality === modality)
       .flatMap((question) => question.challenge ? [question.challenge.kind] : []),
       ...(requested.mapPresentation === "interactive" && categories.includes("tahadani-games-326") ? ["qatar_map" as const] : []),
     ])];
+    const scopedDefinitionSchemas = [...new Set(scopedQuestions.filter((question) => categories.includes(question.categoryId) && question.modality === modality && question.challenge).map((question) => question.challenge!.definition.schemaVersion))];
     if (scopedChallengeKinds.length && !challenge) throw new Error("CHALLENGE_PROTOCOL_REQUIRED");
     if (scopedChallengeKinds.length && (!challenge || gameKind !== "categories" || !this.hasInjectedChallengeDefinitions() || !scopedChallengeKinds.every((mechanic) => challenge.mechanics.includes(mechanic)) || !scopedChallengeKinds.every((mechanic) => this.enabledChallengeMechanics.has(mechanic)) || (requested.mapPresentation === "interactive" && !this.mapVariants.length)))
       throw new Error("CHALLENGE_MECHANICS_DISABLED");
-    this.requirePlayableQuestionScope(demo, categories, modality, gameKind);
+    if (scopedDefinitionSchemas.length && (!challenge || !scopedDefinitionSchemas.every((schema) => (challenge.definitionSchemas ?? ["t36-challenge-definition-v1"]).includes(schema)))) throw new Error("CHALLENGE_DEFINITION_SCHEMA_UNSUPPORTED");
+    this.requirePlayableQuestionScope(demo, categories, modality, gameKind, scopedQuestions);
     const localSource = demo ? this.localFirestoreQuestionSource : undefined;
     const config: MatchConfig = {
       policyVersion: 1,
@@ -761,7 +769,7 @@ export class AuthoritativeGameService {
       showQuestionOnAudience: requested.showQuestionOnAudience !== false,
       labelledColours: requested.labelledColours === true,
       mapPresentation: requested.mapPresentation === "interactive" ? "interactive" : "ordinary",
-      ...(challenge && scopedChallengeKinds.length ? { challenge: { protocolVersion: challenge.protocolVersion, mechanics: scopedChallengeKinds } } : {}),
+      ...(challenge && scopedChallengeKinds.length ? { challenge: { protocolVersion: challenge.protocolVersion, mechanics: scopedChallengeKinds, definitionSchemas: scopedDefinitionSchemas.sort() } } : {}),
     };
     const room: Room = {
       id,
@@ -807,8 +815,11 @@ export class AuthoritativeGameService {
   private sameChallengeCapability(value: unknown, expected: ChallengeCapabilityOffer): boolean {
     if (!value || typeof value !== "object") return false;
     const candidate = value as Partial<ChallengeCapabilityOffer>;
-    return candidate.protocolVersion === expected.protocolVersion && Array.isArray(candidate.mechanics) &&
-      expected.mechanics.every((mechanic) => (candidate.mechanics as readonly string[]).includes(mechanic));
+    const schemas: unknown = candidate.definitionSchemas ?? ["t36-challenge-definition-v1"];
+    return candidate.protocolVersion === expected.protocolVersion && Array.isArray(candidate.mechanics) && candidate.mechanics.length > 0 && candidate.mechanics.length <= 5 && new Set(candidate.mechanics).size === candidate.mechanics.length && candidate.mechanics.every((mechanic) => mechanic === "navigation" || mechanic === "missing_tile" || mechanic === "memory" || mechanic === "qatar_map" || mechanic === "word_search") &&
+      Array.isArray(schemas) && schemas.length > 0 && schemas.length <= 3 && new Set(schemas).size === schemas.length && schemas.every((schema) => schema === "t36-challenge-definition-v1" || schema === "t37-clean70-challenge-definition-v1" || schema === "t37-topup-word-search-definition-v1") &&
+      expected.mechanics.every((mechanic) => candidate.mechanics!.includes(mechanic)) &&
+      (expected.definitionSchemas ?? ["t36-challenge-definition-v1"]).every((schema) => schemas.includes(schema));
   }
   async join(
     code: string,
@@ -1317,7 +1328,7 @@ export class AuthoritativeGameService {
     const challengeIntent = type === "ASSIGN" ? { ...common, type, assignment: payload.assignment as "guide" | "mover" | "captain" | "stealCaptain", participantId: payload.participantId as string }
       : type === "READY" ? { ...common, type, participantId: payload.participantId as string, readiness: payload.readiness as ChallengeIntent & never }
       : type === "MOVE" ? { ...common, type, direction: payload.direction as "north" | "east" | "south" | "west" }
-      : type === "SUBMIT" ? { ...common, type, answers: payload.answers as string[] }
+      : type === "SUBMIT" ? { ...common, type, ...(Array.isArray(payload.answers) ? { answers: payload.answers as string[] } : { start: payload.start as { row: number; column: number }, end: payload.end as { row: number; column: number } }) }
       : common as ChallengeIntent;
     const next = reduceChallenge(definition, current, challengeIntent as ChallengeIntent, participants, runtime);
     if (next === current) throw new Error("CHALLENGE_INTENT_REJECTED");
@@ -2137,14 +2148,32 @@ export class AuthoritativeGameService {
    */
   private async effectiveQuestions(room: Room): Promise<StoredQuestion[]> {
     const questions = await this.questions(room.demo, room.questionSourceSnapshot);
-    if (!this.mapVariants.length) return questions;
-    return materializeMapPresentation(
+    const materialized = !this.mapVariants.length ? questions : materializeMapPresentation(
       questions,
       room.config.mapPresentation ?? "ordinary",
       this.mapVariants,
       (question) => createHash("sha256").update(canonicalChallengeJson(question)).digest("hex"),
       (binding) => this.challengeDefinitions.resolve(binding.definition),
     ) as StoredQuestion[];
+    return this.questionsForRoom(materialized, room.config.challenge);
+  }
+  /** Creation must see every scoped challenge row when a client offers the
+   * protocol, so an unsupported mechanic/schema cannot be hidden by filtering. */
+  private questionsForChallengeAdmission(
+    questions: readonly StoredQuestion[],
+    challenge: ChallengeCapabilityOffer | undefined,
+  ): StoredQuestion[] {
+    return challenge ? [...questions] : questions.filter((question) => !question.challenge);
+  }
+  /** A room without negotiated challenge capability is an ordinary room, even
+   * when one selected category has both ordinary and challenge children. */
+  private questionsForRoom(
+    questions: readonly StoredQuestion[],
+    challenge: ChallengeCapabilityOffer | undefined,
+  ): StoredQuestion[] {
+    return !challenge
+      ? questions.filter((question) => !question.challenge)
+      : questions.filter((question) => !question.challenge || challenge.mechanics.includes(question.challenge.kind));
   }
   private questionsSync(demo: boolean, snapshot?: string): StoredQuestion[] {
     if (snapshot) return this.firestoreQuestions(snapshot);
@@ -2185,17 +2214,18 @@ export class AuthoritativeGameService {
     categories: string[],
     modality: MatchConfig["modality"],
     gameKind: MatchConfig["gameKind"] = "huroof",
+    questions = this.questionsSync(demo),
   ): void {
     if (modality === "charades") return;
     try {
       if (gameKind === "categories")
-        createCategoryQuestionSelection(this.questionsSync(demo), {
+        createCategoryQuestionSelection(questions, {
           categories,
           modality: "classic",
           seed: 0,
         });
       else
-        createMatchQuestionSelection(this.questionsSync(demo), {
+        createMatchQuestionSelection(questions, {
           categories,
           modality,
           seed: 0,

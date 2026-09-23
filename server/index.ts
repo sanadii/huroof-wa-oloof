@@ -72,8 +72,8 @@ const localChallengeDefinitions: ChallengeDefinitionEnvelope[] = localChallengeD
 const localChallengeMechanics = (process.env.LOCAL_CHALLENGE_ENABLED_MECHANICS ?? "")
   .split(",")
   .map((value) => value.trim())
-  .filter((value): value is "navigation" | "missing_tile" | "memory" | "qatar_map" =>
-    value === "navigation" || value === "missing_tile" || value === "memory" || value === "qatar_map",
+  .filter((value): value is "navigation" | "missing_tile" | "memory" | "qatar_map" | "word_search" =>
+    value === "navigation" || value === "missing_tile" || value === "memory" || value === "qatar_map" || value === "word_search",
   );
 const service = new AuthoritativeGameService({
   dbPath: process.env.GAME_DB_PATH,

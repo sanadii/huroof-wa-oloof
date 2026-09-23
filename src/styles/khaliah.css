@@ -966,6 +966,14 @@ html[data-theme="dark"] .game-arena--host .host-controls .host-team-selection__b
 .challenge-memory-cell { position: relative; }
 .challenge-memory-cell__label { background: #f8f3df; bottom: .25rem; color: #193f52; font-size: clamp(.7rem, 1.8vw, .95rem); font-weight: 700; line-height: 1; padding-inline: .18rem; position: absolute; }
 .challenge-navigation-grid { background: #edf1ed; outline: 1px solid rgb(255 255 255 / 35%); outline-offset: .35rem; }
+.challenge-word-search-scroll { direction: ltr; max-inline-size: 100%; overflow-x: auto; padding: .35rem; }
+.challenge-word-search-grid { direction: ltr; display: grid; gap: clamp(.2rem, .55vw, .45rem); inline-size: max-content; margin-inline: auto; min-inline-size: min(100%, 32rem); }
+.challenge-word-search-cell { align-items: center; aspect-ratio: 1; background: #f8f3df; border: 2px solid #697e87; color: #193f52; display: grid; font: inherit; font-size: clamp(1rem, 2.6vw, 1.65rem); font-weight: 700; justify-content: center; min-block-size: 2.75rem; min-inline-size: 2.75rem; padding: 0; transition: background-color 110ms ease, transform 110ms ease; }
+.challenge-word-search-cell:not(:disabled):active { transform: scale(.96); }
+.challenge-word-search-cell.is-start { border-color: #143d32; box-shadow: inset 0 0 0 3px #143d32; }
+.challenge-word-search-cell.is-end { border-color: #8f2931; box-shadow: inset 0 0 0 3px #8f2931; }
+.challenge-word-search-cell.is-reveal { background: #d9eef0; text-decoration: underline; }
+.challenge-word-search-instruction, .challenge-word-search-draft { margin: 0; }
 .challenge-navigation-cell.is-trail { background: #d9eef0; }
 .challenge-navigation-cell.is-start { box-shadow: inset 0 0 0 3px #193f52; }
 .challenge-navigation-cell.is-current { background: #193f52; color: #fffdf3; }
@@ -1005,7 +1013,7 @@ html[data-theme="dark"] .game-arena--host .host-controls .host-team-selection__b
 .challenge-frame button:focus-visible, .challenge-frame select:focus-visible { outline: 3px solid var(--spatial-cyan); outline-offset: 3px; }
 .challenge-frame .button--quiet { background: #fffdf3; border-color: #fffdf3; color: #09264a; }
 .challenge-frame .button--quiet:hover:not(:disabled), .challenge-frame .button--quiet:active:not(:disabled) { background: #f5ce5b; border-color: #f5ce5b; color: #09264a; }
-@media (max-width: 42rem) { .challenge-frame { padding: 1rem; } .challenge-frame__header { grid-template-columns: 1fr; } .challenge-frame__timer { grid-column: 1; grid-row: auto; } .challenge-options, .challenge-memory-palette { grid-template-columns: repeat(2, minmax(0, 1fr)); } .challenge-assignments label { grid-template-columns: 1fr; } }
+@media (max-width: 42rem) { .challenge-frame { padding: 1rem; } .challenge-frame__header { grid-template-columns: 1fr; } .challenge-frame__timer { grid-column: 1; grid-row: auto; } .challenge-options, .challenge-memory-palette { grid-template-columns: repeat(2, minmax(0, 1fr)); } .challenge-assignments label { grid-template-columns: 1fr; } .challenge-word-search-scroll { inline-size: calc(100% + 2rem); margin-inline: -1rem; max-inline-size: none; padding-inline: .25rem; } .challenge-word-search-grid { gap: .125rem; margin-inline: auto; min-inline-size: max-content; } }
 @media (prefers-reduced-motion: reduce) { .challenge-frame *, .challenge-frame *::before, .challenge-frame *::after { animation: none !important; scroll-behavior: auto !important; transition: none !important; } }
 
 
