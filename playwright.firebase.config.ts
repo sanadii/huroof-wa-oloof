@@ -2,7 +2,7 @@ import { defineConfig } from '@playwright/test';
 
 export default defineConfig({
   testDir: './tests/e2e',
-  testMatch: 'firebase.spec.ts',
+  testMatch: ['firebase.spec.ts', 'admin-category-correction.spec.ts'],
   timeout: 90_000,
   workers: 1,
   use: { baseURL: 'http://127.0.0.1:5188', channel: process.env.PLAYWRIGHT_CHANNEL || undefined, screenshot: 'only-on-failure' },

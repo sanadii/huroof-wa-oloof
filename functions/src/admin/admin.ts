@@ -66,6 +66,9 @@ function listInput(value: unknown) {
 }
 function mutationEnabled() { return process.env.FUNCTIONS_EMULATOR === "true" || process.env.ADMIN_MUTATIONS_ENABLED === "true"; }
 function productionBlocked() { if (!mutationEnabled()) throw new HttpsError("failed-precondition", "Admin mutations are staged and disabled in this environment."); }
+/** This narrow gate deliberately does not enable the general admin mutation surface. */
+export function categoryCorrectionDraftsEnabled(environment: NodeJS.ProcessEnv = process.env) { return environment.FUNCTIONS_EMULATOR === "true" || environment.ADMIN_CATEGORY_CORRECTION_DRAFTS_ENABLED === "true"; }
+function categoryCorrectionDraftsBlocked() { if (!categoryCorrectionDraftsEnabled()) throw new HttpsError("failed-precondition", "Category correction drafts are staged and disabled in this environment."); }
 function canonicalize(value: unknown): unknown {
   if (Array.isArray(value)) return value.map(canonicalize);
   if (value && typeof value === "object") {
@@ -80,7 +83,7 @@ function canonicalize(value: unknown): unknown {
 export function canonicalAdminHash(value: unknown) {
   return createHash("sha256").update(JSON.stringify(canonicalize(value))).digest("hex");
 }
-type Principal = { uid: string; roles: Role[]; authzVersion: number; requestHash: string; categoryScopes?: string[]; reviewerScopes?: string[] };
+type Principal = { uid: string; roles: Role[]; claimRoles: Role[]; authzVersion: number; claimAuthzVersion: unknown; requestHash: string; categoryScopes?: string[]; reviewerScopes?: string[] };
 async function principal(request: CallableRequest<unknown>, capability: Capability): Promise<Principal> {
   const uid = request.auth?.uid;
   const token = request.auth?.token as Record<string, unknown> | undefined;
@@ -93,7 +96,7 @@ async function principal(request: CallableRequest<unknown>, capability: Capabili
   const claimRoles = Array.isArray(token?.adminRoles) ? token.adminRoles.filter((role): role is Role => typeof role === "string" && (roles as readonly string[]).includes(role)) : [];
   if (!sameAdminAuthorization(liveRoles, claimRoles, row.authzVersion, token?.authzVersion)) throw new HttpsError("permission-denied", "Administrative authorization is stale. Refresh your Google session.");
   if (!liveRoles.some((role) => capabilities[role].includes(capability))) throw new HttpsError("permission-denied", "Missing administrative capability.");
-  return { uid, roles: liveRoles, authzVersion: row.authzVersion, requestHash: canonicalAdminHash(request.data ?? {}), categoryScopes: Array.isArray(row.categoryScopes) ? row.categoryScopes.filter((v: unknown): v is string => typeof v === "string") : [], reviewerScopes: Array.isArray(row.reviewerScopes) ? row.reviewerScopes.filter((v: unknown): v is string => typeof v === "string") : [] };
+  return { uid, roles: liveRoles, claimRoles, authzVersion: row.authzVersion, claimAuthzVersion: token?.authzVersion, requestHash: canonicalAdminHash(request.data ?? {}), categoryScopes: Array.isArray(row.categoryScopes) ? row.categoryScopes.filter((v: unknown): v is string => typeof v === "string") : [], reviewerScopes: Array.isArray(row.reviewerScopes) ? row.reviewerScopes.filter((v: unknown): v is string => typeof v === "string") : [] };
 }
 function requireRole(actor: Principal, role: Role) { if (!actor.roles.includes(role)) throw new HttpsError("permission-denied", "This action requires super administrator authority."); }
 function scopeCategory(actor: Principal, categoryId: string) { if (!actor.roles.includes("super_admin") && (!actor.categoryScopes?.includes(categoryId))) throw new HttpsError("permission-denied", "Category is outside your assigned scope."); }
@@ -239,11 +242,25 @@ function publishedScope(actor: Principal, categoryId?: string) {
   if (!categoryId && scopes.length > 30) throw new HttpsError("failed-precondition", "Select one assigned category to page published content.");
   return categoryId ? [categoryId] : scopes;
 }
-function publishedQuestionDto(id: string, row: Record<string, unknown>, detail = false) {
-  const media = (value: unknown) => value && typeof value === "object" ? (() => { const item = value as Record<string, unknown>; return { mediaId: item.mediaId ?? null, type: item.type ?? null, contentType: item.contentType ?? null, altAr: item.altAr ?? null, assetSha256: item.assetSha256 ?? null }; })() : null;
+function publishedMediaDto(value: unknown) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const item = value as Record<string, unknown>;
+  if (typeof item.mediaId !== "string" || !/^[A-Za-z0-9:_-]{1,128}$/.test(item.mediaId) || typeof item.assetSha256 !== "string" || !/^[a-f0-9]{64}$/i.test(item.assetSha256)) return null;
+  const contentType = item.contentType === "image/png" || item.contentType === "image/jpeg" || item.contentType === "video/mp4" ? item.contentType : null;
+  const type = item.type === "image" || item.type === "video" ? item.type : null;
+  return { mediaId: item.mediaId, type, contentType, altAr: typeof item.altAr === "string" ? item.altAr : null, assetSha256: item.assetSha256 };
+}
+/** Explicit public-admin allowlist; never project release internals or storage routing. */
+export function publishedQuestionDto(id: string, row: Record<string, unknown>, detail = false) {
   return {
     id, categoryId: row.categoryId, modality: row.modality, headerAr: row.headerAr, promptAr: row.promptAr, targetLetter: row.targetLetter ?? null,
-    ...(detail ? { promptAr: row.promptAr, canonicalAnswer: row.canonicalAnswer, acceptedAnswers: Array.isArray(row.acceptedAnswers) ? row.acceptedAnswers : [], media: media(row.media), answerMedia: media(row.answerMedia) } : {}),
+    ...(detail ? {
+      canonicalAnswer: row.canonicalAnswer,
+      acceptedAnswers: Array.isArray(row.acceptedAnswers) ? row.acceptedAnswers.filter(answer => typeof answer === "string") : [],
+      media: publishedMediaDto(row.media), answerMedia: publishedMediaDto(row.answerMedia),
+      points: typeof row.points === "number" && Number.isFinite(row.points) ? row.points : null,
+      difficulty: typeof row.difficulty === "string" && row.difficulty.trim() ? row.difficulty.trim() : null,
+    } : {}),
   };
 }
 async function publishedCategoryDto(releaseId: string, snapshot: FirebaseFirestore.DocumentSnapshot) {
@@ -252,6 +269,61 @@ async function publishedCategoryDto(releaseId: string, snapshot: FirebaseFiresto
   const count = inventory.data()?.approvedCount;
   const readiness = value.runtimeReadiness && typeof value.runtimeReadiness === "object" ? value.runtimeReadiness as Record<string, unknown> : {};
   return { id: snapshot.id, labelAr: value.labelAr ?? value.displayNameAr ?? snapshot.id, runtimeReadiness: { huroof: readiness.huroof === true, categories: readiness.categories === true, charades: readiness.charades === true }, approvedCount: Number.isSafeInteger(count) ? count : 0, uniqueAnswerConceptCount: Number.isSafeInteger(inventory.data()?.uniqueAnswerConceptCount) ? inventory.data()!.uniqueAnswerConceptCount : null };
+}
+
+type CategoryCorrectionBaseline = { categoryId: string; releaseId: string; releaseRootSha256: string; publishedLabelAr: string; correctionRef: FirebaseFirestore.DocumentReference };
+type LiveCorrectionPrincipal = { roles: Role[]; categoryScopes: string[] };
+
+/** The correction form is intentionally limited to a proposed label and private operational note. */
+export function categoryCorrectionDraftInput(value: unknown) {
+  const draft = object(value); only(draft, ["proposedLabelAr", "internalNote"]);
+  return { proposedLabelAr: text(draft.proposedLabelAr, "proposedLabelAr", 160), internalNote: text(draft.internalNote, "internalNote", 2000) };
+}
+export function canManageCategoryCorrection(live: LiveCorrectionPrincipal, categoryId: string) {
+  return live.roles.includes("super_admin") || (live.roles.includes("content_admin") && live.categoryScopes.includes(categoryId));
+}
+/** Pure, exported transaction guard: callers must invoke it from the Firestore transaction. */
+export function validateLiveCategoryCorrectionPrincipal(actor: { claimRoles: readonly Role[]; claimAuthzVersion: unknown }, row: Record<string, unknown> | undefined, categoryId: string): LiveCorrectionPrincipal {
+  if (!row || row.enabled !== true || row.identityReady !== true || !Array.isArray(row.roles) || typeof row.authzVersion !== "number" || !Number.isInteger(row.authzVersion)) throw new HttpsError("permission-denied", "Administrator registry authority changed.");
+  const liveRoles = row.roles.filter((role: unknown): role is Role => typeof role === "string" && (roles as readonly string[]).includes(role));
+  if (!sameAdminAuthorization(liveRoles, actor.claimRoles, row.authzVersion, actor.claimAuthzVersion)) throw new HttpsError("permission-denied", "Administrative authorization changed. Refresh your session.");
+  const categoryScopes = Array.isArray(row.categoryScopes) ? row.categoryScopes.filter((scope: unknown): scope is string => typeof scope === "string") : [];
+  const live = { roles: liveRoles, categoryScopes };
+  if (!liveRoles.some(role => capabilities[role].includes("categories.write")) || !canManageCategoryCorrection(live, categoryId)) throw new HttpsError("permission-denied", "Category correction authority or scope changed.");
+  return live;
+}
+export function categoryCorrectionDto(value: Record<string, unknown>, includeInternalNote: boolean) {
+  return {
+    categoryId: value.categoryId,
+    baseReleaseId: value.baseReleaseId,
+    baseReleaseRootSha256: value.baseReleaseRootSha256,
+    publishedLabelAr: value.publishedLabelAr,
+    proposedLabelAr: value.proposedLabelAr,
+    status: value.status === "draft" ? "draft" : "unknown",
+    revision: Number.isSafeInteger(value.revision) ? value.revision : 0,
+    createdAt: value.createdAt ?? null,
+    updatedAt: value.updatedAt ?? null,
+    ...(includeInternalNote && typeof value.internalNote === "string" ? { internalNote: value.internalNote } : {}),
+  };
+}
+function correctionReadDto(snapshot: FirebaseFirestore.DocumentSnapshot, includeInternalNote: boolean) {
+  if (!snapshot.exists) return null;
+  const value = snapshot.data() ?? {};
+  return categoryCorrectionDto(value, includeInternalNote);
+}
+async function correctionBaselineInTransaction(tx: FirebaseFirestore.Transaction, categoryId: string): Promise<CategoryCorrectionBaseline> {
+  const pointer = await tx.get(db.doc("runtime/activeRelease"));
+  const releaseId = pointer.data()?.releaseId;
+  if (!pointer.exists || typeof releaseId !== "string" || !/^[A-Za-z0-9_-]{1,128}$/.test(releaseId)) throw new HttpsError("failed-precondition", "No active immutable release.");
+  const [release, category] = await Promise.all([tx.get(db.doc(`releases/${releaseId}`)), tx.get(db.doc(`releases/${releaseId}/catalogCategories/${categoryId}`))]);
+  const releaseData = release.data(); const categoryData = category.data();
+  if (!release.exists || releaseData?.immutable !== true || typeof releaseData.documentRootSha256 !== "string" || !/^[a-f0-9]{64}$/i.test(releaseData.documentRootSha256)) throw new HttpsError("failed-precondition", "Active release is incomplete or not immutable.");
+  const publishedLabelAr = typeof categoryData?.labelAr === "string" && categoryData.labelAr.trim() ? categoryData.labelAr.trim() : typeof categoryData?.displayNameAr === "string" && categoryData.displayNameAr.trim() ? categoryData.displayNameAr.trim() : null;
+  if (!category.exists || !publishedLabelAr) throw new HttpsError("not-found", "Published category not found in the active release.");
+  return { categoryId, releaseId, releaseRootSha256: releaseData.documentRootSha256, publishedLabelAr, correctionRef: db.doc(`adminCategoryCorrections/${categoryId}/releases/${releaseId}`) };
+}
+function correctionMatchesBaseline(value: Record<string, unknown>, baseline: CategoryCorrectionBaseline) {
+  return value.categoryId === baseline.categoryId && value.baseReleaseId === baseline.releaseId && value.baseReleaseRootSha256 === baseline.releaseRootSha256 && value.publishedLabelAr === baseline.publishedLabelAr && value.status === "draft";
 }
 async function publishedQuestionPage(release: ActiveRelease, actor: Principal, input: ReturnType<typeof listInput>) {
   const scope = publishedScope(actor, input.categoryId);
@@ -270,7 +342,7 @@ async function publishedQuestionPage(release: ActiveRelease, actor: Principal, i
   return { releaseId: release.id, items: docs.map(doc => publishedQuestionDto(doc.id, doc.data())), nextCursor: result.docs.length > input.limit ? docs.at(-1)?.id ?? null : null };
 }
 
-export const adminGetSession = call("session", async (_request, actor) => ({ uid: actor.uid, roles: actor.roles, authzVersion: actor.authzVersion, capabilities: [...new Set(actor.roles.flatMap(role => capabilities[role]))], mutationMode: mutationEnabled() ? "enabled" : "staged" }));
+export const adminGetSession = call("session", async (_request, actor) => ({ uid: actor.uid, roles: actor.roles, authzVersion: actor.authzVersion, capabilities: [...new Set(actor.roles.flatMap(role => capabilities[role]))], mutationMode: mutationEnabled() ? "enabled" : "staged", categoryCorrectionDraftMode: categoryCorrectionDraftsEnabled() ? "enabled" : "staged" }));
 export const adminGetOverview = call("session", async (_request, actor) => {
   const inventory: Record<string, number> = {};
   const draftScope = actor.roles.includes("super_admin") || actor.roles.includes("viewer");
@@ -332,6 +404,58 @@ export const adminGetPublishedCategory = call("categories.read", async (request,
   const data = object(request.data); only(data, ["id", "releaseId"]); const release = await activeRelease({ releaseId: optionalId(data.releaseId, "releaseId") }); const categoryId = id(data.id); scopeCategory(actor, categoryId);
   const snap = await db.doc(`releases/${release.id}/catalogCategories/${categoryId}`).get(); if (!snap.exists) throw new HttpsError("not-found", "Published category not found.");
   return { releaseId: release.id, ...await publishedCategoryDto(release.id, snap) };
+});
+
+/** Correction drafts are separate from immutable release catalogs. */
+export const adminGetCategoryCorrection = call("categories.read", async (request, actor) => {
+  const data = object(request.data); only(data, ["categoryId", "releaseId"]); const categoryId = id(data.categoryId, "categoryId"); const release = await activeRelease({ releaseId: optionalId(data.releaseId, "releaseId") });
+  scopeCategory(actor, categoryId);
+  const category = await db.doc(`releases/${release.id}/catalogCategories/${categoryId}`).get(); if (!category.exists) throw new HttpsError("not-found", "Published category not found.");
+  const correction = await db.doc(`adminCategoryCorrections/${categoryId}/releases/${release.id}`).get();
+  const canManage = canManageCategoryCorrection({ roles: actor.roles, categoryScopes: actor.categoryScopes ?? [] }, categoryId) && actor.roles.some(role => capabilities[role].includes("categories.write"));
+  if (correction.exists) {
+    const categoryData = category.data()!;
+    const label = typeof categoryData.labelAr === "string" && categoryData.labelAr.trim() ? categoryData.labelAr.trim() : typeof categoryData.displayNameAr === "string" && categoryData.displayNameAr.trim() ? categoryData.displayNameAr.trim() : null;
+    if (!label || !correctionMatchesBaseline(correction.data()!, { categoryId, releaseId: release.id, releaseRootSha256: release.documentRootSha256, publishedLabelAr: label, correctionRef: correction.ref })) throw new HttpsError("failed-precondition", "Category correction draft no longer matches the active release baseline.");
+  }
+  return { releaseId: release.id, draft: correctionReadDto(correction, canManage), canEdit: canManage, correctionDraftMode: categoryCorrectionDraftsEnabled() ? "enabled" : "staged" };
+});
+
+/**
+ * Writes one shared category/release draft. It re-reads live authorization,
+ * pointer, immutable root, category baseline, and idempotency inside its
+ * transaction before creating the draft, revision snapshot, and audit receipt.
+ */
+export const adminSaveCategoryCorrection = call("categories.write", async (request, actor) => {
+  const data = object(request.data); only(data, ["categoryId", "releaseId", "operationId", "expectedRevision", "draft"]);
+  const categoryId = id(data.categoryId, "categoryId"); const requestedReleaseId = id(data.releaseId, "releaseId"); const operationId = id(data.operationId, "operationId"); const expectedRevision = integer(data.expectedRevision, "expectedRevision", 0); const draft = categoryCorrectionDraftInput(data.draft);
+  scopeCategory(actor, categoryId);
+  if (!canManageCategoryCorrection({ roles: actor.roles, categoryScopes: actor.categoryScopes ?? [] }, categoryId)) throw new HttpsError("permission-denied", "Category correction authority or scope is missing.");
+  categoryCorrectionDraftsBlocked();
+  return db.runTransaction(async tx => {
+    categoryCorrectionDraftsBlocked();
+    const baseline = await correctionBaselineInTransaction(tx, categoryId);
+    if (baseline.releaseId !== requestedReleaseId) throw new HttpsError("aborted", "ACTIVE_RELEASE_CHANGED");
+    const [livePrincipal, correction, priorOperation] = await Promise.all([tx.get(db.doc(`adminPrincipals/${actor.uid}`)), tx.get(baseline.correctionRef), tx.get(db.doc(`adminOperations/${operationId}`))]);
+    const live = validateLiveCategoryCorrectionPrincipal(actor, livePrincipal.data(), categoryId);
+    const target = `${categoryId}:${baseline.releaseId}`;
+    if (priorOperation.exists) {
+      const prior = priorOperation.data()!;
+      if (prior.actorUid !== actor.uid || prior.action !== "category.correction-draft.save" || prior.target !== target || prior.requestHash !== actor.requestHash) throw new HttpsError("already-exists", "operationId was previously used for a different mutation payload.");
+      return { operationId, revision: prior.revision, replayed: true, serverTime: prior.serverTime ?? null };
+    }
+    const previous = correction.exists ? correction.data()! : undefined;
+    const revision = Number(previous?.revision ?? 0);
+    if (previous && !correctionMatchesBaseline(previous, baseline)) throw new HttpsError("aborted", "CATEGORY_CORRECTION_BASE_CHANGED");
+    if (revision !== expectedRevision) throw new HttpsError("aborted", "stale-revision");
+    const nextRevision = revision + 1; const serverTime = new Date().toISOString();
+    const next = { categoryId, baseReleaseId: baseline.releaseId, baseReleaseRootSha256: baseline.releaseRootSha256, publishedLabelAr: baseline.publishedLabelAr, proposedLabelAr: draft.proposedLabelAr, internalNote: draft.internalNote, status: "draft", revision: nextRevision, authorUid: previous?.authorUid ?? actor.uid, updatedByUid: actor.uid, updatedAt: FieldValue.serverTimestamp(), createdAt: previous?.createdAt ?? FieldValue.serverTimestamp() };
+    tx.set(baseline.correctionRef, next);
+    tx.create(baseline.correctionRef.collection("revisions").doc(String(nextRevision).padStart(8, "0")), { ...next, immutable: true, createdByUid: actor.uid, createdAt: FieldValue.serverTimestamp() });
+    tx.create(priorOperation.ref, { actorUid: actor.uid, actorRoles: live.roles, action: "category.correction-draft.save", target, expectedRevision, revision: nextRevision, status: "draft_saved", serverTime, requestHash: actor.requestHash, categoryId, baseReleaseId: baseline.releaseId, baseReleaseRootSha256: baseline.releaseRootSha256 });
+    tx.create(db.collection("adminAudit").doc(), { actorUid: actor.uid, actorRoles: live.roles, operationId, action: "category.correction-draft.save", target, expectedRevision, resultRevision: nextRevision, result: "draft_saved", requestHash: actor.requestHash, categoryId, baseReleaseId: baseline.releaseId, baseReleaseRootSha256: baseline.releaseRootSha256, createdAt: FieldValue.serverTimestamp() });
+    return { operationId, revision: nextRevision, replayed: false, serverTime };
+  });
 });
 
 export const adminListQuestions = call("questions.read", async (request, actor) => { const input = listInput(request.data); const result = await page("adminQuestionDrafts", input, { status: input.status, categoryId: input.categoryId }, actor.roles.includes("super_admin") ? undefined : actor.categoryScopes); const items = (result.items as Record<string, unknown>[]).map(item => ({ id: item.id, revision: item.revision, status: item.status, categoryId: item.categoryId, modality: item.modality, headerAr: item.headerAr, updatedAt: item.updatedAt })); return { ...result, items }; });

@@ -1,5 +1,7 @@
 # تحدي الخلية — documentation index
 
+Current admin category work (2026-09-24): [T39 category inspection and correction](T39-ADMIN-CATEGORY-INSPECTION.md) records the authorized question-browser milestone, the pending edit semantics, security boundaries, and release checks. Its task IDs are tracked in the [implementation plan](IMPLEMENTATION-PLAN.md), [milestones](MILESTONES.md), and [handover](HANDOVER.md).
+
 ## Production media and combined categories — 2026-09-12
 
 M07 is Done: production has **25,763 questions across 96 supported categories**, with image and goal-video playback verified. Five unsupported acting-game categories remain held. See the [completed T17 milestone](T17-QUESTION-MEDIA.md#m07-final-live-acceptance--done), [all category counts](../docs/CATEGORY-PLAYABILITY-2026-09-12.md), and [verified handover](HANDOVER.md#production-media-and-combined-categories--2026-09-12) for deployment, checks and limitations. Earlier dated status below remains historical.
