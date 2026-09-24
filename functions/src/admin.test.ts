@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { adminRoomDto } from './index.js';
-import { canonicalAdminHash, isArchivableQuestionStatus, isVerifiedAdminProvider, publishedQuestionDto, publishedQuestionMediaBinding, questionReviewBinding, reviewMatchesQuestion, sameAdminAuthorization, validateAdminQuestionDraft, wouldLockOutLastSuperAdmin, wouldOrphanSuperAdmin } from './admin/admin.js';
+import { canonicalAdminHash, canManageCategoryCorrection, categoryCorrectionDraftInput, categoryCorrectionDraftsEnabled, categoryCorrectionDto, isArchivableQuestionStatus, isVerifiedAdminProvider, publishedQuestionDto, publishedQuestionMediaBinding, questionReviewBinding, reviewMatchesQuestion, sameAdminAuthorization, validateAdminQuestionDraft, validateLiveCategoryCorrectionPrincipal, wouldLockOutLastSuperAdmin, wouldOrphanSuperAdmin } from './admin/admin.js';
 
 test('game-ops room DTO remains answer-free even if a canonical room has active question data', () => {
   const dto = adminRoomDto('room_1', {
@@ -28,6 +28,32 @@ test('authorization parity rejects stale versions and role mismatches', () => {
   assert.equal(sameAdminAuthorization(['viewer'], ['viewer'], 4, 4), true);
   assert.equal(sameAdminAuthorization(['viewer'], ['viewer'], 4, 3), false);
   assert.equal(sameAdminAuthorization(['viewer'], ['super_admin'], 4, 4), false);
+});
+
+test('category correction drafts use a dedicated gate and a two-field allowlist', () => {
+  assert.equal(categoryCorrectionDraftsEnabled({ FUNCTIONS_EMULATOR: 'true' } as NodeJS.ProcessEnv), true);
+  assert.equal(categoryCorrectionDraftsEnabled({ ADMIN_CATEGORY_CORRECTION_DRAFTS_ENABLED: 'true' } as NodeJS.ProcessEnv), true);
+  assert.equal(categoryCorrectionDraftsEnabled({ ADMIN_MUTATIONS_ENABLED: 'true' } as NodeJS.ProcessEnv), false);
+  assert.deepEqual(categoryCorrectionDraftInput({ proposedLabelAr: ' عنوان مصحح ', internalNote: ' ملاحظة داخلية ' }), { proposedLabelAr: 'عنوان مصحح', internalNote: 'ملاحظة داخلية' });
+  assert.throws(() => categoryCorrectionDraftInput({ proposedLabelAr: 'عنوان', internalNote: 'ملاحظة', publishedLabelAr: 'محاولة تجاوز' }), /Unsupported field/);
+});
+
+test('category correction DTO excludes internal notes unless a current writer may read them', () => {
+  const stored = { categoryId: 'cat-1', baseReleaseId: 'release-1', baseReleaseRootSha256: 'a'.repeat(64), publishedLabelAr: 'منشور', proposedLabelAr: 'مقترح', internalNote: 'خاص', status: 'draft', revision: 4 };
+  const reader = categoryCorrectionDto(stored, false);
+  assert.equal('internalNote' in reader, false);
+  assert.equal(categoryCorrectionDto(stored, true).internalNote, 'خاص');
+  assert.equal(canManageCategoryCorrection({ roles: ['content_admin'], categoryScopes: ['cat-1'] }, 'cat-1'), true);
+  assert.equal(canManageCategoryCorrection({ roles: ['content_admin'], categoryScopes: ['cat-2'] }, 'cat-1'), false);
+});
+
+test('transaction-time category correction authorization rejects revoked roles, versions, and scopes', () => {
+  const actor = { claimRoles: ['content_admin'] as const, claimAuthzVersion: 7 };
+  const current = { enabled: true, identityReady: true, roles: ['content_admin'], authzVersion: 7, categoryScopes: ['cat-1'] };
+  assert.deepEqual(validateLiveCategoryCorrectionPrincipal(actor, current, 'cat-1'), { roles: ['content_admin'], categoryScopes: ['cat-1'] });
+  assert.throws(() => validateLiveCategoryCorrectionPrincipal(actor, { ...current, categoryScopes: ['cat-2'] }, 'cat-1'), /scope changed/);
+  assert.throws(() => validateLiveCategoryCorrectionPrincipal(actor, { ...current, roles: ['viewer'] }, 'cat-1'), /authorization changed/);
+  assert.throws(() => validateLiveCategoryCorrectionPrincipal(actor, { ...current, authzVersion: 8 }, 'cat-1'), /authorization changed/);
 });
 
 test('admin access accepts only verified Google or email/password identities', () => {

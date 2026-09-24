@@ -1,6 +1,6 @@
 import { httpsCallable } from 'firebase/functions';
 import { getOptionalFirebaseAdminClient } from '../../lib/firebase/client';
-import type { AdminOverview, AdminSession, Category, Mutation, Page, PublishedCategory, PublishedPage, PublishedQuestionDetail, PublishedQuestionSummary, QuestionDetail, QuestionSummary, Release, Review, RoomSummary } from './types';
+import type { AdminOverview, AdminSession, Category, CategoryCorrectionResponse, Mutation, Page, PublishedCategory, PublishedPage, PublishedQuestionDetail, PublishedQuestionSummary, QuestionDetail, QuestionSummary, Release, Review, RoomSummary } from './types';
 export type { AdminSession } from './types';
 
 export type AdminOperation = Mutation;
@@ -20,6 +20,8 @@ export const getPublishedQuestion = (id: string, releaseId?: string) => adminCal
 export const getPublishedQuestionMedia = (id: string, releaseId: string, variant: 'question' | 'answer') => adminCall<{ id: string; releaseId: string; variant: 'question' | 'answer' }, { mediaId: string; type: string; contentType: string; altAr: string | null; url: string }>('adminGetPublishedQuestionMedia', { id, releaseId, variant });
 export const listPublishedCategories = (data: Record<string, unknown> = {}) => adminCall<Record<string, unknown>, PublishedPage<PublishedCategory>>('adminListPublishedCategories', data);
 export const getPublishedCategory = (id: string, releaseId?: string) => adminCall<{ id: string; releaseId?: string }, PublishedCategory & { releaseId: string }>('adminGetPublishedCategory', { id, ...(releaseId ? { releaseId } : {}) });
+export const getCategoryCorrection = (categoryId: string, releaseId?: string) => adminCall<{ categoryId: string; releaseId?: string }, CategoryCorrectionResponse>('adminGetCategoryCorrection', { categoryId, ...(releaseId ? { releaseId } : {}) });
+export const saveCategoryCorrection = (data: { categoryId: string; releaseId: string; operationId: string; expectedRevision: number; draft: { proposedLabelAr: string; internalNote: string } }) => adminCall<typeof data, Mutation>('adminSaveCategoryCorrection', data);
 export const listQuestions = (data: Record<string, unknown> = {}) => adminCall<Record<string, unknown>, Page<QuestionSummary>>('adminListQuestions', data);
 export const getQuestion = (id: string) => adminCall<{ id: string }, QuestionDetail>('adminGetQuestion', { id });
 export const saveQuestion = (data: Record<string, unknown>) => adminCall<Record<string, unknown>, Mutation>('adminSaveQuestion', data);
