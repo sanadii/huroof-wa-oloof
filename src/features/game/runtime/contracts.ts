@@ -1,4 +1,6 @@
 /** Vendor-neutral boundary defined by ADR-001. */
+import { isQuestionTypeCounts, type QuestionTypeCounts } from './question-type-counts.js';
+
 export type ClientRole = 'host' | 'player' | 'audience';
 export type RoomState = import('../domain/lifecycle.js').LifecycleState;
 export const CHALLENGE_PROTOCOL_VERSION = 't36-challenge-runtime-v1' as const;
@@ -99,7 +101,7 @@ export interface ApprovedReleaseCatalog {
   /** True only for the Firebase emulator's explicit fixture release. */
   demoFixture: boolean;
   /** Challenge data remains metadata-only. M6 publishers may pin a category's kinds here. */
-  categories: Array<{ id: string; labelAr: string; playable: { huroof: boolean; categories: boolean; charades: boolean }; /** Hidden until every required mechanic is enabled. */ challengeOnly?: boolean; challengeKinds?: ChallengeMechanic[] }>;
+  categories: Array<{ id: string; labelAr: string; playable: { huroof: boolean; categories: boolean; charades: boolean }; /** Absent when this release has no verified type-index sidecar. */ questionTypeCounts?: QuestionTypeCounts; /** Hidden until every required mechanic is enabled. */ challengeOnly?: boolean; challengeKinds?: ChallengeMechanic[] }>;
   boardCapabilities: { huroof: boolean; categories: boolean; charades: boolean };
   /** Current runtime flags, projected without reading any canonical questions. */
   challengeAvailability?: { enabledMechanics: ChallengeMechanic[] };
@@ -112,6 +114,7 @@ export const isApprovedReleaseCatalog = (value: unknown): value is ApprovedRelea
   const isChallengeMechanic = (value: unknown): value is ChallengeMechanic => value === 'navigation' || value === 'missing_tile' || value === 'memory' || value === 'qatar_map' || value === 'word_search';
   for (const category of catalog.categories) {
     if (!category || typeof category.id !== 'string' || !/^[A-Za-z0-9_-]{1,128}$/.test(category.id) || typeof category.labelAr !== 'string' || !category.labelAr.trim() || !category.playable || typeof category.playable.huroof !== 'boolean' || typeof category.playable.categories !== 'boolean' || typeof category.playable.charades !== 'boolean' || ids.has(category.id)) return false;
+    if (category.questionTypeCounts !== undefined && !isQuestionTypeCounts(category.questionTypeCounts)) return false;
     if (category.challengeOnly !== undefined && typeof category.challengeOnly !== 'boolean') return false;
     if (category.challengeOnly === true && (!Array.isArray(category.challengeKinds) || category.challengeKinds.length === 0)) return false;
     if (category.challengeKinds !== undefined && (!Array.isArray(category.challengeKinds) || category.challengeKinds.some((kind) => !isChallengeMechanic(kind)) || new Set(category.challengeKinds).size !== category.challengeKinds.length)) return false;

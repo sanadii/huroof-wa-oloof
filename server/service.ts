@@ -2095,6 +2095,7 @@ export class AuthoritativeGameService {
         huroofQuestionCount: category.huroofQuestionCount,
         categoryGameEligible: category.categoryGameEligible,
         availability: category.availability,
+        questionTypeCounts: category.questionTypeCounts,
       })),
     };
   }

@@ -2,6 +2,7 @@ import { categoryCatalog, type CategoryCover } from "./category-catalog";
 import { normalizeCategoryFilterText } from "./category-filters";
 import publicCategoryInventory from "./category-inventory.public.json";
 import tahadaniImages from "./tahadani-image-catalog.public.json";
+import type { QuestionTypeCounts } from "../features/game/runtime/question-type-counts";
 
 const importedCovers = new Map(
   tahadaniImages.covers.map((cover) => [normalizeCategoryFilterText(cover.name), cover]),
@@ -39,6 +40,8 @@ export type LocalQuestionInventory = {
     huroofQuestionCount: number;
     categoryGameEligible: boolean;
     availability: "ready" | "insufficient_questions" | "held_only";
+    /** Available only when the normalized local source supplied a verified count. */
+    questionTypeCounts?: QuestionTypeCounts;
   }>;
 };
 
