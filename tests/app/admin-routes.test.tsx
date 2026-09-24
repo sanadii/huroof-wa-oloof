@@ -34,6 +34,16 @@ it('shows the stored category identity, keeps category-local navigation bounded,
   expect(await screen.findByTestId('location')).toHaveTextContent('/admin/questions/published-q2?releaseId=release-01');
 });
 
+it('uses the published category as the question-page heading with its reviewed cover and return action', async () => {
+  serviceMocks.getPublishedQuestion.mockResolvedValue({ releaseId: 'release-01', id: 'missing-1', categoryId: 'tahadani-014', categoryLabelAr: 'الجزء المفقود', headerAr: 'أكمل النمط', promptAr: 'أي قطعة تكمل الشكل؟', canonicalAnswer: 'أ', modality: 'classic', previousQuestionId: null, nextQuestionId: null, inspection: { reviewed: false } });
+  renderAdmin('/admin/questions/missing-1?releaseId=release-01', <Route path="questions/:id" element={<AdminPublishedQuestionsRoute />} />);
+  expect(await screen.findByRole('heading', { level: 1, name: 'الجزء المفقود' })).toBeVisible();
+  expect(screen.getByText('إدارة الخلية - تفاصيل السؤال المنشور')).toBeVisible();
+  expect(screen.getByText('قراءة من الإصدار المنشور الثابت. لا يمكن تحرير هذا السجل من لوحة الإدارة.')).toBeVisible();
+  expect(screen.getByRole('img', { name: /غلاف فئة الجزء المفقود/ })).toHaveAttribute('src', '/assets/categories/generated/tahadani-014.webp');
+  expect(screen.getByRole('link', { name: 'العودة إلى أسئلة الفئة' })).toHaveAttribute('href', '/admin/questions?categoryId=tahadani-014&releaseId=release-01');
+});
+
 it('does not let a deferred inspection mark navigate away from a manually selected neighbor', async () => {
   const pending = deferred<{ operationId: string; revision: number; replayed: boolean; serverTime: string }>();
   serviceMocks.markPublishedQuestionInspected.mockReturnValue(pending.promise);

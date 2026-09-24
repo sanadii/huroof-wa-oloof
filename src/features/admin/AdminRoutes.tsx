@@ -64,7 +64,7 @@ export function AdminPublishedQuestionsRoute() {
   const load = async (append = false) => { const token = ++requestId.current; setState('loading'); if (!append) { setItems([]); setNextCursor(null); } try { if (id) { const value = await getPublishedQuestion(id, requestedReleaseId); if (token !== requestId.current) return; setDetail(value); setReleaseId(value.releaseId); setItems([]); setNextCursor(null); } else { const page = await listPublishedQuestions({ limit: 50, ...(append && nextCursor && releaseId ? { cursor: nextCursor, releaseId } : requestedReleaseId ? { releaseId: requestedReleaseId } : {}), ...(categoryId ? { categoryId } : {}), ...(modality ? { modality } : {}) }); if (token !== requestId.current) return; setReleaseId(page.releaseId); setItems(current => append ? [...current, ...page.items] : page.items); setNextCursor(page.nextCursor); } setState('ready'); } catch { if (token === requestId.current) setState('error'); } };
   useEffect(() => { let live = true; void (async () => { const all: Row[] = []; let cursor: string | null = null; let bound: string | undefined; try { do { const page = await listPublishedCategories({ limit: 100, ...(cursor && bound ? { cursor, releaseId: bound } : {}) }); bound = page.releaseId; all.push(...page.items); cursor = page.nextCursor; } while (cursor); if (live) { setCategories(all); setCategoryError(false); } } catch { if (live) { setCategories([]); setCategoryError(true); } } })(); return () => { live = false; }; }, []);
   useEffect(() => { setReleaseId(requestedReleaseId); setNextCursor(null); void load(false); }, [id, categoryId, modality, requestedReleaseId]);
-  if (id) return <AdminSurface title="تفاصيل سؤال منشور" description="قراءة من الإصدار المنشور الثابت. لا يمكن تحرير هذا السجل من لوحة الإدارة.">{state === 'loading' ? <LoadingRows /> : state === 'error' ? <Recovery message="تعذر تحميل السؤال المنشور أو تغيّر الإصدار النشط." retry={() => void load(false)} /> : detail ? <><Link className="text-link" to={publishedQuestionsPath(detail.categoryId, detail.releaseId)}>العودة إلى أسئلة الفئة</Link><PublishedQuestionInspectionDetail value={detail} /></> : null}</AdminSurface>;
+  if (id) return <AdminSurface title="تفاصيل سؤال منشور" description="قراءة من الإصدار المنشور الثابت. لا يمكن تحرير هذا السجل من لوحة الإدارة." hideDefaultHeader={state === 'ready' && Boolean(detail)}>{state === 'loading' ? <LoadingRows /> : state === 'error' ? <Recovery message="تعذر تحميل السؤال المنشور أو تغيّر الإصدار النشط." retry={() => void load(false)} /> : detail ? <PublishedQuestionInspectionDetail value={detail} /> : null}</AdminSurface>;
   const categoryLabels = Object.fromEntries(categories.map(category => [String(category.id), text(category.labelAr)]));
   return <AdminSurface title="بنك الأسئلة المنشور" description="سجلات الإصدار المنشور فقط؛ التأليف يظهر في قسم المسودات المنفصل. مرشح الفئة في الرابط ويُطبّق على الخادم ضمن نطاقك."><div className="admin-toolbar"><label>الفئة<select aria-label="فئة منشورة" value={categoryId} onChange={event => setFilter('categoryId', event.target.value)} disabled={state === 'loading' || categoryError}><option value="">كل الفئات المتاحة</option>{categories.map(category => <option key={String(category.id)} value={String(category.id)}>{text(category.labelAr)}</option>)}</select></label><label>نمط السؤال<select aria-label="نمط منشور" value={modality} onChange={event => setFilter('modality', event.target.value)} disabled={state === 'loading'}><option value="">كل الأنماط</option>{['classic', 'image', 'video', 'charades'].map(value => <option key={value} value={value}>{labelStatus(value)}</option>)}</select></label><button className="button button--secondary" type="button" onClick={() => { const next = new URLSearchParams(searchParams); next.delete('categoryId'); next.delete('modality'); setSearchParams(next); }} disabled={!categoryId && !modality}>مسح المرشحات</button><button className="button button--secondary" type="button" onClick={() => void load(false)} disabled={state === 'loading'}>تحديث</button></div>{categoryError ? <p className="admin-notice" role="alert">تعذر تحميل قائمة الفئات كاملة؛ أعد المحاولة قبل استخدام مرشح الفئة.</p> : null}{state === 'loading' ? <LoadingRows /> : state === 'error' ? <Recovery message="تعذر تحميل بنك الإصدار. أعد المحاولة للتحقق من الإصدار الحالي." retry={() => void load(false)} /> : items.length ? <div className="admin-table-wrap"><div className="admin-table admin-table--published" role="table" aria-label="بنك الأسئلة المنشور"><div className="admin-table__row admin-table__row--head" role="row"><b role="columnheader">السؤال</b><b role="columnheader">الفئة</b><b role="columnheader">النمط</b><b role="columnheader">الإجراء</b></div>{items.map(item => <div className="admin-table__row" role="row" key={String(item.id)}><span data-label="السؤال" role="cell"><small>{text(item.headerAr)}</small><b className="admin-question-prompt">{text(item.promptAr)}</b></span><span data-label="الفئة" role="cell">{categoryLabels[String(item.categoryId)] ?? 'فئة غير معروضة'}<small><bdi dir="ltr">{text(item.categoryId)}</bdi></small></span><span data-label="النمط" role="cell"><Status value={item.modality} /></span><span data-label="الإجراء" role="cell"><Link className="text-link" to={`/admin/questions/${encodeURIComponent(String(item.id))}${releaseId ? `?releaseId=${encodeURIComponent(releaseId)}` : ''}`}>عرض السؤال</Link></span></div>)}</div></div> : <p className="admin-empty">{categoryId ? 'لا توجد أسئلة منشورة ضمن هذه الفئة في الإصدار أو نطاقك.' : 'لا توجد أسئلة منشورة مطابقة للمرشحات أو ضمن نطاقك.'}</p>}{nextCursor ? <button className="button button--secondary" type="button" onClick={() => void load(true)} disabled={state === 'loading'}>تحميل الصفحة التالية</button> : null}<p className="admin-hint">الإصدار: <bdi dir="ltr">{releaseId ?? 'جارٍ التحقق'}</bdi></p></AdminSurface>;
 }
@@ -292,19 +292,27 @@ function PublishedQuestionInspectionDetail({ value }: { value: Row }) {
   };
   const cover = publicCategoryCover(categoryId);
   return <article className="admin-published-detail admin-published-inspection">
-    <section className="admin-published-category" aria-labelledby="admin-published-category-title">
-      {cover && !coverFailed ? <img src={`/${cover.web320}`} alt={cover.altAr} onError={() => setCoverFailed(true)} /> : <div className="admin-published-category__fallback" role="img" aria-label="لا تتوفر صورة عامة منشورة لهذه الفئة">لا تتوفر صورة عامة منشورة لهذه الفئة</div>}
-      <div><p className="eyebrow">الفئة المنشورة</p><h2 id="admin-published-category-title">{text(value.categoryLabelAr)}</h2><p><bdi dir="ltr">{categoryId}</bdi></p></div>
-    </section>
-    <nav className="admin-published-navigation" aria-label="تنقل أسئلة الفئة">
-      {typeof value.previousQuestionId === 'string' ? <Link className="button button--secondary" to={publishedQuestionPath(value.previousQuestionId, releaseId)}>السؤال السابق</Link> : <span className="admin-hint">هذا أول سؤال في الفئة.</span>}
-      {typeof value.nextQuestionId === 'string' ? <Link className="button button--secondary" to={publishedQuestionPath(value.nextQuestionId, releaseId)}>السؤال التالي</Link> : <span className="admin-hint">هذا آخر سؤال في الفئة.</span>}
-    </nav>
-    <section className="admin-published-inspection__controls" aria-labelledby="admin-inspection-heading">
-      <div><p className="eyebrow">فحص تشغيلي</p><h2 id="admin-inspection-heading">{reviewed ? 'تم فحص هذا السؤال' : 'لم يُسجل فحص لهذا السؤال بعد'}</h2><p className="admin-hint">لا تعني هذه العلامة اعتماداً تحريرياً أو تغييراً في المحتوى أو النشر.</p></div>
-      {reviewed ? <Status value="completed">تم الفحص</Status> : canInspect && inspectionMode === 'enabled' ? <button className="button button--primary" type="button" disabled={saving} onClick={() => void markAndAdvance()}>{saving ? 'جارٍ الحفظ…' : 'تسجيل الفحص والانتقال'}</button> : <p className="admin-notice">{canInspect ? 'تسجيل الفحص في وضع مرحلي حتى تفتح بوابته المخصصة.' : 'هذه الجلسة للقراءة فقط ولا تملك صلاحية تسجيل الفحص.'}</p>}
-      {notice ? <p className="admin-form-status" aria-live="polite">{notice}</p> : null}
-    </section>
+    <header className="admin-published-hero">
+      <p className="eyebrow">إدارة الخلية - تفاصيل السؤال المنشور</p>
+      <div className="admin-published-hero__row">
+        <div className="admin-published-category" aria-labelledby="admin-published-category-title">
+          {cover && !coverFailed ? <img src={`/${cover.web320}`} alt={cover.altAr} onError={() => setCoverFailed(true)} /> : <div className="admin-published-category__fallback" role="img" aria-label="لا تتوفر صورة عامة منشورة لهذه الفئة">لا تتوفر صورة عامة منشورة لهذه الفئة</div>}
+          <div><h1 id="admin-published-category-title">{text(value.categoryLabelAr)}</h1><p>قراءة من الإصدار المنشور الثابت. لا يمكن تحرير هذا السجل من لوحة الإدارة.</p></div>
+        </div>
+        <Link className="text-link admin-published-hero__back" to={publishedQuestionsPath(value.categoryId, value.releaseId)}>العودة إلى أسئلة الفئة</Link>
+      </div>
+    </header>
+    <div className="admin-published-reviewbar">
+      <nav className="admin-published-navigation" aria-label="تنقل أسئلة الفئة">
+        {typeof value.previousQuestionId === 'string' ? <Link className="button button--secondary" to={publishedQuestionPath(value.previousQuestionId, releaseId)}>السؤال السابق</Link> : <span className="admin-hint">هذا أول سؤال في الفئة.</span>}
+        {typeof value.nextQuestionId === 'string' ? <Link className="button button--secondary" to={publishedQuestionPath(value.nextQuestionId, releaseId)}>السؤال التالي</Link> : <span className="admin-hint">هذا آخر سؤال في الفئة.</span>}
+      </nav>
+      <section className="admin-published-inspection__controls" aria-labelledby="admin-inspection-heading">
+        <div><p className="eyebrow">فحص تشغيلي</p><h2 id="admin-inspection-heading">{reviewed ? 'تم فحص هذا السؤال' : 'لم يُسجل فحص لهذا السؤال بعد'}</h2><p className="admin-hint">علامة فحص فقط؛ لا تغيّر المحتوى أو النشر.</p></div>
+        {reviewed ? <Status value="completed">تم الفحص</Status> : canInspect && inspectionMode === 'enabled' ? <button className="button button--primary" type="button" disabled={saving} onClick={() => void markAndAdvance()}>{saving ? 'جارٍ الحفظ…' : 'تسجيل الفحص والانتقال'}</button> : <p className="admin-notice">{canInspect ? 'تسجيل الفحص في وضع مرحلي حتى تفتح بوابته المخصصة.' : 'هذه الجلسة للقراءة فقط ولا تملك صلاحية تسجيل الفحص.'}</p>}
+        {notice ? <p className="admin-form-status" aria-live="polite">{notice}</p> : null}
+      </section>
+    </div>
     <PublishedQuestionDetail value={value} />
   </article>;
 }
@@ -315,16 +323,17 @@ export function PublishedQuestionDetail({ value }: { value: Row }) {
   const questionId = String(value.id ?? '');
   const releaseId = String(value.releaseId ?? '');
   const aliases = Array.isArray(value.acceptedAnswers) ? value.acceptedAnswers.filter(answer => typeof answer === 'string' && answer !== value.canonicalAnswer) : [];
+  const distinctHeader = typeof value.headerAr === 'string' && value.headerAr.trim() && value.headerAr.trim() !== String(value.categoryLabelAr ?? '').trim();
 
   return <article className="admin-published-detail">
-    <header className="admin-published-detail__header">
+    {distinctHeader ? <header className="admin-published-detail__header">
       <p className="eyebrow">السجل المنشور</p>
       <h2>{text(value.headerAr)}</h2>
-    </header>
+    </header> : null}
     <dl className="admin-published-facts">
       <div><dt>الفئة</dt><dd><bdi dir="ltr">{text(value.categoryId)}</bdi></dd></div>
       <div><dt>النمط</dt><dd><Status value={value.modality} /></dd></div>
-      {typeof value.targetLetter === 'string' && value.targetLetter ? <div><dt>الحرف المستهدف</dt><dd>{value.targetLetter}</dd></div> : null}
+      {typeof value.targetLetter === 'string' && value.targetLetter && value.targetLetter !== 'category-only' ? <div><dt>الحرف المستهدف</dt><dd>{value.targetLetter}</dd></div> : null}
       {typeof value.points === 'number' && Number.isFinite(value.points) ? <div><dt>النقاط</dt><dd>{value.points}</dd></div> : null}
       <div><dt>الصعوبة</dt><dd>{typeof value.difficulty === 'string' && value.difficulty ? value.difficulty : 'غير مخزنة في هذا الإصدار'}</dd></div>
     </dl>
@@ -410,6 +419,6 @@ function Status({ value, children }: { value: unknown; children?: ReactNode }) {
 function Recovery({ message, retry }: { message: string; retry: () => void }) { return <div className="admin-notice" role="alert"><p>{message}</p><button className="button button--secondary" type="button" onClick={retry}>إعادة المحاولة</button></div>; }
 function LoadingRows() { return <div className="admin-loading" role="status" aria-label="جارٍ تحميل البيانات"><span /><span /><span /><p>جارٍ تحميل البيانات من الخادم…</p></div>; }
 function HealthSummary({ value }: { value: Row }) { const components = value.components && typeof value.components === 'object' ? value.components as Row : {}; return <dl className="admin-health"><div><dt>وضع التغيير</dt><dd>{labelStatus(value.mutationMode)}</dd></div><div><dt>الإصدار النشط</dt><dd>{text(value.activeReleaseId)}</dd></div><div><dt>عمليات فاشلة</dt><dd>{text(value.failedJobs)}</dd></div><div><dt>غرف قديمة</dt><dd>{text(value.staleRooms)}</dd></div>{Object.entries(components).map(([name, status]) => <div key={name}><dt>{({ auth: 'الهوية', functions: 'الدوال', firestore: 'قاعدة البيانات', storage: 'التخزين', appCheck: 'حماية التطبيق' } as Record<string, string>)[name] ?? name}</dt><dd><Status value={status} /></dd></div>)}</dl>; }
-function AdminSurface({ title, description, children }: { title: string; description: string; children: ReactNode }) { useEffect(() => { document.title = `${title} | الخلية`; }, [title]); return <section className="admin-surface"><p className="eyebrow">إدارة الخلية</p><h1>{title}</h1><p className="admin-description">{description}</p>{children}</section>; }
+function AdminSurface({ title, description, children, hideDefaultHeader = false }: { title: string; description: string; children: ReactNode; hideDefaultHeader?: boolean }) { useEffect(() => { document.title = `${title} | الخلية`; }, [title]); return <section className="admin-surface">{hideDefaultHeader ? null : <><p className="eyebrow">إدارة الخلية</p><h1>{title}</h1><p className="admin-description">{description}</p></>}{children}</section>; }
 export function AdminRootRedirect() { return <Navigate replace to="/admin/overview" />; }
 export function LegacyQuestionRedirect() { const { questionId } = useParams(); return <Navigate replace to={`/admin/drafts/${encodeURIComponent(questionId ?? '')}`} />; }
