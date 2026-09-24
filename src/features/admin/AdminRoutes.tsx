@@ -99,6 +99,7 @@ function AdminPublishedCategoryList({ items, nextCursor, releaseId, state, loadM
   const [extraItems, setExtraItems] = useState<Row[]>([]);
   const [loadingAll, setLoadingAll] = useState(false);
   const [typeError, setTypeError] = useState('');
+  const [localTypeIndexPreview, setLocalTypeIndexPreview] = useState(false);
   const [visibleLimit, setVisibleLimit] = useState(50);
   const requestId = useRef(0);
 
@@ -113,6 +114,7 @@ function AdminPublishedCategoryList({ items, nextCursor, releaseId, state, loadM
         return;
       }
       setTypeCounts(new Map(catalog.categories.map(category => [category.id, category.questionTypeCounts!])));
+      setLocalTypeIndexPreview(catalog.localTypeIndexPreview === true);
       setTypeStatus('ready');
     }).catch(() => { if (live) setTypeStatus('unavailable'); });
     return () => { live = false; };
@@ -168,6 +170,7 @@ function AdminPublishedCategoryList({ items, nextCursor, releaseId, state, loadM
       {questionType !== 'all' ? <button className="button button--secondary" type="button" onClick={() => void selectQuestionType('all')}>مسح التصفية</button> : null}
     </div>
     {typeStatus === 'unavailable' ? <p className="admin-hint">تصنيف أنماط الأسئلة غير متاح لهذا الإصدار حالياً؛ تبقى كل الفئات ظاهرة.</p> : null}
+    {localTypeIndexPreview ? <p className="admin-hint">تصفية محلية مبنية على فهرس هذا الإصدار المراجع؛ لم يُنشر الفهرس بعد في الإنتاج.</p> : null}
     {loadingAll ? <p className="admin-hint" role="status">جارٍ تحميل كل فئات الإصدار قبل تطبيق التصفية…</p> : null}
     {typeError ? <p className="admin-notice" role="alert">{typeError}</p> : null}
     {state === 'loading' || loadingAll ? <LoadingRows /> : state === 'error' ? <Recovery message="تعذر تحميل فهرس الفئات؛ لم تُعرض حالة صفرية بديلة." retry={retry} /> : shown.length ? <div className="admin-table-wrap"><div className="admin-table admin-table--categories" role="table" aria-label="فئات الإصدار المنشور"><div className="admin-table__row admin-table__row--head" role="row"><b role="columnheader">الفئة</b><b role="columnheader">الأسئلة</b><b role="columnheader">جاهزية اللعب</b><b role="columnheader">الإجراءات</b></div>{shown.map(item => <div className="admin-table__row" role="row" key={String(item.id)}><span role="cell">{text(item.labelAr)} <small><bdi dir="ltr">{text(item.id)}</bdi></small></span><span role="cell">{text(item.approvedCount)}</span><span role="cell">{publishedReadiness(item.runtimeReadiness)}</span><span role="cell" className="admin-inline-actions"><Link className="text-link" to={`/admin/categories/${encodeURIComponent(String(item.id))}${releaseId ? `?releaseId=${encodeURIComponent(releaseId)}` : ''}`}>عرض الفئة</Link><Link className="text-link" to={publishedQuestionsPath(item.id, releaseId)}>عرض الأسئلة</Link></span></div>)}</div></div> : <p className="admin-empty">{questionType === 'all' ? 'لا توجد فئات منشورة ضمن نطاقك.' : 'لا توجد فئات منشورة مطابقة لهذا النمط ضمن نطاقك.'}</p>}

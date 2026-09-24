@@ -1,6 +1,8 @@
 import { defineConfig } from 'vitest/config';
 import { loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
+import { readFile } from 'node:fs/promises';
+import { resolve } from 'node:path';
 import { isLocalAdminPath, isLoopbackAddress } from './server/local-admin-guard.js';
 
 export default defineConfig(({ command, mode, isPreview }) => {
@@ -31,6 +33,34 @@ export default defineConfig(({ command, mode, isPreview }) => {
               return;
             }
             next();
+          });
+        },
+      },
+      {
+        name: 'local-question-type-preview',
+        configureServer(server) {
+          server.middlewares.use(async (request, response, next) => {
+            const url = new URL(request.url ?? '/', 'http://vite.local');
+            if (url.pathname !== '/__dev/question-type-index') return next();
+            if (!isLoopbackAddress(request.socket.remoteAddress)) {
+              response.writeHead(403).end();
+              return;
+            }
+            const filename = ({
+              't38b2-calculations-6a73e1c8757035264bf256adad3b146f': 'INDEX.json',
+              't37m-media-cc919463d962a644fefb20b5d05ed8f8': 'T37M-INDEX.json',
+            } as Record<string, string>)[url.searchParams.get('releaseId') ?? ''];
+            if (!filename) {
+              response.writeHead(404).end();
+              return;
+            }
+            try {
+              const body = await readFile(resolve('output/t40-question-type-20260924', filename));
+              response.writeHead(200, { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', 'x-content-type-options': 'nosniff' });
+              response.end(body);
+            } catch {
+              response.writeHead(404).end();
+            }
           });
         },
       },

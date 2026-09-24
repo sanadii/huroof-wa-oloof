@@ -2,6 +2,7 @@ import { httpsCallable } from 'firebase/functions';
 import { getOptionalFirebaseAdminClient } from '../../lib/firebase/client';
 import type { AdminOverview, AdminSession, Category, CategoryCorrectionResponse, Mutation, Page, PublishedCategory, PublishedPage, PublishedQuestionDetail, PublishedQuestionSummary, QuestionDetail, QuestionSummary, Release, Review, RoomSummary } from './types';
 import { isApprovedReleaseCatalog, type ApprovedReleaseCatalog } from '../game/runtime/contracts';
+import { mergeLocalQuestionTypePreview } from './local-question-type-preview';
 export type { AdminSession } from './types';
 
 export type AdminOperation = Mutation;
@@ -21,9 +22,15 @@ export const getPublishedQuestion = (id: string, releaseId?: string) => adminCal
 export const getPublishedQuestionMedia = (id: string, releaseId: string, variant: 'question' | 'answer') => adminCall<{ id: string; releaseId: string; variant: 'question' | 'answer' }, { mediaId: string; type: string; contentType: string; altAr: string | null; url: string }>('adminGetPublishedQuestionMedia', { id, releaseId, variant });
 export const markPublishedQuestionInspected = (data: { id: string; releaseId: string; operationId: string }) => adminCall<typeof data, Mutation & { alreadyInspected?: boolean }>('adminMarkPublishedQuestionInspected', data);
 export const listPublishedCategories = (data: Record<string, unknown> = {}) => adminCall<Record<string, unknown>, PublishedPage<PublishedCategory>>('adminListPublishedCategories', data);
-export async function getPublishedCategoryQuestionTypes(): Promise<ApprovedReleaseCatalog> {
+export async function getPublishedCategoryQuestionTypes(): Promise<ApprovedReleaseCatalog & { localTypeIndexPreview?: true }> {
   const catalog = await adminCall<Record<string, never>, unknown>('getApprovedReleaseCatalog', {});
   if (!isApprovedReleaseCatalog(catalog)) throw new Error('APPROVED_RELEASE_CATALOG_INVALID');
+  if (import.meta.env.DEV && catalog.categories.every(category => !category.questionTypeCounts)) {
+    try {
+      const response = await fetch(`/__dev/question-type-index?releaseId=${encodeURIComponent(catalog.releaseId)}`, { cache: 'no-store' });
+      if (response.ok) return mergeLocalQuestionTypePreview(catalog, await response.json()) ?? catalog;
+    } catch { /* The server catalog remains authoritative when no local preview is present. */ }
+  }
   return catalog;
 }
 export const getPublishedCategory = (id: string, releaseId?: string) => adminCall<{ id: string; releaseId?: string }, PublishedCategory & { releaseId: string }>('adminGetPublishedCategory', { id, ...(releaseId ? { releaseId } : {}) });
