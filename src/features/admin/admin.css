@@ -40,6 +40,17 @@
 .spatial-admin .admin-detail-list dt { color: var(--spatial-ink-muted); font-size: .82rem; }
 .spatial-admin .admin-detail-list dd { margin: .35rem 0 0; overflow-wrap: anywhere; }
 .spatial-admin .admin-published-detail { display: grid; gap: 1.25rem; inline-size: 100%; max-inline-size: 76rem; min-inline-size: 0; }
+.spatial-admin .admin-published-inspection { gap: 1rem; }
+.spatial-admin .admin-published-category { align-items: stretch; border-block: 1px solid var(--admin-border); display: grid; gap: 1rem; grid-template-columns: minmax(10rem, 15rem) minmax(0, 1fr); padding-block: 1rem; }
+.spatial-admin .admin-published-category img { block-size: 100%; inline-size: 100%; max-block-size: 10rem; object-fit: cover; }
+.spatial-admin .admin-published-category h2 { margin: 0; }
+.spatial-admin .admin-published-category p { margin: .4rem 0 0; overflow-wrap: anywhere; }
+.spatial-admin .admin-published-category__fallback { align-items: center; background: var(--admin-panel); border: 1px dashed var(--admin-border); display: flex; font-size: .86rem; justify-content: center; min-block-size: 7rem; padding: 1rem; text-align: center; }
+.spatial-admin .admin-published-navigation { align-items: center; display: flex; flex-wrap: wrap; gap: .75rem 1rem; justify-content: space-between; }
+.spatial-admin .admin-published-inspection__controls { align-items: center; background: var(--admin-panel); border-block: 2px solid var(--admin-border); display: flex; flex-wrap: wrap; gap: .75rem 1rem; justify-content: space-between; padding: 1rem; }
+.spatial-admin .admin-published-inspection__controls h2 { margin: 0; }
+.spatial-admin .admin-published-inspection__controls .admin-hint { margin: .3rem 0 0; }
+.spatial-admin .admin-published-inspection__controls .admin-form-status { flex-basis: 100%; margin: 0; }
 .spatial-admin .admin-published-detail__header { border-block-end: 1px solid var(--admin-border); padding-block-end: .75rem; }
 .spatial-admin .admin-published-detail__header .eyebrow { color: var(--spatial-ink-muted); margin: 0 0 .25rem; }
 .spatial-admin .admin-published-detail__header h2 { font-size: clamp(1.25rem, 2vw, 1.6rem); line-height: 1.4; }
@@ -92,4 +103,10 @@ html:not([data-theme="dark"]) .spatial-admin :is(.admin-notice, .admin-empty) { 
 html:not([data-theme="dark"]) .spatial-admin :is(.admin-hint, .admin-description, .admin-table__row small) { color: #385878; }
 @media (max-width: 61rem) { .spatial-admin .admin-layout { display: block; }.spatial-admin .admin-table-wrap { margin-inline: -.15rem; }.spatial-admin .admin-toolbar { align-items: stretch; }.spatial-admin .admin-toolbar > label { flex: 1 1 12rem; } }
 @media (max-width: 40rem) { .spatial-admin .admin-workspace { padding: .75rem; }.spatial-admin .admin-toolbar { display: grid; }.spatial-admin .admin-toolbar .button { inline-size: 100%; }.spatial-admin .admin-inventory { grid-template-columns: 1fr; }.spatial-admin .admin-loading { align-items: flex-start; flex-wrap: wrap; }.spatial-admin .admin-loading p { flex-basis: 100%; }.spatial-admin .admin-table__row { padding: .75rem; }.spatial-admin .admin-table-wrap:has(.admin-table--published) { overflow: visible; }.spatial-admin .admin-table--published { min-inline-size: 0; }.spatial-admin .admin-table--published .admin-table__row--head { display: none !important; }.spatial-admin .admin-table--published .admin-table__row { display: grid; gap: .65rem; grid-template-columns: 1fr !important; padding: .85rem; }.spatial-admin .admin-table--published [role="cell"] { display: block; min-inline-size: 0; overflow-wrap: anywhere; }.spatial-admin .admin-table--published [role="cell"]::before { color: var(--spatial-ink-muted); content: attr(data-label); display: block; font-size: .78rem; font-weight: 600; margin-block-end: .18rem; }.spatial-admin .admin-table--published .admin-question-prompt { font-size: 1rem; }.spatial-admin .admin-table--published [role="cell"] small { margin: 0; } }
+@media (max-width: 40rem) {
+  .spatial-admin .admin-published-category { grid-template-columns: 1fr; }
+  .spatial-admin .admin-published-category img { max-block-size: 14rem; }
+  .spatial-admin .admin-published-navigation,
+  .spatial-admin .admin-published-inspection__controls { align-items: stretch; display: grid; }
+}
 @media (prefers-reduced-motion: reduce) { .spatial-admin .admin-loading span { animation: none; } }

@@ -3,9 +3,11 @@ import { BrandMark } from '../../design-system/BrandMark';
 import { ThemeToggle } from '../../design-system/ThemeToggle';
 import { InternalHeader } from '../../design-system/InternalHeader';
 import { categoryTopicIdForCategory, categoryTopics } from '../../data/category-filters';
+import adminPublishedCategoryCovers from '../../data/admin-published-category-covers.public.json';
+import sourceCategoryCovers from '../../data/tahadani-games-category-covers.public.json';
 import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { useFirebaseAuth } from '../auth/AuthProvider';
-import { decideReview, getAdminOverview, getAdminSession, getCategoryCorrection, getHealth, getPublishedCategory, getPublishedQuestion, getPublishedQuestionMedia, getQuestion, getRelease, getReview, getRoom, getSettings, listAudit, listCategories, listPublishedCategories, listPublishedQuestions, listQuestions, listReleases, listReviews, listRooms, lookupUser, releaseStage, revokeUserSessions, roomAction, saveCategoryCorrection, saveQuestion, setUserStatus, submitQuestionReview, updateSettings, updateUserRole, validateQuestion, type AdminSession } from './admin-service';
+import { decideReview, getAdminOverview, getAdminSession, getCategoryCorrection, getHealth, getPublishedCategory, getPublishedQuestion, getPublishedQuestionMedia, getQuestion, getRelease, getReview, getRoom, getSettings, listAudit, listCategories, listPublishedCategories, listPublishedQuestions, listQuestions, listReleases, listReviews, listRooms, lookupUser, markPublishedQuestionInspected, releaseStage, revokeUserSessions, roomAction, saveCategoryCorrection, saveQuestion, setUserStatus, submitQuestionReview, updateSettings, updateUserRole, validateQuestion, type AdminSession } from './admin-service';
 import type { AdminCapability, Category } from './types';
 import './admin.css';
 
@@ -53,6 +55,7 @@ export function AdminOverviewRoute() {
 
 function publishedReadiness(value: unknown) { const item = value && typeof value === 'object' ? value as Row : {}; const names = [{ key: 'huroof', label: 'الحروف' }, { key: 'categories', label: 'الفئات' }, { key: 'charades', label: 'تمثيل' }]; return <span className="admin-readiness">{names.map(({ key, label }) => <Status key={key} value={item[key] === true ? 'enabled' : 'disabled'}>{label}</Status>)}</span>; }
 function publishedQuestionsPath(categoryId?: unknown, releaseId?: unknown) { const params = new URLSearchParams(); if (typeof categoryId === 'string' && categoryId) params.set('categoryId', categoryId); if (typeof releaseId === 'string' && releaseId) params.set('releaseId', releaseId); const query = params.toString(); return `/admin/questions${query ? `?${query}` : ''}`; }
+function publishedQuestionPath(questionId: string, releaseId: string) { return `/admin/questions/${encodeURIComponent(questionId)}?releaseId=${encodeURIComponent(releaseId)}`; }
 function publishedCategoryTopic(value: Row) { const id = typeof value.id === 'string' ? value.id : ''; const displayNameAr = typeof value.labelAr === 'string' ? value.labelAr : ''; if (!id || !displayNameAr) return null; const topicId = categoryTopicIdForCategory({ id, displayNameAr }); return categoryTopics.find(topic => topic.id === topicId)?.labelAr ?? null; }
 
 export function AdminPublishedQuestionsRoute() {
@@ -61,7 +64,7 @@ export function AdminPublishedQuestionsRoute() {
   const load = async (append = false) => { const token = ++requestId.current; setState('loading'); if (!append) { setItems([]); setNextCursor(null); } try { if (id) { const value = await getPublishedQuestion(id, requestedReleaseId); if (token !== requestId.current) return; setDetail(value); setReleaseId(value.releaseId); setItems([]); setNextCursor(null); } else { const page = await listPublishedQuestions({ limit: 50, ...(append && nextCursor && releaseId ? { cursor: nextCursor, releaseId } : requestedReleaseId ? { releaseId: requestedReleaseId } : {}), ...(categoryId ? { categoryId } : {}), ...(modality ? { modality } : {}) }); if (token !== requestId.current) return; setReleaseId(page.releaseId); setItems(current => append ? [...current, ...page.items] : page.items); setNextCursor(page.nextCursor); } setState('ready'); } catch { if (token === requestId.current) setState('error'); } };
   useEffect(() => { let live = true; void (async () => { const all: Row[] = []; let cursor: string | null = null; let bound: string | undefined; try { do { const page = await listPublishedCategories({ limit: 100, ...(cursor && bound ? { cursor, releaseId: bound } : {}) }); bound = page.releaseId; all.push(...page.items); cursor = page.nextCursor; } while (cursor); if (live) { setCategories(all); setCategoryError(false); } } catch { if (live) { setCategories([]); setCategoryError(true); } } })(); return () => { live = false; }; }, []);
   useEffect(() => { setReleaseId(requestedReleaseId); setNextCursor(null); void load(false); }, [id, categoryId, modality, requestedReleaseId]);
-  if (id) return <AdminSurface title="تفاصيل سؤال منشور" description="قراءة من الإصدار المنشور الثابت. لا يمكن تحرير هذا السجل من لوحة الإدارة.">{state === 'loading' ? <LoadingRows /> : state === 'error' ? <Recovery message="تعذر تحميل السؤال المنشور أو تغيّر الإصدار النشط." retry={() => void load(false)} /> : detail ? <><Link className="text-link" to={publishedQuestionsPath(detail.categoryId, detail.releaseId)}>العودة إلى أسئلة الفئة</Link><PublishedQuestionDetail value={detail} /></> : null}</AdminSurface>;
+  if (id) return <AdminSurface title="تفاصيل سؤال منشور" description="قراءة من الإصدار المنشور الثابت. لا يمكن تحرير هذا السجل من لوحة الإدارة.">{state === 'loading' ? <LoadingRows /> : state === 'error' ? <Recovery message="تعذر تحميل السؤال المنشور أو تغيّر الإصدار النشط." retry={() => void load(false)} /> : detail ? <><Link className="text-link" to={publishedQuestionsPath(detail.categoryId, detail.releaseId)}>العودة إلى أسئلة الفئة</Link><PublishedQuestionInspectionDetail value={detail} /></> : null}</AdminSurface>;
   const categoryLabels = Object.fromEntries(categories.map(category => [String(category.id), text(category.labelAr)]));
   return <AdminSurface title="بنك الأسئلة المنشور" description="سجلات الإصدار المنشور فقط؛ التأليف يظهر في قسم المسودات المنفصل. مرشح الفئة في الرابط ويُطبّق على الخادم ضمن نطاقك."><div className="admin-toolbar"><label>الفئة<select aria-label="فئة منشورة" value={categoryId} onChange={event => setFilter('categoryId', event.target.value)} disabled={state === 'loading' || categoryError}><option value="">كل الفئات المتاحة</option>{categories.map(category => <option key={String(category.id)} value={String(category.id)}>{text(category.labelAr)}</option>)}</select></label><label>نمط السؤال<select aria-label="نمط منشور" value={modality} onChange={event => setFilter('modality', event.target.value)} disabled={state === 'loading'}><option value="">كل الأنماط</option>{['classic', 'image', 'video', 'charades'].map(value => <option key={value} value={value}>{labelStatus(value)}</option>)}</select></label><button className="button button--secondary" type="button" onClick={() => { const next = new URLSearchParams(searchParams); next.delete('categoryId'); next.delete('modality'); setSearchParams(next); }} disabled={!categoryId && !modality}>مسح المرشحات</button><button className="button button--secondary" type="button" onClick={() => void load(false)} disabled={state === 'loading'}>تحديث</button></div>{categoryError ? <p className="admin-notice" role="alert">تعذر تحميل قائمة الفئات كاملة؛ أعد المحاولة قبل استخدام مرشح الفئة.</p> : null}{state === 'loading' ? <LoadingRows /> : state === 'error' ? <Recovery message="تعذر تحميل بنك الإصدار. أعد المحاولة للتحقق من الإصدار الحالي." retry={() => void load(false)} /> : items.length ? <div className="admin-table-wrap"><div className="admin-table admin-table--published" role="table" aria-label="بنك الأسئلة المنشور"><div className="admin-table__row admin-table__row--head" role="row"><b role="columnheader">السؤال</b><b role="columnheader">الفئة</b><b role="columnheader">النمط</b><b role="columnheader">الإجراء</b></div>{items.map(item => <div className="admin-table__row" role="row" key={String(item.id)}><span data-label="السؤال" role="cell"><small>{text(item.headerAr)}</small><b className="admin-question-prompt">{text(item.promptAr)}</b></span><span data-label="الفئة" role="cell">{categoryLabels[String(item.categoryId)] ?? 'فئة غير معروضة'}<small><bdi dir="ltr">{text(item.categoryId)}</bdi></small></span><span data-label="النمط" role="cell"><Status value={item.modality} /></span><span data-label="الإجراء" role="cell"><Link className="text-link" to={`/admin/questions/${encodeURIComponent(String(item.id))}${releaseId ? `?releaseId=${encodeURIComponent(releaseId)}` : ''}`}>عرض السؤال</Link></span></div>)}</div></div> : <p className="admin-empty">{categoryId ? 'لا توجد أسئلة منشورة ضمن هذه الفئة في الإصدار أو نطاقك.' : 'لا توجد أسئلة منشورة مطابقة للمرشحات أو ضمن نطاقك.'}</p>}{nextCursor ? <button className="button button--secondary" type="button" onClick={() => void load(true)} disabled={state === 'loading'}>تحميل الصفحة التالية</button> : null}<p className="admin-hint">الإصدار: <bdi dir="ltr">{releaseId ?? 'جارٍ التحقق'}</bdi></p></AdminSurface>;
 }
@@ -161,6 +164,55 @@ function mediaPreviewError(reason: unknown) {
   return code.includes('resource-exhausted')
     ? 'حجم الوسيط يتجاوز حد العرض داخل لوحة الإدارة (1 ميغابايت).'
     : 'تعذر عرض الوسيط؛ لم يكتمل التحقق من ارتباطه بالإصدار أو لا تملك نطاقه.';
+}
+
+function publicCategoryCover(categoryId: string) {
+  const adminEntry = adminPublishedCategoryCovers.categories.find(item => item.categoryId === categoryId);
+  if (adminEntry?.publishable === true) return { web320: adminEntry.web320, altAr: adminEntry.altAr };
+  const sourceEntry = sourceCategoryCovers.categories.find(item => item.categoryId === categoryId);
+  return sourceEntry?.cover.publishable === true ? { web320: sourceEntry.cover.web320, altAr: `غلاف فئة ${categoryId}` } : null;
+}
+
+function PublishedQuestionInspectionDetail({ value }: { value: Row }) {
+  const admin = useAdmin(); const navigate = useNavigate(); const questionId = String(value.id ?? ''); const releaseId = String(value.releaseId ?? ''); const categoryId = String(value.categoryId ?? '');
+  const identity = `${releaseId}:${questionId}`; const identityRef = useRef(identity); const operationRef = useRef<string | null>(null); const pendingRef = useRef(false);
+  const [saving, setSaving] = useState(false); const [notice, setNotice] = useState(''); const [coverFailed, setCoverFailed] = useState(false); const [reviewed, setReviewed] = useState(value.inspection && typeof value.inspection === 'object' && (value.inspection as Row).reviewed === true);
+  useEffect(() => { identityRef.current = identity; operationRef.current = null; pendingRef.current = false; setSaving(false); setNotice(''); setCoverFailed(false); setReviewed(value.inspection && typeof value.inspection === 'object' && (value.inspection as Row).reviewed === true); return () => { identityRef.current = ''; }; }, [identity, value.inspection]);
+  const canInspect = capabilities(admin?.session ?? null, 'questions.inspect'); const inspectionMode = admin?.session.publishedQuestionInspectionMode ?? 'staged';
+  const markAndAdvance = async () => {
+    if (!questionId || !releaseId || pendingRef.current || saving || reviewed || !canInspect || inspectionMode !== 'enabled') return;
+    const submittedIdentity = identity; const operationId = operationRef.current ?? crypto.randomUUID(); operationRef.current = operationId;
+    pendingRef.current = true;
+    setSaving(true); setNotice('جارٍ تسجيل الفحص التشغيلي…');
+    try {
+      await markPublishedQuestionInspected({ id: questionId, releaseId, operationId });
+      if (identityRef.current !== submittedIdentity) return;
+      operationRef.current = null; setReviewed(true);
+      const next = typeof value.nextQuestionId === 'string' ? value.nextQuestionId : '';
+      if (next) { navigate(publishedQuestionPath(next, releaseId)); return; }
+      setNotice('حُفظت علامة الفحص. وصلت إلى آخر سؤال في هذه الفئة.');
+    } catch (error) {
+      if (identityRef.current !== submittedIdentity) return;
+      setNotice(isConflict(error) ? 'تغيّر الإصدار أو السؤال أثناء الحفظ؛ حدّث الصفحة قبل المتابعة.' : 'تعذر تأكيد الحفظ. أعد المحاولة؛ ستُستخدم العملية نفسها حتى لا يتكرر التسجيل.');
+    } finally { if (identityRef.current === submittedIdentity) { pendingRef.current = false; setSaving(false); } }
+  };
+  const cover = publicCategoryCover(categoryId);
+  return <article className="admin-published-detail admin-published-inspection">
+    <section className="admin-published-category" aria-labelledby="admin-published-category-title">
+      {cover && !coverFailed ? <img src={`/${cover.web320}`} alt={cover.altAr} onError={() => setCoverFailed(true)} /> : <div className="admin-published-category__fallback" role="img" aria-label="لا تتوفر صورة عامة منشورة لهذه الفئة">لا تتوفر صورة عامة منشورة لهذه الفئة</div>}
+      <div><p className="eyebrow">الفئة المنشورة</p><h2 id="admin-published-category-title">{text(value.categoryLabelAr)}</h2><p><bdi dir="ltr">{categoryId}</bdi></p></div>
+    </section>
+    <nav className="admin-published-navigation" aria-label="تنقل أسئلة الفئة">
+      {typeof value.previousQuestionId === 'string' ? <Link className="button button--secondary" to={publishedQuestionPath(value.previousQuestionId, releaseId)}>السؤال السابق</Link> : <span className="admin-hint">هذا أول سؤال في الفئة.</span>}
+      {typeof value.nextQuestionId === 'string' ? <Link className="button button--secondary" to={publishedQuestionPath(value.nextQuestionId, releaseId)}>السؤال التالي</Link> : <span className="admin-hint">هذا آخر سؤال في الفئة.</span>}
+    </nav>
+    <section className="admin-published-inspection__controls" aria-labelledby="admin-inspection-heading">
+      <div><p className="eyebrow">فحص تشغيلي</p><h2 id="admin-inspection-heading">{reviewed ? 'تم فحص هذا السؤال' : 'لم يُسجل فحص لهذا السؤال بعد'}</h2><p className="admin-hint">لا تعني هذه العلامة اعتماداً تحريرياً أو تغييراً في المحتوى أو النشر.</p></div>
+      {reviewed ? <Status value="completed">تم الفحص</Status> : canInspect && inspectionMode === 'enabled' ? <button className="button button--primary" type="button" disabled={saving} onClick={() => void markAndAdvance()}>{saving ? 'جارٍ الحفظ…' : 'تسجيل الفحص والانتقال'}</button> : <p className="admin-notice">{canInspect ? 'تسجيل الفحص في وضع مرحلي حتى تفتح بوابته المخصصة.' : 'هذه الجلسة للقراءة فقط ولا تملك صلاحية تسجيل الفحص.'}</p>}
+      {notice ? <p className="admin-form-status" aria-live="polite">{notice}</p> : null}
+    </section>
+    <PublishedQuestionDetail value={value} />
+  </article>;
 }
 
 export function PublishedQuestionDetail({ value }: { value: Row }) {

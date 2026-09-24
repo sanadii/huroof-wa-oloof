@@ -80,4 +80,6 @@ Latest publication2026-09-09: [GitHub/Vercel evidence and remaining online prere
 
 Current authorized media work (2026-09-11): [T-17 goal video and image gameplay](T17-QUESTION-MEDIA.md) defines three ordered milestones, protected shared reveal, local imports and online rollout.
 
+Current admin question-review work (2026-09-24): [T39.4 implementation and T39.5 release contract](T39-ADMIN-CATEGORY-INSPECTION.md#t394--category-question-inspection-workflow-authorized-2026-09-24), [canonical task mapping](IMPLEMENTATION-PLAN.md#t39--admin-category-inspection-and-correction-2026-09-24), [milestones](MILESTONES.md#m39--admin-category-inspection-and-correction-2026-09-24), and [handover](HANDOVER.md#t39-admin-category-handover--2026-09-24). Existing T39.1–3 production history remains intact.
+
 Current authorized Firebase data consolidation: [T17.3a content sync](FIREBASE-CONTENT-SYNC.md), including related-task source recovery and private media upload; gameplay rollout remains T17.
