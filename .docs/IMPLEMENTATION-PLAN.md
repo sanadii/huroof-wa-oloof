@@ -669,3 +669,6 @@ Done — root accepted2026-09-09. User-authorized validated6540-record stream im
 
 ## T-17 — Goal videos and image questions — 2026-09-11
 User-approved implementation: [canonical task details, decisions, checks and rollback](T17-QUESTION-MEDIA.md). T17.1 media/data and T17.2 runtime/UI are Done; T17.3 implementation/deployment preparation is accepted after final Gate PASS. Online rollout remains blocked by Firebase authentication and actual reviewed release inputs. Local and Firebase-emulator image/goal flows are verified; no production activation is claimed.
+# T39 — Admin category inspection and correction (2026-09-24)
+
+Canonical task detail, dependency order, owners, decision T39.D1, acceptance criteria, checks and rollback: [T39-ADMIN-CATEGORY-INSPECTION.md](T39-ADMIN-CATEGORY-INSPECTION.md). T39.1 is authorized now; T39.2 awaits the user-facing edit semantics and database review; T39.3 is integrated release acceptance. Preserve T27 admin design and the immutable active release.
