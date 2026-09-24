@@ -82,9 +82,120 @@ export function AdminPublishedCategoriesRoute() {
   return <AdminSurface title="فئات الإصدار المنشور" description="كل فئات الإصدار النشط ظاهرة هنا، بما فيها الفئات المحجوبة عن أنماط اللعب.">{state === 'loading' ? <LoadingRows /> : state === 'error' ? <Recovery message="تعذر تحميل فهرس الفئات؛ لم تُعرض حالة صفرية بديلة." retry={() => void load(false)} /> : items.length ? <div className="admin-table-wrap"><div className="admin-table admin-table--categories" role="table" aria-label="فئات الإصدار المنشور"><div className="admin-table__row admin-table__row--head" role="row"><b role="columnheader">الفئة</b><b role="columnheader">الأسئلة</b><b role="columnheader">جاهزية اللعب</b><b role="columnheader">الإجراءات</b></div>{items.map(item => <div className="admin-table__row" role="row" key={String(item.id)}><span role="cell">{text(item.labelAr)} <small><bdi dir="ltr">{text(item.id)}</bdi></small></span><span role="cell">{text(item.approvedCount)}</span><span role="cell">{publishedReadiness(item.runtimeReadiness)}</span><span role="cell" className="admin-inline-actions"><Link className="text-link" to={`/admin/categories/${encodeURIComponent(String(item.id))}${releaseId ? `?releaseId=${encodeURIComponent(releaseId)}` : ''}`}>عرض الفئة</Link><Link className="text-link" to={publishedQuestionsPath(item.id, releaseId)}>عرض الأسئلة</Link></span></div>)}</div></div> : <p className="admin-empty">لا توجد فئات منشورة ضمن نطاقك.</p>}{nextCursor ? <button className="button button--secondary" type="button" onClick={() => void load(true)} disabled={state === 'loading'}>تحميل الصفحة التالية</button> : null}<p className="admin-hint">الإصدار: <bdi dir="ltr">{releaseId ?? 'جارٍ التحقق'}</bdi></p></AdminSurface>;
 }
 
-export function PublishedQuestionDetail({ value }: { value: Row }) { type Variant = 'question' | 'answer'; type Preview = { url: string; type: string; key: string }; const questionMedia = value.media && typeof value.media === 'object' ? value.media as Row : null; const answerMedia = value.answerMedia && typeof value.answerMedia === 'object' ? value.answerMedia as Row : null; const detailKey = `${String(value.releaseId ?? '')}:${String(value.id ?? '')}`; const detailKeyRef = useRef(detailKey); detailKeyRef.current = detailKey; const [previews, setPreviews] = useState<Partial<Record<Variant, Preview>>>({}); const [previewStates, setPreviewStates] = useState<Record<Variant, 'idle' | 'loading' | 'error'>>({ question: 'idle', answer: 'idle' }); const [previewErrors, setPreviewErrors] = useState<Partial<Record<Variant, string>>>({}); useEffect(() => { setPreviews({}); setPreviewStates({ question: 'idle', answer: 'idle' }); setPreviewErrors({}); }, [detailKey]); const loadPreview = async (variant: Variant) => { const media = variant === 'question' ? questionMedia : answerMedia; if (!media?.mediaId || typeof value.id !== 'string' || typeof value.releaseId !== 'string') return; const requestKey = detailKey; setPreviewStates(current => ({ ...current, [variant]: 'loading' })); setPreviewErrors(current => ({ ...current, [variant]: undefined })); try { const result = await getPublishedQuestionMedia(value.id, value.releaseId, variant); if (detailKeyRef.current !== requestKey) return; setPreviews(current => ({ ...current, [variant]: { url: result.url, type: result.type, key: requestKey } })); setPreviewStates(current => ({ ...current, [variant]: 'idle' })); } catch (error) { if (detailKeyRef.current === requestKey) { const code = String((error as { code?: unknown })?.code ?? ''); setPreviewStates(current => ({ ...current, [variant]: 'error' })); setPreviewErrors(current => ({ ...current, [variant]: code.includes('resource-exhausted') ? 'حجم ملف الوسيط يتجاوز 1 ميغابايت، لذلك لا تتوفر معاينة داخل لوحة الإدارة.' : 'المعاينة غير متاحة؛ لم يكتمل التحقق من ارتباط الوسيط الثابت أو لا تملك نطاقه.' })); } } }; const mediaSection = (media: Row, variant: Variant, title: string) => { const preview = previews[variant]?.key === detailKey ? previews[variant] : undefined; const previewState = previewStates[variant]; return <section><h2>{title}</h2><dl className="admin-detail-list"><div><dt>المعرف</dt><dd><bdi dir="ltr">{text(media.mediaId)}</bdi></dd></div><div><dt>النوع</dt><dd>{text(media.type ?? media.contentType)}</dd></div>{media.altAr ? <div><dt>الوصف</dt><dd>{text(media.altAr)}</dd></div> : null}</dl>{preview ? preview.type === 'video' ? <video className="admin-media-preview" controls src={preview.url} /> : <img className="admin-media-preview" src={preview.url} alt={text(media.altAr)} /> : <button className="button button--secondary" type="button" onClick={() => void loadPreview(variant)} disabled={previewState === 'loading'}>{previewState === 'loading' ? 'جارٍ تحميل المعاينة…' : 'تحميل معاينة موثقة (حتى 1 ميغابايت)'}</button>}{previewState === 'error' ? <p className="admin-field-error">{previewErrors[variant]}</p> : null}<p className="admin-hint">تُحمّل المعاينة من ارتباط الإصدار الثابت فقط.</p></section>; }; const aliases = Array.isArray(value.acceptedAnswers) ? value.acceptedAnswers.filter(answer => typeof answer === 'string' && answer !== value.canonicalAnswer) : []; return <article className="admin-published-detail"><dl className="admin-detail-list"><div><dt>العنوان</dt><dd>{text(value.headerAr)}</dd></div><div><dt>الفئة</dt><dd><bdi dir="ltr">{text(value.categoryId)}</bdi></dd></div><div><dt>النمط</dt><dd><Status value={value.modality} /></dd></div>{typeof value.targetLetter === 'string' && value.targetLetter ? <div><dt>الحرف المستهدف</dt><dd>{value.targetLetter}</dd></div> : null}{typeof value.points === 'number' && Number.isFinite(value.points) ? <div><dt>النقاط</dt><dd>{value.points}</dd></div> : null}<div><dt>الصعوبة</dt><dd>{typeof value.difficulty === 'string' && value.difficulty ? value.difficulty : 'غير مخزنة في هذا الإصدار'}</dd></div></dl><section><h2>السؤال</h2><p>{text(value.promptAr)}</p></section><section><h2>الإجابة المرجعية</h2><p>{text(value.canonicalAnswer)}</p>{aliases.length ? <p className="admin-hint">بدائل الإجابة المقبولة: {aliases.map(text).join('، ')}</p> : <p className="admin-hint">لا توجد بدائل إجابة إضافية مخزنة.</p>}</section>{questionMedia?.mediaId ? mediaSection(questionMedia, 'question', 'وسيط السؤال') : null}{answerMedia?.mediaId ? mediaSection(answerMedia, 'answer', 'وسيط الإجابة') : null}<p className="admin-notice">هذا السجل منشور وثابت؛ أنشئ مسودة جديدة لمسار التأليف والمراجعة.</p></article>;
+type PublishedMediaVariant = 'question' | 'answer';
+
+function PublishedMediaPreview({ media, variant, questionId, releaseId }: { media: Row; variant: PublishedMediaVariant; questionId: string; releaseId: string }) {
+  const label = variant === 'question' ? 'السؤال' : 'الإجابة';
+  const kind = media.type === 'video' || media.contentType === 'video/mp4' ? 'video' : media.type === 'image' || media.contentType === 'image/png' || media.contentType === 'image/jpeg' ? 'image' : null;
+  const [preview, setPreview] = useState<{ url: string; type: string } | null>(null);
+  const [state, setState] = useState<'idle' | 'loading' | 'ready' | 'error'>(kind === 'image' ? 'loading' : 'idle');
+  const [error, setError] = useState('');
+  const [retry, setRetry] = useState(0);
+  const mounted = useRef(true);
+
+  useEffect(() => {
+    mounted.current = true;
+    return () => { mounted.current = false; };
+  }, []);
+
+  useEffect(() => {
+    if (kind !== 'image') return;
+    let current = true;
+    setState('loading');
+    setError('');
+    void getPublishedQuestionMedia(questionId, releaseId, variant).then(result => {
+      if (!current) return;
+      setPreview({ url: result.url, type: result.type });
+      setState('ready');
+    }).catch(reason => {
+      if (!current) return;
+      setState('error');
+      setError(mediaPreviewError(reason));
+    });
+    return () => { current = false; };
+  }, [kind, questionId, releaseId, variant, media.mediaId, retry]);
+
+  const openVideo = async () => {
+    if (state === 'loading') return;
+    setState('loading');
+    setError('');
+    try {
+      const result = await getPublishedQuestionMedia(questionId, releaseId, variant);
+      if (!mounted.current) return;
+      setPreview({ url: result.url, type: result.type });
+      setState('ready');
+    } catch (reason) {
+      if (!mounted.current) return;
+      setState('error');
+      setError(mediaPreviewError(reason));
+    }
+  };
+
+  if (!kind) return <p className="admin-hint">نوع هذا الوسيط غير مدعوم للعرض داخل الصفحة.</p>;
+
+  return <div className="admin-published-media">
+    <p className="admin-published-media__label">{kind === 'video' ? 'فيديو' : 'صورة'} {label}</p>
+    {kind === 'video' ? (
+      preview ? <video className="admin-media-preview admin-media-preview--video" aria-label={`فيديو ${label}`} controls controlsList="nodownload" autoPlay playsInline preload="metadata" src={preview.url} onError={() => { setPreview(null); setState('error'); setError('تعذر تشغيل هذا الفيديو داخل الصفحة.'); }} /> :
+        <button className="admin-media-play" type="button" onClick={() => void openVideo()} disabled={state === 'loading'}>
+          <span className="admin-media-play__icon" aria-hidden="true">▶</span>
+          <span>{state === 'loading' ? 'جارٍ تجهيز الفيديو…' : state === 'error' ? `أعد محاولة عرض فيديو ${label}` : `شاهد فيديو ${label}`}</span>
+          <small>يُعرض هنا داخل {label}، دون تنزيل ملف.</small>
+        </button>
+    ) : (
+      preview ? <img className="admin-media-preview admin-media-preview--image" src={preview.url} alt={typeof media.altAr === 'string' && media.altAr ? media.altAr : `صورة ${label}`} onError={() => { setPreview(null); setState('error'); setError('تعذر عرض هذه الصورة داخل الصفحة.'); }} /> :
+        state === 'error' ? <button className="button button--secondary" type="button" onClick={() => setRetry(current => current + 1)}>إعادة محاولة عرض صورة {label}</button> :
+          <div className="admin-media-loading" role="status">جارٍ عرض صورة {label}…</div>
+    )}
+    {state === 'error' ? <p className="admin-field-error" role="alert">{error}</p> : null}
+    {typeof media.altAr === 'string' && media.altAr ? <p className="admin-published-media__caption">{media.altAr}</p> : null}
+    <details className="admin-published-media__details">
+      <summary>بيانات الوسيط</summary>
+      <dl><div><dt>المعرف</dt><dd><bdi dir="ltr">{text(media.mediaId)}</bdi></dd></div><div><dt>النوع</dt><dd>{text(media.contentType ?? media.type)}</dd></div></dl>
+    </details>
+  </div>;
 }
 
+function mediaPreviewError(reason: unknown) {
+  const code = String((reason as { code?: unknown })?.code ?? '');
+  return code.includes('resource-exhausted')
+    ? 'حجم الوسيط يتجاوز حد العرض داخل لوحة الإدارة (1 ميغابايت).'
+    : 'تعذر عرض الوسيط؛ لم يكتمل التحقق من ارتباطه بالإصدار أو لا تملك نطاقه.';
+}
+
+export function PublishedQuestionDetail({ value }: { value: Row }) {
+  const questionMedia = value.media && typeof value.media === 'object' ? value.media as Row : null;
+  const answerMedia = value.answerMedia && typeof value.answerMedia === 'object' ? value.answerMedia as Row : null;
+  const questionId = String(value.id ?? '');
+  const releaseId = String(value.releaseId ?? '');
+  const aliases = Array.isArray(value.acceptedAnswers) ? value.acceptedAnswers.filter(answer => typeof answer === 'string' && answer !== value.canonicalAnswer) : [];
+
+  return <article className="admin-published-detail">
+    <header className="admin-published-detail__header">
+      <p className="eyebrow">السجل المنشور</p>
+      <h2>{text(value.headerAr)}</h2>
+    </header>
+    <dl className="admin-published-facts">
+      <div><dt>الفئة</dt><dd><bdi dir="ltr">{text(value.categoryId)}</bdi></dd></div>
+      <div><dt>النمط</dt><dd><Status value={value.modality} /></dd></div>
+      {typeof value.targetLetter === 'string' && value.targetLetter ? <div><dt>الحرف المستهدف</dt><dd>{value.targetLetter}</dd></div> : null}
+      {typeof value.points === 'number' && Number.isFinite(value.points) ? <div><dt>النقاط</dt><dd>{value.points}</dd></div> : null}
+      <div><dt>الصعوبة</dt><dd>{typeof value.difficulty === 'string' && value.difficulty ? value.difficulty : 'غير مخزنة في هذا الإصدار'}</dd></div>
+    </dl>
+    <section className="admin-published-panel admin-published-panel--question" aria-labelledby="admin-published-question-heading">
+      <div className="admin-published-panel__heading"><span className="admin-published-panel__number" aria-hidden="true">١</span><h2 id="admin-published-question-heading">السؤال</h2></div>
+      <p className="admin-published-panel__copy">{text(value.promptAr)}</p>
+      {questionMedia?.mediaId ? <PublishedMediaPreview key={`${releaseId}:${questionId}:question:${String(questionMedia.mediaId)}`} media={questionMedia} variant="question" questionId={questionId} releaseId={releaseId} /> : null}
+    </section>
+    <section className="admin-published-panel admin-published-panel--answer" aria-labelledby="admin-published-answer-heading">
+      <div className="admin-published-panel__heading"><span className="admin-published-panel__number" aria-hidden="true">٢</span><h2 id="admin-published-answer-heading">الإجابة</h2></div>
+      <p className="admin-published-panel__copy">{text(value.canonicalAnswer)}</p>
+      {aliases.length ? <p className="admin-published-aliases"><strong>بدائل مقبولة</strong> {aliases.map(text).join('، ')}</p> : null}
+      {answerMedia?.mediaId ? <PublishedMediaPreview key={`${releaseId}:${questionId}:answer:${String(answerMedia.mediaId)}`} media={answerMedia} variant="answer" questionId={questionId} releaseId={releaseId} /> : null}
+    </section>
+    <p className="admin-published-detail__footnote">هذا السؤال من الإصدار المنشور الثابت. تعديل المحتوى يمر عبر مسودة ومراجعة منفصلتين.</p>
+  </article>;
+}
 const listLoaders: Record<string, (data?: Record<string, unknown>) => Promise<{ items: Row[]; nextCursor: string | null }>> = { drafts: listQuestions, reviews: listReviews, releases: listReleases, rooms: listRooms, audit: listAudit };
 const detailLoaders: Record<string, (id: string) => Promise<Row>> = { drafts: getQuestion, reviews: getReview, releases: getRelease, rooms: getRoom };
 function rowCells(section: string, item: Row, categoryNames: Record<string, string> = {}): Array<{ label: string; value: ReactNode }> {
