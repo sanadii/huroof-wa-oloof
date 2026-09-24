@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { adminRoomDto } from './index.js';
-import { canonicalAdminHash, canManageCategoryCorrection, categoryCorrectionDraftInput, categoryCorrectionDraftsEnabled, categoryCorrectionDto, isArchivableQuestionStatus, isVerifiedAdminProvider, publishedQuestionDto, publishedQuestionMediaBinding, questionReviewBinding, reviewMatchesQuestion, sameAdminAuthorization, validateAdminQuestionDraft, validateLiveCategoryCorrectionPrincipal, wouldLockOutLastSuperAdmin, wouldOrphanSuperAdmin } from './admin/admin.js';
+import { canonicalAdminHash, canInspectPublishedQuestion, canManageCategoryCorrection, categoryCorrectionDraftInput, categoryCorrectionDraftsEnabled, categoryCorrectionDto, isArchivableQuestionStatus, isVerifiedAdminProvider, publishedQuestionContentDigest, publishedQuestionDto, publishedQuestionInspectionsEnabled, publishedQuestionMediaBinding, questionReviewBinding, reviewMatchesQuestion, sameAdminAuthorization, validateAdminQuestionDraft, validateLiveCategoryCorrectionPrincipal, validateLivePublishedQuestionInspectionPrincipal, wouldLockOutLastSuperAdmin, wouldOrphanSuperAdmin } from './admin/admin.js';
 
 test('game-ops room DTO remains answer-free even if a canonical room has active question data', () => {
   const dto = adminRoomDto('room_1', {
@@ -36,6 +36,26 @@ test('category correction drafts use a dedicated gate and a two-field allowlist'
   assert.equal(categoryCorrectionDraftsEnabled({ ADMIN_MUTATIONS_ENABLED: 'true' } as NodeJS.ProcessEnv), false);
   assert.deepEqual(categoryCorrectionDraftInput({ proposedLabelAr: ' عنوان مصحح ', internalNote: ' ملاحظة داخلية ' }), { proposedLabelAr: 'عنوان مصحح', internalNote: 'ملاحظة داخلية' });
   assert.throws(() => categoryCorrectionDraftInput({ proposedLabelAr: 'عنوان', internalNote: 'ملاحظة', publishedLabelAr: 'محاولة تجاوز' }), /Unsupported field/);
+});
+
+test('published question inspections use a dedicated gate and role/scope boundary', () => {
+  assert.equal(publishedQuestionInspectionsEnabled({ FUNCTIONS_EMULATOR: 'true' } as NodeJS.ProcessEnv), true);
+  assert.equal(publishedQuestionInspectionsEnabled({ ADMIN_PUBLISHED_QUESTION_INSPECTIONS_ENABLED: 'true' } as NodeJS.ProcessEnv), true);
+  assert.equal(publishedQuestionInspectionsEnabled({ ADMIN_MUTATIONS_ENABLED: 'true' } as NodeJS.ProcessEnv), false);
+  assert.equal(canInspectPublishedQuestion({ roles: ['content_admin'], categoryScopes: ['cat-1'] }, 'cat-1'), true);
+  assert.equal(canInspectPublishedQuestion({ roles: ['reviewer'], categoryScopes: ['cat-1'] }, 'cat-1'), true);
+  assert.equal(canInspectPublishedQuestion({ roles: ['viewer'], categoryScopes: ['cat-1'] }, 'cat-1'), false);
+  assert.equal(canInspectPublishedQuestion({ roles: ['game_ops'], categoryScopes: ['cat-1'] }, 'cat-1'), false);
+  assert.equal(canInspectPublishedQuestion({ roles: ['reviewer'], categoryScopes: ['cat-2'] }, 'cat-1'), false);
+});
+
+test('transaction-time inspection authorization rejects revoked roles, versions, and scopes', () => {
+  const actor = { claimRoles: ['reviewer'] as const, claimAuthzVersion: 7 };
+  const current = { enabled: true, identityReady: true, roles: ['reviewer'], authzVersion: 7, categoryScopes: ['cat-1'] };
+  assert.deepEqual(validateLivePublishedQuestionInspectionPrincipal(actor, current, 'cat-1'), { roles: ['reviewer'], categoryScopes: ['cat-1'] });
+  assert.throws(() => validateLivePublishedQuestionInspectionPrincipal(actor, { ...current, categoryScopes: ['cat-2'] }, 'cat-1'), /scope changed/);
+  assert.throws(() => validateLivePublishedQuestionInspectionPrincipal(actor, { ...current, roles: ['viewer'] }, 'cat-1'), /authorization changed/);
+  assert.throws(() => validateLivePublishedQuestionInspectionPrincipal(actor, { ...current, authzVersion: 8 }, 'cat-1'), /authorization changed/);
 });
 
 test('category correction DTO excludes internal notes unless a current writer may read them', () => {
@@ -88,6 +108,12 @@ test('published question inspection DTO exposes only approved fields and normali
   const unavailable = publishedQuestionDto('published-2', { categoryId: 'tahadani-001', modality: 'classic', headerAr: 'عنوان', promptAr: 'سؤال', canonicalAnswer: 'جواب', acceptedAnswers: [], points: Number.NaN }, true);
   assert.equal(unavailable.points, null);
   assert.equal(unavailable.difficulty, null);
+});
+
+test('published question inspection digest binds the immutable detail projection', () => {
+  const question = { categoryId: 'cat-1', modality: 'classic', headerAr: 'عنوان', promptAr: 'سؤال', canonicalAnswer: 'جواب', acceptedAnswers: ['جواب'] };
+  assert.equal(publishedQuestionContentDigest('q-1', question), publishedQuestionContentDigest('q-1', { ...question }));
+  assert.notEqual(publishedQuestionContentDigest('q-1', question), publishedQuestionContentDigest('q-1', { ...question, promptAr: 'سؤال جديد' }));
 });
 
 test('question validator enforces modality reviewers and safe HTTPS sources', () => {

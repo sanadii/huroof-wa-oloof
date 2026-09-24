@@ -1,9 +1,10 @@
 import { expect, test } from '@playwright/test';
-import { deleteApp as deleteAdminApp, getApps, initializeApp as initializeAdminApp } from 'firebase-admin/app';
+import { deleteApp as deleteAdminApp, initializeApp as initializeAdminApp } from 'firebase-admin/app';
 import { getAuth as getAdminAuth } from 'firebase-admin/auth';
 import { getFirestore } from 'firebase-admin/firestore';
 import { deleteApp, initializeApp } from 'firebase/app';
 import { connectAuthEmulator, getAuth, signInWithEmailAndPassword } from 'firebase/auth';
+import { connectFirestoreEmulator, doc, getFirestore as getClientFirestore, setDoc } from 'firebase/firestore';
 import { connectFunctionsEmulator, getFunctions, httpsCallable } from 'firebase/functions';
 
 const projectId = 'demo-huroof-wa-oloof';
@@ -61,7 +62,7 @@ test('category correction transaction binds the active release, revision, scope,
     let sawInitialRateLimit = false; let readyForRace!: () => void; let revokeScope!: () => void;
     const rateLimitReady = new Promise<void>(resolve => { readyForRace = resolve; });
     const scopeRevoked = new Promise<void>(resolve => { revokeScope = resolve; });
-    const unsubscribeRateLimit = rateLimitRef.onSnapshot(snapshot => {
+    const unsubscribeRateLimit = rateLimitRef.onSnapshot(() => {
       if (!sawInitialRateLimit) { sawInitialRateLimit = true; readyForRace(); return; }
       void database.doc(`adminPrincipals/${user.uid}`).update({ categoryScopes: [] }).then(() => revokeScope());
     });
@@ -101,4 +102,45 @@ test('category correction transaction binds the active release, revision, scope,
   } finally {
     await Promise.all([deleteApp(clientApp), deleteAdminApp(adminApp)]);
   }
+});
+
+test('published-question inspection is release-bound, create-once, scope-checked, and inaccessible through Firestore rules', async () => {
+  const adminApp = initializeAdminApp({ projectId }, `inspection-admin-${Date.now()}`);
+  const database = getFirestore(adminApp); const adminAuth = getAdminAuth(adminApp);
+  const suffix = Date.now(); const categoryId = `inspection-cat-${suffix}`; const releaseId = `inspection-release-${suffix}`; const root = 'c'.repeat(64);
+  const first = await adminAuth.createUser({ email: `inspection-first-${suffix}@example.test`, password: 'inspection-pass', emailVerified: true });
+  const second = await adminAuth.createUser({ email: `inspection-second-${suffix}@example.test`, password: 'inspection-pass', emailVerified: true });
+  const questions = ['question-a', 'question-b', 'question-c'];
+  await Promise.all([
+    adminAuth.setCustomUserClaims(first.uid, { adminRoles: ['content_admin'], authzVersion: 1 }), adminAuth.setCustomUserClaims(second.uid, { adminRoles: ['reviewer'], authzVersion: 1 }),
+    database.doc('runtime/activeRelease').set({ releaseId }), database.doc(`releases/${releaseId}`).set({ immutable: true, approvedCount: questions.length, documentRootSha256: root }), database.doc(`releases/${releaseId}/catalogCategories/${categoryId}`).set({ labelAr: 'فئة الفحص' }),
+    database.doc(`adminPrincipals/${first.uid}`).set({ enabled: true, identityReady: true, roles: ['content_admin'], authzVersion: 1, categoryScopes: [categoryId] }), database.doc(`adminPrincipals/${second.uid}`).set({ enabled: true, identityReady: true, roles: ['reviewer'], authzVersion: 1, categoryScopes: [categoryId] }),
+    ...questions.map((id) => database.doc(`releases/${releaseId}/questions/${id}`).set({ categoryId, modality: 'classic', headerAr: id, promptAr: `نص ${id}`, canonicalAnswer: 'جواب', acceptedAnswers: ['جواب'] })),
+  ]);
+  const makeClient = (name: string) => {
+    const app = initializeApp({ apiKey: 'demo-api-key', authDomain: `${projectId}.firebaseapp.com`, projectId, appId: `1:1234567890:web:${name}-${suffix}` }, `inspection-${name}-${suffix}`);
+    const clientAuth = getAuth(app); connectAuthEmulator(clientAuth, 'http://127.0.0.1:19099', { disableWarnings: true });
+    const functions = getFunctions(app, 'me-central1'); connectFunctionsEmulator(functions, '127.0.0.1', 15001);
+    const clientDb = getClientFirestore(app); connectFirestoreEmulator(clientDb, '127.0.0.1', 18080);
+    return { app, clientAuth, functions, clientDb };
+  };
+  const firstClient = makeClient('first'); const secondClient = makeClient('second');
+  try {
+    await Promise.all([signInWithEmailAndPassword(firstClient.clientAuth, first.email!, 'inspection-pass'), signInWithEmailAndPassword(secondClient.clientAuth, second.email!, 'inspection-pass')]);
+    const inspect = (functions: ReturnType<typeof getFunctions>, operationId: string) => httpsCallable<{ id: string; releaseId: string; operationId: string }, { operationId: string; revision: number; replayed: boolean; alreadyInspected?: boolean }>(functions, 'adminMarkPublishedQuestionInspected')({ id: 'question-b', releaseId, operationId });
+    await expect(setDoc(doc(firstClient.clientDb, `adminPublishedQuestionInspections/${releaseId}/questions/question-b`), { forged: true })).rejects.toBeDefined();
+    const [one, two] = await Promise.all([inspect(firstClient.functions, 'inspection-op-1'), inspect(secondClient.functions, 'inspection-op-2')]);
+    expect([one.data.alreadyInspected, two.data.alreadyInspected].filter(Boolean)).toHaveLength(1);
+    const marker = await database.doc(`adminPublishedQuestionInspections/${releaseId}/questions/question-b`).get();
+    expect(marker.data()).toMatchObject({ releaseId, questionId: 'question-b', categoryId, releaseRootSha256: root, status: 'reviewed' });
+    expect([first.uid, second.uid]).toContain(marker.data()?.reviewedByUid);
+    const replay = await inspect(firstClient.functions, 'inspection-op-1'); expect(replay.data.replayed).toBe(true);
+    await expect(httpsCallable<{ id: string; releaseId: string; operationId: string }, unknown>(firstClient.functions, 'adminMarkPublishedQuestionInspected')({ id: 'question-a', releaseId, operationId: 'inspection-op-1' })).rejects.toMatchObject({ code: 'functions/already-exists' });
+    const detail = await httpsCallable<{ id: string; releaseId: string }, { previousQuestionId: string | null; nextQuestionId: string | null; categoryLabelAr: string; inspection: { reviewed: boolean } }>(firstClient.functions, 'adminGetPublishedQuestion')({ id: 'question-b', releaseId });
+    expect(detail.data).toMatchObject({ categoryLabelAr: 'فئة الفحص', previousQuestionId: 'question-a', nextQuestionId: 'question-c', inspection: { reviewed: true } });
+    await database.doc(`adminPrincipals/${first.uid}`).update({ categoryScopes: [] });
+    await expect(inspect(firstClient.functions, 'inspection-op-scope-revoked')).rejects.toMatchObject({ code: 'functions/permission-denied' });
+    await database.doc('runtime/activeRelease').set({ releaseId: `${releaseId}-successor` }); await database.doc(`releases/${releaseId}-successor`).set({ immutable: true, approvedCount: 0, documentRootSha256: 'd'.repeat(64) });
+    await expect(inspect(secondClient.functions, 'inspection-op-release-changed')).rejects.toMatchObject({ code: 'functions/aborted' });
+  } finally { await Promise.all([deleteApp(firstClient.app), deleteApp(secondClient.app), deleteAdminApp(adminApp)]); }
 });

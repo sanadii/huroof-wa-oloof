@@ -33,7 +33,7 @@ import {
 } from "./presence.js";
 export {
   adminGetSession, adminGetOverview, adminListQuestions, adminGetQuestion,
-  adminListPublishedQuestions, adminGetPublishedQuestion, adminGetPublishedQuestionMedia, adminListPublishedCategories, adminGetPublishedCategory, adminGetCategoryCorrection, adminSaveCategoryCorrection,
+  adminListPublishedQuestions, adminGetPublishedQuestion, adminGetPublishedQuestionMedia, adminMarkPublishedQuestionInspected, adminListPublishedCategories, adminGetPublishedCategory, adminGetCategoryCorrection, adminSaveCategoryCorrection,
   adminSaveQuestion, adminValidateQuestion, adminSubmitQuestionReview, adminArchiveQuestion,
   adminListReviews, adminGetReview, adminDecideReview, adminListCategories, adminGetCategory,
   adminUpdateCategory, adminListReleases, adminGetRelease, adminAuditRelease, adminStageRelease,
