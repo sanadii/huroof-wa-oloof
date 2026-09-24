@@ -27,6 +27,7 @@ const AdminShell = lazy(() => import('../features/admin/AdminRoutes').then(({ Ad
 const AdminUsersRoute = lazy(() => import('../features/admin/AdminRoutes').then(({ AdminUsersRoute }) => ({ default: AdminUsersRoute })));
 const LegacyQuestionRedirect = lazy(() => import('../features/admin/AdminRoutes').then(({ LegacyQuestionRedirect }) => ({ default: LegacyQuestionRedirect })));
 const LocalImportReviewRoute = lazy(() => import('../routes/LocalImportReviewRoute').then(({ LocalImportReviewRoute }) => ({ default: LocalImportReviewRoute })));
+const MediaCreditsRoute = lazy(() => import('../routes/MediaCredits').then(({ MediaCreditsRoute }) => ({ default: MediaCreditsRoute })));
 
 type RouteStatusSurfaceProps = {
   action?: ReactNode;
@@ -104,6 +105,7 @@ export function App() {
             <Route path="/" element={<EntryRoute />} />
             <Route path="/room/:roomCode/join" element={<NameJoinRoute />} />
             <Route path="/how-to-play" element={<HowToPlayRoute />} />
+            <Route path="/media-credits" element={<MediaCreditsRoute />} />
             <Route path="/host/new" element={<HostNewRoute />} />
             <Route path="/room/:roomCode/lobby" element={staticPreview ? unavailable : <RoomRoute surface="lobby" />} />
             <Route path="/room/:roomCode/host" element={staticPreview ? unavailable : <RoomRoute surface="host" />} />
