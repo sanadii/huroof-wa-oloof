@@ -83,3 +83,5 @@ Current authorized media work (2026-09-11): [T-17 goal video and image gameplay]
 Current admin question-review work (2026-09-24): [T39.4 implementation and T39.5 release contract](T39-ADMIN-CATEGORY-INSPECTION.md#t394--category-question-inspection-workflow-authorized-2026-09-24), [canonical task mapping](IMPLEMENTATION-PLAN.md#t39--admin-category-inspection-and-correction-2026-09-24), [milestones](MILESTONES.md#m39--admin-category-inspection-and-correction-2026-09-24), and [handover](HANDOVER.md#t39-admin-category-handover--2026-09-24). Existing T39.1–3 production history remains intact.
 
 Current authorized Firebase data consolidation: [T17.3a content sync](FIREBASE-CONTENT-SYNC.md), including related-task source recovery and private media upload; gameplay rollout remains T17.
+
+Latest T39.4/T39.5 production checkpoint: [review workflow, release evidence and open human checks](T39-ADMIN-CATEGORY-INSPECTION.md#t395--integrated-release-and-production-readback). The feature is live; no published card was marked solely for deployment testing.
