@@ -1,6 +1,7 @@
 import { httpsCallable } from 'firebase/functions';
 import { getOptionalFirebaseAdminClient } from '../../lib/firebase/client';
 import type { AdminOverview, AdminSession, Category, CategoryCorrectionResponse, Mutation, Page, PublishedCategory, PublishedPage, PublishedQuestionDetail, PublishedQuestionSummary, QuestionDetail, QuestionSummary, Release, Review, RoomSummary } from './types';
+import { isApprovedReleaseCatalog, type ApprovedReleaseCatalog } from '../game/runtime/contracts';
 export type { AdminSession } from './types';
 
 export type AdminOperation = Mutation;
@@ -20,6 +21,11 @@ export const getPublishedQuestion = (id: string, releaseId?: string) => adminCal
 export const getPublishedQuestionMedia = (id: string, releaseId: string, variant: 'question' | 'answer') => adminCall<{ id: string; releaseId: string; variant: 'question' | 'answer' }, { mediaId: string; type: string; contentType: string; altAr: string | null; url: string }>('adminGetPublishedQuestionMedia', { id, releaseId, variant });
 export const markPublishedQuestionInspected = (data: { id: string; releaseId: string; operationId: string }) => adminCall<typeof data, Mutation & { alreadyInspected?: boolean }>('adminMarkPublishedQuestionInspected', data);
 export const listPublishedCategories = (data: Record<string, unknown> = {}) => adminCall<Record<string, unknown>, PublishedPage<PublishedCategory>>('adminListPublishedCategories', data);
+export async function getPublishedCategoryQuestionTypes(): Promise<ApprovedReleaseCatalog> {
+  const catalog = await adminCall<Record<string, never>, unknown>('getApprovedReleaseCatalog', {});
+  if (!isApprovedReleaseCatalog(catalog)) throw new Error('APPROVED_RELEASE_CATALOG_INVALID');
+  return catalog;
+}
 export const getPublishedCategory = (id: string, releaseId?: string) => adminCall<{ id: string; releaseId?: string }, PublishedCategory & { releaseId: string }>('adminGetPublishedCategory', { id, ...(releaseId ? { releaseId } : {}) });
 export const getCategoryCorrection = (categoryId: string, releaseId?: string) => adminCall<{ categoryId: string; releaseId?: string }, CategoryCorrectionResponse>('adminGetCategoryCorrection', { categoryId, ...(releaseId ? { releaseId } : {}) });
 export const saveCategoryCorrection = (data: { categoryId: string; releaseId: string; operationId: string; expectedRevision: number; draft: { proposedLabelAr: string; internalNote: string } }) => adminCall<typeof data, Mutation>('adminSaveCategoryCorrection', data);

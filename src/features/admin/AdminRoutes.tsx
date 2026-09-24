@@ -2,12 +2,12 @@ import { Link, Navigate, Outlet, useLocation, useNavigate, useOutletContext, use
 import { BrandMark } from '../../design-system/BrandMark';
 import { ThemeToggle } from '../../design-system/ThemeToggle';
 import { InternalHeader } from '../../design-system/InternalHeader';
-import { categoryTopicIdForCategory, categoryTopics } from '../../data/category-filters';
+import { categoryQuestionTypes, categoryTopicIdForCategory, categoryTopics, type CategoryQuestionType } from '../../data/category-filters';
 import adminPublishedCategoryCovers from '../../data/admin-published-category-covers.public.json';
 import sourceCategoryCovers from '../../data/tahadani-games-category-covers.public.json';
 import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { useFirebaseAuth } from '../auth/AuthProvider';
-import { decideReview, getAdminOverview, getAdminSession, getCategoryCorrection, getHealth, getPublishedCategory, getPublishedQuestion, getPublishedQuestionMedia, getQuestion, getRelease, getReview, getRoom, getSettings, listAudit, listCategories, listPublishedCategories, listPublishedQuestions, listQuestions, listReleases, listReviews, listRooms, lookupUser, markPublishedQuestionInspected, releaseStage, revokeUserSessions, roomAction, saveCategoryCorrection, saveQuestion, setUserStatus, submitQuestionReview, updateSettings, updateUserRole, validateQuestion, type AdminSession } from './admin-service';
+import { decideReview, getAdminOverview, getAdminSession, getCategoryCorrection, getHealth, getPublishedCategory, getPublishedCategoryQuestionTypes, getPublishedQuestion, getPublishedQuestionMedia, getQuestion, getRelease, getReview, getRoom, getSettings, listAudit, listCategories, listPublishedCategories, listPublishedQuestions, listQuestions, listReleases, listReviews, listRooms, lookupUser, markPublishedQuestionInspected, releaseStage, revokeUserSessions, roomAction, saveCategoryCorrection, saveQuestion, setUserStatus, submitQuestionReview, updateSettings, updateUserRole, validateQuestion, type AdminSession } from './admin-service';
 import type { AdminCapability, Category } from './types';
 import './admin.css';
 
@@ -82,7 +82,98 @@ export function AdminPublishedCategoriesRoute() {
   const saveCorrection = async (event: FormEvent<HTMLFormElement>) => { event.preventDefault(); if (!id || !detail || typeof detail.releaseId !== 'string' || !canEditCorrection || saveState === 'saving') return; const submittedCategoryId = id; const submittedReleaseId = detail.releaseId; setSaveState('saving'); setSaveMessage('جارٍ حفظ مسودة التصحيح…'); try { const result = await saveCategoryCorrection({ categoryId: submittedCategoryId, releaseId: submittedReleaseId, operationId: crypto.randomUUID(), expectedRevision: Number(correctionDraft?.revision ?? 0), draft: { proposedLabelAr, internalNote } }); if (!isCurrentIdentity(submittedCategoryId, submittedReleaseId)) return; setCorrection(current => current ? { ...current, draft: { ...((current.draft as Row) ?? {}), categoryId: submittedCategoryId, proposedLabelAr, internalNote, status: 'draft', revision: result.revision } } : current); admin?.setDirty(false); setSaveMessage('حُفظت مسودة التصحيح. لا يتغير الإصدار المنشور أو اللاعبون بهذا الحفظ.'); } catch (error) { if (!isCurrentIdentity(submittedCategoryId, submittedReleaseId)) return; setSaveMessage(isConflict(error) ? 'تعارض في المسودة: بقي نصك كما هو. حدّث الفئة قبل محاولة الحفظ مرة أخرى.' : 'تعذر حفظ مسودة التصحيح؛ بقي النص في النموذج.'); } finally { if (isCurrentIdentity(submittedCategoryId, submittedReleaseId)) setSaveState('idle'); } };
   const protectQuestionNavigation = (event: React.MouseEvent<HTMLAnchorElement>, target: string) => { if (!admin?.dirty) return; event.preventDefault(); if (!window.confirm('لديك مسودة تصحيح غير محفوظة. هل تريد مغادرة الفئة؟')) return; admin.discardDirty(() => navigate(target)); };
   if (id) return <AdminSurface title="تفاصيل فئة منشورة" description="هذه قراءة من فهرس الإصدار الثابت، مع عدد الأسئلة وحالة جاهزية اللعب.">{state === 'loading' ? <LoadingRows /> : state === 'error' ? <Recovery message="تعذر تحميل الفئة المنشورة أو تغيّر الإصدار النشط." retry={() => void load(false)} /> : detail ? <><dl className="admin-detail-list"><div><dt>الاسم المنشور</dt><dd>{text(detail.labelAr)}</dd></div><div><dt>المعرف</dt><dd><bdi dir="ltr">{text(detail.id)}</bdi></dd></div>{publishedCategoryTopic(detail) ? <div><dt>الموضوع (تجميع للتصفح)</dt><dd>{publishedCategoryTopic(detail)}</dd></div> : null}<div><dt>الأسئلة المنشورة</dt><dd>{text(detail.approvedCount)}</dd></div><div><dt>جاهزية اللعب</dt><dd>{publishedReadiness(detail.runtimeReadiness)}</dd></div></dl><p className="admin-hint">الموضوع تجميع تصفح مشتق من التصنيف المحلي، وليس حقلاً محفوظاً في الإصدار المنشور.</p>{Number(detail.approvedCount) === 0 ? <p className="admin-empty">لا توجد أسئلة منشورة في هذه الفئة ضمن هذا الإصدار.</p> : <Link className="button button--primary" to={publishedQuestionsPath(detail.id, detail.releaseId)} onClick={event => protectQuestionNavigation(event, publishedQuestionsPath(detail.id, detail.releaseId))}>عرض أسئلة هذه الفئة ({text(detail.approvedCount)})</Link>}<section className="admin-published-detail" aria-labelledby="category-correction-title"><div><p className="eyebrow">تصحيح داخلي</p><h2 id="category-correction-title">مسودة تصحيح الفئة</h2></div><p className="admin-notice">هذه مسودة تصحيح داخلية؛ لا يراها اللاعبون. يلزم إصدار لاحق ومراجعة منفصلة قبل أن يظهر أي تغيير في اللعب.</p>{correctionDraft ? <dl className="admin-detail-list"><div><dt>الحالة</dt><dd><Status value={correctionDraft.status} /></dd></div><div><dt>المراجعة</dt><dd>{text(correctionDraft.revision)}</dd></div><div><dt>اسم مقترح</dt><dd>{text(correctionDraft.proposedLabelAr)}</dd></div></dl> : <p className="admin-hint">لا توجد مسودة تصحيح محفوظة لهذه الفئة في الإصدار النشط.</p>}{canEditCorrection ? <form className="admin-form" onSubmit={saveCorrection}><fieldset disabled={saveState === 'saving'}><legend>بيانات مسودة التصحيح</legend><label htmlFor="admin-category-proposed-label">الاسم العربي المقترح<input id="admin-category-proposed-label" value={proposedLabelAr} maxLength={160} required aria-describedby="admin-category-proposed-label-guidance" onChange={event => { setProposedLabelAr(event.target.value); admin?.setDirty(true); }} /></label><p id="admin-category-proposed-label-guidance" className="admin-hint">يلزم اسم عربي مقترح قبل حفظ مسودة التصحيح.</p><label htmlFor="admin-category-internal-note">ملاحظة التصحيح الداخلية<textarea id="admin-category-internal-note" value={internalNote} maxLength={2000} required aria-describedby="admin-category-internal-note-guidance" onChange={event => { setInternalNote(event.target.value); admin?.setDirty(true); }} /></label><p id="admin-category-internal-note-guidance" className="admin-hint">يلزم وصف داخلي موجز لسبب التصحيح؛ لا يظهر للاعبين.</p></fieldset><p aria-live="polite" className="admin-form-status">{saveMessage}</p><button className="button button--primary" type="submit" disabled={saveState === 'saving'}>{saveState === 'saving' ? 'جارٍ الحفظ…' : 'حفظ مسودة التصحيح'}</button></form> : <p className="admin-notice">{correctionGateStaged && capabilities(admin?.session ?? null, 'categories.write') ? 'مسودات تصحيح الفئات في وضع مرحلي؛ لا يمكن حفظها حتى يفتح الخادم بوابتها المخصصة.' : 'هذه الجلسة للقراءة فقط؛ لا تملك صلاحية عرض الملاحظة الداخلية أو حفظ تصحيح الفئة.'}</p>}</section></> : null}</AdminSurface>;
-  return <AdminSurface title="فئات الإصدار المنشور" description="كل فئات الإصدار النشط ظاهرة هنا، بما فيها الفئات المحجوبة عن أنماط اللعب.">{state === 'loading' ? <LoadingRows /> : state === 'error' ? <Recovery message="تعذر تحميل فهرس الفئات؛ لم تُعرض حالة صفرية بديلة." retry={() => void load(false)} /> : items.length ? <div className="admin-table-wrap"><div className="admin-table admin-table--categories" role="table" aria-label="فئات الإصدار المنشور"><div className="admin-table__row admin-table__row--head" role="row"><b role="columnheader">الفئة</b><b role="columnheader">الأسئلة</b><b role="columnheader">جاهزية اللعب</b><b role="columnheader">الإجراءات</b></div>{items.map(item => <div className="admin-table__row" role="row" key={String(item.id)}><span role="cell">{text(item.labelAr)} <small><bdi dir="ltr">{text(item.id)}</bdi></small></span><span role="cell">{text(item.approvedCount)}</span><span role="cell">{publishedReadiness(item.runtimeReadiness)}</span><span role="cell" className="admin-inline-actions"><Link className="text-link" to={`/admin/categories/${encodeURIComponent(String(item.id))}${releaseId ? `?releaseId=${encodeURIComponent(releaseId)}` : ''}`}>عرض الفئة</Link><Link className="text-link" to={publishedQuestionsPath(item.id, releaseId)}>عرض الأسئلة</Link></span></div>)}</div></div> : <p className="admin-empty">لا توجد فئات منشورة ضمن نطاقك.</p>}{nextCursor ? <button className="button button--secondary" type="button" onClick={() => void load(true)} disabled={state === 'loading'}>تحميل الصفحة التالية</button> : null}<p className="admin-hint">الإصدار: <bdi dir="ltr">{releaseId ?? 'جارٍ التحقق'}</bdi></p></AdminSurface>;
+  return <AdminSurface title="فئات الإصدار المنشور" description="كل فئات الإصدار النشط ظاهرة هنا، بما فيها الفئات المحجوبة عن أنماط اللعب."><AdminPublishedCategoryList key={releaseId ?? 'pending'} items={items} nextCursor={nextCursor} releaseId={releaseId} state={state} loadMore={() => void load(true)} retry={() => void load(false)} /></AdminSurface>;
+}
+
+function AdminPublishedCategoryList({ items, nextCursor, releaseId, state, loadMore, retry }: {
+  items: Row[];
+  nextCursor: string | null;
+  releaseId: string | undefined;
+  state: 'loading' | 'ready' | 'error';
+  loadMore: () => void;
+  retry: () => void;
+}) {
+  const [questionType, setQuestionType] = useState<CategoryQuestionType | 'all'>('all');
+  const [typeCounts, setTypeCounts] = useState<Map<string, Record<CategoryQuestionType, number>> | null>(null);
+  const [typeStatus, setTypeStatus] = useState<'loading' | 'ready' | 'unavailable'>('loading');
+  const [extraItems, setExtraItems] = useState<Row[]>([]);
+  const [loadingAll, setLoadingAll] = useState(false);
+  const [typeError, setTypeError] = useState('');
+  const [visibleLimit, setVisibleLimit] = useState(50);
+  const requestId = useRef(0);
+
+  useEffect(() => {
+    if (!releaseId) return;
+    let live = true;
+    setTypeStatus('loading');
+    void getPublishedCategoryQuestionTypes().then(catalog => {
+      if (!live) return;
+      if (catalog.releaseId !== releaseId || catalog.categories.some(category => !category.questionTypeCounts)) {
+        setTypeStatus('unavailable');
+        return;
+      }
+      setTypeCounts(new Map(catalog.categories.map(category => [category.id, category.questionTypeCounts!])));
+      setTypeStatus('ready');
+    }).catch(() => { if (live) setTypeStatus('unavailable'); });
+    return () => { live = false; };
+  }, [releaseId]);
+
+  const selectQuestionType = async (value: CategoryQuestionType | 'all') => {
+    const token = ++requestId.current;
+    setVisibleLimit(50);
+    setTypeError('');
+    if (value === 'all') {
+      setQuestionType('all');
+      setExtraItems([]);
+      setLoadingAll(false);
+      return;
+    }
+    if (!typeCounts || !releaseId) return;
+    setQuestionType(value);
+    if (!nextCursor) return;
+    setLoadingAll(true);
+    try {
+      const remaining: Row[] = [];
+      let cursor: string | null = nextCursor;
+      while (cursor) {
+        const page = await listPublishedCategories({ limit: 100, cursor, releaseId });
+        if (requestId.current !== token) return;
+        if (page.releaseId !== releaseId) throw new Error('ACTIVE_RELEASE_CHANGED');
+        remaining.push(...page.items);
+        cursor = page.nextCursor;
+      }
+      setExtraItems(remaining);
+    } catch {
+      if (requestId.current !== token) return;
+      setQuestionType('all');
+      setExtraItems([]);
+      setTypeError('تعذر تحميل جميع الفئات لهذا النمط؛ بقيت القائمة دون تصفية. أعد المحاولة.');
+    } finally {
+      if (requestId.current === token) setLoadingAll(false);
+    }
+  };
+
+  const filtered = (questionType === 'all' ? items : [...items, ...extraItems].filter(item =>
+    (typeCounts?.get(String(item.id))?.[questionType] ?? 0) > 0));
+  const shown = filtered.slice(0, visibleLimit);
+  const canLoadMore = questionType === 'all' ? Boolean(nextCursor) : filtered.length > visibleLimit;
+  return <>
+    <div className="admin-toolbar">
+      <label>نمط السؤال
+        <select aria-label="نمط السؤال في الفئات" value={questionType} disabled={state !== 'ready' || loadingAll || typeStatus !== 'ready'} onChange={event => void selectQuestionType(event.target.value as CategoryQuestionType | 'all')}>
+          <option value="all">كل الأنماط</option>
+          {categoryQuestionTypes.map(type => <option key={type.id} value={type.id}>{type.labelAr}</option>)}
+        </select>
+      </label>
+      {questionType !== 'all' ? <button className="button button--secondary" type="button" onClick={() => void selectQuestionType('all')}>مسح التصفية</button> : null}
+    </div>
+    {typeStatus === 'unavailable' ? <p className="admin-hint">تصنيف أنماط الأسئلة غير متاح لهذا الإصدار حالياً؛ تبقى كل الفئات ظاهرة.</p> : null}
+    {loadingAll ? <p className="admin-hint" role="status">جارٍ تحميل كل فئات الإصدار قبل تطبيق التصفية…</p> : null}
+    {typeError ? <p className="admin-notice" role="alert">{typeError}</p> : null}
+    {state === 'loading' || loadingAll ? <LoadingRows /> : state === 'error' ? <Recovery message="تعذر تحميل فهرس الفئات؛ لم تُعرض حالة صفرية بديلة." retry={retry} /> : shown.length ? <div className="admin-table-wrap"><div className="admin-table admin-table--categories" role="table" aria-label="فئات الإصدار المنشور"><div className="admin-table__row admin-table__row--head" role="row"><b role="columnheader">الفئة</b><b role="columnheader">الأسئلة</b><b role="columnheader">جاهزية اللعب</b><b role="columnheader">الإجراءات</b></div>{shown.map(item => <div className="admin-table__row" role="row" key={String(item.id)}><span role="cell">{text(item.labelAr)} <small><bdi dir="ltr">{text(item.id)}</bdi></small></span><span role="cell">{text(item.approvedCount)}</span><span role="cell">{publishedReadiness(item.runtimeReadiness)}</span><span role="cell" className="admin-inline-actions"><Link className="text-link" to={`/admin/categories/${encodeURIComponent(String(item.id))}${releaseId ? `?releaseId=${encodeURIComponent(releaseId)}` : ''}`}>عرض الفئة</Link><Link className="text-link" to={publishedQuestionsPath(item.id, releaseId)}>عرض الأسئلة</Link></span></div>)}</div></div> : <p className="admin-empty">{questionType === 'all' ? 'لا توجد فئات منشورة ضمن نطاقك.' : 'لا توجد فئات منشورة مطابقة لهذا النمط ضمن نطاقك.'}</p>}
+    {state === 'ready' && !loadingAll && canLoadMore ? <button className="button button--secondary" type="button" onClick={() => { setVisibleLimit(limit => limit + 50); if (questionType === 'all' && nextCursor) loadMore(); }}>تحميل الصفحة التالية</button> : null}
+    <p className="admin-hint">الإصدار: <bdi dir="ltr">{releaseId ?? 'جارٍ التحقق'}</bdi></p>
+  </>;
 }
 
 type PublishedMediaVariant = 'question' | 'answer';
