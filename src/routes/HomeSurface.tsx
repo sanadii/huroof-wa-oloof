@@ -182,7 +182,7 @@ export function HomeSurface({ joinForm, joinMessage, staticPreview = false }: Ho
 
       <footer className="spatial-home__footer" data-home-region="footer">
         <p><BrandMark /> لعبة معرفة عربية مباشرة بلوحات الحروف والفئات.</p>
-        <nav aria-label="روابط المساعدة"><Link to="/how-to-play">قواعد اللعب</Link><Link to="/host/new">إعداد مباراة</Link></nav>
+        <nav aria-label="روابط المساعدة"><Link to="/how-to-play">قواعد اللعب</Link><Link to="/host/new">إعداد مباراة</Link><Link to="/media-credits">اعتمادات الصور</Link></nav>
       </footer>
     </main>
   );
