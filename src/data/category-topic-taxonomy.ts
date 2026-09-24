@@ -37,10 +37,10 @@ const sourceTopicRanges: readonly SourceTopicRange[] = [
 ];
 
 const sourceTopicOverrides: Readonly<Record<number, ParentTopicId>> = {
-  1: "religion", 2: "sports", 3: "geography", 4: "sports", 5: "geography",
-  6: "religion", 7: "sports", 8: "geography", 9: "literature", 10: "geography",
+  1: "religion", 2: "sports", 3: "screen", 4: "sports", 5: "geography",
+  6: "religion", 7: "sports", 8: "screen", 9: "literature", 10: "screen",
   11: "screen", 12: "restaurants", 13: "music", 14: "sports", 15: "digital",
-  16: "religion", 17: "geography", 18: "geography", 19: "geography", 20: "history",
+  16: "religion", 17: "screen", 18: "screen", 19: "screen", 20: "history",
   21: "science", 22: "screen", 23: "screen", 24: "sports", 25: "sports", 26: "sports",
   27: "digital", 28: "digital", 29: "science", 30: "screen", 31: "screen",
   32: "geography", 33: "digital", 34: "literature", 35: "culture", 36: "culture",
