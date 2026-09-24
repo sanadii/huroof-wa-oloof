@@ -672,3 +672,5 @@ User-approved implementation: [canonical task details, decisions, checks and rol
 # T39 — Admin category inspection and correction (2026-09-24)
 
 Canonical task detail, dependency order, owners, decision T39.D1, acceptance criteria, checks and rollback: [T39-ADMIN-CATEGORY-INSPECTION.md](T39-ADMIN-CATEGORY-INSPECTION.md). T39.1 is authorized now; T39.2 awaits the user-facing edit semantics and database review; T39.3 is integrated release acceptance. Preserve T27 admin design and the immutable active release.
+
+Current extension: [T39.4 category question inspection workflow](T39-ADMIN-CATEGORY-INSPECTION.md#t394--category-question-inspection-workflow-authorized-2026-09-24) is authorized and assigned to Forge. It adds release-scoped shared inspection checks, category identity and ordered navigation, with no question or approval mutation. [T39.5 integrated release](T39-ADMIN-CATEGORY-INSPECTION.md#t395--integrated-release-and-production-readback) follows verified implementation and independent Gate. Database and Security boundary findings and rollback are recorded in the canonical T39 plan; T39.1–3 history remains intact.
