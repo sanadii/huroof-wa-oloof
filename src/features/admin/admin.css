@@ -39,10 +39,42 @@
 .spatial-admin .admin-detail-list { display: grid; gap: .75rem; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); margin: 0; }
 .spatial-admin .admin-detail-list dt { color: var(--spatial-ink-muted); font-size: .82rem; }
 .spatial-admin .admin-detail-list dd { margin: .35rem 0 0; overflow-wrap: anywhere; }
-.spatial-admin .admin-published-detail { display: grid; gap: 1rem; max-inline-size: 52rem; }
-.spatial-admin .admin-published-detail > section { background: var(--admin-panel); border: 1px solid var(--admin-border); border-radius: .875rem; padding: 1rem; }
-.spatial-admin .admin-published-detail > section p { line-height: 1.8; margin-block: .6rem 0; white-space: pre-wrap; }
-.spatial-admin .admin-media-preview { background: #07142e; border: 1px solid var(--admin-border); border-radius: .75rem; display: block; margin-block-start: 1rem; max-block-size: 22rem; max-inline-size: 100%; }
+.spatial-admin .admin-published-detail { display: grid; gap: 1.25rem; inline-size: 100%; max-inline-size: 76rem; min-inline-size: 0; }
+.spatial-admin .admin-published-detail__header { border-block-end: 1px solid var(--admin-border); padding-block-end: .75rem; }
+.spatial-admin .admin-published-detail__header .eyebrow { color: var(--spatial-ink-muted); margin: 0 0 .25rem; }
+.spatial-admin .admin-published-detail__header h2 { font-size: clamp(1.25rem, 2vw, 1.6rem); line-height: 1.4; }
+.spatial-admin .admin-published-facts { display: flex; flex-wrap: wrap; gap: .5rem 1.25rem; margin: 0; }
+.spatial-admin .admin-published-facts > div { align-items: baseline; display: flex; gap: .45rem; min-inline-size: 0; }
+.spatial-admin .admin-published-facts dt { color: var(--spatial-ink-muted); font-size: .78rem; }
+.spatial-admin .admin-published-facts dd { font-size: .9rem; font-weight: 700; margin: 0; overflow-wrap: anywhere; }
+.spatial-admin .admin-published-panel { background: var(--admin-panel); border: 1px solid var(--admin-border); border-radius: 1rem; min-inline-size: 0; padding: clamp(1rem, 2.2vw, 1.75rem); }
+.spatial-admin .admin-published-panel--question { border-inline-start: .25rem solid var(--khaliah-cyan, #1bc4df); }
+.spatial-admin .admin-published-panel--answer { border-inline-start: .25rem solid var(--khaliah-gold, #e8b353); }
+.spatial-admin .admin-published-panel__heading { align-items: center; display: flex; gap: .7rem; }
+.spatial-admin .admin-published-panel__number { align-items: center; background: var(--admin-border); border-radius: 50%; display: inline-flex; font-size: .8rem; font-weight: 700; justify-content: center; block-size: 1.75rem; inline-size: 1.75rem; }
+.spatial-admin .admin-published-panel__copy { font-size: clamp(1.1rem, 1.6vw, 1.35rem); font-weight: 650; line-height: 1.8; margin: .9rem 0 0; max-inline-size: 70ch; white-space: pre-wrap; }
+.spatial-admin .admin-published-aliases { color: var(--spatial-ink-muted); font-size: .875rem; line-height: 1.7; margin: .65rem 0 0; }
+.spatial-admin .admin-published-aliases strong { margin-inline-end: .35rem; }
+.spatial-admin .admin-published-media { border-block-start: 1px solid var(--admin-border); margin-block-start: 1.25rem; max-inline-size: 55rem; padding-block-start: 1rem; }
+.spatial-admin .admin-published-media__label { font-size: .85rem; font-weight: 700; margin: 0 0 .65rem; }
+.spatial-admin .admin-media-preview { background: #07142e; border: 1px solid var(--admin-border); border-radius: .75rem; display: block; inline-size: 100%; max-block-size: 34rem; object-fit: contain; }
+.spatial-admin .admin-media-preview--video { aspect-ratio: 16 / 9; }
+.spatial-admin .admin-media-preview--image { block-size: auto; }
+.spatial-admin .admin-media-play { align-items: center; background: linear-gradient(135deg, #10284c, #173d65); border: 1px solid #4b829f; border-radius: .75rem; color: #fff; cursor: pointer; display: flex; flex-direction: column; gap: .5rem; justify-content: center; min-block-size: clamp(12rem, 28vw, 24rem); padding: 1.5rem; text-align: center; inline-size: 100%; }
+.spatial-admin .admin-media-play:hover { background: linear-gradient(135deg, #17375f, #205277); }
+.spatial-admin .admin-media-play:focus-visible { outline: 3px solid var(--khaliah-cyan, #1bc4df); outline-offset: 3px; }
+.spatial-admin .admin-media-play:disabled { cursor: progress; opacity: .75; }
+.spatial-admin .admin-media-play__icon { align-items: center; background: #e8f7fb; border-radius: 50%; color: #10284c; display: flex; font-size: 1.5rem; justify-content: center; block-size: 3.25rem; inline-size: 3.25rem; padding-inline-start: .15rem; }
+.spatial-admin .admin-media-play > span:nth-child(2) { font-size: 1.1rem; font-weight: 700; }
+.spatial-admin .admin-media-play small { color: #d5ecf5; font-size: .8rem; }
+.spatial-admin .admin-media-loading { align-items: center; background: color-mix(in srgb, var(--admin-panel) 75%, var(--admin-border)); border: 1px dashed var(--admin-border); border-radius: .75rem; display: flex; justify-content: center; min-block-size: 12rem; }
+.spatial-admin .admin-published-media__caption { color: var(--spatial-ink-muted); font-size: .85rem; margin: .55rem 0 0; }
+.spatial-admin .admin-published-media__details { color: var(--spatial-ink-muted); font-size: .78rem; margin-block-start: .75rem; }
+.spatial-admin .admin-published-media__details summary { cursor: pointer; inline-size: max-content; }
+.spatial-admin .admin-published-media__details dl { display: grid; gap: .35rem; margin: .6rem 0 0; }
+.spatial-admin .admin-published-media__details dl > div { display: flex; gap: .5rem; }
+.spatial-admin .admin-published-media__details dd { margin: 0; overflow-wrap: anywhere; }
+.spatial-admin .admin-published-detail__footnote { color: var(--spatial-ink-muted); font-size: .8rem; margin: 0; }
 .spatial-admin .admin-loading { align-items: center; background: var(--admin-panel); border: 1px solid var(--admin-border); border-radius: .875rem; display: flex; gap: .5rem; min-block-size: 5rem; padding: 1rem; }
 .spatial-admin .admin-loading span { animation: admin-pulse 1.2s ease-in-out infinite; background: var(--admin-border); block-size: .5rem; border-radius: 999px; inline-size: 2.5rem; }
 .spatial-admin .admin-loading span:nth-child(2) { animation-delay: .15s; }.spatial-admin .admin-loading span:nth-child(3) { animation-delay: .3s; }

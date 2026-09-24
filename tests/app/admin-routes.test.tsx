@@ -1,10 +1,10 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import userEvent from '@testing-library/user-event';
 import { Link, MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { beforeEach, expect, it, vi } from 'vitest';
 import { ThemeProvider } from '../../src/app/ThemeProvider';
-import { AdminOverviewRoute, AdminPublishedCategoriesRoute, AdminPublishedQuestionsRoute, AdminQuestionEditorRoute, AdminRecordRoute, AdminRootRedirect, AdminShell, LegacyQuestionRedirect } from '../../src/features/admin/AdminRoutes';
+import { AdminOverviewRoute, AdminPublishedCategoriesRoute, AdminPublishedQuestionsRoute, AdminQuestionEditorRoute, AdminRecordRoute, AdminRootRedirect, AdminShell, LegacyQuestionRedirect, PublishedQuestionDetail } from '../../src/features/admin/AdminRoutes';
 
 const editorSession = { uid: 'editor-1', roles: ['content_admin'], authzVersion: 1, capabilities: ['session', 'questions.read', 'questions.write', 'reviews.read', 'categories.read', 'categories.write', 'releases.read', 'releases.stage', 'audit.read', 'health.read', 'settings.read'], mutationMode: 'enabled', categoryCorrectionDraftMode: 'enabled' } as const;
 const viewerSession = { uid: 'viewer-1', roles: ['viewer'], authzVersion: 1, capabilities: ['session', 'questions.read', 'reviews.read', 'categories.read', 'releases.read', 'rooms.read', 'audit.read', 'health.read', 'settings.read'], mutationMode: 'staged', categoryCorrectionDraftMode: 'staged' } as const;
@@ -20,6 +20,35 @@ function PublishedWithNextCategory() { return <><Link to="/admin/questions?categ
 function renderAdmin(path: string, element: ReactNode) { return render(<ThemeProvider><MemoryRouter initialEntries={[path]}><LocationProbe /><Routes><Route path="/" element={<p>الرئيسية</p>} /><Route path="/admin" element={<AdminShell />}>{element}</Route></Routes></MemoryRouter></ThemeProvider>); }
 
 beforeEach(() => { vi.clearAllMocks(); serviceMocks.getAdminSession.mockImplementation(async () => serviceMocks.session); serviceMocks.session = editorSession; serviceMocks.getAdminOverview.mockResolvedValue({ inventory: {}, mutationMode: 'staged' }); serviceMocks.listCategories.mockResolvedValue({ items: [{ id: 'tahadani-001', titleAr: 'تحدي المعرفة' }], nextCursor: null }); serviceMocks.listPublishedCategories.mockResolvedValue({ releaseId: 'release-01', items: [{ id: 'tahadani-001', labelAr: 'تحدي المعرفة', approvedCount: 1 }], nextCursor: null }); serviceMocks.listPublishedQuestions.mockResolvedValue({ releaseId: 'release-01', items: [{ id: 'published-q1', headerAr: 'سؤال منشور', promptAr: 'ما الإجابة؟', categoryId: 'tahadani-001', modality: 'classic' }], nextCursor: null }); serviceMocks.getPublishedCategory.mockResolvedValue({ releaseId: 'release-01', id: 'tahadani-001', labelAr: 'تحدي المعرفة', approvedCount: 1, runtimeReadiness: {} }); serviceMocks.getCategoryCorrection.mockResolvedValue({ releaseId: 'release-01', draft: null, canEdit: true, correctionDraftMode: 'enabled' }); serviceMocks.listQuestions.mockResolvedValue({ items: [{ id: 'q1', headerAr: 'سؤال حقيقي', status: 'draft', categoryId: 'tahadani-001', modality: 'classic', revision: 1 }], nextCursor: null }); serviceMocks.listReviews.mockResolvedValue({ items: [], nextCursor: null }); serviceMocks.listReleases.mockResolvedValue({ items: [], nextCursor: null }); serviceMocks.listRooms.mockResolvedValue({ items: [], nextCursor: null }); serviceMocks.listAudit.mockResolvedValue({ items: [], nextCursor: null }); serviceMocks.getQuestion.mockResolvedValue({ id: 'q-existing', revision: 3, status: 'draft', categoryId: 'tahadani-001', modality: 'classic', headerAr: 'عنوان محفوظ', promptAr: 'نص محفوظ', canonicalAnswer: 'جواب', acceptedAnswers: ['جواب'], sources: [] }); serviceMocks.saveQuestion.mockResolvedValue({ operationId: 'op', revision: 1, replayed: false, serverTime: 'now' }); serviceMocks.saveCategoryCorrection.mockResolvedValue({ operationId: 'correction-op', revision: 1, replayed: false, serverTime: 'now' }); serviceMocks.decideReview.mockResolvedValue({ operationId: 'review-op', revision: 2, replayed: false, serverTime: 'now' }); });
+
+it('shows verified images automatically inside their respective question and answer sections', async () => {
+  serviceMocks.getPublishedQuestionMedia.mockImplementation(async (_id: string, _release: string, variant: string) => ({ url: `data:image/png;base64,${variant}`, type: 'image' }));
+  render(<PublishedQuestionDetail value={{ id: 'q-image', releaseId: 'release-01', headerAr: 'عنوان الصورة', categoryId: 'tahadani-001', modality: 'image', promptAr: 'ما في الصورة؟', canonicalAnswer: 'الإجابة المصورة', media: { mediaId: 'question-image', type: 'image', altAr: 'وصف صورة السؤال' }, answerMedia: { mediaId: 'answer-image', type: 'image', altAr: 'وصف صورة الإجابة' } }} />);
+  const question = screen.getByRole('region', { name: 'السؤال' });
+  const answer = screen.getByRole('region', { name: 'الإجابة' });
+  expect(within(question).getByText('ما في الصورة؟')).toBeVisible();
+  expect(within(answer).getByText('الإجابة المصورة')).toBeVisible();
+  expect(await within(question).findByRole('img', { name: 'وصف صورة السؤال' })).toHaveAttribute('src', 'data:image/png;base64,question');
+  expect(await within(answer).findByRole('img', { name: 'وصف صورة الإجابة' })).toHaveAttribute('src', 'data:image/png;base64,answer');
+  expect(serviceMocks.getPublishedQuestionMedia).toHaveBeenCalledWith('q-image', 'release-01', 'question');
+  expect(serviceMocks.getPublishedQuestionMedia).toHaveBeenCalledWith('q-image', 'release-01', 'answer');
+});
+
+it('plays each verified video inline only when requested in its section', async () => {
+  serviceMocks.getPublishedQuestionMedia.mockImplementation(async (_id: string, _release: string, variant: string) => ({ url: `data:video/mp4;base64,${variant}`, type: 'video' }));
+  const user = userEvent.setup();
+  render(<PublishedQuestionDetail value={{ id: 'q-video', releaseId: 'release-01', headerAr: 'عنوان الفيديو', categoryId: 'tahadani-001', modality: 'video', promptAr: 'من اللاعب؟', canonicalAnswer: 'اللاعب', media: { mediaId: 'question-video', type: 'video' }, answerMedia: { mediaId: 'answer-video', type: 'video' } }} />);
+  const question = screen.getByRole('region', { name: 'السؤال' });
+  const answer = screen.getByRole('region', { name: 'الإجابة' });
+  expect(serviceMocks.getPublishedQuestionMedia).not.toHaveBeenCalled();
+  await user.click(within(question).getByRole('button', { name: /شاهد فيديو السؤال/ }));
+  expect(await within(question).findByLabelText('فيديو السؤال')).toHaveAttribute('src', 'data:video/mp4;base64,question');
+  expect(within(answer).queryByLabelText('فيديو الإجابة')).not.toBeInTheDocument();
+  await user.click(within(answer).getByRole('button', { name: /شاهد فيديو الإجابة/ }));
+  expect(await within(answer).findByLabelText('فيديو الإجابة')).toHaveAttribute('src', 'data:video/mp4;base64,answer');
+  expect(serviceMocks.getPublishedQuestionMedia).toHaveBeenCalledTimes(2);
+  expect(screen.queryByText(/تحميل معاينة/)).not.toBeInTheDocument();
+});
 
 it('redirects /admin to the Arabic-first overview route', async () => { render(<MemoryRouter initialEntries={['/admin']}><Routes><Route path="/admin" element={<AdminRootRedirect />} /><Route path="/admin/overview" element={<p>overview</p>} /></Routes></MemoryRouter>); expect(await screen.findByText('overview')).toBeVisible(); });
 it('keeps a category deep link in the URL, resets it, and sends the filter to the published server query', async () => { const user = userEvent.setup(); renderAdmin('/admin/questions?categoryId=tahadani-001&releaseId=release-01', <Route path="questions" element={<AdminPublishedQuestionsRoute />} />); expect(await screen.findByText('سؤال منشور')).toBeVisible(); expect(serviceMocks.listPublishedQuestions).toHaveBeenCalledWith({ limit: 50, releaseId: 'release-01', categoryId: 'tahadani-001' }); await user.click(screen.getByRole('button', { name: 'مسح المرشحات' })); await waitFor(() => expect(screen.getByTestId('location')).toHaveTextContent('/admin/questions?releaseId=release-01')); await waitFor(() => expect(serviceMocks.listPublishedQuestions).toHaveBeenLastCalledWith({ limit: 50, releaseId: 'release-01' })); });
