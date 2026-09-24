@@ -1,17 +1,11 @@
 import { type CategoryCover } from "./category-catalog";
+import {
+  type ParentTopicId,
+  topicForKnownNormalizedLabel,
+  topicForKnownSourceCategoryId,
+} from "./category-topic-taxonomy";
 
-export type CategoryTopicId =
-  | "sports"
-  | "geography"
-  | "screen"
-  | "music"
-  | "animation"
-  | "games"
-  | "science"
-  | "religion"
-  | "culture"
-  | "restaurants"
-  | "other";
+export type CategoryTopicId = ParentTopicId;
 
 export type CategoryTopic = {
   id: CategoryTopicId;
@@ -27,10 +21,14 @@ export const categoryTopics: readonly CategoryTopic[] = [
   { id: "music", labelAr: "أغاني وموسيقى", categoryIds: ["huroof-092", "huroof-093", "tahadani-017", "tahadani-031", "tahadani-032", "tahadani-033", "tahadani-034", "tahadani-035"] },
   { id: "animation", labelAr: "أنمي وكرتون", categoryIds: ["huroof-078", "tahadani-019", "tahadani-036", "tahadani-037", "tahadani-038", "tahadani-039"] },
   { id: "games", labelAr: "ألعاب", categoryIds: ["huroof-073", "huroof-074", "huroof-075", "huroof-076", "huroof-077", "tahadani-040", "tahadani-041", "tahadani-042", "tahadani-043"] },
-  { id: "science", labelAr: "علوم وطبيعة", categoryIds: ["huroof-097", "huroof-098", "huroof-099", "tahadani-003", "tahadani-007", "tahadani-008", "tahadani-016", "tahadani-051"] },
+  { id: "science", labelAr: "علوم وطبيعة", categoryIds: ["huroof-097", "huroof-098", "huroof-099", "tahadani-003", "tahadani-007", "tahadani-008", "tahadani-016"] },
   { id: "religion", labelAr: "دين", categoryIds: ["huroof-094", "huroof-095", "huroof-096", "tahadani-056", "tahadani-057"] },
-  { id: "culture", labelAr: "ثقافة وألغاز", categoryIds: ["tahadani-006", "tahadani-009", "tahadani-011", "tahadani-012", "tahadani-013", "tahadani-014", "tahadani-015", "tahadani-053"] },
-  { id: "restaurants", labelAr: "مطاعم", categoryIds: ["tahadani-058"] },
+  { id: "culture", labelAr: "ثقافة وألغاز", categoryIds: ["tahadani-006", "tahadani-011", "tahadani-012", "tahadani-013", "tahadani-014", "tahadani-015"] },
+  { id: "restaurants", labelAr: "طعام ومطاعم", categoryIds: ["tahadani-058"] },
+  { id: "digital", labelAr: "إنترنت وصنّاع محتوى", categoryIds: [] },
+  { id: "lifestyle", labelAr: "أسلوب حياة", categoryIds: ["tahadani-051"] },
+  { id: "history", labelAr: "تاريخ وتراث", categoryIds: ["tahadani-009"] },
+  { id: "literature", labelAr: "لغة وأدب", categoryIds: ["tahadani-053"] },
   // Dynamic Firebase catalogues have no parent/group field. This visible fallback
   // ensures every newly released category remains browseable until it gains a stable mapping.
   { id: "other", labelAr: "موضوعات أخرى", categoryIds: [] },
@@ -88,7 +86,14 @@ export function categoryTopicIdForCategory(
   const explicitTopic = explicitTopicByCategoryId.get(category.id);
   if (explicitTopic) return explicitTopic;
 
-  const labelWords = normalizedWords(category.displayNameAr);
+  const sourceTopic = topicForKnownSourceCategoryId(category.id);
+  if (sourceTopic) return sourceTopic;
+
+  const normalizedLabel = normalizeCategoryFilterText(category.displayNameAr);
+  const knownLabelTopic = topicForKnownNormalizedLabel(normalizedLabel);
+  if (knownLabelTopic) return knownLabelTopic;
+
+  const labelWords = normalizedWords(normalizedLabel);
   return labelTopicHints.find(([, hints]) =>
     hints.some((hint) => labelIncludesHint(labelWords, hint)),
   )?.[0] ?? "other";
