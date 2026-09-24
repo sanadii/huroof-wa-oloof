@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { adminRoomDto } from './index.js';
-import { canonicalAdminHash, isArchivableQuestionStatus, isVerifiedAdminProvider, publishedQuestionMediaBinding, questionReviewBinding, reviewMatchesQuestion, sameAdminAuthorization, validateAdminQuestionDraft, wouldLockOutLastSuperAdmin, wouldOrphanSuperAdmin } from './admin/admin.js';
+import { canonicalAdminHash, isArchivableQuestionStatus, isVerifiedAdminProvider, publishedQuestionDto, publishedQuestionMediaBinding, questionReviewBinding, reviewMatchesQuestion, sameAdminAuthorization, validateAdminQuestionDraft, wouldLockOutLastSuperAdmin, wouldOrphanSuperAdmin } from './admin/admin.js';
 
 test('game-ops room DTO remains answer-free even if a canonical room has active question data', () => {
   const dto = adminRoomDto('room_1', {
@@ -45,6 +45,23 @@ test('published media preview binds only the stored question or answer media rec
   assert.throws(() => publishedQuestionMediaBinding({ media: { mediaId: '../outside', assetSha256: hash } }, 'question'));
   assert.throws(() => publishedQuestionMediaBinding({}, 'answer'));
   assert.throws(() => publishedQuestionMediaBinding({}, 'objectName'));
+});
+
+test('published question inspection DTO exposes only approved fields and normalizes missing optional values', () => {
+  const hash = 'b'.repeat(64);
+  const dto = publishedQuestionDto('published-1', {
+    categoryId: 'tahadani-001', modality: 'image', headerAr: 'عنوان', promptAr: 'سؤال', targetLetter: 'أ', canonicalAnswer: 'جواب', acceptedAnswers: ['جواب', 'الجواب', 42], points: 400, difficulty: 'متوسط',
+    media: { mediaId: 'asset_1', assetSha256: hash, type: 'image', contentType: 'image/png', altAr: 'صورة', objectName: 'private/path.png' },
+    answerMedia: { mediaId: '../bad', assetSha256: hash, type: 'video', contentType: 'video/mp4' },
+    internalReview: { authorUid: 'private-user' }, objectName: 'never-returned', signedUrl: 'never-returned',
+  }, true);
+  assert.deepEqual(dto, {
+    id: 'published-1', categoryId: 'tahadani-001', modality: 'image', headerAr: 'عنوان', promptAr: 'سؤال', targetLetter: 'أ', canonicalAnswer: 'جواب', acceptedAnswers: ['جواب', 'الجواب'],
+    media: { mediaId: 'asset_1', assetSha256: hash, type: 'image', contentType: 'image/png', altAr: 'صورة' }, answerMedia: null, points: 400, difficulty: 'متوسط',
+  });
+  const unavailable = publishedQuestionDto('published-2', { categoryId: 'tahadani-001', modality: 'classic', headerAr: 'عنوان', promptAr: 'سؤال', canonicalAnswer: 'جواب', acceptedAnswers: [], points: Number.NaN }, true);
+  assert.equal(unavailable.points, null);
+  assert.equal(unavailable.difficulty, null);
 });
 
 test('question validator enforces modality reviewers and safe HTTPS sources', () => {

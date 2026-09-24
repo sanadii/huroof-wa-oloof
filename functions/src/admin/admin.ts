@@ -239,11 +239,25 @@ function publishedScope(actor: Principal, categoryId?: string) {
   if (!categoryId && scopes.length > 30) throw new HttpsError("failed-precondition", "Select one assigned category to page published content.");
   return categoryId ? [categoryId] : scopes;
 }
-function publishedQuestionDto(id: string, row: Record<string, unknown>, detail = false) {
-  const media = (value: unknown) => value && typeof value === "object" ? (() => { const item = value as Record<string, unknown>; return { mediaId: item.mediaId ?? null, type: item.type ?? null, contentType: item.contentType ?? null, altAr: item.altAr ?? null, assetSha256: item.assetSha256 ?? null }; })() : null;
+function publishedMediaDto(value: unknown) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const item = value as Record<string, unknown>;
+  if (typeof item.mediaId !== "string" || !/^[A-Za-z0-9:_-]{1,128}$/.test(item.mediaId) || typeof item.assetSha256 !== "string" || !/^[a-f0-9]{64}$/i.test(item.assetSha256)) return null;
+  const contentType = item.contentType === "image/png" || item.contentType === "image/jpeg" || item.contentType === "video/mp4" ? item.contentType : null;
+  const type = item.type === "image" || item.type === "video" ? item.type : null;
+  return { mediaId: item.mediaId, type, contentType, altAr: typeof item.altAr === "string" ? item.altAr : null, assetSha256: item.assetSha256 };
+}
+/** Explicit public-admin allowlist; never project release internals or storage routing. */
+export function publishedQuestionDto(id: string, row: Record<string, unknown>, detail = false) {
   return {
     id, categoryId: row.categoryId, modality: row.modality, headerAr: row.headerAr, promptAr: row.promptAr, targetLetter: row.targetLetter ?? null,
-    ...(detail ? { promptAr: row.promptAr, canonicalAnswer: row.canonicalAnswer, acceptedAnswers: Array.isArray(row.acceptedAnswers) ? row.acceptedAnswers : [], media: media(row.media), answerMedia: media(row.answerMedia) } : {}),
+    ...(detail ? {
+      canonicalAnswer: row.canonicalAnswer,
+      acceptedAnswers: Array.isArray(row.acceptedAnswers) ? row.acceptedAnswers.filter(answer => typeof answer === "string") : [],
+      media: publishedMediaDto(row.media), answerMedia: publishedMediaDto(row.answerMedia),
+      points: typeof row.points === "number" && Number.isFinite(row.points) ? row.points : null,
+      difficulty: typeof row.difficulty === "string" && row.difficulty.trim() ? row.difficulty.trim() : null,
+    } : {}),
   };
 }
 async function publishedCategoryDto(releaseId: string, snapshot: FirebaseFirestore.DocumentSnapshot) {
