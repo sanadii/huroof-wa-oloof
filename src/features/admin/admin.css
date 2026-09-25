@@ -31,12 +31,27 @@
 .spatial-admin .admin-inventory dd { font-size: 1.45rem; }
 .spatial-admin .admin-inventory dd bdi { font-size: .78rem; font-weight: 600; overflow-wrap: anywhere; }
 .spatial-admin .admin-table { min-inline-size: 42rem; }
-.spatial-admin .admin-table--published .admin-table__row { grid-template-columns: minmax(12rem, 1.8fr) minmax(9rem, 1fr) minmax(7rem, .7fr) minmax(6rem, auto); }
+.spatial-admin .admin-table--published .admin-table__row { grid-template-columns: minmax(12rem, 1.8fr) minmax(9rem, 1fr) minmax(7rem, .7fr) minmax(8rem, .75fr) minmax(6rem, auto); }
 .spatial-admin .admin-table--categories .admin-table__row { grid-template-columns: minmax(14rem, 1.7fr) minmax(6rem, .6fr) minmax(15rem, 1.2fr) minmax(7rem, auto); }
 .spatial-admin .admin-table__row { font-size: .93rem; min-block-size: 3.25rem; padding: .75rem 1rem; }
 .spatial-admin .admin-table .text-link,
 .spatial-admin .admin-table .text-link:visited { color: #006f91; font-weight: 700; }
 .spatial-admin .admin-table__row small { color: var(--spatial-ink-muted); display: block; font-size: .75rem; margin-block-start: .2rem; }
+.spatial-admin .admin-question-open { color: inherit; display: block; text-decoration: none; }
+.spatial-admin .admin-question-open:hover { color: #006f91; text-decoration: underline; }
+.spatial-admin .admin-inspection-status { align-items: center; display: inline-flex; font-size: .82rem; font-weight: 700; gap: .35rem; line-height: 1.35; }
+.spatial-admin .admin-inspection-status--reviewed { color: #087a55; }
+.spatial-admin .admin-inspection-status--unchecked { color: #385878; }
+.spatial-admin .admin-inspection-status--unavailable { color: #875d00; }
+.spatial-admin .admin-published-list-summary { align-items: end; background: var(--admin-panel); border-block: 1px solid var(--admin-border); display: flex; flex-wrap: wrap; gap: .75rem 1.5rem; justify-content: space-between; margin-block: 1rem; padding: .75rem 1rem; }
+.spatial-admin .admin-published-list-summary p { color: var(--spatial-ink-muted); font-size: .85rem; margin: .2rem 0 0; }
+.spatial-admin .admin-published-list-summary .eyebrow { margin: 0; }
+.spatial-admin .admin-published-list-summary h2 { font-size: 1.15rem; margin: .15rem 0 0; }
+.spatial-admin .admin-published-dialog { background: transparent; border: 0; color: inherit; inline-size: min(76rem, calc(100vw - 2rem)); margin: auto; max-block-size: calc(100dvh - 2rem); max-inline-size: none; padding: 0; }
+.spatial-admin .admin-published-dialog::backdrop { background: rgb(3 16 38 / 68%); }
+.spatial-admin .admin-published-dialog__frame { background: var(--spatial-surface, #f7fbff); border: 1px solid var(--admin-border); box-shadow: 0 1.5rem 4rem rgb(2 19 49 / 35%); max-block-size: calc(100dvh - 2rem); overflow: auto; padding: clamp(1rem, 2vw, 1.5rem); position: relative; }
+.spatial-admin .admin-published-dialog__close { background: var(--admin-panel); border: 1px solid var(--admin-border); border-radius: .5rem; color: inherit; cursor: pointer; font: inherit; inset-block-start: .75rem; inset-inline-end: .75rem; min-block-size: 2.5rem; padding-inline: .75rem; position: sticky; float: inline-end; z-index: 1; }
+.spatial-admin .admin-published-dialog__close:focus-visible { outline: 3px solid var(--khaliah-cyan, #1bc4df); outline-offset: 2px; }
 .spatial-admin .admin-question-prompt { display: block; font-size: 1rem; font-weight: 600; line-height: 1.7; margin-block-start: .2rem; }
 .spatial-admin .admin-readiness { display: flex; flex-wrap: wrap; gap: .35rem; }
 .spatial-admin .admin-readiness .admin-status { font-size: .72rem; }
@@ -109,6 +124,11 @@ html[data-theme="dark"] .spatial-admin { --admin-panel: color-mix(in srgb, var(-
 html[data-theme="dark"] .spatial-admin :is(.admin-inventory dd, .admin-detail-list dd, .admin-published-detail, .admin-question-prompt) { color: #eef6ff; }
 html[data-theme="dark"] .spatial-admin .admin-table .text-link,
 html[data-theme="dark"] .spatial-admin .admin-table .text-link:visited { color: #6fe4f6; }
+html[data-theme="dark"] .spatial-admin .admin-question-open { color: #eef6ff; }
+html[data-theme="dark"] .spatial-admin .admin-inspection-status--reviewed { color: #7ee9bd; }
+html[data-theme="dark"] .spatial-admin .admin-inspection-status--unchecked { color: #c6ddf4; }
+html[data-theme="dark"] .spatial-admin .admin-inspection-status--unavailable { color: #ffd277; }
+html[data-theme="dark"] .spatial-admin .admin-published-dialog__frame { background: #10284c; }
 html[data-theme="dark"] .spatial-admin :is(.admin-notice, .admin-empty) { background: #17365d; border-color: #62cde4; color: #eef6ff; }
 html[data-theme="dark"] .spatial-admin :is(.admin-hint, .admin-description, .admin-loading p, .admin-table__row small) { color: #c6ddf4; }
 html[data-theme="dark"] .spatial-admin .admin-field-error { color: #ffb7b7; }
@@ -117,7 +137,7 @@ html:not([data-theme="dark"]) .spatial-admin :is(.admin-hint, .admin-description
 @media (max-width: 61rem) { .spatial-admin .admin-layout { display: block; }.spatial-admin .admin-table-wrap { margin-inline: -.15rem; }.spatial-admin .admin-toolbar { align-items: stretch; }.spatial-admin .admin-toolbar > label { flex: 1 1 12rem; } }
 @media (max-width: 61rem) { .spatial-admin .admin-toolbar--published { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 61rem) { .spatial-admin .admin-published-reviewbar { grid-template-columns: minmax(0, 1fr); } }
-@media (max-width: 40rem) { .spatial-admin .admin-workspace { padding: .75rem; }.spatial-admin .admin-toolbar { display: grid; }.spatial-admin .admin-toolbar .button { inline-size: 100%; }.spatial-admin .admin-inventory { grid-template-columns: 1fr; }.spatial-admin .admin-loading { align-items: flex-start; flex-wrap: wrap; }.spatial-admin .admin-loading p { flex-basis: 100%; }.spatial-admin .admin-table__row { padding: .75rem; }.spatial-admin .admin-table-wrap:has(.admin-table--published) { overflow: visible; }.spatial-admin .admin-table--published { min-inline-size: 0; }.spatial-admin .admin-table--published .admin-table__row--head { display: none !important; }.spatial-admin .admin-table--published .admin-table__row { display: grid; gap: .65rem; grid-template-columns: 1fr !important; padding: .85rem; }.spatial-admin .admin-table--published [role="cell"] { display: block; min-inline-size: 0; overflow-wrap: anywhere; }.spatial-admin .admin-table--published [role="cell"]::before { color: var(--spatial-ink-muted); content: attr(data-label); display: block; font-size: .78rem; font-weight: 600; margin-block-end: .18rem; }.spatial-admin .admin-table--published .admin-question-prompt { font-size: 1rem; }.spatial-admin .admin-table--published [role="cell"] small { margin: 0; } }
+@media (max-width: 40rem) { .spatial-admin .admin-workspace { padding: .75rem; }.spatial-admin .admin-toolbar { display: grid; }.spatial-admin .admin-toolbar .button { inline-size: 100%; }.spatial-admin .admin-inventory { grid-template-columns: 1fr; }.spatial-admin .admin-loading { align-items: flex-start; flex-wrap: wrap; }.spatial-admin .admin-loading p { flex-basis: 100%; }.spatial-admin .admin-table__row { padding: .75rem; }.spatial-admin .admin-table-wrap:has(.admin-table--published) { overflow: visible; }.spatial-admin .admin-table--published { min-inline-size: 0; }.spatial-admin .admin-table--published .admin-table__row--head { display: none !important; }.spatial-admin .admin-table--published .admin-table__row { display: grid; gap: .65rem; grid-template-columns: 1fr !important; padding: .85rem; }.spatial-admin .admin-table--published [role="cell"] { display: block; min-inline-size: 0; overflow-wrap: anywhere; }.spatial-admin .admin-table--published [role="cell"]::before { color: var(--spatial-ink-muted); content: attr(data-label); display: block; font-size: .78rem; font-weight: 600; margin-block-end: .18rem; }.spatial-admin .admin-table--published .admin-question-prompt { font-size: 1rem; }.spatial-admin .admin-table--published [role="cell"] small { margin: 0; }.spatial-admin .admin-published-list-summary { align-items: stretch; display: grid; }.spatial-admin .admin-published-dialog { inline-size: calc(100vw - 1rem); max-block-size: calc(100dvh - 1rem); }.spatial-admin .admin-published-dialog__frame { max-block-size: calc(100dvh - 1rem); padding: 1rem; }.spatial-admin .admin-published-dialog__close { display: block; float: none; inline-size: fit-content; margin-block: 0 1rem; margin-inline-start: auto; position: static; } }
 @media (max-width: 40rem) { .spatial-admin .admin-toolbar--published { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 40rem) {
   .spatial-admin .admin-published-hero__row { align-items: stretch; flex-direction: column; }

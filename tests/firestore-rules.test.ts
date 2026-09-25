@@ -22,6 +22,7 @@ async function setup() {
     await setDoc(doc(context.firestore(), 'challengeDefinitionSets/manifest-private/definitions/definition-private'), { canonicalJson: 'secret' });
     await setDoc(doc(context.firestore(), 'releases/release-private/mapVariants/map-private'), { runtimeQuestionId: 'map-private' });
     await setDoc(doc(context.firestore(), 'releaseQuestionTypeIndexes/index-private'), { immutable: true, categories: [] });
+    await setDoc(doc(context.firestore(), 'adminPublishedQuestionInspections/release-private/questions/question-private'), { reviewedByUid: 'u3', questionContentDigest: 'secret' });
   });
 }
 await setup();
@@ -49,6 +50,7 @@ for (const path of [
   'challengeDefinitionSets/manifest-private/definitions/definition-private',
   'releases/release-private/mapVariants/map-private',
   'releaseQuestionTypeIndexes/index-private',
+  'adminPublishedQuestionInspections/release-private/questions/question-private',
 ]) {
   await assertFails(getDoc(doc(player, path)));
   await assertFails(getDoc(doc(hostUser, path)));

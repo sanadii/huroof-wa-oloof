@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { adminRoomDto } from './index.js';
-import { canonicalAdminHash, canInspectPublishedQuestion, canManageCategoryCorrection, categoryCorrectionDraftInput, categoryCorrectionDraftsEnabled, categoryCorrectionDto, isArchivableQuestionStatus, isVerifiedAdminProvider, publishedQuestionContentDigest, publishedQuestionDto, publishedQuestionInspectionsEnabled, publishedQuestionMediaBinding, questionReviewBinding, reviewMatchesQuestion, sameAdminAuthorization, validateAdminQuestionDraft, validateLiveCategoryCorrectionPrincipal, validateLivePublishedQuestionInspectionPrincipal, wouldLockOutLastSuperAdmin, wouldOrphanSuperAdmin } from './admin/admin.js';
+import { Timestamp } from 'firebase-admin/firestore';
+import { canonicalAdminHash, canInspectPublishedQuestion, canManageCategoryCorrection, categoryCorrectionDraftInput, categoryCorrectionDraftsEnabled, categoryCorrectionDto, inspectionDto, isArchivableQuestionStatus, isVerifiedAdminProvider, publishedQuestionContentDigest, publishedQuestionDto, publishedQuestionInspectionsEnabled, publishedQuestionMediaBinding, questionReviewBinding, reviewMatchesQuestion, sameAdminAuthorization, validateAdminQuestionDraft, validateLiveCategoryCorrectionPrincipal, validateLivePublishedQuestionInspectionPrincipal, wouldLockOutLastSuperAdmin, wouldOrphanSuperAdmin } from './admin/admin.js';
 
 test('game-ops room DTO remains answer-free even if a canonical room has active question data', () => {
   const dto = adminRoomDto('room_1', {
@@ -114,6 +115,20 @@ test('published question inspection digest binds the immutable detail projection
   const question = { categoryId: 'cat-1', modality: 'classic', headerAr: 'عنوان', promptAr: 'سؤال', canonicalAnswer: 'جواب', acceptedAnswers: ['جواب'] };
   assert.equal(publishedQuestionContentDigest('q-1', question), publishedQuestionContentDigest('q-1', { ...question }));
   assert.notEqual(publishedQuestionContentDigest('q-1', question), publishedQuestionContentDigest('q-1', { ...question, promptAr: 'سؤال جديد' }));
+});
+
+test('published inspection projection fails closed for a mismatched binding or malformed timestamp', () => {
+  const question = { categoryId: 'cat-1', modality: 'classic', headerAr: 'عنوان', promptAr: 'سؤال', canonicalAnswer: 'جواب', acceptedAnswers: ['جواب'] };
+  const binding = { releaseId: 'release-1', releaseRootSha256: 'a'.repeat(64), questionId: 'q-1', categoryId: 'cat-1', questionContentDigest: publishedQuestionContentDigest('q-1', question) };
+  const missing = { exists: false, data: () => undefined } as any;
+  assert.deepEqual(inspectionDto(missing, binding), { reviewed: false, reviewedAt: null });
+  const valid = { exists: true, data: () => ({ ...binding, status: 'reviewed', reviewedAt: new Timestamp(1, 0) }) } as any;
+  assert.equal(inspectionDto(valid, binding).reviewed, true);
+  const summary = { ...publishedQuestionDto('q-1', { ...question, objectName: 'private/path', answerMedia: { objectName: 'private-answer' } }), inspection: inspectionDto({ exists: true, data: () => ({ ...binding, status: 'reviewed', reviewedAt: new Timestamp(1, 0), reviewedByUid: 'private-actor', requestHash: 'private-receipt' }) } as any, binding) };
+  assert.match(JSON.stringify(summary), /reviewed/);
+  assert.doesNotMatch(JSON.stringify(summary), /private-actor|private-receipt|private\/path|private-answer/);
+  assert.throws(() => inspectionDto({ exists: true, data: () => ({ ...binding, status: 'reviewed', reviewedAt: { seconds: 1, nanoseconds: 0 } }) } as any, binding), /timestamp is invalid/);
+  assert.throws(() => inspectionDto({ exists: true, data: () => ({ ...binding, questionContentDigest: 'b'.repeat(64), status: 'reviewed', reviewedAt: null }) } as any, binding), /binding is invalid/);
 });
 
 test('question validator enforces modality reviewers and safe HTTPS sources', () => {

@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { getApps, initializeApp } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
-import { FieldPath, FieldValue, getFirestore } from "firebase-admin/firestore";
+import { FieldPath, FieldValue, getFirestore, Timestamp } from "firebase-admin/firestore";
 import { getStorage } from "firebase-admin/storage";
 import { HttpsError, onCall, type CallableRequest } from "firebase-functions/https";
 import { reduceGame } from "../../../src/features/game/domain/lifecycle.js";
@@ -290,11 +290,15 @@ function validateLivePublishedReadPrincipal(actor: Principal, row: Record<string
   if (!liveRoles.includes("super_admin") && !(Array.isArray(row.categoryScopes) && row.categoryScopes.includes(categoryId))) throw new HttpsError("permission-denied", "Category is outside your assigned scope.");
 }
 type PublishedQuestionInspectionBinding = { releaseId: string; releaseRootSha256: string; questionId: string; categoryId: string; questionContentDigest: string };
-function inspectionDto(snapshot: FirebaseFirestore.DocumentSnapshot, binding: PublishedQuestionInspectionBinding) {
+export function inspectionDto(snapshot: FirebaseFirestore.DocumentSnapshot, binding: PublishedQuestionInspectionBinding) {
   if (!snapshot.exists) return { reviewed: false, reviewedAt: null };
   const value = snapshot.data() ?? {};
   if (value.releaseId !== binding.releaseId || value.releaseRootSha256 !== binding.releaseRootSha256 || value.questionId !== binding.questionId || value.categoryId !== binding.categoryId || value.questionContentDigest !== binding.questionContentDigest || value.status !== "reviewed") throw new HttpsError("failed-precondition", "Published question inspection binding is invalid.");
-  return { reviewed: true, reviewedAt: value.reviewedAt ?? null };
+  // A marker created in a transaction is only meaningful once Firestore has
+  // resolved its server timestamp. Never turn malformed marker data into a
+  // plausible checked status in a list projection.
+  if (value.reviewedAt !== null && !(value.reviewedAt instanceof Timestamp)) throw new HttpsError("failed-precondition", "Published question inspection timestamp is invalid.");
+  return { reviewed: true, reviewedAt: value.reviewedAt };
 }
 async function publishedQuestionNeighbors(releaseId: string, categoryId: string, question: FirebaseFirestore.DocumentSnapshot) {
   const collection = db.collection(`releases/${releaseId}/questions`);
@@ -392,7 +396,27 @@ async function publishedQuestionPage(release: ActiveRelease, actor: Principal, i
     query = query.startAfter(cursor);
   }
   const result = await query.get(); const docs = result.docs.slice(0, input.limit);
-  return { releaseId: release.id, items: docs.map(doc => publishedQuestionDto(doc.id, doc.data())), nextCursor: result.docs.length > input.limit ? docs.at(-1)?.id ?? null : null };
+  // Read only the documents actually returned to the caller: the extra row is
+  // a cursor sentinel and must never add a marker read or leak list state.
+  const markerSnapshots = docs.length ? await db.getAll(...docs.map(doc => db.doc(`adminPublishedQuestionInspections/${release.id}/questions/${doc.id}`))) : [];
+  const markersByQuestionId = new Map(markerSnapshots.map(snapshot => [snapshot.id, snapshot]));
+  return {
+    releaseId: release.id,
+    items: docs.map(doc => {
+      const marker = markersByQuestionId.get(doc.id);
+      if (!marker) throw new HttpsError("internal", "Published question inspection marker read was incomplete.");
+      const question = doc.data();
+      const binding: PublishedQuestionInspectionBinding = {
+        releaseId: release.id,
+        releaseRootSha256: release.documentRootSha256,
+        questionId: doc.id,
+        categoryId: id(question.categoryId, "stored categoryId"),
+        questionContentDigest: publishedQuestionContentDigest(doc.id, question),
+      };
+      return { ...publishedQuestionDto(doc.id, question), inspection: inspectionDto(marker, binding) };
+    }),
+    nextCursor: result.docs.length > input.limit ? docs.at(-1)?.id ?? null : null,
+  };
 }
 
 export const adminGetSession = call("session", async (_request, actor) => ({ uid: actor.uid, roles: actor.roles, authzVersion: actor.authzVersion, capabilities: [...new Set(actor.roles.flatMap(role => capabilities[role]))], mutationMode: mutationEnabled() ? "enabled" : "staged", categoryCorrectionDraftMode: categoryCorrectionDraftsEnabled() ? "enabled" : "staged", publishedQuestionInspectionMode: publishedQuestionInspectionsEnabled() ? "enabled" : "staged" }));
