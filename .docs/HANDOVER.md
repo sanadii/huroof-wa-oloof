@@ -1,5 +1,9 @@
 # Handover
 
+## T39.6 admin question dialog — 2026-09-25
+
+The user authorized a question dialog that preserves the published list, review-status icons and question counts. [T39.6a–d](T39-ADMIN-CATEGORY-INSPECTION.md#t396--persistent-published-question-list-and-inspection-dialog-authorized-2026-09-25) is **Done, root accepted 2026-09-25** after Security/Database review, focused UI/Functions/Rules checks, independent Gate PASS, and signed-in local desktop/mobile readback. The list stays mounted through dialog next/close/Back/Forward/Escape; the mobile close control no longer overlaps the title. The local client shows an explicit unavailable inspection state because its still-deployed callable lacks the additive summary field. Implementation commit `de90db9a` was pushed to [PR #12](https://github.com/sanadii/huroof-wa-oloof/pull/12), based on PR #11. [T39.7 production release](T39-ADMIN-CATEGORY-INSPECTION.md#t397--integrated-release-and-production-readback) remains open: complete the upstream T40.5 release dependency, deploy the compatible callable before the client, then perform signed-in production readback. Standard Admin SDK ADC is still absent in this workspace; do not adapt the Firebase CLI refresh token into ADC after the prior automatic approval review rejected that action. No production deployment has been made for this extension. Concurrent board/game/style edits in the shared worktree are unrelated and must remain unstaged. Existing T39.5 production-origin mark and human mobile review remain open.
+
 ## Production media and combined categories — 2026-09-12
 
 The live production release now contains **25,763 questions across 96 supported categories**, including 291 image questions and 99 goal-video questions with 198 prompt/reveal clips. All 489 media bindings are preserved. The five uploaded acting-game categories remain hidden because their web flow is unavailable; unmatched source photos remain documented and held.

@@ -1,7 +1,7 @@
-import { render, screen, waitFor, within } from '@testing-library/react';
-import type { ReactNode } from 'react';
+import { act, render, screen, waitFor, within } from '@testing-library/react';
+import { StrictMode, type ReactNode } from 'react';
 import userEvent from '@testing-library/user-event';
-import { Link, MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
+import { Link, MemoryRouter, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { beforeEach, expect, it, vi } from 'vitest';
 import { ThemeProvider } from '../../src/app/ThemeProvider';
 import { AdminOverviewRoute, AdminPublishedCategoriesRoute, AdminPublishedQuestionsRoute, AdminQuestionEditorRoute, AdminRecordRoute, AdminRootRedirect, AdminShell, LegacyQuestionRedirect, PublishedQuestionDetail } from '../../src/features/admin/AdminRoutes';
@@ -18,6 +18,9 @@ function deferred<T>() { let resolve!: (value: T) => void; let reject!: (reason?
 function EditorWithNextLink() { return <><Link to="/admin/questions/q-b">السجل التالي</Link><AdminQuestionEditorRoute /></>; }
 function PublishedWithNextCategory() { return <><Link to="/admin/questions?categoryId=tahadani-002">الفئة التالية</Link><AdminPublishedQuestionsRoute /></>; }
 function renderAdmin(path: string, element: ReactNode) { return render(<ThemeProvider><MemoryRouter initialEntries={[path]}><LocationProbe /><Routes><Route path="/" element={<p>الرئيسية</p>} /><Route path="/admin" element={<AdminShell />}>{element}</Route></Routes></MemoryRouter></ThemeProvider>); }
+function HistoryControls() { const navigate = useNavigate(); const location = useLocation(); const openSecondForTest = () => { const next = new URLSearchParams(location.search); next.set('questionId', 'published-q2'); navigate({ pathname: location.pathname, search: `?${next.toString()}` }, { replace: true, state: location.state }); }; return <><button type="button" onClick={() => navigate(-1)}>رجوع المتصفح</button><button type="button" onClick={() => navigate(1)}>تقدم المتصفح</button><button type="button" onClick={openSecondForTest}>تغيير السؤال للاختبار</button></>; }
+function renderAdminHistory(entries: string[], index: number, element: ReactNode) { return render(<ThemeProvider><MemoryRouter initialEntries={entries} initialIndex={index}><LocationProbe /><Routes><Route path="/" element={<p>الرئيسية</p>} /><Route path="/admin" element={<AdminShell />}>{element}</Route></Routes></MemoryRouter></ThemeProvider>); }
+function renderAdminStrict(path: string, element: ReactNode) { return render(<StrictMode><ThemeProvider><MemoryRouter initialEntries={[path]}><LocationProbe /><Routes><Route path="/" element={<p>الرئيسية</p>} /><Route path="/admin" element={<AdminShell />}>{element}</Route></Routes></MemoryRouter></ThemeProvider></StrictMode>); }
 
 beforeEach(() => { vi.clearAllMocks(); serviceMocks.getAdminSession.mockImplementation(async () => serviceMocks.session); serviceMocks.session = editorSession; serviceMocks.getAdminOverview.mockResolvedValue({ inventory: {}, mutationMode: 'staged' }); serviceMocks.listCategories.mockResolvedValue({ items: [{ id: 'tahadani-001', titleAr: 'تحدي المعرفة' }], nextCursor: null }); serviceMocks.listPublishedCategories.mockResolvedValue({ releaseId: 'release-01', items: [{ id: 'tahadani-001', labelAr: 'تحدي المعرفة', approvedCount: 1 }], nextCursor: null }); serviceMocks.listPublishedQuestions.mockResolvedValue({ releaseId: 'release-01', items: [{ id: 'published-q1', headerAr: 'سؤال منشور', promptAr: 'ما الإجابة؟', categoryId: 'tahadani-001', modality: 'classic' }], nextCursor: null }); serviceMocks.getPublishedQuestion.mockResolvedValue({ releaseId: 'release-01', id: 'published-q1', categoryId: 'tahadani-001', categoryLabelAr: 'تحدي المعرفة', headerAr: 'سؤال منشور', promptAr: 'ما الإجابة؟', canonicalAnswer: 'الإجابة', modality: 'classic', previousQuestionId: null, nextQuestionId: null, inspection: { reviewed: false, reviewedAt: null } }); serviceMocks.getPublishedCategory.mockResolvedValue({ releaseId: 'release-01', id: 'tahadani-001', labelAr: 'تحدي المعرفة', approvedCount: 1, runtimeReadiness: {} }); serviceMocks.getCategoryCorrection.mockResolvedValue({ releaseId: 'release-01', draft: null, canEdit: true, correctionDraftMode: 'enabled' }); serviceMocks.listQuestions.mockResolvedValue({ items: [{ id: 'q1', headerAr: 'سؤال حقيقي', status: 'draft', categoryId: 'tahadani-001', modality: 'classic', revision: 1 }], nextCursor: null }); serviceMocks.listReviews.mockResolvedValue({ items: [], nextCursor: null }); serviceMocks.listReleases.mockResolvedValue({ items: [], nextCursor: null }); serviceMocks.listRooms.mockResolvedValue({ items: [], nextCursor: null }); serviceMocks.listAudit.mockResolvedValue({ items: [], nextCursor: null }); serviceMocks.getQuestion.mockResolvedValue({ id: 'q-existing', revision: 3, status: 'draft', categoryId: 'tahadani-001', modality: 'classic', headerAr: 'عنوان محفوظ', promptAr: 'نص محفوظ', canonicalAnswer: 'جواب', acceptedAnswers: ['جواب'], sources: [] }); serviceMocks.saveQuestion.mockResolvedValue({ operationId: 'op', revision: 1, replayed: false, serverTime: 'now' }); serviceMocks.saveCategoryCorrection.mockResolvedValue({ operationId: 'correction-op', revision: 1, replayed: false, serverTime: 'now' }); serviceMocks.markPublishedQuestionInspected.mockResolvedValue({ operationId: 'inspection-op', revision: 1, replayed: false, serverTime: 'now' }); serviceMocks.decideReview.mockResolvedValue({ operationId: 'review-op', revision: 2, replayed: false, serverTime: 'now' }); });
 
@@ -32,6 +35,16 @@ it('shows the stored category identity, keeps category-local navigation bounded,
   await user.click(screen.getByRole('button', { name: 'تسجيل الفحص والانتقال' }));
   await waitFor(() => expect(serviceMocks.markPublishedQuestionInspected).toHaveBeenCalledWith(expect.objectContaining({ id: 'published-q1', releaseId: 'release-01' })));
   expect(await screen.findByTestId('location')).toHaveTextContent('/admin/questions/published-q2?releaseId=release-01');
+});
+
+it('uses the published category as the question-page heading with its reviewed cover and return action', async () => {
+  serviceMocks.getPublishedQuestion.mockResolvedValue({ releaseId: 'release-01', id: 'missing-1', categoryId: 'tahadani-014', categoryLabelAr: 'الجزء المفقود', headerAr: 'أكمل النمط', promptAr: 'أي قطعة تكمل الشكل؟', canonicalAnswer: 'أ', modality: 'classic', previousQuestionId: null, nextQuestionId: null, inspection: { reviewed: false } });
+  renderAdmin('/admin/questions/missing-1?releaseId=release-01', <Route path="questions/:id" element={<AdminPublishedQuestionsRoute />} />);
+  expect(await screen.findByRole('heading', { level: 1, name: 'الجزء المفقود' })).toBeVisible();
+  expect(screen.getByText('إدارة الخلية - تفاصيل السؤال المنشور')).toBeVisible();
+  expect(screen.getByText('قراءة من الإصدار المنشور الثابت. لا يمكن تحرير هذا السجل من لوحة الإدارة.')).toBeVisible();
+  expect(screen.getByRole('img', { name: /غلاف فئة الجزء المفقود/ })).toHaveAttribute('src', '/assets/categories/generated/tahadani-014.webp');
+  expect(screen.getByRole('link', { name: 'العودة إلى أسئلة الفئة' })).toHaveAttribute('href', '/admin/questions?categoryId=tahadani-014&releaseId=release-01');
 });
 
 it('does not let a deferred inspection mark navigate away from a manually selected neighbor', async () => {
@@ -57,6 +70,117 @@ it('keeps a viewer inspection detail read-only while still showing the shared st
   expect(await screen.findByText('تم فحص هذا السؤال')).toBeVisible();
   expect(screen.queryByRole('button', { name: 'تسجيل الفحص والانتقال' })).not.toBeInTheDocument();
   expect(serviceMocks.markPublishedQuestionInspected).not.toHaveBeenCalled();
+});
+
+it('uses one in-app dialog history entry across next, close, Back, and Forward while retaining the list', async () => {
+  const user = userEvent.setup();
+  serviceMocks.listPublishedQuestions.mockResolvedValue({ releaseId: 'release-01', items: [
+    { id: 'published-q1', headerAr: 'سؤال منشور', promptAr: 'ما الإجابة؟', categoryId: 'tahadani-001', modality: 'classic', inspection: { reviewed: true, reviewedAt: { seconds: 1 } } },
+    { id: 'published-q2', headerAr: 'سؤال آخر', promptAr: 'السؤال الثاني', categoryId: 'tahadani-001', modality: 'image', inspection: { reviewed: false, reviewedAt: null } },
+    { id: 'published-q3', headerAr: 'سؤال قديم', promptAr: 'حالة قديمة', categoryId: 'tahadani-001', modality: 'classic' },
+  ], nextCursor: 'cursor-2' });
+  serviceMocks.listPublishedCategories.mockResolvedValue({ releaseId: 'release-01', items: [{ id: 'tahadani-001', labelAr: 'تحدي المعرفة', approvedCount: 12 }], nextCursor: null });
+  serviceMocks.getPublishedQuestion.mockImplementation((id: string) => Promise.resolve({ releaseId: 'release-01', id, categoryId: 'tahadani-001', categoryLabelAr: 'تحدي المعرفة', headerAr: id === 'published-q2' ? 'السؤال الثاني' : 'السؤال الأول', promptAr: id === 'published-q2' ? 'تفاصيل السؤال الثاني' : 'تفاصيل السؤال الأول', canonicalAnswer: 'الإجابة', modality: 'classic', previousQuestionId: id === 'published-q2' ? 'published-q1' : null, nextQuestionId: id === 'published-q1' ? 'published-q2' : null, inspection: { reviewed: false, reviewedAt: null } }));
+  const base = '/admin/questions?categoryId=tahadani-001&modality=classic&releaseId=release-01';
+  renderAdminHistory([base], 0, <Route path="questions" element={<><HistoryControls /><AdminPublishedQuestionsRoute /></>} />);
+  const trigger = await screen.findByRole('link', { name: 'ما الإجابة؟' });
+  await user.click(trigger);
+  expect(await screen.findByRole('dialog')).toBeVisible();
+  expect(screen.getByText('إجمالي الفئة المنشور: 12 سؤالاً')).toBeVisible();
+  expect(screen.getByText('المحمّل الآن: 3 سؤالاً؛ هذا ليس إجمالياً مصفّى.')).toBeVisible();
+  expect(screen.getByRole('status', { name: 'تم فحص السؤال' })).toBeVisible();
+  expect(screen.getByRole('status', { name: 'لم يسجل فحص بعد' })).toBeVisible();
+  expect(screen.getByRole('status', { name: 'حالة الفحص غير متاحة من هذا الإصدار' })).toBeVisible();
+  await user.click(screen.getByRole('button', { name: 'السؤال التالي' }));
+  await waitFor(() => expect(screen.getByTestId('location')).toHaveTextContent('questionId=published-q2'));
+  expect(await screen.findByText('تفاصيل السؤال الثاني')).toBeVisible();
+  await user.click(screen.getByRole('button', { name: 'إغلاق تفاصيل السؤال' }));
+  await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+  expect(screen.getByText('ما الإجابة؟')).toBeVisible();
+  await user.click(screen.getByRole('button', { name: 'تقدم المتصفح' }));
+  expect(await screen.findByRole('dialog')).toBeVisible();
+  expect(screen.getByText('تفاصيل السؤال الثاني')).toBeVisible();
+  await user.click(screen.getByRole('button', { name: 'رجوع المتصفح' }));
+  await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+});
+
+it('keeps an actual-click dialog open through StrictMode effect replay', async () => {
+  const dialogPrototype = HTMLDialogElement.prototype;
+  const showModalDescriptor = Object.getOwnPropertyDescriptor(dialogPrototype, 'showModal');
+  const closeDescriptor = Object.getOwnPropertyDescriptor(dialogPrototype, 'close');
+  Object.defineProperty(dialogPrototype, 'showModal', { configurable: true, value(this: HTMLDialogElement) { this.setAttribute('open', ''); } });
+  Object.defineProperty(dialogPrototype, 'close', { configurable: true, value(this: HTMLDialogElement) { this.removeAttribute('open'); window.setTimeout(() => this.dispatchEvent(new Event('close')), 0); } });
+  const user = userEvent.setup();
+  try {
+    renderAdminStrict('/admin/questions?categoryId=tahadani-001&releaseId=release-01', <Route path="questions" element={<AdminPublishedQuestionsRoute />} />);
+    await user.click(await screen.findByRole('link', { name: 'ما الإجابة؟' }));
+    await new Promise<void>(resolve => window.setTimeout(resolve, 0));
+    expect(await screen.findByRole('dialog', { name: 'تفاصيل السؤال المنشور' })).toBeVisible();
+    await waitFor(() => expect(screen.getByTestId('location')).toHaveTextContent('questionId=published-q1'));
+  } finally {
+    if (showModalDescriptor) Object.defineProperty(dialogPrototype, 'showModal', showModalDescriptor); else delete (dialogPrototype as { showModal?: unknown }).showModal;
+    if (closeDescriptor) Object.defineProperty(dialogPrototype, 'close', closeDescriptor); else delete (dialogPrototype as { close?: unknown }).close;
+  }
+});
+
+it('dismisses the native dialog cancel event and restores its trigger focus', async () => {
+  const user = userEvent.setup();
+  renderAdmin('/admin/questions?categoryId=tahadani-001&releaseId=release-01', <Route path="questions" element={<AdminPublishedQuestionsRoute />} />);
+  const trigger = await screen.findByRole('link', { name: 'ما الإجابة؟' });
+  await user.click(trigger);
+  act(() => { screen.getByRole('dialog').dispatchEvent(new Event('cancel', { cancelable: true })); });
+  await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+  await waitFor(() => expect(trigger).toHaveFocus());
+});
+
+it('does not render a prior dialog detail or its media while the selected question identity changes', async () => {
+  const first = deferred<Row>(); const second = deferred<Row>();
+  serviceMocks.getPublishedQuestion.mockImplementation((id: string) => id === 'published-q1' ? first.promise : second.promise);
+  serviceMocks.getPublishedQuestionMedia.mockResolvedValue({ url: 'data:image/png;base64,old', type: 'image' });
+  const user = userEvent.setup();
+  renderAdminHistory(['/admin/questions?categoryId=tahadani-001&releaseId=release-01'], 0, <Route path="questions" element={<><HistoryControls /><AdminPublishedQuestionsRoute /></>} />);
+  await user.click(await screen.findByRole('link', { name: 'ما الإجابة؟' }));
+  first.resolve({ releaseId: 'release-01', id: 'published-q1', categoryId: 'tahadani-001', categoryLabelAr: 'تحدي المعرفة', headerAr: 'الأول', promptAr: 'تفاصيل قديمة يجب إخفاؤها', canonicalAnswer: 'جواب', modality: 'image', previousQuestionId: null, nextQuestionId: 'published-q2', inspection: { reviewed: false, reviewedAt: null }, media: { mediaId: 'old-media', type: 'image', altAr: 'وسيط قديم' } });
+  expect(await screen.findByText('تفاصيل قديمة يجب إخفاؤها')).toBeVisible();
+  await user.click(screen.getByRole('button', { name: 'تغيير السؤال للاختبار' }));
+  const dialog = screen.getByRole('dialog');
+  expect(within(dialog).queryByText('تفاصيل قديمة يجب إخفاؤها')).not.toBeInTheDocument();
+  expect(within(dialog).queryByRole('img', { name: 'وسيط قديم' })).not.toBeInTheDocument();
+  second.resolve({ releaseId: 'release-01', id: 'published-q2', categoryId: 'tahadani-001', categoryLabelAr: 'تحدي المعرفة', headerAr: 'الثاني', promptAr: 'تفاصيل السؤال الجديد', canonicalAnswer: 'جواب جديد', modality: 'classic', previousQuestionId: 'published-q1', nextQuestionId: null, inspection: { reviewed: false, reviewedAt: null } });
+  expect(await screen.findByText('تفاصيل السؤال الجديد')).toBeVisible();
+});
+
+it('shows a dialog load failure and retries the same requested question', async () => {
+  const pending = deferred<Row>();
+  serviceMocks.getPublishedQuestion.mockReturnValueOnce(pending.promise).mockResolvedValueOnce({ releaseId: 'release-01', id: 'published-q1', categoryId: 'tahadani-001', categoryLabelAr: 'تحدي المعرفة', headerAr: 'استعادة', promptAr: 'تفاصيل بعد إعادة المحاولة', canonicalAnswer: 'جواب', modality: 'classic', previousQuestionId: null, nextQuestionId: null, inspection: { reviewed: false, reviewedAt: null } });
+  const user = userEvent.setup();
+  renderAdmin('/admin/questions?categoryId=tahadani-001&releaseId=release-01', <Route path="questions" element={<AdminPublishedQuestionsRoute />} />);
+  await user.click(await screen.findByRole('link', { name: 'ما الإجابة؟' }));
+  expect(await screen.findByRole('dialog', { name: 'تفاصيل السؤال المنشور' })).toBeVisible();
+  pending.reject(new Error('unavailable'));
+  expect(await screen.findByRole('alert')).toHaveTextContent('تعذر تحميل السؤال المنشور أو تغيّر الإصدار النشط.');
+  expect(screen.getByRole('dialog', { name: 'تفاصيل السؤال المنشور' })).toBeVisible();
+  await user.click(screen.getByRole('button', { name: 'إعادة المحاولة' }));
+  expect(await screen.findByText('تفاصيل بعد إعادة المحاولة')).toBeVisible();
+  expect(serviceMocks.getPublishedQuestion).toHaveBeenCalledTimes(2);
+});
+
+it('does not reopen or navigate a dialog after it is closed while its inspection mark is pending', async () => {
+  const pending = deferred<{ operationId: string; revision: number; replayed: boolean; serverTime: string }>();
+  serviceMocks.markPublishedQuestionInspected.mockReturnValue(pending.promise);
+  serviceMocks.getPublishedQuestion.mockResolvedValue({ releaseId: 'release-01', id: 'published-q1', categoryId: 'tahadani-001', categoryLabelAr: 'تحدي المعرفة', headerAr: 'سؤال منشور', promptAr: 'ما الإجابة؟', canonicalAnswer: 'الإجابة', modality: 'classic', previousQuestionId: null, nextQuestionId: 'published-q2', inspection: { reviewed: false, reviewedAt: null } });
+  const user = userEvent.setup();
+  renderAdmin('/admin/questions?categoryId=tahadani-001&releaseId=release-01', <Route path="questions" element={<AdminPublishedQuestionsRoute />} />);
+  const trigger = await screen.findByRole('link', { name: 'ما الإجابة؟' });
+  await user.click(trigger);
+  await screen.findByRole('dialog');
+  await user.click(screen.getByRole('button', { name: 'تسجيل الفحص والانتقال' }));
+  await user.click(screen.getByRole('button', { name: 'إغلاق تفاصيل السؤال' }));
+  await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+  await waitFor(() => expect(trigger).toHaveFocus());
+  pending.resolve({ operationId: 'inspection-op', revision: 1, replayed: false, serverTime: 'now' });
+  await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+  expect(screen.getByTestId('location')).not.toHaveTextContent('questionId=');
 });
 
 it('shows verified images automatically inside their respective question and answer sections', async () => {
@@ -90,6 +214,35 @@ it('plays each verified video inline only when requested in its section', async 
 
 it('redirects /admin to the Arabic-first overview route', async () => { render(<MemoryRouter initialEntries={['/admin']}><Routes><Route path="/admin" element={<AdminRootRedirect />} /><Route path="/admin/overview" element={<p>overview</p>} /></Routes></MemoryRouter>); expect(await screen.findByText('overview')).toBeVisible(); });
 it('keeps a category deep link in the URL, resets it, and sends the filter to the published server query', async () => { const user = userEvent.setup(); renderAdmin('/admin/questions?categoryId=tahadani-001&releaseId=release-01', <Route path="questions" element={<AdminPublishedQuestionsRoute />} />); expect(await screen.findByText('سؤال منشور')).toBeVisible(); expect(serviceMocks.listPublishedQuestions).toHaveBeenCalledWith({ limit: 50, releaseId: 'release-01', categoryId: 'tahadani-001' }); await user.click(screen.getByRole('button', { name: 'مسح المرشحات' })); await waitFor(() => expect(screen.getByTestId('location')).toHaveTextContent('/admin/questions?releaseId=release-01')); await waitFor(() => expect(serviceMocks.listPublishedQuestions).toHaveBeenLastCalledWith({ limit: 50, releaseId: 'release-01' })); });
+it('narrows published categories by parent topic and waits for a category before querying questions', async () => {
+  const user = userEvent.setup();
+  serviceMocks.listPublishedCategories.mockResolvedValue({ releaseId: 'release-01', items: [
+    { id: 'tahadani-001', labelAr: 'تحدي المعرفة', approvedCount: 1 },
+    { id: 'tahadani-002', labelAr: 'كرة القدم', approvedCount: 1 },
+  ], nextCursor: null });
+  renderAdmin('/admin/questions?releaseId=release-01', <Route path="questions" element={<AdminPublishedQuestionsRoute />} />);
+  const topic = await screen.findByRole('combobox', { name: 'موضوع الفئة المنشورة' });
+  const category = screen.getByRole('combobox', { name: 'فئة منشورة' });
+  await waitFor(() => expect(topic).toBeEnabled());
+  await user.selectOptions(topic, 'sports');
+  expect(screen.getByText('اختر فئة من موضوع رياضة لعرض أسئلتها.')).toBeVisible();
+  expect(within(category).getByRole('option', { name: 'كرة القدم' })).toBeVisible();
+  expect(within(category).queryByRole('option', { name: 'تحدي المعرفة' })).not.toBeInTheDocument();
+  expect(screen.getByTestId('location')).toHaveTextContent('topicId=sports');
+  const queriesBeforeCategory = serviceMocks.listPublishedQuestions.mock.calls.length;
+  await user.selectOptions(category, 'tahadani-002');
+  await waitFor(() => expect(serviceMocks.listPublishedQuestions).toHaveBeenCalledWith({ limit: 50, releaseId: 'release-01', categoryId: 'tahadani-002' }));
+  expect(serviceMocks.listPublishedQuestions.mock.calls.length).toBe(queriesBeforeCategory + 1);
+  await user.selectOptions(topic, 'geography');
+  expect(category).toHaveValue('');
+  expect(screen.getByText('اختر فئة من موضوع جغرافيا ودول لعرض أسئلتها.')).toBeVisible();
+  expect(screen.getByTestId('location')).not.toHaveTextContent('categoryId=');
+});
+it('selects the parent topic for a category deep link', async () => {
+  renderAdmin('/admin/questions?categoryId=tahadani-001&releaseId=release-01', <Route path="questions" element={<AdminPublishedQuestionsRoute />} />);
+  await waitFor(() => expect(screen.getByRole('combobox', { name: 'موضوع الفئة المنشورة' })).toHaveValue('geography'));
+  expect(screen.getByRole('combobox', { name: 'فئة منشورة' })).toHaveValue('tahadani-001');
+});
 it('does not render a stale published-category response after the URL filter changes', async () => { const first = deferred<{ releaseId: string; items: Record<string, unknown>[]; nextCursor: null }>(); const second = deferred<{ releaseId: string; items: Record<string, unknown>[]; nextCursor: null }>(); serviceMocks.listPublishedQuestions.mockImplementation((data: { categoryId?: string }) => data.categoryId === 'tahadani-001' ? first.promise : second.promise); const user = userEvent.setup(); renderAdmin('/admin/questions?categoryId=tahadani-001', <Route path="questions" element={<PublishedWithNextCategory />} />); await waitFor(() => expect(serviceMocks.listPublishedQuestions).toHaveBeenCalledWith({ limit: 50, categoryId: 'tahadani-001' })); await user.click(screen.getByRole('link', { name: 'الفئة التالية' })); await waitFor(() => expect(serviceMocks.listPublishedQuestions).toHaveBeenCalledWith({ limit: 50, categoryId: 'tahadani-002' })); second.resolve({ releaseId: 'release-01', items: [{ id: 'q-new', headerAr: 'السؤال الجديد', promptAr: 'نص جديد', categoryId: 'tahadani-002', modality: 'classic' }], nextCursor: null }); expect(await screen.findByText('السؤال الجديد')).toBeVisible(); first.resolve({ releaseId: 'release-01', items: [{ id: 'q-old', headerAr: 'السؤال القديم', promptAr: 'نص قديم', categoryId: 'tahadani-001', modality: 'classic' }], nextCursor: null }); await waitFor(() => expect(screen.queryByText('السؤال القديم')).not.toBeInTheDocument()); });
 it('gives category rows distinct view-category and view-questions actions and an honest zero state', async () => { const user = userEvent.setup(); serviceMocks.listPublishedCategories.mockResolvedValue({ releaseId: 'release-01', items: [{ id: 'tahadani-001', labelAr: 'تحدي المعرفة', approvedCount: 0 }], nextCursor: null }); serviceMocks.getPublishedCategory.mockResolvedValue({ releaseId: 'release-01', id: 'tahadani-001', labelAr: 'تحدي المعرفة', approvedCount: 0, runtimeReadiness: {} }); renderAdmin('/admin/categories', <><Route path="categories" element={<AdminPublishedCategoriesRoute />} /><Route path="categories/:id" element={<AdminPublishedCategoriesRoute />} /></>); expect(await screen.findByRole('link', { name: 'عرض الفئة' })).toHaveAttribute('href', '/admin/categories/tahadani-001?releaseId=release-01'); expect(screen.getByRole('link', { name: 'عرض الأسئلة' })).toHaveAttribute('href', '/admin/questions?categoryId=tahadani-001&releaseId=release-01'); await user.click(screen.getByRole('link', { name: 'عرض الفئة' })); expect(await screen.findByText('لا توجد أسئلة منشورة في هذه الفئة ضمن هذا الإصدار.')).toBeVisible(); expect(screen.getByText('جغرافيا ودول')).toBeVisible(); });
 

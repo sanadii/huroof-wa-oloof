@@ -6,6 +6,12 @@
       "web320": "assets/categories/generated/goals-2026.webp",
       "altAr": "غلاف فئة من سجل الهدف؟",
       "publishable": true
+    },
+    {
+      "categoryId": "tahadani-014",
+      "web320": "assets/categories/generated/tahadani-014.webp",
+      "altAr": "غلاف فئة الجزء المفقود: لوحة نمط هندسي مع قطعة مرفوعة وفراغ في موضعها",
+      "publishable": true
     }
   ]
 }
