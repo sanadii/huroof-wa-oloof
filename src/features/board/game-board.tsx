@@ -101,6 +101,8 @@ const HORIZONTAL = RADIUS_X * 1.5;
 const VERTICAL = Math.sqrt(3) * RADIUS_Y;
 const FRAME_MIN = 5;
 const FRAME_MAX = 435;
+// The tactile enclosure rim extends beyond the regular 0–440 cell viewBox.
+const ENCLOSURE_VIEWBOX = "-26 -18 488 476";
 // Cells are deliberately wider than a regular hex so the complete 5x5 framed board
 // has approximately equal visible width and height. Odd columns remain offset by half a hex.
 // q/r identities and domain adjacency stay independent from this rendered layout.
@@ -223,7 +225,7 @@ function tactileRailPath(
 }
 
 /** Extend the same honeycomb lattice: every surrounding tile has one team color. */
-function CellEnclosure({ cells }: { cells: BoardCell[] }) {
+function CellEnclosure({ cells, ambientMotion = false }: { cells: BoardCell[]; ambientMotion?: boolean }) {
   const clipId = `enclosure-${useId().replace(/:/g, "")}`;
   const top = railBoundary("vertical", "start", cells);
   const bottom = railBoundary("vertical", "end", cells);
@@ -242,15 +244,16 @@ function CellEnclosure({ cells }: { cells: BoardCell[] }) {
     const row = r + (q % 2 < 0 ? -1 : 0);
     return { q, r, axis: row < 0 || row > 4 ? "vertical" : "horizontal" };
   }).filter(({ q, r }) => q < 0 || q > 4 || r < 0 || r > 4);
-  return <g className="game-board__enclosure" aria-hidden="true">
+  return <g className={`game-board__enclosure ${ambientMotion ? "game-board__enclosure--ambient" : ""}`} aria-hidden="true">
     <defs><clipPath id={clipId}><rect x={x} y={y} width={width} height={height} rx={14} /></clipPath></defs>
     <rect className="game-board__enclosure-rim-shadow" x={x + 2} y={y + 3} width={width - 4} height={height - 4} rx={12} />
     <g clipPath={`url(#${clipId})`}>
-      {surround.map(({ q, r, axis }) => (
+      {surround.map(({ q, r, axis }, index) => (
         <g key={`${q}-${r}`}>
           <polygon data-surround-cell={`${q},${r}`}
             className={`game-board__enclosure-section game-board__enclosure-section--${axis}`}
-            points={points(q, r)} />
+            points={points(q, r)}
+            style={ambientMotion ? { "--ambient-cell-delay": `${-((index * 23) % 59) * .33}s` } as CSSProperties : undefined} />
           <polygon aria-hidden="true" className={`game-board__enclosure-groove game-board__enclosure-groove--${axis}`}
             data-material-layer="surround-inset-groove" points={scaledPoints(q, r, .82)} />
         </g>
@@ -324,6 +327,7 @@ export function GameBoard({
   allowOwnedSelection = false,
   onSelect,
   className = "",
+  fillContainer = false,
   presentation = "flat",
   motionBaselineKey = "authoritative",
   motionEnabled = true,
@@ -337,6 +341,8 @@ export function GameBoard({
   allowOwnedSelection?: boolean;
   onSelect?: (cellId: string) => void;
   className?: string;
+  /** Audience stage only: use the entire rectangular board slot. */
+  fillContainer?: boolean;
   /** Decorative only. Gameplay stays flat unless an isolated presentation opts in. */
   presentation?: "flat" | "tactile";
   /** A new server/cache/connection baseline suppresses historical replay effects. */
@@ -384,6 +390,17 @@ export function GameBoard({
   const [entranceToken, setEntranceToken] = useState<number>();
   const [hoveredCellId, setHoveredCellId] = useState<string>();
   const [pressedCellId, setPressedCellId] = useState<string>();
+  // The event identifier persists for deduplication after its visual effect ends.
+  // Gate ambient motion on the short-lived effect tokens instead.
+  const ambientMotion =
+    fillContainer &&
+    presentation === "tactile" &&
+    motionEnabled &&
+    presentationContext?.phase === "CELL_SELECTION" &&
+    !entranceToken &&
+    !selectionToken &&
+    !awardToken &&
+    winningPath.length === 0;
   const previousOwnership = useRef<string | undefined>(undefined);
   const previousNear = useRef<Record<TeamAxis, string> | undefined>(undefined);
   const previousWinningPath = useRef<string | undefined>(undefined);
@@ -538,10 +555,11 @@ export function GameBoard({
       <svg
         aria-label="لوحة المباراة"
         className="game-board-svg"
-        data-frame-shape="square"
+          data-frame-shape={fillContainer ? "fluid" : "square"}
+          preserveAspectRatio={fillContainer ? "none" : undefined}
         role="img"
         style={materialStyle}
-        viewBox="0 0 440 440"
+          viewBox={fillContainer ? ENCLOSURE_VIEWBOX : "0 0 440 440"}
       >
         {presentation === "tactile" ? (
           <defs>
@@ -556,7 +574,7 @@ export function GameBoard({
             <filter id={`${materialId}-contact-shadow`} x="-20%" y="-20%" width="140%" height="150%"><feDropShadow dx="0" dy="2.5" floodColor="#071b36" floodOpacity=".2" stdDeviation="1.4" /></filter>
           </defs>
         ) : null}
-        <CellEnclosure cells={cells} />
+        <CellEnclosure cells={cells} ambientMotion={ambientMotion} />
         <g aria-hidden="true">
           <Rail axis="vertical" cells={cells} edge="start" presentation={presentation} />
           <Rail axis="vertical" cells={cells} edge="end" presentation={presentation} />
@@ -624,6 +642,14 @@ export function GameBoard({
                 data-material-layer="flat-face"
                 points={presentation === "tactile" ? tactileFacePoints(cell.q, cell.r) : points(cell.q, cell.r)}
               />
+              {ambientMotion && !cell.owner && !active && !won ? (
+                <polygon
+                  aria-hidden="true"
+                  className="game-board__ambient-cell-glint"
+                  points={tactileFacePoints(cell.q, cell.r)}
+                  style={{ "--ambient-cell-delay": `${-((cellIndex * 17) % 25) * .68}s` } as CSSProperties}
+                />
+              ) : null}
               {presentation === "tactile" ? (
                 <polyline
                   className="game-board__cell-chamfer-highlight"
@@ -661,7 +687,12 @@ export function GameBoard({
                 y={c.y + 4 - (content.lines.length - 1) * lineHeight / 2}
               >
                 {content.lines.map((line, index) => (
-                  <tspan dy={index === 0 ? 0 : lineHeight} key={`${cell.id}-${index}`} x={c.x}>
+                  <tspan
+                    className={content.variant === "category" && index === content.lines.length - 1 ? "game-board__cell-label-category-occurrence" : undefined}
+                    dy={index === 0 ? 0 : lineHeight}
+                    key={`${cell.id}-${index}`}
+                    x={c.x}
+                  >
                     {line}
                   </tspan>
                 ))}

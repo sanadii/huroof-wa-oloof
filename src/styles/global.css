@@ -4362,10 +4362,16 @@
   inline-size: min(100%, var(--arena-board-size));
   justify-self: center;
 }
-.game-arena .stage-board-column--active-caption {
-  --arena-board-size: min(60vh, calc(100svh - 20rem), 48rem);
-  display: grid;
-  gap: var(--space-2);
+@media (min-width: 56.25rem) {
+  .game-arena .stage-board-column {
+    block-size: 100%;
+    inline-size: 100%;
+    max-inline-size: 100%;
+    min-block-size: 0;
+  }
+  .game-arena .stage-board-column > .stage-board {
+    block-size: 100%;
+  }
 }
 .game-arena .stage-board {
   background: transparent;
@@ -4373,7 +4379,7 @@
   border-radius: 0;
   box-shadow: none;
   block-size: auto;
-  inline-size: min(100%, var(--arena-board-size));
+  inline-size: 100%;
   max-inline-size: 100%;
   padding: 0;
 }
@@ -4527,6 +4533,7 @@
   min-block-size: 6rem;
   padding: clamp(var(--space-2), 1vw, var(--space-4));
 }
+.game-arena:not(.game-arena--host) > .question-band--concealed { display: none; }
 .question-band__heading {
   align-items: center;
   color: var(--arena-line);
@@ -4659,8 +4666,29 @@
   .game-arena .team-score__points { border-block-start: 0; border-inline-start: var(--border-default) solid currentColor; grid-area: points; margin: 0; padding-block: 0; padding-inline-start: var(--space-2); width: auto; }
   .game-arena .stage-board-column { inline-size: 100%; }
   .game-arena .stage-board { inline-size: min(100%, 30rem); }
+  .game-arena:not(.game-arena--host) .stage-board-column > .stage-board { aspect-ratio: 1; }
   .game-arena__rail { block-size: 46%; top: 34%; }
   .game-arena__hex { display: none; }
+}
+
+.game-arena:not(.game-arena--host) .stage-score {
+  direction: rtl;
+  position: relative;
+  overflow: hidden;
+}
+.game-arena:not(.game-arena--host) .stage-game { direction: ltr; }
+.game-arena:not(.game-arena--host) .stage-score .team-score__points {
+  border: 0;
+}
+.game-arena:not(.game-arena--host) .stage-score .team-score__rounds > strong {
+  font-size: clamp(3rem, 5vw, 4.75rem);
+}
+.game-arena:not(.game-arena--host) .stage-score .team-score__rounds > small,
+.game-arena:not(.game-arena--host) .stage-score .team-score__points-label {
+  font-size: clamp(.875rem, 1vw, 1rem);
+}
+.game-arena:not(.game-arena--host) .stage-score .team-score__points-value {
+  font-size: clamp(1.5rem, 2.2vw, 2.25rem);
 }
 
 @media (max-width: 30rem) {

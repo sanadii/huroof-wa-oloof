@@ -713,6 +713,20 @@ html[data-theme="dark"] .spatial-admin .admin-nav a.is-current { color: var(--kh
   inline-size: 88%;
   block-size: 88%;
 }
+@media (min-width: 56.25rem) {
+  .game-arena:not(.game-arena--host) .stage-board-column > .stage-board {
+    aspect-ratio: auto;
+  }
+}
+.game-arena:not(.game-arena--host) .stage-board-column > .stage-board > .game-board-svg {
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+}
+.game-arena:not(.game-arena--host) .game-board__cell-label-category-occurrence {
+  font-size: 10px;
+  font-weight: 500;
+}
 .game-arena .stage-score__team,
 .game-arena--host .host-score__team { color: var(--on-team); }
 .game-arena .question-media { background: var(--khaliah-surface-alt); }
@@ -887,6 +901,27 @@ html[data-theme="dark"] .game-arena--host .host-controls .host-team-selection__b
   stroke: rgb(7 39 76 / 70%);
   stroke-width: 1.5;
 }
+/* Independent, brief tile flashes keep the team border alive without a traveling light. */
+.game-arena .game-board__enclosure--ambient .game-board__enclosure-section {
+  animation: khaliah-border-cell-flash 20s ease-in-out infinite;
+  animation-delay: var(--ambient-cell-delay);
+}
+.game-arena .game-board__ambient-cell-glint {
+  fill: #f7bf49;
+  stroke: none;
+  pointer-events: none;
+  opacity: 0;
+  animation: khaliah-cell-ambient-glint 18s ease-in-out infinite;
+  animation-delay: var(--ambient-cell-delay);
+}
+@keyframes khaliah-cell-ambient-glint {
+  0%, 1%, 8%, 100% { opacity: 0; filter: none; }
+  3%, 5% { opacity: .62; filter: drop-shadow(0 0 7px rgb(255 218 115 / 80%)); }
+}
+@keyframes khaliah-border-cell-flash {
+  0%, 1%, 8%, 100% { filter: brightness(1); }
+  3%, 5% { filter: brightness(1.95) saturate(1.2); }
+}
 .game-arena--host .host-board { scroll-margin-block-start: 5.5rem; }
 .game-arena .game-board__cell-near-candidate-ring {
   fill: none;
@@ -939,6 +974,8 @@ html[data-theme="dark"] .game-arena--host .host-controls .host-team-selection__b
 @keyframes khaliah-buzzer-event { 0% { transform: translateY(0); } 50% { transform: translateY(-2px); } 100% { transform: translateY(0); } }
 @media (prefers-reduced-motion: reduce) {
   .game-arena :is(.game-board-wrap--round-enter .game-board-svg, .game-board-wrap--round-enter .game-board__enclosure, .game-board-wrap--round-enter .game-board__cell, .game-board__cell--selection, .game-board__cell--awarded, .game-board__cell-award-sweep, .game-board__cell--hovered, .game-board__cell--pressed, .game-board__cell--content-updated, .game-board__cell--near-flash .game-board__cell-face, .game-board__cell--winning-pulse, .board-status-strip--buzzer) { animation: none; transform: none; }
+  .game-arena .game-board__enclosure--ambient .game-board__enclosure-section { animation: none; filter: none; }
+  .game-arena .game-board__ambient-cell-glint { animation: none; opacity: 0; }
   .game-arena .game-board__button { transition: none; }
 }
 .game-board-wrap--motion-disabled :is(.game-board__cell--hovered, .game-board__cell--pressed) { transform: none; transition: none; }

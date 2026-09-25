@@ -1930,7 +1930,7 @@ export function TeamScoreCard({
   );
 }
 
-export function BoardStatusStrip({ projection, serverTime, presentationContext, onDeadline }: { projection: SafeProjection; serverTime: string; presentationContext?: BoardPresentationContext; onDeadline?: () => void; notification?: string }) {
+export function BoardStatusStrip({ projection, serverTime, presentationContext, onDeadline }: { projection: SafeProjection; serverTime: string; presentationContext?: BoardPresentationContext; onDeadline?: () => void }) {
   const state = projection.room.state;
   const answering = (state === "FIRST_ANSWER" || state === "OPPONENT_CHANCE")
     ? projection.answeringTeam ?? projection.entitledTeam : undefined;
@@ -3323,13 +3323,6 @@ function RoomRouteInstance({
   const canStartMatch = canDispatchLobbyStart(state, projection.room.canStart);
   const team = projection.self?.team;
   const cells = projection.board ?? previewBoardCells;
-  const activeCell = cells.find((cell) => cell.id === projection.activeCellId);
-  const activeCellCaption =
-    activeCell?.kind === "category" && activeCell.categoryLabelAr
-      ? `الفئة الحالية: ${activeCell.categoryLabelAr} · الترتيب ${activeCell.categoryOccurrence ?? "—"}`
-      : activeCell?.kind === "surprise" && activeCell.revealedLetter
-        ? `المفاجأة ${activeCell.visibleValue}: الحرف الحالي ${activeCell.revealedLetter}`
-        : undefined;
   const incompleteEnd = Boolean(projection.endedWithoutWinner);
   const boardMotionEnabled =
     connection === "connected" && envelope.authoritative !== false;
@@ -3691,7 +3684,7 @@ function RoomRouteInstance({
             <span>الخلية</span>
             <small>شاشة الجمهور</small>
           </p>
-          <BoardStatusStrip projection={projection} serverTime={envelope.serverTime} presentationContext={boardPresentationContext} onDeadline={reconcileDeadline} notification={activeCellCaption || undefined} />
+          <BoardStatusStrip projection={projection} serverTime={envelope.serverTime} presentationContext={boardPresentationContext} onDeadline={reconcileDeadline} />
           <p className="game-arena__badge">
             <svg aria-hidden="true" viewBox="0 0 24 24">
               <path d="M8 3h8l-1 6h-6L8 3Z" />
@@ -3712,13 +3705,12 @@ function RoomRouteInstance({
             teamName={projection.room.teams?.vertical}
             variant="stage"
           />
-          <div
-            className={`stage-board-column ${activeCellCaption ? "stage-board-column--active-caption" : ""}`}
-          >
+          <div className="stage-board-column">
             <GameBoard
               activeCellId={projection.activeCellId}
               cells={cells}
               className="stage-board"
+              fillContainer
               presentation="tactile"
               winningPath={projection.winningPath}
               motionBaselineKey={boardMotionBaselineKey}
@@ -3737,7 +3729,7 @@ function RoomRouteInstance({
           />
         </section>
         <section
-          className={`question-band${questionMediaVisible ? " question-band--with-media" : ""}${questionMediaVisible && !audienceQuestionTextVisible ? " question-band--media-only" : ""}`}
+          className={`question-band${questionMediaVisible ? " question-band--with-media" : ""}${questionMediaVisible && !audienceQuestionTextVisible ? " question-band--media-only" : ""}${!audienceQuestionTextVisible && !questionMediaVisible ? " question-band--concealed" : ""}`}
           aria-live="polite"
           style={{
             visibility: (audienceQuestionTextVisible || questionMediaVisible)
