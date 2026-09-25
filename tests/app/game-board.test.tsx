@@ -1,8 +1,8 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { stat } from "node:fs/promises";
 import { join } from "node:path";
 import sharp from "sharp";
-import { expect, it } from "vitest";
+import { expect, it, vi } from "vitest";
 import {
   GameBoard,
   nearestCell,
@@ -93,7 +93,49 @@ it("renders a category title and occurrence in the cell while retaining its full
   expect(screen.getByTestId("cell-0-0")).toHaveAccessibleName("اختر الفئة من أنا / لاعبين كرة قدم، الترتيب 7، 1-1");
   const svgCell = document.querySelector(".game-board__cell");
   expect(svgCell?.querySelectorAll(".game-board__cell-label--category tspan")).toHaveLength(3);
-  expect(svgCell).toHaveTextContent("#7");
+  const occurrence = svgCell?.querySelector(".game-board__cell-label-category-occurrence");
+  expect(occurrence).toHaveTextContent("#7");
+  expect(occurrence).toBe(svgCell?.querySelector(".game-board__cell-label--category tspan:last-child"));
+});
+
+it("animates ambient cells only during calm selection", () => {
+  vi.useFakeTimers();
+  let selection: ReturnType<typeof render> | undefined;
+  try {
+    selection = render(<GameBoard
+      cells={cells}
+      fillContainer
+      presentation="tactile"
+      presentationContext={{ roomId: "room", phase: "CELL_SELECTION", revision: 1, eventKey: "baseline", suppressEffects: true }}
+    />);
+    expect(selection.container.querySelector(".game-board__enclosure")).toHaveClass("game-board__enclosure--ambient");
+    expect(selection.container.querySelectorAll(".game-board__ambient-cell-glint")).toHaveLength(25);
+
+    selection.rerender(<GameBoard
+      cells={cells}
+      fillContainer
+      presentation="tactile"
+      presentationContext={{ roomId: "room", phase: "CELL_SELECTION", revision: 2, event: "award", eventKey: "award-2", eventCellId: "cell-0-0" }}
+    />);
+    expect(selection.container.querySelector(".game-board__enclosure")).not.toHaveClass("game-board__enclosure--ambient");
+    act(() => vi.advanceTimersByTime(421));
+    expect(selection.container.querySelector(".game-board__enclosure")).toHaveClass("game-board__enclosure--ambient");
+    expect(selection.container.querySelectorAll(".game-board__ambient-cell-glint")).toHaveLength(25);
+
+    for (const phase of ["QUESTION", "PAUSED", "AWARD", "VICTORY"]) {
+      selection.rerender(<GameBoard
+        cells={cells}
+        fillContainer
+        presentation="tactile"
+        presentationContext={{ roomId: "room", phase, revision: 3 }}
+      />);
+      expect(selection.container.querySelector(".game-board__enclosure")).not.toHaveClass("game-board__enclosure--ambient");
+      expect(selection.container.querySelectorAll(".game-board__ambient-cell-glint")).toHaveLength(0);
+    }
+  } finally {
+    selection?.unmount();
+    vi.useRealTimers();
+  }
 });
 
 it("keeps a numbered surprise identity visible when its replacement letter changes", () => {
