@@ -100,6 +100,35 @@ it('plays each verified video inline only when requested in its section', async 
 
 it('redirects /admin to the Arabic-first overview route', async () => { render(<MemoryRouter initialEntries={['/admin']}><Routes><Route path="/admin" element={<AdminRootRedirect />} /><Route path="/admin/overview" element={<p>overview</p>} /></Routes></MemoryRouter>); expect(await screen.findByText('overview')).toBeVisible(); });
 it('keeps a category deep link in the URL, resets it, and sends the filter to the published server query', async () => { const user = userEvent.setup(); renderAdmin('/admin/questions?categoryId=tahadani-001&releaseId=release-01', <Route path="questions" element={<AdminPublishedQuestionsRoute />} />); expect(await screen.findByText('سؤال منشور')).toBeVisible(); expect(serviceMocks.listPublishedQuestions).toHaveBeenCalledWith({ limit: 50, releaseId: 'release-01', categoryId: 'tahadani-001' }); await user.click(screen.getByRole('button', { name: 'مسح المرشحات' })); await waitFor(() => expect(screen.getByTestId('location')).toHaveTextContent('/admin/questions?releaseId=release-01')); await waitFor(() => expect(serviceMocks.listPublishedQuestions).toHaveBeenLastCalledWith({ limit: 50, releaseId: 'release-01' })); });
+it('narrows published categories by parent topic and waits for a category before querying questions', async () => {
+  const user = userEvent.setup();
+  serviceMocks.listPublishedCategories.mockResolvedValue({ releaseId: 'release-01', items: [
+    { id: 'tahadani-001', labelAr: 'تحدي المعرفة', approvedCount: 1 },
+    { id: 'tahadani-002', labelAr: 'كرة القدم', approvedCount: 1 },
+  ], nextCursor: null });
+  renderAdmin('/admin/questions?releaseId=release-01', <Route path="questions" element={<AdminPublishedQuestionsRoute />} />);
+  const topic = await screen.findByRole('combobox', { name: 'موضوع الفئة المنشورة' });
+  const category = screen.getByRole('combobox', { name: 'فئة منشورة' });
+  await waitFor(() => expect(topic).toBeEnabled());
+  await user.selectOptions(topic, 'sports');
+  expect(screen.getByText('اختر فئة من موضوع رياضة لعرض أسئلتها.')).toBeVisible();
+  expect(within(category).getByRole('option', { name: 'كرة القدم' })).toBeVisible();
+  expect(within(category).queryByRole('option', { name: 'تحدي المعرفة' })).not.toBeInTheDocument();
+  expect(screen.getByTestId('location')).toHaveTextContent('topicId=sports');
+  const queriesBeforeCategory = serviceMocks.listPublishedQuestions.mock.calls.length;
+  await user.selectOptions(category, 'tahadani-002');
+  await waitFor(() => expect(serviceMocks.listPublishedQuestions).toHaveBeenCalledWith({ limit: 50, releaseId: 'release-01', categoryId: 'tahadani-002' }));
+  expect(serviceMocks.listPublishedQuestions.mock.calls.length).toBe(queriesBeforeCategory + 1);
+  await user.selectOptions(topic, 'geography');
+  expect(category).toHaveValue('');
+  expect(screen.getByText('اختر فئة من موضوع جغرافيا ودول لعرض أسئلتها.')).toBeVisible();
+  expect(screen.getByTestId('location')).not.toHaveTextContent('categoryId=');
+});
+it('selects the parent topic for a category deep link', async () => {
+  renderAdmin('/admin/questions?categoryId=tahadani-001&releaseId=release-01', <Route path="questions" element={<AdminPublishedQuestionsRoute />} />);
+  await waitFor(() => expect(screen.getByRole('combobox', { name: 'موضوع الفئة المنشورة' })).toHaveValue('geography'));
+  expect(screen.getByRole('combobox', { name: 'فئة منشورة' })).toHaveValue('tahadani-001');
+});
 it('does not render a stale published-category response after the URL filter changes', async () => { const first = deferred<{ releaseId: string; items: Record<string, unknown>[]; nextCursor: null }>(); const second = deferred<{ releaseId: string; items: Record<string, unknown>[]; nextCursor: null }>(); serviceMocks.listPublishedQuestions.mockImplementation((data: { categoryId?: string }) => data.categoryId === 'tahadani-001' ? first.promise : second.promise); const user = userEvent.setup(); renderAdmin('/admin/questions?categoryId=tahadani-001', <Route path="questions" element={<PublishedWithNextCategory />} />); await waitFor(() => expect(serviceMocks.listPublishedQuestions).toHaveBeenCalledWith({ limit: 50, categoryId: 'tahadani-001' })); await user.click(screen.getByRole('link', { name: 'الفئة التالية' })); await waitFor(() => expect(serviceMocks.listPublishedQuestions).toHaveBeenCalledWith({ limit: 50, categoryId: 'tahadani-002' })); second.resolve({ releaseId: 'release-01', items: [{ id: 'q-new', headerAr: 'السؤال الجديد', promptAr: 'نص جديد', categoryId: 'tahadani-002', modality: 'classic' }], nextCursor: null }); expect(await screen.findByText('السؤال الجديد')).toBeVisible(); first.resolve({ releaseId: 'release-01', items: [{ id: 'q-old', headerAr: 'السؤال القديم', promptAr: 'نص قديم', categoryId: 'tahadani-001', modality: 'classic' }], nextCursor: null }); await waitFor(() => expect(screen.queryByText('السؤال القديم')).not.toBeInTheDocument()); });
 it('gives category rows distinct view-category and view-questions actions and an honest zero state', async () => { const user = userEvent.setup(); serviceMocks.listPublishedCategories.mockResolvedValue({ releaseId: 'release-01', items: [{ id: 'tahadani-001', labelAr: 'تحدي المعرفة', approvedCount: 0 }], nextCursor: null }); serviceMocks.getPublishedCategory.mockResolvedValue({ releaseId: 'release-01', id: 'tahadani-001', labelAr: 'تحدي المعرفة', approvedCount: 0, runtimeReadiness: {} }); renderAdmin('/admin/categories', <><Route path="categories" element={<AdminPublishedCategoriesRoute />} /><Route path="categories/:id" element={<AdminPublishedCategoriesRoute />} /></>); expect(await screen.findByRole('link', { name: 'عرض الفئة' })).toHaveAttribute('href', '/admin/categories/tahadani-001?releaseId=release-01'); expect(screen.getByRole('link', { name: 'عرض الأسئلة' })).toHaveAttribute('href', '/admin/questions?categoryId=tahadani-001&releaseId=release-01'); await user.click(screen.getByRole('link', { name: 'عرض الفئة' })); expect(await screen.findByText('لا توجد أسئلة منشورة في هذه الفئة ضمن هذا الإصدار.')).toBeVisible(); expect(screen.getByText('جغرافيا ودول')).toBeVisible(); });
 
