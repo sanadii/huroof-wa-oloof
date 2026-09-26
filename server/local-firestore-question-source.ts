@@ -3,6 +3,7 @@
  * imported by browser code and deliberately has no write or release capability.
  */
 import { createHash } from "node:crypto";
+import { addQuestionTypeCount, classifyQuestionSideType, emptyQuestionTypeCounts, type QuestionTypeCounts } from "../src/features/game/runtime/question-type-counts.js";
 import { readFile } from "node:fs/promises";
 import { createRequire } from "node:module";
 import { resolve } from "node:path";
@@ -104,6 +105,7 @@ export type LocalQuestionInventory = {
     huroofQuestionCount: number;
     categoryGameEligible: boolean;
     availability: "ready" | "insufficient_questions" | "held_only";
+    questionTypeCounts: QuestionTypeCounts;
   }>;
 };
 export type LocalFirestoreQuestionSource = {
@@ -457,6 +459,10 @@ export async function loadLocalFirestoreQuestionSource(
       const concepts = new Set(
         records.map((question) => question.answerConceptId),
       );
+      const questionTypeCounts = records.reduce(
+        (counts, question) => addQuestionTypeCount(counts, classifyQuestionSideType(question)),
+        emptyQuestionTypeCounts(),
+      );
       return {
         id: category.sourceCategoryId,
         labelAr: category.sourceTitleAr,
@@ -468,6 +474,7 @@ export async function loadLocalFirestoreQuestionSource(
           question.modality === "classic" && Boolean(question.targetLetter),
         ).length,
         categoryGameEligible: concepts.size >= 14,
+        questionTypeCounts,
         availability: (concepts.size >= 14
           ? "ready"
           : "insufficient_questions") as "ready" | "insufficient_questions",

@@ -9,6 +9,34 @@ import {
 } from '../../src/data/category-filters';
 import { sourceTopicCoverage } from '../../src/data/category-topic-taxonomy';
 
+it('intersects question type with category browsing without changing the selected ids', () => {
+  const categories = [
+    { id: 'text-category', displayNameAr: 'أسئلة عامة', questionReadiness: 'ready', cover: { web320: '', altAr: '', publishable: true } },
+    { id: 'image-category', displayNameAr: 'صور عالمية', questionReadiness: 'ready', cover: { web320: '', altAr: '', publishable: true } },
+  ];
+  const questionTypeCountsByCategory = new Map([
+    ['text-category', { text: 12, image: 0, video: 0, audio: 0, interactive: 0, other: 0 }],
+    ['image-category', { text: 2, image: 4, video: 0, audio: 0, interactive: 0, other: 0 }],
+  ]);
+  const filtered = filterCategories(categories, {
+    query: 'صور',
+    selectedIds: ['text-category', 'image-category'],
+    selectedOnly: true,
+    topicId: 'all',
+    questionType: 'image',
+    questionTypeCountsByCategory,
+  });
+  expect(filtered.map((category) => category.id)).toEqual(['image-category']);
+  expect(filterCategories(categories, {
+    query: '',
+    selectedIds: ['image-category'],
+    selectedOnly: false,
+    topicId: 'all',
+    questionType: 'audio',
+    questionTypeCountsByCategory,
+  })).toEqual([]);
+});
+
 it('assigns every imported category to one browse topic exactly once', () => {
   const topicIdSet = new Set(categoryTopics.map((topic) => topic.id));
   const explicitCategoryIds = categoryTopics.flatMap((topic) => topic.categoryIds);

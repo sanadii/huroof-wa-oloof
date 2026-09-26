@@ -30,9 +30,12 @@ import {
   type LocalQuestionInventory,
 } from "../data/local-question-inventory";
 import {
+  categoryQuestionTypes,
   categoryTopicIdForCategory,
   categoryTopics,
   filterCategories,
+  type CategoryQuestionType,
+  type CategoryQuestionTypeCounts,
   type CategoryTopicId,
 } from "../data/category-filters";
 import {
@@ -531,6 +534,7 @@ export function HostNewRoute() {
     "all",
   );
   const [selectedOnly, setSelectedOnly] = useState(false);
+  const [categoryQuestionType, setCategoryQuestionType] = useState<CategoryQuestionType | "all">("all");
   const [unavailableCovers, setUnavailableCovers] = useState<Set<string>>(
     () => new Set(),
   );
@@ -635,6 +639,33 @@ export function HostNewRoute() {
     () => categoryCatalogue.filter((category) => categorySelectionAllowed(category.id)),
     [categoryCatalogue, categorySelectionAllowed],
   );
+  const questionTypeCountsByCategory = useMemo(() => {
+    const source = firebaseRuntime
+      ? approvedReleaseCatalog?.categories
+      : activeQuestionInventory?.categories;
+    return new Map<string, CategoryQuestionTypeCounts>(
+      source?.flatMap((category) =>
+        category.questionTypeCounts
+          ? [[category.id, category.questionTypeCounts] as const]
+          : [],
+      ) ?? [],
+    );
+  }, [activeQuestionInventory, approvedReleaseCatalog, firebaseRuntime]);
+  const questionTypeMetadataAvailable =
+    availableCategoryCatalog.length > 0 &&
+    availableCategoryCatalog.every((category) => questionTypeCountsByCategory.has(category.id));
+  const availableQuestionTypeCounts = useMemo(
+    () => Object.fromEntries(categoryQuestionTypes.map(({ id }) => [
+      id,
+      availableCategoryCatalog.filter((category) => (questionTypeCountsByCategory.get(category.id)?.[id] ?? 0) > 0).length,
+    ])) as Record<CategoryQuestionType, number>,
+    [availableCategoryCatalog, questionTypeCountsByCategory],
+  );
+  const effectiveCategoryQuestionType =
+    questionTypeMetadataAvailable &&
+    (categoryQuestionType === "all" || availableQuestionTypeCounts[categoryQuestionType] > 0)
+      ? categoryQuestionType
+      : "all";
   const firebaseSelectedModeUnavailable = Boolean(
     firebaseRuntime && approvedReleaseCatalog && !approvedReleaseCatalog.boardCapabilities[form.gameKind],
   );
@@ -664,12 +695,16 @@ export function HostNewRoute() {
       selectedIds: form.categories,
       selectedOnly,
       topicId: categoryTopic,
+      questionType: effectiveCategoryQuestionType,
+      questionTypeCountsByCategory,
     });
   }, [
     availableCategoryCatalog,
     categoryQuery,
     categoryTopic,
+    effectiveCategoryQuestionType,
     form.categories,
+    questionTypeCountsByCategory,
     selectedOnly,
   ]);
   const selectedCategories = useMemo(
@@ -799,10 +834,12 @@ export function HostNewRoute() {
   const resetCategoryFilters = () => {
     setCategoryQuery("");
     setCategoryTopic("all");
+    setCategoryQuestionType("all");
     setSelectedOnly(false);
   };
   const categoryFiltersActive =
-    categoryQuery.trim().length > 0 || categoryTopic !== "all" || selectedOnly;
+    categoryQuery.trim().length > 0 || categoryTopic !== "all" ||
+    effectiveCategoryQuestionType !== "all" || selectedOnly;
   async function create(event: FormEvent) {
     event.preventDefault();
     setError("");
@@ -1102,6 +1139,36 @@ export function HostNewRoute() {
                       </button>
                     ))}
                   </div>
+                </div>
+                <div aria-label="نوع السؤال" className="category-type-picker" role="group">
+                  <span className="category-type-picker__label">نوع السؤال</span>
+                  <div className="category-type-picker__list">
+                    <button
+                      aria-pressed={effectiveCategoryQuestionType === "all"}
+                      className={`category-type-picker__button${effectiveCategoryQuestionType === "all" ? " is-selected" : ""}`}
+                      onClick={() => setCategoryQuestionType("all")}
+                      type="button"
+                    >
+                      الكل <small>{availableCategoryCatalog.length}</small>
+                    </button>
+                    {categoryQuestionTypes.map(({ id, labelAr }) => (
+                      <button
+                        aria-pressed={effectiveCategoryQuestionType === id}
+                        className={`category-type-picker__button${effectiveCategoryQuestionType === id ? " is-selected" : ""}`}
+                        disabled={!questionTypeMetadataAvailable || availableQuestionTypeCounts[id] === 0}
+                        key={id}
+                        onClick={() => setCategoryQuestionType(id)}
+                        type="button"
+                      >
+                        {labelAr} <small>{availableQuestionTypeCounts[id]}</small>
+                      </button>
+                    ))}
+                  </div>
+                  <p className="category-type-picker__note">
+                    {questionTypeMetadataAvailable
+                      ? "تعرض التصفية الفئات التي تضم هذا النوع؛ قد تظهر أنواع أخرى أثناء المباراة."
+                      : "تصنيف أنواع الأسئلة غير متاح لهذه الحزمة حالياً؛ تبقى كل الفئات القابلة للعب ظاهرة."}
+                  </p>
                 </div>
                 <label className="category-filter__selected-only">
                   <input

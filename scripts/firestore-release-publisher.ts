@@ -41,6 +41,8 @@ export interface FirestorePublicationAdapter {
   /** Atomically creates global, immutable review-nonce claims; equal retries are allowed. */
   claimReviewNonceClaims?(documents: ReleaseDocument[]): Promise<void>;
   create(documents: ReleaseDocument[]): Promise<void>;
+  /** Atomic create-only sidecar write guarded by the currently active immutable release identity. */
+  createQuestionTypeIndexIfActiveReleaseMatches?(document: ReleaseDocument, releaseId: string, releaseRootSha256: string): Promise<boolean>;
   activate(request: ActivationRequest): Promise<void>;
   rollback?(request: RollbackRequest): Promise<void>;
 }
@@ -315,6 +317,13 @@ export async function createAdminProductionAdapter(): Promise<FirestorePublicati
       });
     },
     create: async (documents) => { const batch = database.batch(); for (const document of documents) batch.create(database.doc(document.path), document.data); await batch.commit(); },
+    createQuestionTypeIndexIfActiveReleaseMatches: async (document, releaseId, releaseRootSha256) => database.runTransaction(async (transaction) => {
+      const pointerRef = database.doc('runtime/activeRelease'); const rootRef = database.doc(`releases/${releaseId}`); const sidecarRef = database.doc(document.path);
+      const [pointer, root, sidecar] = await Promise.all([transaction.get(pointerRef), transaction.get(rootRef), transaction.get(sidecarRef)]);
+      if (!pointer.exists || pointer.data()?.releaseId !== releaseId || !root.exists || root.data()?.immutable !== true || root.data()?.documentRootSha256 !== releaseRootSha256 || root.data()?.approvedCount !== document.data.approvedQuestionCount || root.data()?.categoryCount !== document.data.categoryCount) throw new Error('Question-type index publication rejected: active release identity or counts changed.');
+      if (sidecar.exists) { if (!equal(sidecar.data(), document.data)) throw new Error(`Immutable conflict at ${document.path}; sidecar not overwritten.`); return false; }
+      transaction.create(sidecarRef, document.data); return true;
+    }),
     activate: async (request) => { await database.runTransaction(async (transaction) => {
       const [root, receipt, barrier, pointer, activation, barrierUse] = await Promise.all([transaction.get(database.doc(request.releaseRoot.path)), transaction.get(database.doc(request.publicationReceipt.path)), transaction.get(database.doc(request.verificationReceipt.path)), transaction.get(database.doc('runtime/activeRelease')), transaction.get(database.doc(request.activationReceipt.path)), transaction.get(database.doc(request.verificationUseReceipt.path))]);
       if (!root.exists || !equal(root.data(), request.releaseRoot.data)) throw new Error('Activation rejected: release root is missing or differs.');

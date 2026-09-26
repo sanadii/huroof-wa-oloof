@@ -1,5 +1,6 @@
 /** Read-only runtime projection for the local T16 SQLite intake test source. */
 import { createHash } from "node:crypto";
+import { addQuestionTypeCount, classifyQuestionSideType, emptyQuestionTypeCounts } from "../src/features/game/runtime/question-type-counts.js";
 import { readFile } from "node:fs/promises";
 import { DatabaseSync } from "node:sqlite";
 import { relative, resolve } from "node:path";
@@ -332,6 +333,10 @@ export async function loadLocalSqliteImportQuestionSource(
     .map((id) => {
       const records = questions.filter((q) => q.categoryId === id),
         concepts = new Set(records.map((q) => q.answerConceptId));
+      const questionTypeCounts = records.reduce(
+        (counts, question) => addQuestionTypeCount(counts, classifyQuestionSideType(question)),
+        emptyQuestionTypeCounts(),
+      );
       const categoryGameEligible = concepts.size >= 14;
       const heldQuestionCount = heldByCategory.get(id) ?? 0;
       return {
@@ -345,6 +350,7 @@ export async function loadLocalSqliteImportQuestionSource(
           (q) => q.modality === "classic" && q.targetLetter,
         ).length,
         categoryGameEligible,
+        questionTypeCounts,
         availability:
           records.length === 0
             ? ("held_only" as const)

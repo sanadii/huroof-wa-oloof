@@ -3,6 +3,7 @@ import { getApps, initializeApp } from "firebase-admin/app";
 import { FieldPath, FieldValue, getFirestore } from "firebase-admin/firestore";
 import { getStorage } from "firebase-admin/storage";
 import { HttpsError, onCall } from "firebase-functions/https";
+import { isQuestionTypeCounts, type QuestionTypeCounts } from "../../src/features/game/runtime/question-type-counts.js";
 import {
   canManageTeamsInState,
   expireRoom,
@@ -97,11 +98,14 @@ export const RELEASE_READER_OPTIONS = {
 const releaseReaderCallable = { ...callable, ...RELEASE_READER_OPTIONS } as const;
 type ChallengeMechanic = "navigation" | "missing_tile" | "memory" | "qatar_map" | "word_search";
 const challengeMechanicValues: readonly ChallengeMechanic[] = ["navigation", "missing_tile", "memory", "qatar_map", "word_search"];
+const QUESTION_TYPE_INDEX_SCHEMA_VERSION = "t40-question-type-index-v1";
+const QUESTION_TYPE_CLASSIFIER_VERSION = "t40-question-side-v1";
+const questionTypeIndexPath = (releaseId: string, releaseRootSha256: string) => `releaseQuestionTypeIndexes/${createHash("sha256").update(releaseId).update("\0").update(releaseRootSha256.toLowerCase()).digest("hex")}`;
 type ApprovedReleaseCatalog = {
   releaseId: string;
   releaseRootSha256: string;
   demoFixture: boolean;
-  categories: Array<{ id: string; labelAr: string; playable: { huroof: boolean; categories: boolean; charades: boolean }; challengeOnly?: boolean; challengeKinds?: ChallengeMechanic[] }>;
+  categories: Array<{ id: string; labelAr: string; playable: { huroof: boolean; categories: boolean; charades: boolean }; questionTypeCounts?: QuestionTypeCounts; challengeOnly?: boolean; challengeKinds?: ChallengeMechanic[] }>;
   boardCapabilities: { huroof: boolean; categories: boolean; charades: boolean };
 };
 // A release can grow independently from a room.  Room creation and gameplay
@@ -353,12 +357,53 @@ async function activeRelease(
  * Public-to-an-authenticated-host release metadata only. Canonical questions,
  * answers, sources, and media are intentionally absent from this boundary.
  */
+function projectedQuestionTypeCounts(
+  value: unknown,
+  releaseId: string,
+  releaseRootSha256: string,
+  categoryIds: readonly string[],
+  approvedQuestionCount: number,
+): Map<string, QuestionTypeCounts> | undefined {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
+  const index = value as Record<string, unknown>;
+  const expectedKeys = ["approvedQuestionCount", "categories", "categoryCount", "classifierVersion", "immutable", "indexSha256", "releaseId", "releaseRootSha256", "schemaVersion"];
+  if (JSON.stringify(Object.keys(index).sort()) !== JSON.stringify(expectedKeys) || index.schemaVersion !== QUESTION_TYPE_INDEX_SCHEMA_VERSION || index.classifierVersion !== QUESTION_TYPE_CLASSIFIER_VERSION || index.immutable !== true || index.releaseId !== releaseId || index.releaseRootSha256 !== releaseRootSha256 || !Number.isSafeInteger(index.approvedQuestionCount) || index.approvedQuestionCount !== approvedQuestionCount || !Number.isSafeInteger(index.categoryCount) || index.categoryCount !== categoryIds.length || typeof index.indexSha256 !== "string" || !/^[a-f0-9]{64}$/iu.test(index.indexSha256) || !Array.isArray(index.categories) || index.categories.length !== categoryIds.length) return undefined;
+  const payload = {
+    schemaVersion: index.schemaVersion,
+    classifierVersion: index.classifierVersion,
+    releaseId: index.releaseId,
+    releaseRootSha256: index.releaseRootSha256,
+    approvedQuestionCount: index.approvedQuestionCount,
+    categoryCount: index.categoryCount,
+    categories: index.categories,
+  };
+  if (index.indexSha256.toLowerCase() !== challengeHash("sha256").update(canonicalChallengeJson(payload)).digest("hex")) return undefined;
+  const expected = new Set(categoryIds);
+  const result = new Map<string, QuestionTypeCounts>();
+  let total = 0;
+  let priorId = "";
+  for (const row of index.categories) {
+    if (!row || typeof row !== "object" || Array.isArray(row)) return undefined;
+    const category = row as Record<string, unknown>;
+    if (JSON.stringify(Object.keys(category).sort()) !== JSON.stringify(["id", "questionTypeCounts"]) || typeof category.id !== "string" || category.id <= priorId || !expected.has(category.id) || result.has(category.id) || !isQuestionTypeCounts(category.questionTypeCounts)) return undefined;
+    priorId = category.id;
+    result.set(category.id, category.questionTypeCounts);
+    total += Object.values(category.questionTypeCounts).reduce((sum, count) => sum + count, 0);
+  }
+  return total === approvedQuestionCount && result.size === expected.size ? result : undefined;
+}
+
+function withProjectedQuestionTypeIndex(catalog: ApprovedReleaseCatalog, value: unknown, approvedQuestionCount: number): ApprovedReleaseCatalog {
+  const counts = projectedQuestionTypeCounts(value, catalog.releaseId, catalog.releaseRootSha256, catalog.categories.map((category) => category.id), approvedQuestionCount);
+  return counts ? { ...catalog, categories: catalog.categories.map((category) => ({ ...category, questionTypeCounts: counts.get(category.id)! })) } : catalog;
+}
+
 export function approvedReleaseCatalogProjection(
   pointerData: unknown,
   rootData: unknown,
   categoryRows: Array<{ id: string; data: unknown }>,
   questions: CanonicalQuestion[] = [],
-  options: { allowDemoFixture?: boolean } = {},
+  options: { allowDemoFixture?: boolean; questionTypeIndex?: unknown } = {},
 ): ApprovedReleaseCatalog {
   const pointer = pointerData && typeof pointerData === "object" ? pointerData as Record<string, unknown> : {};
   const root = rootData && typeof rootData === "object" ? rootData as Record<string, unknown> : {};
@@ -393,6 +438,7 @@ export function approvedReleaseCatalogProjection(
     throw new HttpsError("failed-precondition", "Active release has no eligible categories.");
   if (new Set(categories.map((category) => category.id)).size !== categories.length)
     throw new HttpsError("failed-precondition", "Active release category catalog is duplicated.");
+  const questionTypeCounts = projectedQuestionTypeCounts(options.questionTypeIndex, releaseId, releaseRootSha256, categories.map((category) => category.id), root.approvedCount as number);
   const rawCategoryById = new Map(categoryRows.map((row) => [row.id, row.data]));
   const catalogReadiness = categories.map((category) => {
     const row = rawCategoryById.get(category.id);
@@ -411,7 +457,7 @@ export function approvedReleaseCatalogProjection(
   if (!questions.length) {
     if (catalogReadiness.some((value) => !value))
       throw new HttpsError("failed-precondition", "Active release is missing immutable scoped readiness metadata.");
-    const categoriesWithReadiness = categories.map((category, index) => ({ ...category, playable: catalogReadiness[index]! }));
+    const categoriesWithReadiness = categories.map((category, index) => ({ ...category, playable: catalogReadiness[index]!, ...(questionTypeCounts ? { questionTypeCounts: questionTypeCounts.get(category.id)! } : {}) }));
     return {
       releaseId,
       releaseRootSha256,
@@ -436,6 +482,7 @@ export function approvedReleaseCatalogProjection(
   const sharedHuroofPoolPlayable = playable(categories.map((category) => category.id), "huroof");
   const categoriesWithReadiness = categories.map((category) => ({
     ...category,
+    ...(questionTypeCounts ? { questionTypeCounts: questionTypeCounts.get(category.id)! } : {}),
     playable: {
       // Categories contribute letters to a shared board; they need not each
       // contain every board letter. Room creation still validates the exact
@@ -522,12 +569,20 @@ export const getApprovedReleaseCatalog = onCall(releaseReaderCallable, async (re
   if (!cached || cached.expiresAt <= now()) releaseReadinessCache.set(cacheKey, { expiresAt: now() + RELEASE_READINESS_CACHE_MS, value });
   while (releaseReadinessCache.size > 8) releaseReadinessCache.delete(releaseReadinessCache.keys().next().value!);
   try {
-    const [catalog, flags] = await Promise.all([value, database.doc("runtime/challengeMechanics").get()]);
+    // The release catalog itself is cached, but sidecars are read outside that
+    // cache so a just-published immutable index becomes discoverable without a
+    // five-minute readiness-cache delay. Its release/root binding is rechecked
+    // before any counts reach the client.
+    const [catalog, flags, questionTypeIndex] = await Promise.all([
+      value,
+      database.doc("runtime/challengeMechanics").get(),
+      database.doc(questionTypeIndexPath(releaseId, releaseRootSha256)).get(),
+    ]);
     const values = flags.data() ?? {};
     const enabledMechanics = values.enabled === true
       ? challengeMechanicValues.filter((mechanic) => values[mechanic] === true)
       : [];
-    return { ...catalog, challengeAvailability: { enabledMechanics } };
+    return { ...withProjectedQuestionTypeIndex(catalog, questionTypeIndex.exists ? questionTypeIndex.data() : undefined, root.data()?.approvedCount as number), challengeAvailability: { enabledMechanics } };
   } catch (failure) {
     releaseReadinessCache.delete(cacheKey);
     throw failure;

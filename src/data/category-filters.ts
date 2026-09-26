@@ -1,4 +1,5 @@
 import { type CategoryCover } from "./category-catalog";
+import { type QuestionTypeCounts, type QuestionTypeKey } from "../features/game/runtime/question-type-counts";
 import {
   type ParentTopicId,
   topicForKnownNormalizedLabel,
@@ -104,17 +105,32 @@ export type CategoryFilter = {
   selectedIds: readonly string[];
   selectedOnly: boolean;
   topicId: CategoryTopicId | "all";
+  questionType?: CategoryQuestionType | "all";
+  questionTypeCountsByCategory?: ReadonlyMap<string, CategoryQuestionTypeCounts>;
 };
+
+export type CategoryQuestionType = QuestionTypeKey;
+export type CategoryQuestionTypeCounts = QuestionTypeCounts;
+
+export const categoryQuestionTypes: ReadonlyArray<{ id: CategoryQuestionType; labelAr: string }> = [
+  { id: "text", labelAr: "أسئلة نصية" },
+  { id: "image", labelAr: "صور" },
+  { id: "video", labelAr: "فيديو" },
+  { id: "audio", labelAr: "صوت" },
+  { id: "interactive", labelAr: "تحديات تفاعلية" },
+  { id: "other", labelAr: "أنواع أخرى" },
+];
 
 export function filterCategories(
   categories: readonly CategoryCover[],
-  { query, selectedIds, selectedOnly, topicId }: CategoryFilter,
+  { query, selectedIds, selectedOnly, topicId, questionType = "all", questionTypeCountsByCategory }: CategoryFilter,
 ) {
   const normalizedQuery = normalizeCategoryFilterText(query);
   const selected = new Set(selectedIds);
   return categories.filter((category) => {
     if (topicId !== "all" && categoryTopicIdForCategory(category) !== topicId) return false;
     if (selectedOnly && !selected.has(category.id)) return false;
+    if (questionType !== "all" && !((questionTypeCountsByCategory?.get(category.id)?.[questionType] ?? 0) > 0)) return false;
     return !normalizedQuery || normalizeCategoryFilterText(
       `${category.displayNameAr} ${category.id}`,
     ).includes(normalizedQuery);

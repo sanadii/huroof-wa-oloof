@@ -1,5 +1,7 @@
 # تحدي الخلية — documentation index
 
+Current category-type filter work (2026-09-24): [T40 question-type category filter](T40-QUESTION-TYPE-FILTER.md) records the release-bound metadata, host setup UI, privacy boundaries, checks and rollout. Its status is reflected in the [implementation plan](IMPLEMENTATION-PLAN.md), [milestones](MILESTONES.md), and [handover](HANDOVER.md).
+
 Current admin category work (2026-09-24): [T39 category inspection and correction](T39-ADMIN-CATEGORY-INSPECTION.md) records the authorized question-browser milestone, the pending edit semantics, security boundaries, and release checks. Its task IDs are tracked in the [implementation plan](IMPLEMENTATION-PLAN.md), [milestones](MILESTONES.md), and [handover](HANDOVER.md).
 
 ## Production media and combined categories — 2026-09-12

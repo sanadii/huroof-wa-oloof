@@ -257,6 +257,30 @@ html[data-theme="dark"] .spatial-setup .category-filter__empty { color: var(--kh
 html[data-theme="dark"] .spatial-setup .category-filter :is(input, select)::placeholder { color: #b6c6e5; opacity: 1; }
 .spatial-setup .category-filter__controls { display: block; }
 .spatial-setup .category-topic-picker { display: grid; gap: .5rem; }
+.spatial-setup .category-type-picker { display: grid; gap: .5rem; margin-block-start: 1rem; }
+.spatial-setup .category-type-picker__label { color: var(--khaliah-navy); font-size: .88rem; font-weight: 700; }
+.spatial-setup .category-type-picker__list { display: flex; flex-wrap: wrap; gap: .45rem; }
+.spatial-setup .category-type-picker__button {
+  align-items: center;
+  background: var(--khaliah-surface);
+  border: 1px solid var(--khaliah-border);
+  border-radius: 999px;
+  color: var(--khaliah-navy);
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-size: .82rem;
+  font-weight: 700;
+  gap: .42rem;
+  min-block-size: 2.75rem;
+  padding: .4rem .8rem;
+}
+.spatial-setup .category-type-picker__button:hover:not(:disabled) { border-color: var(--khaliah-blue); }
+.spatial-setup .category-type-picker__button.is-selected { background: var(--khaliah-surface-alt); border-color: var(--khaliah-blue); box-shadow: inset 0 0 0 1px var(--khaliah-blue); }
+.spatial-setup .category-type-picker__button:focus-visible { outline: 3px solid var(--khaliah-blue); outline-offset: 2px; }
+.spatial-setup .category-type-picker__button:disabled { cursor: not-allowed; opacity: .55; }
+.spatial-setup .category-type-picker__button small { color: var(--khaliah-ink-muted); font-size: .72rem; font-variant-numeric: tabular-nums; }
+.spatial-setup .category-type-picker__note { color: var(--khaliah-ink-muted); font-size: .8rem; margin: 0; }
 .spatial-setup .category-topic-picker__label { color: var(--khaliah-navy); font-size: .88rem; font-weight: 700; }
 .spatial-setup .category-topic-picker__list { display: flex; flex-wrap: wrap; gap: .45rem; }
 .spatial-setup .category-topic-picker__button {

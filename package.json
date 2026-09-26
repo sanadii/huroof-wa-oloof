@@ -34,6 +34,8 @@
     "promote:authoring": "tsx scripts/authoring-v2.1.ts promote",
     "build:firestore-release": "tsx scripts/build-firestore-release.ts",
     "build:firestore-release:dry-run": "npm run build:firestore-release -- --dry-run",
+    "prepare:question-type-index": "tsx scripts/prepare-question-type-release-index.ts",
+    "publish:question-type-index": "tsx scripts/publish-question-type-release-index.ts",
     "firestore:production:plan": "tsx scripts/firestore-release-publisher.ts plan",
     "firestore:production:prepare": "tsx scripts/firestore-release-publisher.ts prepare",
     "firestore:production:verify": "tsx scripts/firestore-release-publisher.ts verify",

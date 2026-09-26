@@ -21,6 +21,7 @@ async function setup() {
     await setDoc(doc(context.firestore(), 'rooms/r1/qaClosureReceipts/receipt-private'), { immutable: true, actorUid: 'u3' });
     await setDoc(doc(context.firestore(), 'challengeDefinitionSets/manifest-private/definitions/definition-private'), { canonicalJson: 'secret' });
     await setDoc(doc(context.firestore(), 'releases/release-private/mapVariants/map-private'), { runtimeQuestionId: 'map-private' });
+    await setDoc(doc(context.firestore(), 'releaseQuestionTypeIndexes/index-private'), { immutable: true, categories: [] });
   });
 }
 await setup();
@@ -47,6 +48,7 @@ for (const path of [
   'rooms/r1/qaClosureReceipts/receipt-private',
   'challengeDefinitionSets/manifest-private/definitions/definition-private',
   'releases/release-private/mapVariants/map-private',
+  'releaseQuestionTypeIndexes/index-private',
 ]) {
   await assertFails(getDoc(doc(player, path)));
   await assertFails(getDoc(doc(hostUser, path)));
