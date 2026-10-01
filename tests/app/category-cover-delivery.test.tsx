@@ -11,7 +11,7 @@ it("resolves a non-fallback image for all 530 saved live catalog categories", ()
   expect(new Set(liveCatalog.categories.map((category) => category.id)).size).toBe(530);
   const resolved = catalogCategoryCovers(liveCatalog.categories);
   expect(resolved).toHaveLength(530);
-  expect(resolved.filter((category) => !category.cover.publishable)).toHaveLength(159);
+  expect(resolved.filter((category) => !category.cover.publishable)).toHaveLength(154);
   for (const category of resolved) {
     expect(category.cover.altAr).not.toContain("افتراضية");
     expect(existsSync(resolve("public", category.cover.web320))).toBe(true);
@@ -40,7 +40,7 @@ it("uses exact normalized names only when release category IDs differ", () => {
   }
 });
 
-it("uses original replacement art for seven exact legacy-rights holds", () => {
+it("uses original replacement art for twelve exact legacy-rights holds", () => {
   const result = catalogCategoryCovers([
     { id: "huroof-069", labelAr: "كرة القدم الكويتية" },
     { id: "huroof-097", labelAr: "علوم" },
@@ -49,6 +49,11 @@ it("uses original replacement art for seven exact legacy-rights holds", () => {
     { id: "tahadani-001", labelAr: "من أنا - دول" },
     { id: "tahadani-003", labelAr: "من أنا - حيوانات" },
     { id: "tahadani-006", labelAr: "معلومات عامة" },
+    { id: "tahadani-007", labelAr: "عالم الحيوان" },
+    { id: "tahadani-008", labelAr: "تكنولوجيا" },
+    { id: "tahadani-009", labelAr: "تاريخ" },
+    { id: "tahadani-013", labelAr: "ألغاز" },
+    { id: "tahadani-015", labelAr: "أمثال وغطاوي" },
   ]);
   for (const category of result) {
     expect(category.cover.web320).toBe(`assets/categories/generated/t44-rights/320/${category.id}.webp`);

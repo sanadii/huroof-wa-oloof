@@ -55,6 +55,11 @@ const rightsReplacementCovers = new Set([
   "tahadani-001",
   "tahadani-003",
   "tahadani-006",
+  "tahadani-007",
+  "tahadani-008",
+  "tahadani-009",
+  "tahadani-013",
+  "tahadani-015",
 ]);
 
 type TahadaniGamesCategoryCover = {
