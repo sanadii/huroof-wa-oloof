@@ -2,6 +2,7 @@ import { categoryCatalog, type CategoryCover } from "./category-catalog";
 import { normalizeCategoryFilterText } from "./category-filters";
 import publicCategoryInventory from "./category-inventory.public.json";
 import tahadaniImages from "./tahadani-image-catalog.public.json";
+import tahadaniGamesCategoryCovers from "./tahadani-games-category-covers.public.json";
 
 const importedCovers = new Map(
   tahadaniImages.covers.map((cover) => [normalizeCategoryFilterText(cover.name), cover]),
@@ -14,7 +15,24 @@ const coverAliases = new Map([
 ].map(([label, name]) => [normalizeCategoryFilterText(label), normalizeCategoryFilterText(name)]));
 
 const generatedCovers = new Map([
+  ["PlayStation", "legacy/320/playstation.webp"],
+  ["Nintendo", "legacy/320/nintendo.webp"],
+  ["أفلام ديزني وبيكسار", "legacy/320/disney-pixar.webp"],
+  ["DC Comics", "legacy/320/dc-comics.webp"],
+  ["مسلسلات أجنبية", "legacy/320/foreign-series.webp"],
+  ["أفلام هوليوود", "legacy/320/hollywood-films.webp"],
+  ["أفلام عربية", "legacy/320/arabic-films.webp"],
+  ["من سجل الهدف؟", "goals-2026.webp"],
+  ["كرة السلة وNBA", "huroof-063.webp"],
+  ["دوري أبطال أوروبا", "huroof-064.webp"],
+  ["الدوري الإنجليزي", "huroof-065.webp"],
+  ["الدوري الإسباني", "huroof-066.webp"],
+  ["الدوري السعودي", "huroof-067.webp"],
   ["منتخب الكويت", "cover-generated-kuwait-team.png"],
+  ["الألعاب الأولمبية", "huroof-070.webp"],
+  ["WWE", "huroof-071.webp"],
+  ["الملاكمة", "huroof-072.webp"],
+  ["ألعاب الفيديو", "huroof-073.webp"],
   ["مسلسلات خليجية", "cover-generated-gulf-series.png"],
   ["مسلسلات كويتية", "cover-generated-kuwait-series.png"],
   ["مشاهير الكويت", "cover-generated-kuwait-celebrities.png"],
@@ -24,7 +42,35 @@ const generatedCovers = new Map([
   ["السيرة النبوية", "cover-generated-prophetic-biography.png"],
   ["الصحابة", "cover-generated-companions.png"],
   ["الحضارة الإسلامية", "cover-generated-islamic-civilization.png"],
+  ["فضاء وفلك", "huroof-098.webp"],
 ].map(([label, file]) => [normalizeCategoryFilterText(label), file]));
+
+type TahadaniGamesCategoryCover = {
+  categoryId: string;
+  normalizedNameAr: string;
+  cover: {
+    source: "existing_library" | "generated_review";
+    web320: string;
+    web640: string;
+    publishable: boolean;
+  } | null;
+};
+
+// Candidate catalog metadata is presentation-only. It does not activate categories
+// or alter their question ownership/readiness.
+const tahadaniGamesCoverByCategoryId = new Map(
+  (tahadaniGamesCategoryCovers.categories as TahadaniGamesCategoryCover[])
+    .filter((category) => category.cover !== null)
+    .map((category) => [category.categoryId, category.cover!] as const),
+);
+
+// Release and legacy inventories can use different IDs for the same topic.
+// Match exact normalized labels as well; never use fuzzy topic substitution.
+const tahadaniGamesCoverByName = new Map(
+  (tahadaniGamesCategoryCovers.categories as TahadaniGamesCategoryCover[])
+    .filter((category) => category.cover !== null)
+    .map((category) => [normalizeCategoryFilterText(category.normalizedNameAr), category.cover!] as const),
+);
 
 export type LocalQuestionInventory = {
   source: "local_firestore_import" | "local_sqlite_import";
@@ -94,6 +140,8 @@ export function catalogCategoryCovers(
     const knownCategory = existing.get(category.id);
     if (knownCategory) return knownCategory;
     const name = normalizeCategoryFilterText(category.labelAr);
+    const mappedCover = tahadaniGamesCoverByCategoryId.get(category.id)
+      ?? tahadaniGamesCoverByName.get(name);
     const importedCover = importedCovers.get(coverAliases.get(name) ?? name);
     const generatedCover = generatedCovers.get(name);
     return {
@@ -101,16 +149,18 @@ export function catalogCategoryCovers(
       displayNameAr: category.labelAr,
       questionReadiness: "drafting",
       cover: {
-        web320: importedCover?.web320 ?? (generatedCover
+        web320: mappedCover?.web320 ?? importedCover?.web320 ?? (generatedCover
           ? `assets/categories/generated/${generatedCover}`
           : "assets/categories/320/category-006.webp"),
-        altAr: importedCover
+        altAr: mappedCover?.source === "generated_review"
+          ? `غلاف مولّد لفئة ${category.labelAr}`
+          : mappedCover || importedCover
           ? `غلاف فئة ${category.labelAr}`
           : generatedCover
             ? `غلاف مولّد لفئة ${category.labelAr}`
           : `صورة افتراضية لفئة ${category.labelAr}`,
         // Imported legacy artwork retains its unverified rights status.
-        publishable: importedCover === undefined,
+        publishable: mappedCover?.publishable ?? importedCover === undefined,
       },
     };
   });
