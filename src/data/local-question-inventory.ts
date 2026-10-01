@@ -47,7 +47,15 @@ const generatedCovers = new Map([
 
 // New category art for exact live IDs whose imported covers lack reuse
 // evidence. These generated assets have separate source/visual receipts.
-const rightsReplacementCovers = new Set(["huroof-069", "huroof-097"]);
+const rightsReplacementCovers = new Set([
+  "huroof-069",
+  "huroof-097",
+  "huroof-099",
+  "huroof-100",
+  "tahadani-001",
+  "tahadani-003",
+  "tahadani-006",
+]);
 
 type TahadaniGamesCategoryCover = {
   categoryId: string;
@@ -142,13 +150,24 @@ export function catalogCategoryCovers(
   );
   return categories.map((category) => {
     const knownCategory = existing.get(category.id);
-    if (knownCategory) return knownCategory;
+    const rightsReplacement = rightsReplacementCovers.has(category.id);
+    if (knownCategory) {
+      return rightsReplacement
+        ? {
+          ...knownCategory,
+          cover: {
+            web320: `assets/categories/generated/t44-rights/320/${category.id}.webp`,
+            altAr: `غلاف مولّد لفئة ${category.labelAr}`,
+            publishable: true,
+          },
+        }
+        : knownCategory;
+    }
     const name = normalizeCategoryFilterText(category.labelAr);
     const mappedCover = tahadaniGamesCoverByCategoryId.get(category.id)
       ?? tahadaniGamesCoverByName.get(name);
     const importedCover = importedCovers.get(coverAliases.get(name) ?? name);
     const generatedCover = generatedCovers.get(name);
-    const rightsReplacement = rightsReplacementCovers.has(category.id);
     return {
       id: category.id,
       displayNameAr: category.labelAr,
