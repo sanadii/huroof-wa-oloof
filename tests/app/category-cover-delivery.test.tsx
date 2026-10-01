@@ -11,7 +11,7 @@ it("resolves a non-fallback image for all 530 saved live catalog categories", ()
   expect(new Set(liveCatalog.categories.map((category) => category.id)).size).toBe(530);
   const resolved = catalogCategoryCovers(liveCatalog.categories);
   expect(resolved).toHaveLength(530);
-  expect(resolved.filter((category) => !category.cover.publishable)).toHaveLength(166);
+  expect(resolved.filter((category) => !category.cover.publishable)).toHaveLength(164);
   for (const category of resolved) {
     expect(category.cover.altAr).not.toContain("افتراضية");
     expect(existsSync(resolve("public", category.cover.web320))).toBe(true);
@@ -37,5 +37,18 @@ it("uses exact normalized names only when release category IDs differ", () => {
   })));
   for (const [index, category] of sourceMapping.categories.entries()) {
     expect(result[index].cover.web320).toBe(category.cover!.web320);
+  }
+});
+
+it("uses new private-review art for the two exact legacy-rights holds", () => {
+  const result = catalogCategoryCovers([
+    { id: "huroof-069", labelAr: "كرة القدم الكويتية" },
+    { id: "huroof-097", labelAr: "علوم" },
+  ]);
+  for (const category of result) {
+    expect(category.cover.web320).toBe(`assets/categories/generated/t44-rights/320/${category.id}.webp`);
+    expect(category.cover.publishable).toBe(true);
+    expect(existsSync(resolve("public", category.cover.web320))).toBe(true);
+    expect(existsSync(resolve("public", `assets/categories/generated/t44-rights/640/${category.id}.webp`))).toBe(true);
   }
 });

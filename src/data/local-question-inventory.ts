@@ -45,6 +45,10 @@ const generatedCovers = new Map([
   ["فضاء وفلك", "huroof-098.webp"],
 ].map(([label, file]) => [normalizeCategoryFilterText(label), file]));
 
+// New category art for exact live IDs whose imported covers lack reuse
+// evidence. These generated assets have separate source/visual receipts.
+const rightsReplacementCovers = new Set(["huroof-069", "huroof-097"]);
+
 type TahadaniGamesCategoryCover = {
   categoryId: string;
   normalizedNameAr: string;
@@ -144,15 +148,20 @@ export function catalogCategoryCovers(
       ?? tahadaniGamesCoverByName.get(name);
     const importedCover = importedCovers.get(coverAliases.get(name) ?? name);
     const generatedCover = generatedCovers.get(name);
+    const rightsReplacement = rightsReplacementCovers.has(category.id);
     return {
       id: category.id,
       displayNameAr: category.labelAr,
       questionReadiness: "drafting",
       cover: {
-        web320: mappedCover?.web320 ?? importedCover?.web320 ?? (generatedCover
+        web320: rightsReplacement
+          ? `assets/categories/generated/t44-rights/320/${category.id}.webp`
+          : mappedCover?.web320 ?? importedCover?.web320 ?? (generatedCover
           ? `assets/categories/generated/${generatedCover}`
           : "assets/categories/320/category-006.webp"),
-        altAr: mappedCover?.source === "generated_review"
+        altAr: rightsReplacement
+          ? `غلاف مولّد لفئة ${category.labelAr}`
+          : mappedCover?.source === "generated_review"
           ? `غلاف مولّد لفئة ${category.labelAr}`
           : mappedCover || importedCover
           ? `غلاف فئة ${category.labelAr}`
@@ -160,7 +169,7 @@ export function catalogCategoryCovers(
             ? `غلاف مولّد لفئة ${category.labelAr}`
           : `صورة افتراضية لفئة ${category.labelAr}`,
         // Imported legacy artwork retains its unverified rights status.
-        publishable: mappedCover?.publishable ?? importedCover === undefined,
+        publishable: rightsReplacement ? true : mappedCover?.publishable ?? importedCover === undefined,
       },
     };
   });
