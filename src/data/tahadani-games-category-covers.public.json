@@ -302,10 +302,10 @@
       "normalizedKey": "مناناحيوانات",
       "canonicalCategoryId": "tahadani-games-021",
       "cover": {
-        "source": "existing_library",
-        "web320": "assets/categories/tahadani/320/cover-2350f70254d00b7c745e.webp",
-        "web640": "assets/categories/tahadani/640/cover-2350f70254d00b7c745e.webp",
-        "publishable": false
+        "source": "generated_review",
+        "web320": "assets/categories/generated/t44-rights/320/tahadani-003.webp",
+        "web640": "assets/categories/generated/t44-rights/640/tahadani-003.webp",
+        "publishable": true
       }
     },
     {

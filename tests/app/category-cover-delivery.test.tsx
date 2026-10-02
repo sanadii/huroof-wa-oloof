@@ -11,7 +11,7 @@ it("resolves a non-fallback image for all 530 saved live catalog categories", ()
   expect(new Set(liveCatalog.categories.map((category) => category.id)).size).toBe(530);
   const resolved = catalogCategoryCovers(liveCatalog.categories);
   expect(resolved).toHaveLength(530);
-  expect(resolved.filter((category) => !category.cover.publishable)).toHaveLength(113);
+  expect(resolved.filter((category) => !category.cover.publishable)).toHaveLength(112);
   for (const category of resolved) {
     expect(category.cover.altAr).not.toContain("افتراضية");
     expect(existsSync(resolve("public", category.cover.web320))).toBe(true);
@@ -21,8 +21,8 @@ it("resolves a non-fallback image for all 530 saved live catalog categories", ()
 it("keeps all 558 source categories mapped to both 320 and 640 delivery files", () => {
   expect(sourceMapping.categories).toHaveLength(558);
   expect(new Set(sourceMapping.categories.map((category) => category.categoryId)).size).toBe(558);
-  expect(sourceMapping.categories.filter((category) => category.cover?.source === "generated_review" && category.cover.publishable)).toHaveLength(466);
-  expect(sourceMapping.categories.filter((category) => category.cover?.source === "existing_library" && !category.cover.publishable)).toHaveLength(92);
+  expect(sourceMapping.categories.filter((category) => category.cover?.source === "generated_review" && category.cover.publishable)).toHaveLength(467);
+  expect(sourceMapping.categories.filter((category) => category.cover?.source === "existing_library" && !category.cover.publishable)).toHaveLength(91);
   for (const category of sourceMapping.categories) {
     expect(category.cover).not.toBeNull();
     expect(existsSync(resolve("public", category.cover!.web320))).toBe(true);
@@ -124,6 +124,26 @@ it("reuses five original legacy covers for exact matching source-category labels
       if (size === 320) expect(resolved.cover.web320).toBe(path);
       expect(existsSync(resolve("public", path))).toBe(true);
     }
+  }
+});
+
+it("reuses the original animal-guess cover for its punctuation-equivalent source label", () => {
+  const legacyId = "tahadani-003";
+  const sourceId = "tahadani-games-021";
+  const liveLabels = new Map(liveCatalog.categories.map((category) => [category.id, category.labelAr]));
+  expect(liveLabels.get(legacyId)).toBe("من أنا - حيوانات");
+  expect(liveLabels.get(sourceId)).toBe("من أنا / حيوانات");
+  const source = sourceMapping.categories.find((category) => category.categoryId === sourceId)!;
+  expect(source.normalizedNameAr).toBe("من أنا / حيوانات");
+  expect(source.cover?.source).toBe("generated_review");
+  expect(source.cover?.publishable).toBe(true);
+  const resolved = catalogCategoryCovers([{ id: sourceId, labelAr: liveLabels.get(sourceId)! }])[0];
+  expect(resolved.cover.publishable).toBe(true);
+  for (const size of [320, 640] as const) {
+    const path = `assets/categories/generated/t44-rights/${size}/${legacyId}.webp`;
+    expect(source.cover?.[`web${size}`]).toBe(path);
+    if (size === 320) expect(resolved.cover.web320).toBe(path);
+    expect(existsSync(resolve("public", path))).toBe(true);
   }
 });
 
