@@ -11,7 +11,7 @@ it("resolves a non-fallback image for all 530 saved live catalog categories", ()
   expect(new Set(liveCatalog.categories.map((category) => category.id)).size).toBe(530);
   const resolved = catalogCategoryCovers(liveCatalog.categories);
   expect(resolved).toHaveLength(530);
-  expect(resolved.filter((category) => !category.cover.publishable)).toHaveLength(140);
+  expect(resolved.filter((category) => !category.cover.publishable)).toHaveLength(136);
   for (const category of resolved) {
     expect(category.cover.altAr).not.toContain("افتراضية");
     expect(existsSync(resolve("public", category.cover.web320))).toBe(true);
@@ -21,8 +21,8 @@ it("resolves a non-fallback image for all 530 saved live catalog categories", ()
 it("keeps all 558 source categories mapped to both 320 and 640 delivery files", () => {
   expect(sourceMapping.categories).toHaveLength(558);
   expect(new Set(sourceMapping.categories.map((category) => category.categoryId)).size).toBe(558);
-  expect(sourceMapping.categories.filter((category) => category.cover?.source === "generated_review" && category.cover.publishable)).toHaveLength(450);
-  expect(sourceMapping.categories.filter((category) => category.cover?.source === "existing_library" && !category.cover.publishable)).toHaveLength(108);
+  expect(sourceMapping.categories.filter((category) => category.cover?.source === "generated_review" && category.cover.publishable)).toHaveLength(452);
+  expect(sourceMapping.categories.filter((category) => category.cover?.source === "existing_library" && !category.cover.publishable)).toHaveLength(106);
   for (const category of sourceMapping.categories) {
     expect(category.cover).not.toBeNull();
     expect(existsSync(resolve("public", category.cover!.web320))).toBe(true);
@@ -63,12 +63,14 @@ it("uses original replacement art for twelve exact legacy-rights holds", () => {
   }
 });
 
-it("uses four original topic covers for eight matching live and source categories", () => {
+it("uses six original topic covers for twelve matching live and source categories", () => {
   const groups = [
     ["أعلام", "tahadani-044", "tahadani-games-280"],
     ["عواصم", "tahadani-045", "tahadani-games-277"],
     ["عملات", "tahadani-047", "tahadani-games-272"],
+    ["تنس", "tahadani-049", "tahadani-games-551"],
     ["سيارات", "tahadani-051", "tahadani-games-073"],
+    ["منوعات شعرية", "tahadani-053", "tahadani-games-069"],
   ] as const;
   const liveLabels = new Map(liveCatalog.categories.map((category) => [category.id, category.labelAr]));
   for (const [label, legacyId, sourceId] of groups) {

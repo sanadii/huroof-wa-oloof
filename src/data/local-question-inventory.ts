@@ -63,11 +63,15 @@ const rightsReplacementCovers = new Set([
   "tahadani-044",
   "tahadani-045",
   "tahadani-047",
+  "tahadani-049",
   "tahadani-051",
+  "tahadani-053",
+  "tahadani-games-069",
   "tahadani-games-073",
   "tahadani-games-272",
   "tahadani-games-277",
   "tahadani-games-280",
+  "tahadani-games-551",
 ]);
 
 // Reviewed exact/punctuation-equivalent topics can reuse already-publishable

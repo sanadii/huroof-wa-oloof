@@ -7,8 +7,8 @@
   "totals": {
     "sourceCategoryIds": 558,
     "uniqueNormalizedNames": 544,
-    "existingLibraryNames": 107,
-    "generatedReviewNames": 437,
+    "existingLibraryNames": 105,
+    "generatedReviewNames": 439,
     "unresolvedNames": 0,
     "mappedCategoryIds": 558,
     "unresolvedCategoryIds": 0
@@ -974,10 +974,10 @@
       "normalizedKey": "منوعاتشعريه",
       "canonicalCategoryId": "tahadani-games-069",
       "cover": {
-        "source": "existing_library",
-        "web320": "assets/categories/tahadani/320/cover-1f04b3c5d5d997a6c97b.webp",
-        "web640": "assets/categories/tahadani/640/cover-1f04b3c5d5d997a6c97b.webp",
-        "publishable": false
+        "source": "generated_review",
+        "web320": "assets/categories/generated/t44-rights/320/tahadani-games-069.webp",
+        "web640": "assets/categories/generated/t44-rights/640/tahadani-games-069.webp",
+        "publishable": true
       }
     },
     {
@@ -7722,10 +7722,10 @@
       "normalizedKey": "تنس",
       "canonicalCategoryId": "tahadani-games-551",
       "cover": {
-        "source": "existing_library",
-        "web320": "assets/categories/tahadani/320/cover-7d039b94d3aacfc0ac3f.webp",
-        "web640": "assets/categories/tahadani/640/cover-7d039b94d3aacfc0ac3f.webp",
-        "publishable": false
+        "source": "generated_review",
+        "web320": "assets/categories/generated/t44-rights/320/tahadani-games-551.webp",
+        "web640": "assets/categories/generated/t44-rights/640/tahadani-games-551.webp",
+        "publishable": true
       }
     },
     {
