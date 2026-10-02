@@ -11,7 +11,7 @@ it("resolves a non-fallback image for all 530 saved live catalog categories", ()
   expect(new Set(liveCatalog.categories.map((category) => category.id)).size).toBe(530);
   const resolved = catalogCategoryCovers(liveCatalog.categories);
   expect(resolved).toHaveLength(530);
-  expect(resolved.filter((category) => !category.cover.publishable)).toHaveLength(154);
+  expect(resolved.filter((category) => !category.cover.publishable)).toHaveLength(148);
   for (const category of resolved) {
     expect(category.cover.altAr).not.toContain("افتراضية");
     expect(existsSync(resolve("public", category.cover.web320))).toBe(true);
@@ -60,5 +60,34 @@ it("uses original replacement art for twelve exact legacy-rights holds", () => {
     expect(category.cover.publishable).toBe(true);
     expect(existsSync(resolve("public", category.cover.web320))).toBe(true);
     expect(existsSync(resolve("public", `assets/categories/generated/t44-rights/640/${category.id}.webp`))).toBe(true);
+  }
+});
+
+it("reuses generated covers only for six checked legacy-rights topic pairs", () => {
+  const pairs = [
+    ["tahadani-002", "tahadani-games-024"],
+    ["tahadani-011", "tahadani-games-134"],
+    ["tahadani-012", "tahadani-games-135"],
+    ["tahadani-014", "tahadani-games-127"],
+    ["tahadani-050", "tahadani-games-554"],
+    ["tahadani-055", "tahadani-games-194"],
+  ] as const;
+  const liveLabels = new Map(liveCatalog.categories.map((category) => [category.id, category.labelAr]));
+  const result = catalogCategoryCovers(pairs.map(([id]) => ({ id, labelAr: liveLabels.get(id)! })));
+  pairs.forEach(([, sourceId], index) => {
+    const source = sourceMapping.categories.find((category) => category.categoryId === sourceId)!;
+    expect(source.cover?.source).toBe("generated_review");
+    expect(source.cover?.publishable).toBe(true);
+    expect(result[index].cover.web320).toBe(source.cover!.web320);
+    expect(result[index].cover.publishable).toBe(true);
+    expect(existsSync(resolve("public", source.cover!.web320))).toBe(true);
+    expect(existsSync(resolve("public", source.cover!.web640))).toBe(true);
+  });
+  const wrongLabel = catalogCategoryCovers([{ id: "tahadani-002", labelAr: "غير مطابق" }])[0];
+  expect(wrongLabel.cover.publishable).toBe(false);
+  expect(wrongLabel.cover.web320).toBe("assets/categories/320/category-002.webp");
+  for (const id of ["tahadani-005", "tahadani-031", "tahadani-033", "tahadani-036", "tahadani-037", "tahadani-038", "tahadani-039", "tahadani-048", "tahadani-059", "tahadani-061"]) {
+    const labelAr = liveLabels.get(id)!;
+    expect(catalogCategoryCovers([{ id, labelAr }])[0].cover.publishable).toBe(false);
   }
 });

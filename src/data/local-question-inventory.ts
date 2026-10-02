@@ -62,6 +62,21 @@ const rightsReplacementCovers = new Set([
   "tahadani-015",
 ]);
 
+// Reviewed exact/punctuation-equivalent topics can reuse already-publishable
+// generated art. Bind both catalog labels so later content edits fail closed.
+const exactGeneratedCoverReuseByLiveId = new Map<string, {
+  sourceId: string;
+  liveLabelAr: string;
+  sourceLabelAr: string;
+}>([
+  ["tahadani-002", { sourceId: "tahadani-games-024", liveLabelAr: "من أنا - لاعبين كرة قدم", sourceLabelAr: "من أنا / لاعبين كرة قدم" }],
+  ["tahadani-011", { sourceId: "tahadani-games-134", liveLabelAr: "خمن الصورة", sourceLabelAr: "خمن الصورة" }],
+  ["tahadani-012", { sourceId: "tahadani-games-135", liveLabelAr: "شنو هذا", sourceLabelAr: "شنو هذا؟" }],
+  ["tahadani-014", { sourceId: "tahadani-games-127", liveLabelAr: "الجزء المفقود", sourceLabelAr: "الجزء المفقود" }],
+  ["tahadani-050", { sourceId: "tahadani-games-554", liveLabelAr: "Formula One", sourceLabelAr: "Formula 1" }],
+  ["tahadani-055", { sourceId: "tahadani-games-194", liveLabelAr: "الكرة الإيطالية", sourceLabelAr: "كرة قدم ايطالية" }],
+]);
+
 type TahadaniGamesCategoryCover = {
   categoryId: string;
   normalizedNameAr: string;
@@ -79,6 +94,11 @@ const tahadaniGamesCoverByCategoryId = new Map(
   (tahadaniGamesCategoryCovers.categories as TahadaniGamesCategoryCover[])
     .filter((category) => category.cover !== null)
     .map((category) => [category.categoryId, category.cover!] as const),
+);
+
+const tahadaniGamesCategoryById = new Map(
+  (tahadaniGamesCategoryCovers.categories as TahadaniGamesCategoryCover[])
+    .map((category) => [category.categoryId, category] as const),
 );
 
 // Release and legacy inventories can use different IDs for the same topic.
@@ -156,12 +176,23 @@ export function catalogCategoryCovers(
   return categories.map((category) => {
     const knownCategory = existing.get(category.id);
     const rightsReplacement = rightsReplacementCovers.has(category.id);
+    const reuse = exactGeneratedCoverReuseByLiveId.get(category.id);
+    const reuseSource = reuse ? tahadaniGamesCategoryById.get(reuse.sourceId) : undefined;
+    const exactGeneratedReuse = reuseSource?.cover?.source === "generated_review"
+      && reuseSource.cover.publishable
+      && normalizeCategoryFilterText(reuseSource.normalizedNameAr) === normalizeCategoryFilterText(reuse!.sourceLabelAr)
+      && normalizeCategoryFilterText(category.labelAr) === normalizeCategoryFilterText(reuse!.liveLabelAr)
+      && normalizeCategoryFilterText(knownCategory?.displayNameAr ?? "") === normalizeCategoryFilterText(reuse!.sourceLabelAr)
+      ? reuseSource.cover
+      : undefined;
     if (knownCategory) {
-      return rightsReplacement
+      return rightsReplacement || exactGeneratedReuse
         ? {
           ...knownCategory,
           cover: {
-            web320: `assets/categories/generated/t44-rights/320/${category.id}.webp`,
+            web320: rightsReplacement
+              ? `assets/categories/generated/t44-rights/320/${category.id}.webp`
+              : exactGeneratedReuse!.web320,
             altAr: `غلاف مولّد لفئة ${category.labelAr}`,
             publishable: true,
           },
