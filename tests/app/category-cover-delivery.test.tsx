@@ -11,7 +11,7 @@ it("resolves a non-fallback image for all 530 saved live catalog categories", ()
   expect(new Set(liveCatalog.categories.map((category) => category.id)).size).toBe(530);
   const resolved = catalogCategoryCovers(liveCatalog.categories);
   expect(resolved).toHaveLength(530);
-  expect(resolved.filter((category) => !category.cover.publishable)).toHaveLength(97);
+  expect(resolved.filter((category) => !category.cover.publishable)).toHaveLength(91);
   for (const category of resolved) {
     expect(category.cover.altAr).not.toContain("افتراضية");
     expect(existsSync(resolve("public", category.cover.web320))).toBe(true);
@@ -21,8 +21,8 @@ it("resolves a non-fallback image for all 530 saved live catalog categories", ()
 it("keeps all 558 source categories mapped to both 320 and 640 delivery files", () => {
   expect(sourceMapping.categories).toHaveLength(558);
   expect(new Set(sourceMapping.categories.map((category) => category.categoryId)).size).toBe(558);
-  expect(sourceMapping.categories.filter((category) => category.cover?.source === "generated_review" && category.cover.publishable)).toHaveLength(475);
-  expect(sourceMapping.categories.filter((category) => category.cover?.source === "existing_library" && !category.cover.publishable)).toHaveLength(83);
+  expect(sourceMapping.categories.filter((category) => category.cover?.source === "generated_review" && category.cover.publishable)).toHaveLength(478);
+  expect(sourceMapping.categories.filter((category) => category.cover?.source === "existing_library" && !category.cover.publishable)).toHaveLength(80);
   for (const category of sourceMapping.categories) {
     expect(category.cover).not.toBeNull();
     expect(existsSync(resolve("public", category.cover!.web320))).toBe(true);
@@ -63,7 +63,7 @@ it("uses original replacement art for twelve exact legacy-rights holds", () => {
   }
 });
 
-it("uses twenty-two original or reviewed-reuse topic covers for forty-four matching live and source categories", () => {
+it("uses twenty-five original or reviewed-reuse topic covers for fifty matching live and source categories", () => {
   const groups = [
     ["أعلام", "tahadani-044", "tahadani-games-280"],
     ["عواصم", "tahadani-045", "tahadani-games-277"],
@@ -87,6 +87,9 @@ it("uses twenty-two original or reviewed-reuse topic covers for forty-four match
     ["قصص الأنبياء", "tahadani-056", "tahadani-games-098"],
     ["القرآن الكريم", "tahadani-057", "tahadani-games-100"],
     ["كأس العالم 2026", "tahadani-062", "tahadani-games-167"],
+    ["باب الحارة", "tahadani-027", "tahadani-games-426"],
+    ["Game Of Thrones", "tahadani-030", "tahadani-games-490"],
+    ["عبدالكريم عبدالقادر", "tahadani-035", "tahadani-games-230"],
   ] as const;
   const liveLabels = new Map(liveCatalog.categories.map((category) => [category.id, category.labelAr]));
   for (const [label, legacyId, sourceId, alternateSourceLabel] of groups) {

@@ -3228,10 +3228,10 @@
       "normalizedKey": "عبدالكريمعبدالقادر",
       "canonicalCategoryId": "tahadani-games-230",
       "cover": {
-        "source": "existing_library",
-        "web320": "assets/categories/tahadani/320/cover-1fa806bb5373d057f057.webp",
-        "web640": "assets/categories/tahadani/640/cover-1fa806bb5373d057f057.webp",
-        "publishable": false
+        "source": "generated_review",
+        "web320": "assets/categories/generated/t44-rights/320/tahadani-games-230.webp",
+        "web640": "assets/categories/generated/t44-rights/640/tahadani-games-230.webp",
+        "publishable": true
       }
     },
     {
@@ -5972,10 +5972,10 @@
       "normalizedKey": "بابالحاره",
       "canonicalCategoryId": "tahadani-games-426",
       "cover": {
-        "source": "existing_library",
-        "web320": "assets/categories/tahadani/320/cover-63c10279e0aade756c84.webp",
-        "web640": "assets/categories/tahadani/640/cover-63c10279e0aade756c84.webp",
-        "publishable": false
+        "source": "generated_review",
+        "web320": "assets/categories/generated/t44-rights/320/tahadani-games-426.webp",
+        "web640": "assets/categories/generated/t44-rights/640/tahadani-games-426.webp",
+        "publishable": true
       }
     },
     {
@@ -6868,10 +6868,10 @@
       "normalizedKey": "gameofthrones",
       "canonicalCategoryId": "tahadani-games-490",
       "cover": {
-        "source": "existing_library",
-        "web320": "assets/categories/tahadani/320/cover-56081b28257fa1403891.webp",
-        "web640": "assets/categories/tahadani/640/cover-56081b28257fa1403891.webp",
-        "publishable": false
+        "source": "generated_review",
+        "web320": "assets/categories/generated/t44-rights/320/tahadani-games-490.webp",
+        "web640": "assets/categories/generated/t44-rights/640/tahadani-games-490.webp",
+        "publishable": true
       }
     },
     {
