@@ -540,10 +540,10 @@
       "normalizedKey": "اكملالفراغ",
       "canonicalCategoryId": "tahadani-games-038",
       "cover": {
-        "source": "existing_library",
-        "web320": "assets/categories/tahadani/320/cover-0178ca37a4917e45ad2a.webp",
-        "web640": "assets/categories/tahadani/640/cover-0178ca37a4917e45ad2a.webp",
-        "publishable": false
+        "source": "generated_review",
+        "web320": "assets/categories/generated/t44-rights/320/tahadani-games-038.webp",
+        "web640": "assets/categories/generated/t44-rights/640/tahadani-games-038.webp",
+        "publishable": true
       }
     },
     {
@@ -2794,10 +2794,10 @@
       "normalizedKey": "كاسالعالم",
       "canonicalCategoryId": "tahadani-games-199",
       "cover": {
-        "source": "existing_library",
-        "web320": "assets/categories/tahadani/320/cover-ab5b42ba82d3fa7c1b21.webp",
-        "web640": "assets/categories/tahadani/640/cover-ab5b42ba82d3fa7c1b21.webp",
-        "publishable": false
+        "source": "generated_review",
+        "web320": "assets/categories/generated/t44-rights/320/tahadani-games-199.webp",
+        "web640": "assets/categories/generated/t44-rights/640/tahadani-games-199.webp",
+        "publishable": true
       }
     },
     {
@@ -3970,10 +3970,10 @@
       "normalizedKey": "دولوعواصم",
       "canonicalCategoryId": "tahadani-games-283",
       "cover": {
-        "source": "existing_library",
-        "web320": "assets/categories/tahadani/320/cover-59ef1da2f4b5d7d701fa.webp",
-        "web640": "assets/categories/tahadani/640/cover-59ef1da2f4b5d7d701fa.webp",
-        "publishable": false
+        "source": "generated_review",
+        "web320": "assets/categories/generated/t44-rights/320/tahadani-games-283.webp",
+        "web640": "assets/categories/generated/t44-rights/640/tahadani-games-283.webp",
+        "publishable": true
       }
     },
     {

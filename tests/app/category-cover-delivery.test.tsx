@@ -11,7 +11,7 @@ it("resolves a non-fallback image for all 530 saved live catalog categories", ()
   expect(new Set(liveCatalog.categories.map((category) => category.id)).size).toBe(530);
   const resolved = catalogCategoryCovers(liveCatalog.categories);
   expect(resolved).toHaveLength(530);
-  expect(resolved.filter((category) => !category.cover.publishable)).toHaveLength(112);
+  expect(resolved.filter((category) => !category.cover.publishable)).toHaveLength(107);
   for (const category of resolved) {
     expect(category.cover.altAr).not.toContain("افتراضية");
     expect(existsSync(resolve("public", category.cover.web320))).toBe(true);
@@ -21,8 +21,8 @@ it("resolves a non-fallback image for all 530 saved live catalog categories", ()
 it("keeps all 558 source categories mapped to both 320 and 640 delivery files", () => {
   expect(sourceMapping.categories).toHaveLength(558);
   expect(new Set(sourceMapping.categories.map((category) => category.categoryId)).size).toBe(558);
-  expect(sourceMapping.categories.filter((category) => category.cover?.source === "generated_review" && category.cover.publishable)).toHaveLength(467);
-  expect(sourceMapping.categories.filter((category) => category.cover?.source === "existing_library" && !category.cover.publishable)).toHaveLength(91);
+  expect(sourceMapping.categories.filter((category) => category.cover?.source === "generated_review" && category.cover.publishable)).toHaveLength(470);
+  expect(sourceMapping.categories.filter((category) => category.cover?.source === "existing_library" && !category.cover.publishable)).toHaveLength(88);
   for (const category of sourceMapping.categories) {
     expect(category.cover).not.toBeNull();
     expect(existsSync(resolve("public", category.cover!.web320))).toBe(true);
@@ -63,7 +63,7 @@ it("uses original replacement art for twelve exact legacy-rights holds", () => {
   }
 });
 
-it("uses fifteen original topic covers for thirty matching live and source categories", () => {
+it("uses seventeen original topic covers for thirty-four matching live and source categories", () => {
   const groups = [
     ["أعلام", "tahadani-044", "tahadani-games-280"],
     ["عواصم", "tahadani-045", "tahadani-games-277"],
@@ -80,6 +80,8 @@ it("uses fifteen original topic covers for thirty matching live and source categ
     ["كرة قدم عالمية", "tahadani-054", "tahadani-games-212"],
     ["مسيرة لاعب", "tahadani-060", "tahadani-games-220"],
     ["مطاعم الكويت", "tahadani-058", "tahadani-games-310"],
+    ["كأس العالم", "tahadani-023", "tahadani-games-199"],
+    ["دول وعواصم", "tahadani-046", "tahadani-games-283", "دول و عواصم"],
   ] as const;
   const liveLabels = new Map(liveCatalog.categories.map((category) => [category.id, category.labelAr]));
   for (const [label, legacyId, sourceId, alternateSourceLabel] of groups) {
@@ -97,6 +99,25 @@ it("uses fifteen original topic covers for thirty matching live and source categ
         expect(existsSync(resolve("public", `assets/categories/generated/t44-rights/${size}/${id}.webp`))).toBe(true);
       }
     }
+  }
+});
+
+it("uses original blank-completion art for its source-only category", () => {
+  const id = "tahadani-games-038";
+  const labelAr = "أكمل الفراغ";
+  const live = liveCatalog.categories.find((category) => category.id === id)!;
+  const source = sourceMapping.categories.find((category) => category.categoryId === id)!;
+  expect(live.labelAr).toBe(labelAr);
+  expect(source.normalizedNameAr).toBe(labelAr);
+  expect(source.cover?.source).toBe("generated_review");
+  expect(source.cover?.publishable).toBe(true);
+  const resolved = catalogCategoryCovers([{ id, labelAr }])[0];
+  expect(resolved.cover.publishable).toBe(true);
+  for (const size of [320, 640] as const) {
+    const path = `assets/categories/generated/t44-rights/${size}/${id}.webp`;
+    expect(source.cover?.[`web${size}`]).toBe(path);
+    if (size === 320) expect(resolved.cover.web320).toBe(path);
+    expect(existsSync(resolve("public", path))).toBe(true);
   }
 });
 
