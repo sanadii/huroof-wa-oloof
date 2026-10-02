@@ -2,12 +2,13 @@
   "schemaVersion": 1,
   "sourceCatalog": "content/source-catalog/tahadani-games-catalog.v1.json",
   "generatedReviewOriginals": "design/category-covers/tahadani-games-review-2026-09-22",
+  "supplementalGeneratedOriginals": "design/category-covers/t44-rights-replacements-2026-10-02",
   "generatedDeliveryRoot": "assets/categories/generated/tahadani-games",
   "totals": {
     "sourceCategoryIds": 558,
     "uniqueNormalizedNames": 544,
-    "existingLibraryNames": 111,
-    "generatedReviewNames": 433,
+    "existingLibraryNames": 107,
+    "generatedReviewNames": 437,
     "unresolvedNames": 0,
     "mappedCategoryIds": 558,
     "unresolvedCategoryIds": 0
@@ -1029,10 +1030,10 @@
       "normalizedKey": "سيارات",
       "canonicalCategoryId": "tahadani-games-073",
       "cover": {
-        "source": "existing_library",
-        "web320": "assets/categories/tahadani/320/cover-64a611253ef5aa402df8.webp",
-        "web640": "assets/categories/tahadani/640/cover-64a611253ef5aa402df8.webp",
-        "publishable": false
+        "source": "generated_review",
+        "web320": "assets/categories/generated/t44-rights/320/tahadani-games-073.webp",
+        "web640": "assets/categories/generated/t44-rights/640/tahadani-games-073.webp",
+        "publishable": true
       }
     },
     {
@@ -3815,10 +3816,10 @@
       "normalizedKey": "عملات",
       "canonicalCategoryId": "tahadani-games-272",
       "cover": {
-        "source": "existing_library",
-        "web320": "assets/categories/tahadani/320/cover-3b09b52be5060ebdab5e.webp",
-        "web640": "assets/categories/tahadani/640/cover-3b09b52be5060ebdab5e.webp",
-        "publishable": false
+        "source": "generated_review",
+        "web320": "assets/categories/generated/t44-rights/320/tahadani-games-272.webp",
+        "web640": "assets/categories/generated/t44-rights/640/tahadani-games-272.webp",
+        "publishable": true
       }
     },
     {
@@ -3885,10 +3886,10 @@
       "normalizedKey": "عواصم",
       "canonicalCategoryId": "tahadani-games-277",
       "cover": {
-        "source": "existing_library",
-        "web320": "assets/categories/tahadani/320/cover-08fafea7f444767b625c.webp",
-        "web640": "assets/categories/tahadani/640/cover-08fafea7f444767b625c.webp",
-        "publishable": false
+        "source": "generated_review",
+        "web320": "assets/categories/generated/t44-rights/320/tahadani-games-277.webp",
+        "web640": "assets/categories/generated/t44-rights/640/tahadani-games-277.webp",
+        "publishable": true
       }
     },
     {
@@ -3927,10 +3928,10 @@
       "normalizedKey": "اعلام",
       "canonicalCategoryId": "tahadani-games-280",
       "cover": {
-        "source": "existing_library",
-        "web320": "assets/categories/tahadani/320/cover-f0ae92ac58f955eaf813.webp",
-        "web640": "assets/categories/tahadani/640/cover-f0ae92ac58f955eaf813.webp",
-        "publishable": false
+        "source": "generated_review",
+        "web320": "assets/categories/generated/t44-rights/320/tahadani-games-280.webp",
+        "web640": "assets/categories/generated/t44-rights/640/tahadani-games-280.webp",
+        "publishable": true
       }
     },
     {
