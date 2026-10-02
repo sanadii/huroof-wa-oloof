@@ -2976,10 +2976,10 @@
       "normalizedKey": "كرهقدمعالميه",
       "canonicalCategoryId": "tahadani-games-212",
       "cover": {
-        "source": "existing_library",
-        "web320": "assets/categories/tahadani/320/cover-8e49882a684786f8f8aa.webp",
-        "web640": "assets/categories/tahadani/640/cover-8e49882a684786f8f8aa.webp",
-        "publishable": false
+        "source": "generated_review",
+        "web320": "assets/categories/generated/t44-rights/320/tahadani-games-212.webp",
+        "web640": "assets/categories/generated/t44-rights/640/tahadani-games-212.webp",
+        "publishable": true
       }
     },
     {
@@ -3088,10 +3088,10 @@
       "normalizedKey": "مسيرهلاعب",
       "canonicalCategoryId": "tahadani-games-220",
       "cover": {
-        "source": "existing_library",
-        "web320": "assets/categories/tahadani/320/cover-95e53882ebcd946b1030.webp",
-        "web640": "assets/categories/tahadani/640/cover-95e53882ebcd946b1030.webp",
-        "publishable": false
+        "source": "generated_review",
+        "web320": "assets/categories/generated/t44-rights/320/tahadani-games-220.webp",
+        "web640": "assets/categories/generated/t44-rights/640/tahadani-games-220.webp",
+        "publishable": true
       }
     },
     {
@@ -4348,10 +4348,10 @@
       "normalizedKey": "مطاعمالكويت",
       "canonicalCategoryId": "tahadani-games-310",
       "cover": {
-        "source": "existing_library",
-        "web320": "assets/categories/tahadani/320/cover-8dc8794fd918f790c091.webp",
-        "web640": "assets/categories/tahadani/640/cover-8dc8794fd918f790c091.webp",
-        "publishable": false
+        "source": "generated_review",
+        "web320": "assets/categories/generated/t44-rights/320/tahadani-games-310.webp",
+        "web640": "assets/categories/generated/t44-rights/640/tahadani-games-310.webp",
+        "publishable": true
       }
     },
     {
