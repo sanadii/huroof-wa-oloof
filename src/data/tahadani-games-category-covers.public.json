@@ -1380,10 +1380,10 @@
       "normalizedKey": "قصصالانبياء",
       "canonicalCategoryId": "tahadani-games-098",
       "cover": {
-        "source": "existing_library",
-        "web320": "assets/categories/tahadani/320/cover-572ae94f526eef2c5b69.webp",
-        "web640": "assets/categories/tahadani/640/cover-572ae94f526eef2c5b69.webp",
-        "publishable": false
+        "source": "generated_review",
+        "web320": "assets/categories/generated/t44-rights/320/tahadani-games-098.webp",
+        "web640": "assets/categories/generated/t44-rights/640/tahadani-games-098.webp",
+        "publishable": true
       }
     },
     {
@@ -1408,10 +1408,10 @@
       "normalizedKey": "القرانالكريم",
       "canonicalCategoryId": "tahadani-games-100",
       "cover": {
-        "source": "existing_library",
-        "web320": "assets/categories/tahadani/320/cover-1382bcd0bfccd4b19012.webp",
-        "web640": "assets/categories/tahadani/640/cover-1382bcd0bfccd4b19012.webp",
-        "publishable": false
+        "source": "generated_review",
+        "web320": "assets/categories/generated/t44-rights/320/tahadani-games-100.webp",
+        "web640": "assets/categories/generated/t44-rights/640/tahadani-games-100.webp",
+        "publishable": true
       }
     },
     {
@@ -2346,10 +2346,10 @@
       "normalizedKey": "كاسالعالم2026",
       "canonicalCategoryId": "tahadani-games-167",
       "cover": {
-        "source": "existing_library",
-        "web320": "assets/categories/tahadani/320/cover-eea75433f2f7890b8419.webp",
-        "web640": "assets/categories/tahadani/640/cover-eea75433f2f7890b8419.webp",
-        "publishable": false
+        "source": "generated_review",
+        "web320": "assets/categories/generated/t44-rights/320/tahadani-games-167.webp",
+        "web640": "assets/categories/generated/t44-rights/640/tahadani-games-167.webp",
+        "publishable": true
       }
     },
     {

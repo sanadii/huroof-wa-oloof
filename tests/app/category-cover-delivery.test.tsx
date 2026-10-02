@@ -1,4 +1,4 @@
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { expect, it } from "vitest";
 import liveCatalog from "../fixtures/t44-live-category-catalog.json";
@@ -11,7 +11,7 @@ it("resolves a non-fallback image for all 530 saved live catalog categories", ()
   expect(new Set(liveCatalog.categories.map((category) => category.id)).size).toBe(530);
   const resolved = catalogCategoryCovers(liveCatalog.categories);
   expect(resolved).toHaveLength(530);
-  expect(resolved.filter((category) => !category.cover.publishable)).toHaveLength(103);
+  expect(resolved.filter((category) => !category.cover.publishable)).toHaveLength(97);
   for (const category of resolved) {
     expect(category.cover.altAr).not.toContain("افتراضية");
     expect(existsSync(resolve("public", category.cover.web320))).toBe(true);
@@ -21,8 +21,8 @@ it("resolves a non-fallback image for all 530 saved live catalog categories", ()
 it("keeps all 558 source categories mapped to both 320 and 640 delivery files", () => {
   expect(sourceMapping.categories).toHaveLength(558);
   expect(new Set(sourceMapping.categories.map((category) => category.categoryId)).size).toBe(558);
-  expect(sourceMapping.categories.filter((category) => category.cover?.source === "generated_review" && category.cover.publishable)).toHaveLength(472);
-  expect(sourceMapping.categories.filter((category) => category.cover?.source === "existing_library" && !category.cover.publishable)).toHaveLength(86);
+  expect(sourceMapping.categories.filter((category) => category.cover?.source === "generated_review" && category.cover.publishable)).toHaveLength(475);
+  expect(sourceMapping.categories.filter((category) => category.cover?.source === "existing_library" && !category.cover.publishable)).toHaveLength(83);
   for (const category of sourceMapping.categories) {
     expect(category.cover).not.toBeNull();
     expect(existsSync(resolve("public", category.cover!.web320))).toBe(true);
@@ -63,7 +63,7 @@ it("uses original replacement art for twelve exact legacy-rights holds", () => {
   }
 });
 
-it("uses nineteen original topic covers for thirty-eight matching live and source categories", () => {
+it("uses twenty-two original or reviewed-reuse topic covers for forty-four matching live and source categories", () => {
   const groups = [
     ["أعلام", "tahadani-044", "tahadani-games-280"],
     ["عواصم", "tahadani-045", "tahadani-games-277"],
@@ -84,6 +84,9 @@ it("uses nineteen original topic covers for thirty-eight matching live and sourc
     ["دول وعواصم", "tahadani-046", "tahadani-games-283", "دول و عواصم"],
     ["Minecraft", "tahadani-042", "tahadani-games-534"],
     ["Call Of Duty", "tahadani-041", "tahadani-games-536", "Call of Duty"],
+    ["قصص الأنبياء", "tahadani-056", "tahadani-games-098"],
+    ["القرآن الكريم", "tahadani-057", "tahadani-games-100"],
+    ["كأس العالم 2026", "tahadani-062", "tahadani-games-167"],
   ] as const;
   const liveLabels = new Map(liveCatalog.categories.map((category) => [category.id, category.labelAr]));
   for (const [label, legacyId, sourceId, alternateSourceLabel] of groups) {
@@ -100,6 +103,16 @@ it("uses nineteen original topic covers for thirty-eight matching live and sourc
       for (const size of [320, 640]) {
         expect(existsSync(resolve("public", `assets/categories/generated/t44-rights/${size}/${id}.webp`))).toBe(true);
       }
+    }
+  }
+});
+
+it("reuses the edition-neutral World Cup art byte-for-byte for the 2026 topic", () => {
+  for (const size of [320, 640]) {
+    const source = readFileSync(resolve("public", `assets/categories/generated/t44-rights/${size}/tahadani-023.webp`));
+    for (const id of ["tahadani-062", "tahadani-games-167"]) {
+      const current = readFileSync(resolve("public", `assets/categories/generated/t44-rights/${size}/${id}.webp`));
+      expect(current.equals(source)).toBe(true);
     }
   }
 });
