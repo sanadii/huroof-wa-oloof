@@ -946,10 +946,10 @@
       "normalizedKey": "منوالمشهور",
       "canonicalCategoryId": "tahadani-games-067",
       "cover": {
-        "source": "existing_library",
-        "web320": "assets/categories/tahadani/320/cover-e27a8d260da3efb7fb17.webp",
-        "web640": "assets/categories/tahadani/640/cover-e27a8d260da3efb7fb17.webp",
-        "publishable": false
+        "source": "generated_review",
+        "web320": "assets/categories/generated/t44-rights/320/tahadani-games-067.webp",
+        "web640": "assets/categories/generated/t44-rights/640/tahadani-games-067.webp",
+        "publishable": true
       }
     },
     {
@@ -2752,10 +2752,10 @@
       "normalizedKey": "منهواللاعب",
       "canonicalCategoryId": "tahadani-games-196",
       "cover": {
-        "source": "existing_library",
-        "web320": "assets/categories/tahadani/320/cover-b63aa23da9f1f9c2bece.webp",
-        "web640": "assets/categories/tahadani/640/cover-b63aa23da9f1f9c2bece.webp",
-        "publishable": false
+        "source": "generated_review",
+        "web320": "assets/categories/generated/t44-rights/320/tahadani-games-196.webp",
+        "web640": "assets/categories/generated/t44-rights/640/tahadani-games-196.webp",
+        "publishable": true
       }
     },
     {
@@ -6420,10 +6420,10 @@
       "normalizedKey": "افلامرعب",
       "canonicalCategoryId": "tahadani-games-458",
       "cover": {
-        "source": "existing_library",
-        "web320": "assets/categories/tahadani/320/cover-3030dd494b7d7225acb3.webp",
-        "web640": "assets/categories/tahadani/640/cover-3030dd494b7d7225acb3.webp",
-        "publishable": false
+        "source": "generated_review",
+        "web320": "assets/categories/generated/t44-rights/320/tahadani-games-458.webp",
+        "web640": "assets/categories/generated/t44-rights/640/tahadani-games-458.webp",
+        "publishable": true
       }
     },
     {
