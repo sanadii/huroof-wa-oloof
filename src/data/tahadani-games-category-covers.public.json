@@ -3074,10 +3074,10 @@
       "normalizedKey": "منوعاتكرهقدم",
       "canonicalCategoryId": "tahadani-games-219",
       "cover": {
-        "source": "existing_library",
-        "web320": "assets/categories/tahadani/320/cover-91e5f890546273107317.webp",
-        "web640": "assets/categories/tahadani/640/cover-91e5f890546273107317.webp",
-        "publishable": false
+        "source": "generated_review",
+        "web320": "assets/categories/generated/t44-rights/320/tahadani-games-219.webp",
+        "web640": "assets/categories/generated/t44-rights/640/tahadani-games-219.webp",
+        "publishable": true
       }
     },
     {
@@ -6378,10 +6378,10 @@
       "normalizedKey": "افلامكلاسيك",
       "canonicalCategoryId": "tahadani-games-455",
       "cover": {
-        "source": "existing_library",
-        "web320": "assets/categories/tahadani/320/cover-a1c256bd215ed5aeef54.webp",
-        "web640": "assets/categories/tahadani/640/cover-a1c256bd215ed5aeef54.webp",
-        "publishable": false
+        "source": "generated_review",
+        "web320": "assets/categories/generated/t44-rights/320/tahadani-games-455.webp",
+        "web640": "assets/categories/generated/t44-rights/640/tahadani-games-455.webp",
+        "publishable": true
       }
     },
     {
@@ -7330,10 +7330,10 @@
       "normalizedKey": "العابالطفوله",
       "canonicalCategoryId": "tahadani-games-523",
       "cover": {
-        "source": "existing_library",
-        "web320": "assets/categories/tahadani/320/cover-b8e9b004109ffa28163a.webp",
-        "web640": "assets/categories/tahadani/640/cover-b8e9b004109ffa28163a.webp",
-        "publishable": false
+        "source": "generated_review",
+        "web320": "assets/categories/generated/t44-rights/320/tahadani-games-523.webp",
+        "web640": "assets/categories/generated/t44-rights/640/tahadani-games-523.webp",
+        "publishable": true
       }
     },
     {
