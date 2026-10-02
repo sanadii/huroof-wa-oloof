@@ -610,10 +610,10 @@
       "normalizedKey": "تكنولوجيا",
       "canonicalCategoryId": "tahadani-games-043",
       "cover": {
-        "source": "existing_library",
-        "web320": "assets/categories/tahadani/320/cover-e5e64a79314d046fe288.webp",
-        "web640": "assets/categories/tahadani/640/cover-e5e64a79314d046fe288.webp",
-        "publishable": false
+        "source": "generated_review",
+        "web320": "assets/categories/generated/t44-rights/320/tahadani-008.webp",
+        "web640": "assets/categories/generated/t44-rights/640/tahadani-008.webp",
+        "publishable": true
       }
     },
     {
@@ -932,10 +932,10 @@
       "normalizedKey": "تاريخ",
       "canonicalCategoryId": "tahadani-games-066",
       "cover": {
-        "source": "existing_library",
-        "web320": "assets/categories/tahadani/320/cover-ed4e811ec0cb3ee16ccd.webp",
-        "web640": "assets/categories/tahadani/640/cover-ed4e811ec0cb3ee16ccd.webp",
-        "publishable": false
+        "source": "generated_review",
+        "web320": "assets/categories/generated/t44-rights/320/tahadani-009.webp",
+        "web640": "assets/categories/generated/t44-rights/640/tahadani-009.webp",
+        "publishable": true
       }
     },
     {
@@ -988,10 +988,10 @@
       "normalizedKey": "معلوماتعامه",
       "canonicalCategoryId": "tahadani-games-070",
       "cover": {
-        "source": "existing_library",
-        "web320": "assets/categories/tahadani/320/cover-65d35a5beb4222e96f1a.webp",
-        "web640": "assets/categories/tahadani/640/cover-65d35a5beb4222e96f1a.webp",
-        "publishable": false
+        "source": "generated_review",
+        "web320": "assets/categories/generated/t44-rights/320/tahadani-006.webp",
+        "web640": "assets/categories/generated/t44-rights/640/tahadani-006.webp",
+        "publishable": true
       }
     },
     {
@@ -1044,10 +1044,10 @@
       "normalizedKey": "عالمالحيوان",
       "canonicalCategoryId": "tahadani-games-074",
       "cover": {
-        "source": "existing_library",
-        "web320": "assets/categories/tahadani/320/cover-16f8ebd9c6407f101616.webp",
-        "web640": "assets/categories/tahadani/640/cover-16f8ebd9c6407f101616.webp",
-        "publishable": false
+        "source": "generated_review",
+        "web320": "assets/categories/generated/t44-rights/320/tahadani-007.webp",
+        "web640": "assets/categories/generated/t44-rights/640/tahadani-007.webp",
+        "publishable": true
       }
     },
     {
@@ -1968,10 +1968,10 @@
       "normalizedKey": "الغاز",
       "canonicalCategoryId": "tahadani-games-140",
       "cover": {
-        "source": "existing_library",
-        "web320": "assets/categories/tahadani/320/cover-ea16f8ed819f52ab48d1.webp",
-        "web640": "assets/categories/tahadani/640/cover-ea16f8ed819f52ab48d1.webp",
-        "publishable": false
+        "source": "generated_review",
+        "web320": "assets/categories/generated/t44-rights/320/tahadani-013.webp",
+        "web640": "assets/categories/generated/t44-rights/640/tahadani-013.webp",
+        "publishable": true
       }
     },
     {

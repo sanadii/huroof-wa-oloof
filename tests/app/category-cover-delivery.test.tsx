@@ -11,7 +11,7 @@ it("resolves a non-fallback image for all 530 saved live catalog categories", ()
   expect(new Set(liveCatalog.categories.map((category) => category.id)).size).toBe(530);
   const resolved = catalogCategoryCovers(liveCatalog.categories);
   expect(resolved).toHaveLength(530);
-  expect(resolved.filter((category) => !category.cover.publishable)).toHaveLength(124);
+  expect(resolved.filter((category) => !category.cover.publishable)).toHaveLength(119);
   for (const category of resolved) {
     expect(category.cover.altAr).not.toContain("افتراضية");
     expect(existsSync(resolve("public", category.cover.web320))).toBe(true);
@@ -21,8 +21,8 @@ it("resolves a non-fallback image for all 530 saved live catalog categories", ()
 it("keeps all 558 source categories mapped to both 320 and 640 delivery files", () => {
   expect(sourceMapping.categories).toHaveLength(558);
   expect(new Set(sourceMapping.categories.map((category) => category.categoryId)).size).toBe(558);
-  expect(sourceMapping.categories.filter((category) => category.cover?.source === "generated_review" && category.cover.publishable)).toHaveLength(458);
-  expect(sourceMapping.categories.filter((category) => category.cover?.source === "existing_library" && !category.cover.publishable)).toHaveLength(100);
+  expect(sourceMapping.categories.filter((category) => category.cover?.source === "generated_review" && category.cover.publishable)).toHaveLength(463);
+  expect(sourceMapping.categories.filter((category) => category.cover?.source === "existing_library" && !category.cover.publishable)).toHaveLength(95);
   for (const category of sourceMapping.categories) {
     expect(category.cover).not.toBeNull();
     expect(existsSync(resolve("public", category.cover!.web320))).toBe(true);
@@ -93,6 +93,33 @@ it("uses twelve original topic covers for twenty-four matching live and source c
       for (const size of [320, 640]) {
         expect(existsSync(resolve("public", `assets/categories/generated/t44-rights/${size}/${id}.webp`))).toBe(true);
       }
+    }
+  }
+});
+
+it("reuses five original legacy covers for exact matching source-category labels", () => {
+  const pairs = [
+    ["tahadani-games-043", "tahadani-008", "تكنولوجيا"],
+    ["tahadani-games-066", "tahadani-009", "تاريخ"],
+    ["tahadani-games-070", "tahadani-006", "معلومات عامة"],
+    ["tahadani-games-074", "tahadani-007", "عالم الحيوان"],
+    ["tahadani-games-140", "tahadani-013", "ألغاز"],
+  ] as const;
+  const liveLabels = new Map(liveCatalog.categories.map((category) => [category.id, category.labelAr]));
+  for (const [sourceId, originalId, label] of pairs) {
+    expect(liveLabels.get(sourceId)).toBe(label);
+    expect(liveLabels.get(originalId)).toBe(label);
+    const mappedSource = sourceMapping.categories.find((category) => category.categoryId === sourceId)!;
+    expect(mappedSource.normalizedNameAr).toBe(label);
+    expect(mappedSource.cover?.source).toBe("generated_review");
+    expect(mappedSource.cover?.publishable).toBe(true);
+    const resolved = catalogCategoryCovers([{ id: sourceId, labelAr: label }])[0];
+    expect(resolved.cover.publishable).toBe(true);
+    for (const size of [320, 640] as const) {
+      const path = `assets/categories/generated/t44-rights/${size}/${originalId}.webp`;
+      expect(mappedSource.cover?.[`web${size}`]).toBe(path);
+      if (size === 320) expect(resolved.cover.web320).toBe(path);
+      expect(existsSync(resolve("public", path))).toBe(true);
     }
   }
 });
