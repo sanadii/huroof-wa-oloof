@@ -65,6 +65,8 @@ const rightsReplacementCovers = new Set([
   "tahadani-025",
   "tahadani-028",
   "tahadani-029",
+  "tahadani-041",
+  "tahadani-042",
   "tahadani-043",
   "tahadani-044",
   "tahadani-045",
@@ -94,6 +96,8 @@ const rightsReplacementCovers = new Set([
   "tahadani-games-455",
   "tahadani-games-458",
   "tahadani-games-523",
+  "tahadani-games-534",
+  "tahadani-games-536",
   "tahadani-games-551",
 ]);
 

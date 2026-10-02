@@ -7484,10 +7484,10 @@
       "normalizedKey": "minecraft",
       "canonicalCategoryId": "tahadani-games-534",
       "cover": {
-        "source": "existing_library",
-        "web320": "assets/categories/tahadani/320/cover-17613b1e3cce14f5f0eb.webp",
-        "web640": "assets/categories/tahadani/640/cover-17613b1e3cce14f5f0eb.webp",
-        "publishable": false
+        "source": "generated_review",
+        "web320": "assets/categories/generated/t44-rights/320/tahadani-games-534.webp",
+        "web640": "assets/categories/generated/t44-rights/640/tahadani-games-534.webp",
+        "publishable": true
       }
     },
     {
@@ -7512,10 +7512,10 @@
       "normalizedKey": "callofduty",
       "canonicalCategoryId": "tahadani-games-536",
       "cover": {
-        "source": "existing_library",
-        "web320": "assets/categories/tahadani/320/cover-94496c5a57a0019a3cce.webp",
-        "web640": "assets/categories/tahadani/640/cover-94496c5a57a0019a3cce.webp",
-        "publishable": false
+        "source": "generated_review",
+        "web320": "assets/categories/generated/t44-rights/320/tahadani-games-536.webp",
+        "web640": "assets/categories/generated/t44-rights/640/tahadani-games-536.webp",
+        "publishable": true
       }
     },
     {
