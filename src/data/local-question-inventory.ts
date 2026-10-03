@@ -2,6 +2,7 @@ import { categoryCatalog, type CategoryCover } from "./category-catalog";
 import { normalizeCategoryFilterText } from "./category-filters";
 import publicCategoryInventory from "./category-inventory.public.json";
 import tahadaniImages from "./tahadani-image-catalog.public.json";
+import tahadaniGamesCategoryCovers from "./tahadani-games-category-covers.public.json";
 
 const importedCovers = new Map(
   tahadaniImages.covers.map((cover) => [normalizeCategoryFilterText(cover.name), cover]),
@@ -14,7 +15,24 @@ const coverAliases = new Map([
 ].map(([label, name]) => [normalizeCategoryFilterText(label), normalizeCategoryFilterText(name)]));
 
 const generatedCovers = new Map([
+  ["PlayStation", "legacy/320/playstation.webp"],
+  ["Nintendo", "legacy/320/nintendo.webp"],
+  ["أفلام ديزني وبيكسار", "legacy/320/disney-pixar.webp"],
+  ["DC Comics", "legacy/320/dc-comics.webp"],
+  ["مسلسلات أجنبية", "legacy/320/foreign-series.webp"],
+  ["أفلام هوليوود", "legacy/320/hollywood-films.webp"],
+  ["أفلام عربية", "legacy/320/arabic-films.webp"],
+  ["من سجل الهدف؟", "goals-2026.webp"],
+  ["كرة السلة وNBA", "huroof-063.webp"],
+  ["دوري أبطال أوروبا", "huroof-064.webp"],
+  ["الدوري الإنجليزي", "huroof-065.webp"],
+  ["الدوري الإسباني", "huroof-066.webp"],
+  ["الدوري السعودي", "huroof-067.webp"],
   ["منتخب الكويت", "cover-generated-kuwait-team.png"],
+  ["الألعاب الأولمبية", "huroof-070.webp"],
+  ["WWE", "huroof-071.webp"],
+  ["الملاكمة", "huroof-072.webp"],
+  ["ألعاب الفيديو", "huroof-073.webp"],
   ["مسلسلات خليجية", "cover-generated-gulf-series.png"],
   ["مسلسلات كويتية", "cover-generated-kuwait-series.png"],
   ["مشاهير الكويت", "cover-generated-kuwait-celebrities.png"],
@@ -24,7 +42,129 @@ const generatedCovers = new Map([
   ["السيرة النبوية", "cover-generated-prophetic-biography.png"],
   ["الصحابة", "cover-generated-companions.png"],
   ["الحضارة الإسلامية", "cover-generated-islamic-civilization.png"],
+  ["فضاء وفلك", "huroof-098.webp"],
 ].map(([label, file]) => [normalizeCategoryFilterText(label), file]));
+
+// New category art for exact live IDs whose imported covers lack reuse
+// evidence. These generated assets have separate source/visual receipts.
+const rightsReplacementCovers = new Set([
+  "huroof-069",
+  "huroof-097",
+  "huroof-099",
+  "huroof-100",
+  "tahadani-001",
+  "tahadani-003",
+  "tahadani-006",
+  "tahadani-007",
+  "tahadani-008",
+  "tahadani-009",
+  "tahadani-010",
+  "tahadani-013",
+  "tahadani-015",
+  "tahadani-021",
+  "tahadani-022",
+  "tahadani-023",
+  "tahadani-024",
+  "tahadani-025",
+  "tahadani-027",
+  "tahadani-028",
+  "tahadani-029",
+  "tahadani-030",
+  "tahadani-035",
+  "tahadani-041",
+  "tahadani-042",
+  "tahadani-043",
+  "tahadani-044",
+  "tahadani-045",
+  "tahadani-046",
+  "tahadani-047",
+  "tahadani-049",
+  "tahadani-051",
+  "tahadani-052",
+  "tahadani-053",
+  "tahadani-054",
+  "tahadani-056",
+  "tahadani-057",
+  "tahadani-058",
+  "tahadani-060",
+  "tahadani-062",
+  "tahadani-games-067",
+  "tahadani-games-069",
+  "tahadani-games-073",
+  "tahadani-games-098",
+  "tahadani-games-100",
+  "tahadani-games-038",
+  "tahadani-games-167",
+  "tahadani-games-176",
+  "tahadani-games-177",
+  "tahadani-games-196",
+  "tahadani-games-199",
+  "tahadani-games-207",
+  "tahadani-games-212",
+  "tahadani-games-219",
+  "tahadani-games-220",
+  "tahadani-games-230",
+  "tahadani-games-272",
+  "tahadani-games-277",
+  "tahadani-games-280",
+  "tahadani-games-283",
+  "tahadani-games-310",
+  "tahadani-games-426",
+  "tahadani-games-455",
+  "tahadani-games-458",
+  "tahadani-games-490",
+  "tahadani-games-523",
+  "tahadani-games-534",
+  "tahadani-games-536",
+  "tahadani-games-551",
+]);
+
+// Reviewed exact/punctuation-equivalent topics can reuse already-publishable
+// generated art. Bind both catalog labels so later content edits fail closed.
+const exactGeneratedCoverReuseByLiveId = new Map<string, {
+  sourceId: string;
+  liveLabelAr: string;
+  sourceLabelAr: string;
+}>([
+  ["tahadani-002", { sourceId: "tahadani-games-024", liveLabelAr: "من أنا - لاعبين كرة قدم", sourceLabelAr: "من أنا / لاعبين كرة قدم" }],
+  ["tahadani-011", { sourceId: "tahadani-games-134", liveLabelAr: "خمن الصورة", sourceLabelAr: "خمن الصورة" }],
+  ["tahadani-012", { sourceId: "tahadani-games-135", liveLabelAr: "شنو هذا", sourceLabelAr: "شنو هذا؟" }],
+  ["tahadani-014", { sourceId: "tahadani-games-127", liveLabelAr: "الجزء المفقود", sourceLabelAr: "الجزء المفقود" }],
+  ["tahadani-050", { sourceId: "tahadani-games-554", liveLabelAr: "Formula One", sourceLabelAr: "Formula 1" }],
+  ["tahadani-055", { sourceId: "tahadani-games-194", liveLabelAr: "الكرة الإيطالية", sourceLabelAr: "كرة قدم ايطالية" }],
+]);
+
+type TahadaniGamesCategoryCover = {
+  categoryId: string;
+  normalizedNameAr: string;
+  cover: {
+    source: "existing_library" | "generated_review";
+    web320: string;
+    web640: string;
+    publishable: boolean;
+  } | null;
+};
+
+// Candidate catalog metadata is presentation-only. It does not activate categories
+// or alter their question ownership/readiness.
+const tahadaniGamesCoverByCategoryId = new Map(
+  (tahadaniGamesCategoryCovers.categories as TahadaniGamesCategoryCover[])
+    .filter((category) => category.cover !== null)
+    .map((category) => [category.categoryId, category.cover!] as const),
+);
+
+const tahadaniGamesCategoryById = new Map(
+  (tahadaniGamesCategoryCovers.categories as TahadaniGamesCategoryCover[])
+    .map((category) => [category.categoryId, category] as const),
+);
+
+// Release and legacy inventories can use different IDs for the same topic.
+// Match exact normalized labels as well; never use fuzzy topic substitution.
+const tahadaniGamesCoverByName = new Map(
+  (tahadaniGamesCategoryCovers.categories as TahadaniGamesCategoryCover[])
+    .filter((category) => category.cover !== null)
+    .map((category) => [normalizeCategoryFilterText(category.normalizedNameAr), category.cover!] as const),
+);
 
 export type LocalQuestionInventory = {
   source: "local_firestore_import" | "local_sqlite_import";
@@ -92,8 +232,33 @@ export function catalogCategoryCovers(
   );
   return categories.map((category) => {
     const knownCategory = existing.get(category.id);
-    if (knownCategory) return knownCategory;
+    const rightsReplacement = rightsReplacementCovers.has(category.id);
+    const reuse = exactGeneratedCoverReuseByLiveId.get(category.id);
+    const reuseSource = reuse ? tahadaniGamesCategoryById.get(reuse.sourceId) : undefined;
+    const exactGeneratedReuse = reuseSource?.cover?.source === "generated_review"
+      && reuseSource.cover.publishable
+      && normalizeCategoryFilterText(reuseSource.normalizedNameAr) === normalizeCategoryFilterText(reuse!.sourceLabelAr)
+      && normalizeCategoryFilterText(category.labelAr) === normalizeCategoryFilterText(reuse!.liveLabelAr)
+      && normalizeCategoryFilterText(knownCategory?.displayNameAr ?? "") === normalizeCategoryFilterText(reuse!.sourceLabelAr)
+      ? reuseSource.cover
+      : undefined;
+    if (knownCategory) {
+      return rightsReplacement || exactGeneratedReuse
+        ? {
+          ...knownCategory,
+          cover: {
+            web320: rightsReplacement
+              ? `assets/categories/generated/t44-rights/320/${category.id}.webp`
+              : exactGeneratedReuse!.web320,
+            altAr: `غلاف مولّد لفئة ${category.labelAr}`,
+            publishable: true,
+          },
+        }
+        : knownCategory;
+    }
     const name = normalizeCategoryFilterText(category.labelAr);
+    const mappedCover = tahadaniGamesCoverByCategoryId.get(category.id)
+      ?? tahadaniGamesCoverByName.get(name);
     const importedCover = importedCovers.get(coverAliases.get(name) ?? name);
     const generatedCover = generatedCovers.get(name);
     return {
@@ -101,16 +266,22 @@ export function catalogCategoryCovers(
       displayNameAr: category.labelAr,
       questionReadiness: "drafting",
       cover: {
-        web320: importedCover?.web320 ?? (generatedCover
+        web320: rightsReplacement
+          ? `assets/categories/generated/t44-rights/320/${category.id}.webp`
+          : mappedCover?.web320 ?? importedCover?.web320 ?? (generatedCover
           ? `assets/categories/generated/${generatedCover}`
           : "assets/categories/320/category-006.webp"),
-        altAr: importedCover
+        altAr: rightsReplacement
+          ? `غلاف مولّد لفئة ${category.labelAr}`
+          : mappedCover?.source === "generated_review"
+          ? `غلاف مولّد لفئة ${category.labelAr}`
+          : mappedCover || importedCover
           ? `غلاف فئة ${category.labelAr}`
           : generatedCover
             ? `غلاف مولّد لفئة ${category.labelAr}`
           : `صورة افتراضية لفئة ${category.labelAr}`,
         // Imported legacy artwork retains its unverified rights status.
-        publishable: importedCover === undefined,
+        publishable: rightsReplacement ? true : mappedCover?.publishable ?? importedCover === undefined,
       },
     };
   });

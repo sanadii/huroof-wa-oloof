@@ -1,0 +1,12 @@
+# Two additional paired topic covers — preview candidate, 2026-10-02
+
+This extends the [four-pair record](PAIRED-TOPICS.md). Two new square originals were generated with the built-in image tool and **no input images**. The exact current live labels and source-catalog labels agree within each pair. These originals replace imported art with unresolved rights for four live IDs; the older imported bytes are retained. Source PNGs remain private to this source directory, while the app references only the exact 320/640 WebP derivatives under `public/assets/categories/generated/t44-rights/{320,640}/{categoryId}.webp`.
+
+| Topic / exact live IDs | Original PNG SHA-256 | 320 WebP SHA-256 | 640 WebP SHA-256 | 320px visual review |
+| --- | --- | --- | --- | --- |
+| تنس · `tahadani-049`, `tahadani-games-551` | [tennis.png](tennis.png) `d2e31589cbe7f91cfc6b79e4dc371d2d3edd7e12682b1481a525ed4797fff561` | `0ce941a21c07312d577000e37ded88bf8803ed3a7eda6014c6c26aa42d1ae6c8` | `3be10c257a87b5f3c22b07e9b6370fbf0fc18d77da2264b0676f941141ecfc02` | Racket and ball are legible on a clay court; no person, sponsor, brand or venue mark. |
+| منوعات شعرية · `tahadani-053`, `tahadani-games-069` | [poetry.png](poetry.png) `674981434806fdfe5170bece81b70c3669eb600ca172b0ecb5ee4539fa22160f` | `2249dcc5a184ad9edbe081136318654d8f63b1f3ad900dc3639210342eec83fe` | `34958e8a85d35dbb47c2d18bb27f74ef7e494822cd41a9d516494002bab5ad3f` | Blank open notebook, quill and microphone suggest written/spoken poetry; no quoted verse or visible writing. |
+
+Both originals are 1,254 × 1,254 PNG. Sharp produced centered 320 × 320 and 640 × 640 WebP at quality 82, fully decoded them, and copied byte-identical derivatives to each ID within a pair. An independent hash check against these values and the full local cover-delivery verifier are required before preview push.
+
+The tennis generation direction specified an unbranded racket and bright tennis ball on a real clay court in warm late-afternoon light, with teal/cobalt accents and no people, brands, text or watermark. The poetry direction specified a Gulf-inspired literary still life with a completely blank open notebook, quill, inkwell and simple microphone, warm sand/teal lighting, no writing, quoted poem, person, logo or watermark. Both requested one large square photographic-editorial composition readable at 320px. Generated visual review is a first pass, not a legal or human aesthetic approval. Hosted and production byte readback, remaining cover rights review, and per-question playable review stay open.

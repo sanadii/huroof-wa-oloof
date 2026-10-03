@@ -1,0 +1,13 @@
+# World Cup, countries and capitals, and blank-completion covers — preview candidate, 2026-10-02
+
+The configured Image route produced three original, text-free 1,254 × 1,254 PNGs from prompts with no reference/input images. Root inspected each original and its 320px derivative. A local `sharp` pass generated centered 320/640 WebPs at quality 82. Same-topic ID pairs receive byte-identical derivatives; source-only `tahadani-games-038` receives its own two sizes. No imported artwork was overwritten.
+
+| Topic and IDs | Original PNG SHA-256 | 320 WebP SHA-256 | 640 WebP SHA-256 | Visual first pass |
+| --- | --- | --- | --- | --- |
+| كأس العالم · `tahadani-023`, `tahadani-games-199` | [world-cup.png](world-cup.png) `30cf16de14b90ec60071a19d112cdb474ce777fb6ea4ee5ccd0d17da6f5f8fb4` | `491bf482a48eabee66fd80948bc58b876a9ce3ac1fc51bcfab2771fc0d24cd24` | `4eae58474aae6f801dc6e33d62a0a6b5a077da789fcde1fb39573281c5723c56` | Abstract folded-silver cup, plain ball and anonymous stadium. No recognizable FIFA trophy, event mark, crest, text or flag. |
+| دول وعواصم / دول و عواصم · `tahadani-046`, `tahadani-games-283` | [countries-capitals.png](countries-capitals.png) `c56697a29b1012728a82504901575c0d8f6e94ed0f56b7f05bac6edc3f076d75` | `da9844cce82ccc1412a66e223c3f5641600eca66aa689fce6b3130a4277fced8` | `1ba3dcc0e3a3eac000613eee2f1343409d3ce094721fcf53ff4f3cc225bae9a2` | Blank map-like papers, unmarked wireframe globe and generic pins. No country boundaries, names, flags or actual geography. |
+| أكمل الفراغ · `tahadani-games-038` | [complete-the-blank.png](complete-the-blank.png) `a6445d763c1937f05878acfeb63beb097a3681e412d318833cbabe0445829992` | `744022c448a9db77028675c3e34b6d80137936c428970fbbf28050a00cbec292` | `bb3258f63033add043894d144dd4d8151a01df65ff99a8b7f7e330fceefcd45e` | Empty letter slots with a central blank, plain pencil and two blank tiles. No actual characters, clue, logo or watermark. |
+
+Prompts requested generic editorial still lifes, a clear subject at thumbnail size and a quiet lower title area. They excluded real objects and marks specific to World Cup rights holders, identifiable maps and brands, and readable characters. Successful configured-wrapper `gpt-5.6-sol` Image sessions were `01a0fe06-aabe-7a11-affe-7499c91fc32a`, `01a0fe09-5c60-7da1-b366-af2ac8c887e4`, and `01a0fe0b-4f75-7363-83d9-73aaba6fee4f`. All three bitmap outputs passed PNG magic, decode, dimension and SHA-256 checks; no fallback image API was used.
+
+These are preview candidates with a source and visual first pass, not independent human aesthetic or legal clearance. Cover delivery does not establish reviewed playable questions. Production promotion remains separate.
