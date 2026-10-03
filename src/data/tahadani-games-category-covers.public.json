@@ -2472,10 +2472,10 @@
       "normalizedKey": "برشلونه",
       "canonicalCategoryId": "tahadani-games-176",
       "cover": {
-        "source": "existing_library",
-        "web320": "assets/categories/tahadani/320/cover-3c824a5b4907f52cb5e3.webp",
-        "web640": "assets/categories/tahadani/640/cover-3c824a5b4907f52cb5e3.webp",
-        "publishable": false
+        "source": "generated_review",
+        "web320": "assets/categories/generated/t44-rights/320/tahadani-games-176.webp",
+        "web640": "assets/categories/generated/t44-rights/640/tahadani-games-176.webp",
+        "publishable": true
       }
     },
     {
@@ -2486,10 +2486,10 @@
       "normalizedKey": "ريالمدريد",
       "canonicalCategoryId": "tahadani-games-177",
       "cover": {
-        "source": "existing_library",
-        "web320": "assets/categories/tahadani/320/cover-4c2bacc658750e836281.webp",
-        "web640": "assets/categories/tahadani/640/cover-4c2bacc658750e836281.webp",
-        "publishable": false
+        "source": "generated_review",
+        "web320": "assets/categories/generated/t44-rights/320/tahadani-games-177.webp",
+        "web640": "assets/categories/generated/t44-rights/640/tahadani-games-177.webp",
+        "publishable": true
       }
     },
     {
@@ -2906,10 +2906,10 @@
       "normalizedKey": "ميسيوكرستيانو",
       "canonicalCategoryId": "tahadani-games-207",
       "cover": {
-        "source": "existing_library",
-        "web320": "assets/categories/tahadani/320/cover-85de10cfb42c2f3dc426.webp",
-        "web640": "assets/categories/tahadani/640/cover-85de10cfb42c2f3dc426.webp",
-        "publishable": false
+        "source": "generated_review",
+        "web320": "assets/categories/generated/t44-rights/320/tahadani-games-207.webp",
+        "web640": "assets/categories/generated/t44-rights/640/tahadani-games-207.webp",
+        "publishable": true
       }
     },
     {

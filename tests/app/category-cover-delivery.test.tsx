@@ -11,7 +11,7 @@ it("resolves a non-fallback image for all 530 saved live catalog categories", ()
   expect(new Set(liveCatalog.categories.map((category) => category.id)).size).toBe(530);
   const resolved = catalogCategoryCovers(liveCatalog.categories);
   expect(resolved).toHaveLength(530);
-  expect(resolved.filter((category) => !category.cover.publishable)).toHaveLength(91);
+  expect(resolved.filter((category) => !category.cover.publishable)).toHaveLength(85);
   for (const category of resolved) {
     expect(category.cover.altAr).not.toContain("افتراضية");
     expect(existsSync(resolve("public", category.cover.web320))).toBe(true);
@@ -21,8 +21,8 @@ it("resolves a non-fallback image for all 530 saved live catalog categories", ()
 it("keeps all 558 source categories mapped to both 320 and 640 delivery files", () => {
   expect(sourceMapping.categories).toHaveLength(558);
   expect(new Set(sourceMapping.categories.map((category) => category.categoryId)).size).toBe(558);
-  expect(sourceMapping.categories.filter((category) => category.cover?.source === "generated_review" && category.cover.publishable)).toHaveLength(478);
-  expect(sourceMapping.categories.filter((category) => category.cover?.source === "existing_library" && !category.cover.publishable)).toHaveLength(80);
+  expect(sourceMapping.categories.filter((category) => category.cover?.source === "generated_review" && category.cover.publishable)).toHaveLength(481);
+  expect(sourceMapping.categories.filter((category) => category.cover?.source === "existing_library" && !category.cover.publishable)).toHaveLength(77);
   for (const category of sourceMapping.categories) {
     expect(category.cover).not.toBeNull();
     expect(existsSync(resolve("public", category.cover!.web320))).toBe(true);
@@ -63,7 +63,7 @@ it("uses original replacement art for twelve exact legacy-rights holds", () => {
   }
 });
 
-it("uses twenty-five original or reviewed-reuse topic covers for fifty matching live and source categories", () => {
+it("uses twenty-eight original or reviewed-reuse topic covers for fifty-six matching live and source categories", () => {
   const groups = [
     ["أعلام", "tahadani-044", "tahadani-games-280"],
     ["عواصم", "tahadani-045", "tahadani-games-277"],
@@ -90,6 +90,9 @@ it("uses twenty-five original or reviewed-reuse topic covers for fifty matching 
     ["باب الحارة", "tahadani-027", "tahadani-games-426"],
     ["Game Of Thrones", "tahadani-030", "tahadani-games-490"],
     ["عبدالكريم عبدالقادر", "tahadani-035", "tahadani-games-230"],
+    ["ريال مدريد", "tahadani-021", "tahadani-games-177"],
+    ["برشلونة", "tahadani-022", "tahadani-games-176"],
+    ["ميسي وكرستيانو", "tahadani-024", "tahadani-games-207"],
   ] as const;
   const liveLabels = new Map(liveCatalog.categories.map((category) => [category.id, category.labelAr]));
   for (const [label, legacyId, sourceId, alternateSourceLabel] of groups) {
@@ -106,6 +109,20 @@ it("uses twenty-five original or reviewed-reuse topic covers for fifty matching 
       for (const size of [320, 640]) {
         expect(existsSync(resolve("public", `assets/categories/generated/t44-rights/${size}/${id}.webp`))).toBe(true);
       }
+    }
+  }
+});
+
+it("uses identical generated artwork for each exact football topic pair", () => {
+  for (const [legacyId, sourceId] of [
+    ["tahadani-021", "tahadani-games-177"],
+    ["tahadani-022", "tahadani-games-176"],
+    ["tahadani-024", "tahadani-games-207"],
+  ]) {
+    for (const size of [320, 640]) {
+      const legacy = readFileSync(resolve("public", `assets/categories/generated/t44-rights/${size}/${legacyId}.webp`));
+      const source = readFileSync(resolve("public", `assets/categories/generated/t44-rights/${size}/${sourceId}.webp`));
+      expect(legacy.equals(source)).toBe(true);
     }
   }
 });
